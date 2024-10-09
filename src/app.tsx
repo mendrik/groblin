@@ -3,13 +3,18 @@ import preactLogo from './assets/preact.svg'
 import viteLogo from '/vite.svg'
 import './app.css'
 import { Button } from './components/ui/button'
+import {
+	ResizableHandle,
+	ResizablePanel,
+	ResizablePanelGroup
+} from './components/ui/resizable'
 
 export function App() {
-	const [count, setCount] = useState(0)
-
 	return (
-		<>
-			<Button>Hallo</Button>
-		</>
+		<ResizablePanelGroup direction="horizontal" className="w-full">
+			<ResizablePanel defaultSize={25} />
+			<ResizableHandle />
+			<ResizablePanel defaultSize={75} />
+		</ResizablePanelGroup>
 	)
 }
