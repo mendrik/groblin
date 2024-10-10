@@ -10,7 +10,7 @@ export const listToTree =
 	(list: T[]): TreeOf<T, typeof childProp> =>
 		list
 			.filter(item => !item[parentProp])
-			.map(function buildTree(node): any {
+			.map(function buildTree(node: T): any {
 				return {
 					...node,
 					[childProp]: list

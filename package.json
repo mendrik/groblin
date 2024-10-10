@@ -6,7 +6,8 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc -b && vite build",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"schema:fetch": "gq http://localhost:8080/v1/graphql --introspect > schema.graphql"
 	},
 	"dependencies": {
 		"@preact/signals": "^1.3.0",
@@ -32,7 +33,6 @@
 		"clsx": "^2.1.1",
 		"cmdk": "1.0.0",
 		"date-fns": "^4.1.0",
-		"gql.tada": "^1.8.10",
 		"lucide-react": "^0.451.0",
 		"next-themes": "^0.3.0",
 		"preact": "^10.24.2",
@@ -52,6 +52,8 @@
 		"@types/node": "^22.7.5",
 		"@types/ramda": "0.30.2",
 		"autoprefixer": "^10.4.20",
+		"gql.tada": "^1.8.10",
+		"graphqurl": "^1.0.3",
 		"postcss": "^8.4.47",
 		"tailwindcss": "^3.4.13",
 		"typescript": "^5.6.2",
