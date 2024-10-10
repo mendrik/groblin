@@ -7,7 +7,7 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"ignore": ["node_modules", "**/gen/**/*"]
+		"ignore": ["node_modules", "**/gen/**/*", "src/gql/**/*"]
 	},
 	"formatter": {
 		"enabled": true,

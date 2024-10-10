@@ -1,13 +1,14 @@
-type TreeOf<T, C extends string = 'children'> = Omit<T, C> &
-	Record<C, TreeOf<T>[]>
+export type TreeOf<T, C extends string> = T & {
+	[key in C]: TreeOf<T, C>[]
+}
 
 export const listToTree =
-	<T>(
+	<T, S extends string>(
 		idProp: keyof T & string,
 		parentProp: keyof T & string,
-		childProp: string
+		childProp: S
 	) =>
-	(list: T[]): TreeOf<T, typeof childProp> =>
+	(list: T[]): TreeOf<T, S> =>
 		list
 			.filter(item => !item[parentProp])
 			.map(function buildTree(node: T): any {
