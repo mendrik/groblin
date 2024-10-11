@@ -43,8 +43,6 @@ const nodeDictionary = computed<Record<TreeItemIndex, TreeItem<TreeNode>>>(
 	() => ($root.value ? toTreeItems($root.value) : {})
 )
 
-nodeDictionary.subscribe(console.log)
-
 export function App() {
 	const [focusedItem, setFocusedItem] = useState<TreeItemIndex>()
 	const [expandedItems, setExpandedItems] = useState<TreeItemIndex[]>([])
