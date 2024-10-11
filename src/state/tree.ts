@@ -1,14 +1,14 @@
 import type { DocumentType } from '@/gql'
-import type { GetNodesDocument } from '@/gql/graphql'
-import type { ResultOf } from '@graphql-typed-document-node/core'
 import { subscribe } from '@/gql-client'
+import type { GetNodesDocument } from '@/gql/graphql'
 import { setSignal } from '@/lib/utils'
+import type { ResultOf } from '@graphql-typed-document-node/core'
 import { signal } from '@preact/signals-react'
-import { evolve, map, pipe, pluck, prop } from 'ramda'
 import gql from 'graphql-tag'
+import { evolve, map, pipe, pluck, prop } from 'ramda'
 
 const query = gql`
-	subscription GetNodes {    
+	subscription GetNodes {     
 		node {
 			id
 			name

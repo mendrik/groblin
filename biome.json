@@ -26,11 +26,14 @@
 			"suspicious": {
 				"noExplicitAny": "off"
 			},
+			"correctness": {
+				"noUnusedImports": "error"
+			},
 			"style": {
 				"noUselessElse": "off",
 				"noUnusedTemplateLiteral": "off",
 				"useImportType": {
-					"fix": "unsafe",
+					"fix": "safe",
 					"level": "error"
 				}
 			}

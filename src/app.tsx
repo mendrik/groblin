@@ -54,7 +54,9 @@ export function App() {
 			getItemTitle={item => item.data.name}
 			canDragAndDrop
 			canRename
+			onRenameItem={console.log}
 			canReorderItems
+			canSearchByStartingTyping={false}
 			viewState={{
 				documentTree: { focusedItem, expandedItems, selectedItems }
 			}}
