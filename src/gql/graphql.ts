@@ -107,6 +107,7 @@ export type Node_Arr_Rel_Insert_Input = {
 export type Node_Avg_Order_By = {
   id?: InputMaybe<Order_By>;
   node_id?: InputMaybe<Order_By>;
+  order?: InputMaybe<Order_By>;
 };
 
 /** Boolean expression to filter rows from the table "node". All fields are combined with a logical 'AND'. */
@@ -120,6 +121,7 @@ export type Node_Bool_Exp = {
   node_id?: InputMaybe<Int_Comparison_Exp>;
   nodes?: InputMaybe<Node_Bool_Exp>;
   nodes_aggregate?: InputMaybe<Node_Aggregate_Bool_Exp>;
+  order?: InputMaybe<Int_Comparison_Exp>;
   type?: InputMaybe<String_Comparison_Exp>;
 };
 
@@ -133,6 +135,7 @@ export enum Node_Constraint {
 export type Node_Inc_Input = {
   id?: InputMaybe<Scalars['Int']['input']>;
   node_id?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** input type for inserting data into table "node" */
@@ -142,6 +145,7 @@ export type Node_Insert_Input = {
   node?: InputMaybe<Node_Obj_Rel_Insert_Input>;
   node_id?: InputMaybe<Scalars['Int']['input']>;
   nodes?: InputMaybe<Node_Arr_Rel_Insert_Input>;
+  order?: InputMaybe<Scalars['Int']['input']>;
   type?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -150,6 +154,7 @@ export type Node_Max_Order_By = {
   id?: InputMaybe<Order_By>;
   name?: InputMaybe<Order_By>;
   node_id?: InputMaybe<Order_By>;
+  order?: InputMaybe<Order_By>;
   type?: InputMaybe<Order_By>;
 };
 
@@ -158,6 +163,7 @@ export type Node_Min_Order_By = {
   id?: InputMaybe<Order_By>;
   name?: InputMaybe<Order_By>;
   node_id?: InputMaybe<Order_By>;
+  order?: InputMaybe<Order_By>;
   type?: InputMaybe<Order_By>;
 };
 
@@ -182,6 +188,7 @@ export type Node_Order_By = {
   node?: InputMaybe<Node_Order_By>;
   node_id?: InputMaybe<Order_By>;
   nodes_aggregate?: InputMaybe<Node_Aggregate_Order_By>;
+  order?: InputMaybe<Order_By>;
   type?: InputMaybe<Order_By>;
 };
 
@@ -199,6 +206,8 @@ export enum Node_Select_Column {
   /** column name */
   NodeId = 'node_id',
   /** column name */
+  Order = 'order',
+  /** column name */
   Type = 'type'
 }
 
@@ -207,6 +216,7 @@ export type Node_Set_Input = {
   id?: InputMaybe<Scalars['Int']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   node_id?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Scalars['Int']['input']>;
   type?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -214,18 +224,21 @@ export type Node_Set_Input = {
 export type Node_Stddev_Order_By = {
   id?: InputMaybe<Order_By>;
   node_id?: InputMaybe<Order_By>;
+  order?: InputMaybe<Order_By>;
 };
 
 /** order by stddev_pop() on columns of table "node" */
 export type Node_Stddev_Pop_Order_By = {
   id?: InputMaybe<Order_By>;
   node_id?: InputMaybe<Order_By>;
+  order?: InputMaybe<Order_By>;
 };
 
 /** order by stddev_samp() on columns of table "node" */
 export type Node_Stddev_Samp_Order_By = {
   id?: InputMaybe<Order_By>;
   node_id?: InputMaybe<Order_By>;
+  order?: InputMaybe<Order_By>;
 };
 
 /** Streaming cursor of the table "node" */
@@ -241,6 +254,7 @@ export type Node_Stream_Cursor_Value_Input = {
   id?: InputMaybe<Scalars['Int']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   node_id?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Scalars['Int']['input']>;
   type?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -248,6 +262,7 @@ export type Node_Stream_Cursor_Value_Input = {
 export type Node_Sum_Order_By = {
   id?: InputMaybe<Order_By>;
   node_id?: InputMaybe<Order_By>;
+  order?: InputMaybe<Order_By>;
 };
 
 /** update columns of table "node" */
@@ -258,6 +273,8 @@ export enum Node_Update_Column {
   Name = 'name',
   /** column name */
   NodeId = 'node_id',
+  /** column name */
+  Order = 'order',
   /** column name */
   Type = 'type'
 }
@@ -275,18 +292,21 @@ export type Node_Updates = {
 export type Node_Var_Pop_Order_By = {
   id?: InputMaybe<Order_By>;
   node_id?: InputMaybe<Order_By>;
+  order?: InputMaybe<Order_By>;
 };
 
 /** order by var_samp() on columns of table "node" */
 export type Node_Var_Samp_Order_By = {
   id?: InputMaybe<Order_By>;
   node_id?: InputMaybe<Order_By>;
+  order?: InputMaybe<Order_By>;
 };
 
 /** order by variance() on columns of table "node" */
 export type Node_Variance_Order_By = {
   id?: InputMaybe<Order_By>;
   node_id?: InputMaybe<Order_By>;
+  order?: InputMaybe<Order_By>;
 };
 
 /** column ordering options */
@@ -308,7 +328,7 @@ export enum Order_By {
 export type GetNodesSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetNodesSubscription = { __typename?: 'subscription_root', node: Array<{ __typename?: 'node', id: number, name: string, node_id?: number | null, type: string }> };
+export type GetNodesSubscription = { __typename?: 'subscription_root', node: Array<{ __typename?: 'node', id: number, name: string, type: string, order: number, nodes: Array<{ __typename?: 'node', id: number }> }> };
 
 
-export const GetNodesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"GetNodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"node"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"node_id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}}]}}]}}]} as unknown as DocumentNode<GetNodesSubscription, GetNodesSubscriptionVariables>;
+export const GetNodesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"GetNodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"node"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"order"}}]}}]}}]} as unknown as DocumentNode<GetNodesSubscription, GetNodesSubscriptionVariables>;

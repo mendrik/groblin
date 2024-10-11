@@ -1,6 +1,6 @@
 import { computed } from '@preact/signals'
 import { useState } from 'preact/hooks'
-import { fromPairs, isNotEmpty, prop } from 'ramda'
+import { mergeLeft } from 'ramda'
 import {
 	ControlledTreeEnvironment,
 	type TreeItem,
@@ -17,33 +17,33 @@ import {
 import { ScrollArea } from './components/ui/scroll-area'
 import { $root, type TreeNode } from './state/tree'
 
-function* flattenTree(
-	node: TreeNode
-): Generator<[TreeItemIndex, TreeItem<TreeNode>]> {
-	const { id, nodes } = node
-
-	// Yield the current node
-	yield [
-		id,
-		{
-			index: id,
-			children: nodes.map(prop('id')),
-			isFolder: isNotEmpty(nodes),
-			canMove: true,
-			canRename: true,
-			data: node
-		}
-	]
-
-	// Recursively yield all child nodes
-	for (const childNode of nodes) {
-		yield* flattenTree(childNode)
-	}
+function toTreeItems(
+	nodes: TreeNode[]
+): Record<TreeItemIndex, TreeItem<TreeNode>> {
+	return nodes.reduce(
+		(acc, node) =>
+			mergeLeft(
+				{
+					[node.id]: {
+						index: node.id,
+						children: node.nodes,
+						data: node,
+						canMove: true,
+						canRename: true,
+						isFolder: node.nodes.length > 0
+					} satisfies TreeItem<TreeNode>
+				},
+				acc
+			),
+		{}
+	)
 }
 
 const nodeDictionary = computed<Record<TreeItemIndex, TreeItem<TreeNode>>>(
-	() => ($root.value ? fromPairs([...flattenTree($root.value)]) : {})
+	() => ($root.value ? toTreeItems($root.value) : {})
 )
+
+nodeDictionary.subscribe(console.log)
 
 export function App() {
 	const [focusedItem, setFocusedItem] = useState<TreeItemIndex>()

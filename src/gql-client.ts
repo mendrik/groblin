@@ -2,10 +2,13 @@ import { createClient } from 'graphql-ws'
 
 const gql = createClient({ url: 'ws://localhost:8080/v1/graphql' })
 
-export const subscribe = async <R, V extends {}>(
+export const subscribe = async <
+	R,
+	V extends Record<string, any> | undefined = undefined
+>(
 	query: string,
-	callback: (d: R) => any,
-	variables = {} as V
+	callback: <R1 extends R>(d: R1) => any,
+	variables?: V
 ) => {
 	try {
 		const subs = gql.iterate({ query, variables })

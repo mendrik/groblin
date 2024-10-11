@@ -1,32 +1,35 @@
-import type { DocumentType, GetNodesDocument } from '@/gql'
+import type { DocumentType } from '@/gql'
 import { subscribe } from '@/gql-client'
-import { type TreeOf, listToTree } from '@/lib/ramda/toTree'
+import type { GetNodesDocument, GetNodesSubscription } from '@/gql/graphql'
 import { setSignal } from '@/lib/utils'
+import type { ResultOf } from '@graphql-typed-document-node/core'
 import { signal } from '@preact/signals'
-import { pipe, prop } from 'ramda'
-
-export const GetNodesQuery = `
-  subscription GetNodes {    
-    node {
-      id
-      name
-      node_id
-      type
-    }
-  }
-`
+import {
+	defaultTo,
+	evolve,
+	filter,
+	isNotNil,
+	map,
+	pipe,
+	pluck,
+	prop
+} from 'ramda'
+import getNodes from './nodes.gql?raw'
 
 type Node = DocumentType<typeof GetNodesDocument>['node'][number]
+export type TreeNode = Omit<Node, 'nodes'> & { nodes: number[] }
 
-export type TreeNode = TreeOf<Node, 'nodes'>
+export const $root = signal<TreeNode[]>()
 
-export const $root = signal<TreeNode>()
-
-subscribe(
-	GetNodesQuery,
+subscribe<ResultOf<typeof GetNodesDocument>>(
+	getNodes,
 	pipe(
 		prop('node'),
-		listToTree<Node, 'nodes'>('id', 'node_id', 'nodes'),
+		map(
+			evolve({
+				nodes: pluck<number[]>('id')
+			})
+		),
 		setSignal($root)
 	)
 )

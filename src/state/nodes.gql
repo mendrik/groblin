@@ -1,0 +1,9 @@
+subscription GetNodes {    
+    node {
+      id
+      name
+      nodes { id }
+      type
+      order
+    }
+  }
