@@ -2,7 +2,7 @@ subscription GetNodes {
     node {
       id
       name
-      nodes { id }
+      nodes(order_by: { order: asc }) { id }
       type
       order
     }
