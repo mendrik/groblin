@@ -44,7 +44,7 @@ export const DocumentTree = () => {
 	const [selectedItems, setSelectedItems] = useState<TreeItemIndex[]>([])
 
 	return (
-		<div class="w-full h-full rct-dark">
+		<div class="w-full h-full rct-dark pr-1">
 			<ControlledTreeEnvironment<TreeNode>
 				items={nodeDictionary.value}
 				getItemTitle={item => item.data.name}
