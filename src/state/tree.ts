@@ -1,10 +1,9 @@
-import { type DocumentType, type GetNodesDocument, graphql } from '@/gql'
-import {} from '@/gql'
+import type { DocumentType, GetNodesDocument } from '@/gql'
 import { subscribe } from '@/gql-client'
 import { type TreeOf, listToTree } from '@/lib/ramda/toTree'
 import { setSignal } from '@/lib/utils'
 import { signal } from '@preact/signals'
-import { pipe, propOr, tap } from 'ramda'
+import { pipe, prop } from 'ramda'
 
 export const GetNodesQuery = `
   subscription GetNodes {    
@@ -19,12 +18,14 @@ export const GetNodesQuery = `
 
 type Node = DocumentType<typeof GetNodesDocument>['node'][number]
 
-export const $root = signal<TreeOf<Node, 'nodes'>>()
+export type TreeNode = TreeOf<Node, 'nodes'>
+
+export const $root = signal<TreeNode>()
 
 subscribe(
 	GetNodesQuery,
 	pipe(
-		propOr([], 'node'),
+		prop('node'),
 		listToTree<Node, 'nodes'>('id', 'node_id', 'nodes'),
 		setSignal($root)
 	)

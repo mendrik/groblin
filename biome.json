@@ -28,7 +28,11 @@
 			},
 			"style": {
 				"noUselessElse": "off",
-				"noUnusedTemplateLiteral": "off"
+				"noUnusedTemplateLiteral": "off",
+				"useImportType": {
+					"fix": "unsafe",
+					"level": "error"
+				}
 			}
 		}
 	},
