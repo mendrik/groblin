@@ -1,9 +1,0 @@
-subscription GetNodes {    
-    node {
-      id
-      name
-      nodes(order_by: { order: asc }) { id }
-      type
-      order
-    }
-  }

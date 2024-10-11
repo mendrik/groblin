@@ -14,7 +14,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 const documents = {
-    "subscription GetNodes {\n  node {\n    id\n    name\n    nodes(order_by: {order: asc}) {\n      id\n    }\n    type\n    order\n  }\n}": types.GetNodesDocument,
+    "\n\tsubscription GetNodes {    \n\t\tnode {\n\t\t\tid\n\t\t\tname\n\t\t\tnodes(order_by: { order: asc }) { id }\n\t\t\ttype\n\t\t\torder\n\t\t}\n  \t}\n": types.GetNodesDocument,
 };
 
 /**
@@ -34,7 +34,7 @@ export function graphql(source: string): unknown;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "subscription GetNodes {\n  node {\n    id\n    name\n    nodes(order_by: {order: asc}) {\n      id\n    }\n    type\n    order\n  }\n}"): (typeof documents)["subscription GetNodes {\n  node {\n    id\n    name\n    nodes(order_by: {order: asc}) {\n      id\n    }\n    type\n    order\n  }\n}"];
+export function graphql(source: "\n\tsubscription GetNodes {    \n\t\tnode {\n\t\t\tid\n\t\t\tname\n\t\t\tnodes(order_by: { order: asc }) { id }\n\t\t\ttype\n\t\t\torder\n\t\t}\n  \t}\n"): (typeof documents)["\n\tsubscription GetNodes {    \n\t\tnode {\n\t\t\tid\n\t\t\tname\n\t\t\tnodes(order_by: { order: asc }) { id }\n\t\t\ttype\n\t\t\torder\n\t\t}\n  \t}\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

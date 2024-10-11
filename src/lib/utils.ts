@@ -1,4 +1,4 @@
-import type { Signal } from '@preact/signals'
+import type { Signal } from '@preact/signals-react'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 

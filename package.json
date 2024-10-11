@@ -37,6 +37,7 @@
 		"cmdk": "1.0.0",
 		"date-fns": "^4.1.0",
 		"graphql": "^16.9.0",
+		"graphql-tag": "^2.12.6",
 		"graphql-ws": "^5.16.0",
 		"lucide-react": "^0.451.0",
 		"mst-gql": "^0.17.3",
