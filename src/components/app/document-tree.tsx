@@ -38,8 +38,6 @@ const nodeDictionary = computed<Record<TreeItemIndex, TreeItem<TreeNode>>>(
 	() => ($root.value ? fromPairs([...flattenTree($root.value)]) : {})
 )
 
-nodeDictionary.subscribe(console.log)
-
 export const DocumentTree = () => {
 	const [focusedItem, setFocusedItem] = useState<TreeItemIndex>()
 	const [expandedItems, setExpandedItems] = useState<TreeItemIndex[]>([])
