@@ -1,4 +1,5 @@
-import { render } from 'preact'
+import { createRoot } from 'react-dom/client'
+
 import { App } from './app.tsx'
 import './index.css'
 import { Maybe } from 'purify-ts'
@@ -11,5 +12,6 @@ const Main = () => (
 )
 
 Maybe.fromNullable(document.getElementById('app'))
-	.map(app => render(<Main />, app))
+	.map(createRoot)
+	.map(r => r.render(<Main />))
 	.ifNothing(() => console.error('No element with id "app" found'))

@@ -28,16 +28,16 @@ declare module 'ramda' {
 			: EvolveFunction<T[K]> | T[K]
 	}
 
-	declare function evolve<T extends object>(
+	export function evolve<T extends object>(
 		transformations: TransformationsObject<DeepPartial<T>>,
 		target: T
 	): T
 
-	declare function evolve<T extends object>(
+	export function evolve<T extends object>(
 		transformations: TransformationsObject<DeepPartial<T>>
 	): (target: T) => T
 
-	declare function pluck<R extends any[]>(prop: string): (list: any) => R
+	export function pluck<R extends any[]>(prop: string): (list: any) => R
 }
 
 import 'ramda'

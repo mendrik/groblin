@@ -1,5 +1,4 @@
-import { computed } from '@preact/signals'
-import { useState } from 'preact/hooks'
+import { computed } from '@preact/signals-react'
 import { mergeLeft } from 'ramda'
 import {
 	ControlledTreeEnvironment,
@@ -16,6 +15,7 @@ import {
 } from './components/ui/resizable'
 import { ScrollArea } from './components/ui/scroll-area'
 import { $root, type TreeNode } from './state/tree'
+import { useState } from 'react'
 
 function toTreeItems(
 	nodes: TreeNode[]

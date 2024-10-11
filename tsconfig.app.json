@@ -5,11 +5,7 @@
 		"useDefineForClassFields": true,
 		"module": "ESNext",
 		"lib": ["ES2020", "DOM", "DOM.Iterable"],
-		"skipLibCheck": true,
 		"paths": {
-			"react": ["./node_modules/preact/compat/"],
-			"react/jsx-runtime": ["./node_modules/preact/jsx-runtime"],
-			"react-dom/*": ["./node_modules/preact/compat/*"],
 			"@/*": ["./src/*"]
 		},
 
@@ -20,7 +16,7 @@
 		"moduleDetection": "force",
 		"noEmit": true,
 		"jsx": "react-jsx",
-		"jsxImportSource": "preact",
+		"jsxImportSource": "react",
 
 		/* Linting */
 		"strict": true,
