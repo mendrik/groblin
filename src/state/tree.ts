@@ -7,7 +7,14 @@ import { setSignal } from '@/lib/utils'
 import type { ResultOf } from '@graphql-typed-document-node/core'
 import { signal } from '@preact/signals-react'
 import gql from 'graphql-tag'
-import { pipe, prop } from 'ramda'
+import {
+	toString as asStr,
+	lensProp,
+	mergeDeepLeft,
+	over,
+	pipe,
+	prop
+} from 'ramda'
 
 const query = gql`
 	subscription GetNodes {     
@@ -33,17 +40,25 @@ subscribe<ResultOf<typeof GetNodesDocument>>(
 
 type NodeState = {
 	open: boolean
+	selected: boolean
 }
 
 export const $nodes = signal<Record<string, NodeState>>(
 	getItem('tree-state') ?? {}
 )
-
 $nodes.subscribe(setItem('tree-state'))
 
+export const $focusedNode = signal<string>()
+export const setFocusedNode = (nodeId: string | undefined) => {
+	$focusedNode.value = nodeId
+}
+
+$focusedNode.subscribe(console.log)
+
 export const updateNodeState = (node: Node, state: Partial<NodeState>) => {
-	$nodes.value = {
-		...$nodes.value,
-		[node.id]: { ...$nodes.value[node.id], ...state }
-	}
+	$nodes.value = over(
+		lensProp(asStr(node.id)),
+		mergeDeepLeft(state),
+		$nodes.value
+	)
 }

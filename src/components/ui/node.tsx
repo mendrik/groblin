@@ -19,7 +19,10 @@ export const Node = ({ node, depth }: OwnProps) => {
 	const hasChildren = isNotEmpty(node.nodes)
 	const isOpen = $nodes.value[node.id]?.open
 	return (
-		<ol className={cn(`list-none m-0`)} style={{ paddingLeft: depth * 16 }}>
+		<ol
+			className={cn(`list-none m-0 pt-1`)}
+			style={{ paddingLeft: depth * 16 }}
+		>
 			<li data-node_id={node.id}>
 				<div className="flex flex-row items-center justify-start w-full">
 					{hasChildren ? (
@@ -48,6 +51,7 @@ export const Node = ({ node, depth }: OwnProps) => {
 						type="button"
 						variant="ghost"
 						className="flex flex-row gap-1 px-1 py-0 w-full items-center justify-start h-auto"
+						data-node_id={node.id}
 					>
 						{hasChildren ? (
 							<IconFolder className="w-4 h-4 shrink-0" />
