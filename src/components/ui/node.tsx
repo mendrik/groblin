@@ -58,9 +58,9 @@ export const Node = ({ node, depth }: OwnProps) => {
 						className="flex flex-row gap-1 px-1 py-0 w-full items-center justify-start h-auto"
 					>
 						{hasChildren ? (
-							<IconFolder className="w-4 h-4" />
+							<IconFolder className="w-4 h-4 shrink-0" />
 						) : (
-							<IconFile className="w-4 h-4" />
+							<IconFile className="w-4 h-4 shrink-0" />
 						)}
 						<div className="p-1">{node.name}</div>
 					</Button>
