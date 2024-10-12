@@ -8,7 +8,7 @@ type OwnProps = {
 
 export const Tree = ({ root, renderRoot = false }: OwnProps) => {
 	return (
-		<div className="w-full h-full pr-1">
+		<div className="w-full h-full p-1 pl-0">
 			{renderRoot ? (
 				<Node node={root} depth={0} />
 			) : (
