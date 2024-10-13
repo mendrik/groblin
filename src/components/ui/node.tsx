@@ -1,11 +1,6 @@
 import { cn } from '@/lib/utils'
 import { $nodes, type TreeNode, updateNodeState } from '@/state/tree'
-import {
-	IconChevronDown,
-	IconChevronRight,
-	IconFile,
-	IconFolder
-} from '@tabler/icons-react'
+import { IconChevronRight, IconFile, IconFolder } from '@tabler/icons-react'
 import { always, isNotEmpty } from 'ramda'
 import {} from 'zod'
 import { Button } from './button'
@@ -19,10 +14,7 @@ export const Node = ({ node, depth }: OwnProps) => {
 	const hasChildren = isNotEmpty(node.nodes)
 	const isOpen = $nodes.value[node.id]?.open
 	return (
-		<ol
-			className={cn(`list-none m-0 pt-1`)}
-			style={{ paddingLeft: depth * 16 }}
-		>
+		<ol className={cn(`list-none m-0`)} style={{ paddingLeft: depth * 16 }}>
 			<li data-node_id={node.id}>
 				<div className="flex flex-row items-center justify-start w-full">
 					{hasChildren ? (
@@ -32,17 +24,12 @@ export const Node = ({ node, depth }: OwnProps) => {
 							className="flex-0 shrink-0 p-0 w-4 h-auto"
 							tabIndex={-1}
 						>
-							{isOpen ? (
-								<IconChevronDown
-									className="w-4 h-4"
-									onClick={() => updateNodeState(node.id, { open: false })}
-								/>
-							) : (
-								<IconChevronRight
-									className="w-4 h-4"
-									onClick={() => updateNodeState(node.id, { open: true })}
-								/>
-							)}
+							<IconChevronRight
+								className={cn('w-4 h-4 transition-all duration-100', {
+									'rotate-90': isOpen
+								})}
+								onClick={() => updateNodeState(node.id, { open: !isOpen })}
+							/>
 						</Button>
 					) : (
 						<div className="flex-0 shrink-0 w-4" />
@@ -54,11 +41,11 @@ export const Node = ({ node, depth }: OwnProps) => {
 						data-node_id={node.id}
 					>
 						{hasChildren ? (
-							<IconFolder className="w-4 h-4 shrink-0" />
+							<IconFolder className="w-4 h-4 shrink-0 text-muted-foreground" />
 						) : (
-							<IconFile className="w-4 h-4 shrink-0" />
+							<IconFile className="w-4 h-4 shrink-0 text-muted-foreground" />
 						)}
-						<div className="p-1">{node.name}</div>
+						<div className="p-1 font-thin">{node.name}</div>
 					</Button>
 				</div>
 				{node.nodes.filter(always(isOpen)).map(child => (

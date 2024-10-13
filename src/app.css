@@ -1,5 +1,0 @@
-*:focus-visible {
-    outline-width: 1px !important;
-    outline-style: dotted !important;
-    outline-color: hsl(var(--muted-foreground)) !important;
-}
