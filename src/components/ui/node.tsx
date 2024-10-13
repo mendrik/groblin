@@ -35,12 +35,12 @@ export const Node = ({ node, depth }: OwnProps) => {
 							{isOpen ? (
 								<IconChevronDown
 									className="w-4 h-4"
-									onClick={() => updateNodeState(node, { open: false })}
+									onClick={() => updateNodeState(node.id, { open: false })}
 								/>
 							) : (
 								<IconChevronRight
 									className="w-4 h-4"
-									onClick={() => updateNodeState(node, { open: true })}
+									onClick={() => updateNodeState(node.id, { open: true })}
 								/>
 							)}
 						</Button>

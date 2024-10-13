@@ -1,14 +1,17 @@
 import type { SyntheticEvent } from 'react'
 
 export const data =
-	(key: string) =>
-	<E extends Element, N>(e: SyntheticEvent<E, N>) => {
+	<FN extends (value: string) => any>(key: string, fn?: FN) =>
+	<E extends Element, N>(
+		e: SyntheticEvent<E, N>
+	): ReturnType<FN> | undefined => {
 		if (e.target instanceof HTMLElement) {
-			return e.target.dataset[key]
+			const value = e.target.dataset[key]
+			if (value) {
+				return fn ? fn(value) : value
+			}
 		}
 	}
 
-export const focusWithin = (container: HTMLElement | null) => (): boolean => {
-	console.log(container)
-	return container?.matches(':focus-within') ?? false
-}
+export const focusWithin = (container: HTMLElement | null) => (): boolean =>
+	container?.matches(':focus-within') ?? false

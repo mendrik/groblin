@@ -38,6 +38,8 @@ declare module 'ramda' {
 	): (target: T) => T
 
 	export function pluck<R extends any[]>(prop: string): (list: any) => R
+
+	export type Pred<T extends any[]> = (...v: T) => boolean
 }
 
 import 'ramda'

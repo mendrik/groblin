@@ -1,6 +1,12 @@
 import { Node } from '@/components/ui/node'
 import { data, focusWithin } from '@/lib/dom-events'
-import { type TreeNode, setFocusedNode } from '@/state/tree'
+import {
+	type TreeNode,
+	selectNextNode,
+	selectPreviousNode,
+	setFocusedNode,
+	updateFocusNodeState
+} from '@/state/tree'
 import { pipe, unless } from 'ramda'
 import { useRef } from 'react'
 import KeyListener from '../utils/key-listener'
@@ -15,11 +21,16 @@ const resetNode = () => setFocusedNode(undefined)
 export const Tree = ({ root, renderRoot = false }: OwnProps) => {
 	const tree = useRef<HTMLDivElement>(null)
 	return (
-		<KeyListener onArrowDown={console.log}>
+		<KeyListener
+			onArrowLeft={() => updateFocusNodeState({ open: false })}
+			onArrowRight={() => updateFocusNodeState({ open: true })}
+			onArrowDown={() => selectNextNode(tree.current)}
+			onArrowUp={() => selectPreviousNode(tree.current)}
+		>
 			<div
 				ref={tree}
 				className="w-full h-full p-1 pl-0"
-				onFocus={pipe(data('node_id'), setFocusedNode)}
+				onFocus={pipe(data('node_id', Number), setFocusedNode)}
 				onBlur={unless(focusWithin(tree.current), resetNode)}
 			>
 				{renderRoot ? (

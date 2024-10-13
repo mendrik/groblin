@@ -1,5 +1,4 @@
-import { deepEqual } from 'node:assert'
-import { describe, it } from 'node:test'
+import { describe, expect, it } from 'vitest'
 import { listToTree } from './tree.ts'
 
 describe('listToTree', () => {
@@ -12,7 +11,7 @@ describe('listToTree', () => {
 			{ id: '5', name: 'Grandchild 2', parent_id: '3' }
 		]
 		const toTree = listToTree('id', 'parent_id', 'nodes')
-		deepEqual(toTree(nodes), {
+		expect(toTree(nodes)).toEqual({
 			...nodes[0],
 			nodes: [
 				{ ...nodes[1], nodes: [{ ...nodes[3], nodes: [] }] },
