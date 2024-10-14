@@ -1,13 +1,16 @@
-import type { DocumentType } from '@/gql'
-import { subscribe } from '@/gql-client'
-import type { GetNodesDocument } from '@/gql/graphql'
+import { query, subscribe } from '@/gql-client'
+import {
+	GetNodesDocument,
+	type GetNodesSubscription,
+	UpdateNodeNameDocument
+} from '@/gql/graphql'
 import { getItem, setItem } from '@/lib/local-storage'
 import { findNextElement, findPrevElement } from '@/lib/ramda'
 import { type TreeOf, listToTree } from '@/lib/tree'
 import { setSignal } from '@/lib/utils'
-import type { ResultOf } from '@graphql-typed-document-node/core'
 import { signal } from '@preact/signals-react'
 import gql from 'graphql-tag'
+import { Maybe } from 'purify-ts'
 import {
 	toString as asStr,
 	equals,
@@ -18,21 +21,33 @@ import {
 	prop
 } from 'ramda'
 import type { ForwardedRef } from 'react'
-import { type FocusableElement, tabbable } from 'tabbable'
+import { tabbable } from 'tabbable'
 
-const query = gql`
-	subscription GetNodes {     
-		node {
-			id
-			name
-			node_id
-			type
-			order
-		}
-  	}
+gql`
+subscription GetNodes {     
+	node {
+		id
+		name
+		node_id
+		type
+		order
+	}
+}
 `
+
+gql`
+mutation updateNodeName($id: Int!, $name: String!) {
+	update_node_by_pk (
+	pk_columns: { id: $id }
+	_set: { name: $name }
+	) { 
+		id
+	}
+}
+`
+
 /** ---- types ---- **/
-type Node = DocumentType<typeof GetNodesDocument>['node'][number]
+type Node = GetNodesSubscription['node'][number]
 type TreeNode = TreeOf<Node, 'nodes'>
 type NodeState = {
 	open: boolean
@@ -46,8 +61,8 @@ const $focusedNode = signal<number>()
 const $isEditingNode = signal<number | undefined>()
 
 /** ---- subscriptions ---- **/
-subscribe<ResultOf<typeof GetNodesDocument>>(
-	query,
+subscribe(
+	GetNodesDocument,
 	pipe(prop('node'), listToTree('id', 'node_id', 'nodes'), setSignal($root))
 )
 
@@ -76,33 +91,36 @@ const updateNodeState = (nodeId: number, state: Partial<NodeState>) => {
 	)
 }
 
-const focusedNodeState = (state: Partial<NodeState>) => {
-	if ($focusedNode.value) {
-		updateNodeState($focusedNode.value, state)
-	}
-}
+const focusedNodeState = (state: Partial<NodeState>) =>
+	Maybe.fromNullable($focusedNode.value).ifJust(nodeId => {
+		updateNodeState(nodeId, state)
+	})
 
-const selectNextNode = (tree: HTMLElement | null) => {
-	if (tree) {
-		const tabbables = tabbable(tree)
-		const current = tabbables.find(equals(document.activeElement))
-		findNextElement<FocusableElement>(equals(current))(tabbables)?.focus()
-	}
+const confirmNodeName = async (value: string): Promise<any> => {
+	Maybe.fromNullable($isEditingNode.value).ifJust(id =>
+		query(UpdateNodeNameDocument, { id, name: value })
+	)
 }
+const selectNextNode = (tree: HTMLElement | null) =>
+	Maybe.fromNullable(tree)
+		.map(tabbable)
+		.map(findNextElement(equals(document.activeElement)))
+		.chain(Maybe.fromNullable)
+		.ifJust(e => e instanceof HTMLElement && e.focus())
 
-const selectPreviousNode = (tree: HTMLElement | null) => {
-	if (tree) {
-		const tabbables = tabbable(tree)
-		const current = tabbables.find(equals(document.activeElement))
-		findPrevElement<FocusableElement>(equals(current))(tabbables)?.focus()
-	}
-}
+const selectPreviousNode = (tree: HTMLElement | null) =>
+	Maybe.fromNullable(tree)
+		.map(tabbable)
+		.map(findPrevElement(equals(document.activeElement)))
+		.chain(Maybe.fromNullable)
+		.ifJust(e => e instanceof HTMLElement && e.focus())
 
 /** ---- exports ---- **/
 export {
 	$isEditingNode,
 	$nodes,
 	$root,
+	confirmNodeName,
 	focusedNodeState,
 	removeFocusedNode,
 	selectNextNode,

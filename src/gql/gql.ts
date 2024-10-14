@@ -1,6 +1,7 @@
 /* eslint-disable */
 import * as types from './graphql';
-import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+
+
 
 /**
  * Map of all GraphQL operations in the project.
@@ -14,30 +15,20 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 const documents = {
-    "\n\tsubscription GetNodes {     \n\t\tnode {\n\t\t\tid\n\t\t\tname\n\t\t\tnode_id\n\t\t\ttype\n\t\t\torder\n\t\t}\n  \t}\n": types.GetNodesDocument,
+    "\nsubscription GetNodes {     \n\tnode {\n\t\tid\n\t\tname\n\t\tnode_id\n\t\ttype\n\t\torder\n\t}\n}\n": types.GetNodesDocument,
+    "\nmutation updateNodeName($id: Int!, $name: String!) {\n\tupdate_node_by_pk (\n\tpk_columns: { id: $id }\n\t_set: { name: $name }\n\t) { \n\t\tid\n\t}\n}\n": types.UpdateNodeNameDocument,
 };
 
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- *
- *
- * @example
- * ```ts
- * const query = graphql(`query GetUser($id: ID!) { user(id: $id) { name } }`);
- * ```
- *
- * The query argument is unknown!
- * Please regenerate the types.
  */
-export function graphql(source: string): unknown;
-
+export function graphql(source: "\nsubscription GetNodes {     \n\tnode {\n\t\tid\n\t\tname\n\t\tnode_id\n\t\ttype\n\t\torder\n\t}\n}\n"): typeof import('./graphql').GetNodesDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n\tsubscription GetNodes {     \n\t\tnode {\n\t\t\tid\n\t\t\tname\n\t\t\tnode_id\n\t\t\ttype\n\t\t\torder\n\t\t}\n  \t}\n"): (typeof documents)["\n\tsubscription GetNodes {     \n\t\tnode {\n\t\t\tid\n\t\t\tname\n\t\t\tnode_id\n\t\t\ttype\n\t\t\torder\n\t\t}\n  \t}\n"];
+export function graphql(source: "\nmutation updateNodeName($id: Int!, $name: String!) {\n\tupdate_node_by_pk (\n\tpk_columns: { id: $id }\n\t_set: { name: $name }\n\t) { \n\t\tid\n\t}\n}\n"): typeof import('./graphql').UpdateNodeNameDocument;
+
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};
 }
-
-export type DocumentType<TDocumentNode extends DocumentNode<any, any>> = TDocumentNode extends DocumentNode<  infer TType,  any>  ? TType  : never;

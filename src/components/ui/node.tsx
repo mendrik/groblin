@@ -1,11 +1,12 @@
 import { inputValue, stopPropagation } from '@/lib/dom-events'
-import { pipeTap } from '@/lib/ramda'
+import { asyncPipeTap, pipeTap } from '@/lib/ramda'
 import { isActiveRef } from '@/lib/react'
 import { cn } from '@/lib/utils'
 import {
 	$isEditingNode,
 	$nodes,
 	type TreeNode,
+	confirmNodeName,
 	notEditing,
 	returnFocus,
 	startEditing,
@@ -64,10 +65,6 @@ type NodeEditorProps = {
 	node: TreeNode
 }
 
-const confirmNodeName = (value: string): void => {
-	console.log(value)
-}
-
 const NodeEditor = forwardRef<HTMLInputElement, NodeEditorProps>(
 	({ node }, ref) => {
 		useLayoutEffect(() => {
@@ -77,11 +74,11 @@ const NodeEditor = forwardRef<HTMLInputElement, NodeEditorProps>(
 		}, [ref])
 		return (
 			<KeyListener
-				onEnter={pipeTap(
+				onEnter={asyncPipeTap(
 					stopPropagation,
+					pipe(inputValue, confirmNodeName),
 					stopEditing,
-					returnFocus(ref),
-					pipe(inputValue, confirmNodeName)
+					returnFocus(ref)
 				)}
 				onEscape={pipeTap(stopPropagation, returnFocus(ref), stopEditing)}
 			>

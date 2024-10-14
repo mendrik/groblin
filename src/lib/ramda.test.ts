@@ -2,6 +2,7 @@ import { equals } from 'ramda'
 import { describe, expect, it, vi } from 'vitest'
 import {
 	appendFirst,
+	asyncPipeTap,
 	findNextElement,
 	findPrevElement,
 	pipeTap,
@@ -69,5 +70,21 @@ describe('pipeTap', () => {
 		expect(result).toBe(30) // Last function returns 3 * 10
 
 		consoleSpy.mockRestore()
+	})
+
+	it('should handle async functions and await promises', async () => {
+		const fn1 = vi.fn(async (x: number) => x + 1)
+		const fn2 = vi.fn(
+			async (x: number) =>
+				new Promise(resolve => setTimeout(() => resolve(x * 2), 50))
+		)
+		const fn3 = vi.fn((x: number) => x - 3)
+
+		const result = await asyncPipeTap<number, any[]>(fn1, fn2, fn3)(5)
+
+		expect(fn1).toHaveBeenCalledWith(5)
+		expect(fn2).toHaveBeenCalledWith(5)
+		expect(fn3).toHaveBeenCalledWith(5)
+		expect(result).toBe(2) // The result of the last function (5 - 3 = 2)
 	})
 })

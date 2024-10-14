@@ -6,11 +6,10 @@ schema {
 
 """whether this query should be cached (Hasura Cloud only)"""
 directive @cached(
-  """measured in seconds"""
-  ttl: Int! = 60
-
   """refresh the cache entry"""
   refresh: Boolean! = false
+  """measured in seconds"""
+  ttl: Int! = 60
 ) on QUERY
 
 """
@@ -35,48 +34,38 @@ input String_comparison_exp {
   _eq: String
   _gt: String
   _gte: String
-
   """does the column match the given case-insensitive pattern"""
   _ilike: String
   _in: [String!]
-
   """
   does the column match the given POSIX regular expression, case insensitive
   """
   _iregex: String
   _is_null: Boolean
-
   """does the column match the given pattern"""
   _like: String
   _lt: String
   _lte: String
   _neq: String
-
   """does the column NOT match the given case-insensitive pattern"""
   _nilike: String
   _nin: [String!]
-
   """
   does the column NOT match the given POSIX regular expression, case insensitive
   """
   _niregex: String
-
   """does the column NOT match the given pattern"""
   _nlike: String
-
   """
   does the column NOT match the given POSIX regular expression, case sensitive
   """
   _nregex: String
-
   """does the column NOT match the given SQL regular expression"""
   _nsimilar: String
-
   """
   does the column match the given POSIX regular expression, case sensitive
   """
   _regex: String
-
   """does the column match the given SQL regular expression"""
   _similar: String
 }
@@ -85,7 +74,6 @@ input String_comparison_exp {
 enum cursor_ordering {
   """ascending ordering of the cursor"""
   ASC
-
   """descending ordering of the cursor"""
   DESC
 }
@@ -99,60 +87,49 @@ type mutation_root {
     """filter the rows which have to be deleted"""
     where: node_bool_exp!
   ): node_mutation_response
-
   """
   delete single row from the table: "node"
   """
   delete_node_by_pk(id: Int!): node
-
   """
   insert data into the table: "node"
   """
   insert_node(
     """the rows to be inserted"""
     objects: [node_insert_input!]!
-
     """upsert condition"""
     on_conflict: node_on_conflict
   ): node_mutation_response
-
   """
   insert a single row into the table: "node"
   """
   insert_node_one(
     """the row to be inserted"""
     object: node_insert_input!
-
     """upsert condition"""
     on_conflict: node_on_conflict
   ): node
-
   """
   update data of the table: "node"
   """
   update_node(
     """increments the numeric columns with given value of the filtered values"""
     _inc: node_inc_input
-
     """sets the columns of the filtered rows to the given values"""
     _set: node_set_input
-
     """filter the rows which have to be updated"""
     where: node_bool_exp!
   ): node_mutation_response
-
   """
   update single row of the table: "node"
   """
   update_node_by_pk(
     """increments the numeric columns with given value of the filtered values"""
     _inc: node_inc_input
-
     """sets the columns of the filtered rows to the given values"""
     _set: node_set_input
     pk_columns: node_pk_columns_input!
   ): node
-
   """
   update multiples rows of table: "node"
   """
@@ -168,46 +145,36 @@ columns and relationships of "node"
 type node {
   id: Int!
   name: String!
-
   """An object relationship"""
   node: node
   node_id: Int
-
   """An array relationship"""
   nodes(
     """distinct select on columns"""
     distinct_on: [node_select_column!]
-
     """limit the number of rows returned"""
     limit: Int
-
     """skip the first n rows. Use only with order_by"""
     offset: Int
-
     """sort the rows by one or more columns"""
     order_by: [node_order_by!]
-
     """filter the rows returned"""
     where: node_bool_exp
   ): [node!]!
-
   """An aggregate relationship"""
   nodes_aggregate(
     """distinct select on columns"""
     distinct_on: [node_select_column!]
-
     """limit the number of rows returned"""
     limit: Int
-
     """skip the first n rows. Use only with order_by"""
     offset: Int
-
     """sort the rows by one or more columns"""
     order_by: [node_order_by!]
-
     """filter the rows returned"""
     where: node_bool_exp
   ): node_aggregate!
+  order: Int!
   type: String!
 }
 
@@ -269,7 +236,6 @@ input type for inserting array relation for remote table "node"
 """
 input node_arr_rel_insert_input {
   data: [node_insert_input!]!
-
   """upsert condition"""
   on_conflict: node_on_conflict
 }
@@ -278,6 +244,7 @@ input node_arr_rel_insert_input {
 type node_avg_fields {
   id: Float
   node_id: Float
+  order: Float
 }
 
 """
@@ -286,6 +253,7 @@ order by avg() on columns of table "node"
 input node_avg_order_by {
   id: order_by
   node_id: order_by
+  order: order_by
 }
 
 """
@@ -301,6 +269,7 @@ input node_bool_exp {
   node_id: Int_comparison_exp
   nodes: node_bool_exp
   nodes_aggregate: node_aggregate_bool_exp
+  order: Int_comparison_exp
   type: String_comparison_exp
 }
 
@@ -320,6 +289,7 @@ input type for incrementing numeric columns in table "node"
 input node_inc_input {
   id: Int
   node_id: Int
+  order: Int
 }
 
 """
@@ -331,6 +301,7 @@ input node_insert_input {
   node: node_obj_rel_insert_input
   node_id: Int
   nodes: node_arr_rel_insert_input
+  order: Int
   type: String
 }
 
@@ -339,6 +310,7 @@ type node_max_fields {
   id: Int
   name: String
   node_id: Int
+  order: Int
   type: String
 }
 
@@ -349,6 +321,7 @@ input node_max_order_by {
   id: order_by
   name: order_by
   node_id: order_by
+  order: order_by
   type: order_by
 }
 
@@ -357,6 +330,7 @@ type node_min_fields {
   id: Int
   name: String
   node_id: Int
+  order: Int
   type: String
 }
 
@@ -367,6 +341,7 @@ input node_min_order_by {
   id: order_by
   name: order_by
   node_id: order_by
+  order: order_by
   type: order_by
 }
 
@@ -376,7 +351,6 @@ response of any mutation on the table "node"
 type node_mutation_response {
   """number of rows affected by the mutation"""
   affected_rows: Int!
-
   """data from the rows affected by the mutation"""
   returning: [node!]!
 }
@@ -386,7 +360,6 @@ input type for inserting object relation for remote table "node"
 """
 input node_obj_rel_insert_input {
   data: node_insert_input!
-
   """upsert condition"""
   on_conflict: node_on_conflict
 }
@@ -407,6 +380,7 @@ input node_order_by {
   node: node_order_by
   node_id: order_by
   nodes_aggregate: node_aggregate_order_by
+  order: order_by
   type: order_by
 }
 
@@ -421,13 +395,12 @@ select columns of table "node"
 enum node_select_column {
   """column name"""
   id
-
   """column name"""
   name
-
   """column name"""
   node_id
-
+  """column name"""
+  order
   """column name"""
   type
 }
@@ -439,6 +412,7 @@ input node_set_input {
   id: Int
   name: String
   node_id: Int
+  order: Int
   type: String
 }
 
@@ -446,6 +420,7 @@ input node_set_input {
 type node_stddev_fields {
   id: Float
   node_id: Float
+  order: Float
 }
 
 """
@@ -454,12 +429,14 @@ order by stddev() on columns of table "node"
 input node_stddev_order_by {
   id: order_by
   node_id: order_by
+  order: order_by
 }
 
 """aggregate stddev_pop on columns"""
 type node_stddev_pop_fields {
   id: Float
   node_id: Float
+  order: Float
 }
 
 """
@@ -468,12 +445,14 @@ order by stddev_pop() on columns of table "node"
 input node_stddev_pop_order_by {
   id: order_by
   node_id: order_by
+  order: order_by
 }
 
 """aggregate stddev_samp on columns"""
 type node_stddev_samp_fields {
   id: Float
   node_id: Float
+  order: Float
 }
 
 """
@@ -482,6 +461,7 @@ order by stddev_samp() on columns of table "node"
 input node_stddev_samp_order_by {
   id: order_by
   node_id: order_by
+  order: order_by
 }
 
 """
@@ -490,7 +470,6 @@ Streaming cursor of the table "node"
 input node_stream_cursor_input {
   """Stream column input with initial value"""
   initial_value: node_stream_cursor_value_input!
-
   """cursor ordering"""
   ordering: cursor_ordering
 }
@@ -500,6 +479,7 @@ input node_stream_cursor_value_input {
   id: Int
   name: String
   node_id: Int
+  order: Int
   type: String
 }
 
@@ -507,6 +487,7 @@ input node_stream_cursor_value_input {
 type node_sum_fields {
   id: Int
   node_id: Int
+  order: Int
 }
 
 """
@@ -515,6 +496,7 @@ order by sum() on columns of table "node"
 input node_sum_order_by {
   id: order_by
   node_id: order_by
+  order: order_by
 }
 
 """
@@ -523,13 +505,12 @@ update columns of table "node"
 enum node_update_column {
   """column name"""
   id
-
   """column name"""
   name
-
   """column name"""
   node_id
-
+  """column name"""
+  order
   """column name"""
   type
 }
@@ -537,10 +518,8 @@ enum node_update_column {
 input node_updates {
   """increments the numeric columns with given value of the filtered values"""
   _inc: node_inc_input
-
   """sets the columns of the filtered rows to the given values"""
   _set: node_set_input
-
   """filter the rows which have to be updated"""
   where: node_bool_exp!
 }
@@ -549,6 +528,7 @@ input node_updates {
 type node_var_pop_fields {
   id: Float
   node_id: Float
+  order: Float
 }
 
 """
@@ -557,12 +537,14 @@ order by var_pop() on columns of table "node"
 input node_var_pop_order_by {
   id: order_by
   node_id: order_by
+  order: order_by
 }
 
 """aggregate var_samp on columns"""
 type node_var_samp_fields {
   id: Float
   node_id: Float
+  order: Float
 }
 
 """
@@ -571,12 +553,14 @@ order by var_samp() on columns of table "node"
 input node_var_samp_order_by {
   id: order_by
   node_id: order_by
+  order: order_by
 }
 
 """aggregate variance on columns"""
 type node_variance_fields {
   id: Float
   node_id: Float
+  order: Float
 }
 
 """
@@ -585,25 +569,21 @@ order by variance() on columns of table "node"
 input node_variance_order_by {
   id: order_by
   node_id: order_by
+  order: order_by
 }
 
 """column ordering options"""
 enum order_by {
   """in ascending order, nulls last"""
   asc
-
   """in ascending order, nulls first"""
   asc_nulls_first
-
   """in ascending order, nulls last"""
   asc_nulls_last
-
   """in descending order, nulls first"""
   desc
-
   """in descending order, nulls first"""
   desc_nulls_first
-
   """in descending order, nulls last"""
   desc_nulls_last
 }
@@ -615,40 +595,30 @@ type query_root {
   node(
     """distinct select on columns"""
     distinct_on: [node_select_column!]
-
     """limit the number of rows returned"""
     limit: Int
-
     """skip the first n rows. Use only with order_by"""
     offset: Int
-
     """sort the rows by one or more columns"""
     order_by: [node_order_by!]
-
     """filter the rows returned"""
     where: node_bool_exp
   ): [node!]!
-
   """
   fetch aggregated fields from the table: "node"
   """
   node_aggregate(
     """distinct select on columns"""
     distinct_on: [node_select_column!]
-
     """limit the number of rows returned"""
     limit: Int
-
     """skip the first n rows. Use only with order_by"""
     offset: Int
-
     """sort the rows by one or more columns"""
     order_by: [node_order_by!]
-
     """filter the rows returned"""
     where: node_bool_exp
   ): node_aggregate!
-
   """fetch data from the table: "node" using primary key columns"""
   node_by_pk(id: Int!): node
 }
@@ -660,55 +630,41 @@ type subscription_root {
   node(
     """distinct select on columns"""
     distinct_on: [node_select_column!]
-
     """limit the number of rows returned"""
     limit: Int
-
     """skip the first n rows. Use only with order_by"""
     offset: Int
-
     """sort the rows by one or more columns"""
     order_by: [node_order_by!]
-
     """filter the rows returned"""
     where: node_bool_exp
   ): [node!]!
-
   """
   fetch aggregated fields from the table: "node"
   """
   node_aggregate(
     """distinct select on columns"""
     distinct_on: [node_select_column!]
-
     """limit the number of rows returned"""
     limit: Int
-
     """skip the first n rows. Use only with order_by"""
     offset: Int
-
     """sort the rows by one or more columns"""
     order_by: [node_order_by!]
-
     """filter the rows returned"""
     where: node_bool_exp
   ): node_aggregate!
-
   """fetch data from the table: "node" using primary key columns"""
   node_by_pk(id: Int!): node
-
   """
   fetch data from the table in a streaming manner: "node"
   """
   node_stream(
     """maximum number of rows returned in a single batch"""
     batch_size: Int!
-
     """cursor to stream the results returned by the query"""
     cursor: [node_stream_cursor_input]!
-
     """filter the rows returned"""
     where: node_bool_exp
   ): [node!]!
 }
-

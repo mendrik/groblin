@@ -51,3 +51,19 @@ export const pipeTap =
 	<T, FUNCTIONS extends Array<(arg: T) => any>>(...fns: FUNCTIONS) =>
 	(arg: T): ReturnType<Last<FUNCTIONS>> =>
 		fns.reduce((_, fn) => fn(arg), undefined) as ReturnType<Last<FUNCTIONS>>
+
+type LastReturnType<Type extends any[]> = Type extends [...any[], infer LAST_FN]
+	? LAST_FN extends () => Promise<infer R>
+		? Promise<R>
+		: LAST_FN extends () => infer R
+			? Promise<R>
+			: never
+	: never
+
+export const asyncPipeTap =
+	<T, FUNCTIONS extends Array<(arg: T) => any>>(...fns: FUNCTIONS) =>
+	(arg: T) =>
+		fns.reduce(
+			(pc, fn) => pc.then(async () => fn(arg)),
+			Promise.resolve(arg)
+		) as LastReturnType<FUNCTIONS>

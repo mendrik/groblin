@@ -5,9 +5,11 @@ const config: CodegenConfig = {
 	schema: 'http://localhost:8080/v1/graphql',
 	documents: 'src/**/*.{tsx,ts}',
 	generates: {
-		'src/gql/': {
+		'./src/gql/': {
 			preset: 'client',
-			plugins: []
+			config: {
+				documentMode: 'string'
+			}
 		},
 		'./graphql.schema.json': {
 			plugins: ['introspection']

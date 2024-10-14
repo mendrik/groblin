@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+import { DocumentTypeDecoration } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -330,5 +330,44 @@ export type GetNodesSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 export type GetNodesSubscription = { __typename?: 'subscription_root', node: Array<{ __typename?: 'node', id: number, name: string, node_id?: number | null, type: string, order: number }> };
 
+export type UpdateNodeNameMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  name: Scalars['String']['input'];
+}>;
 
-export const GetNodesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"GetNodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"node"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"node_id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"order"}}]}}]}}]} as unknown as DocumentNode<GetNodesSubscription, GetNodesSubscriptionVariables>;
+
+export type UpdateNodeNameMutation = { __typename?: 'mutation_root', update_node_by_pk?: { __typename?: 'node', id: number } | null };
+
+export class TypedDocumentString<TResult, TVariables>
+  extends String
+  implements DocumentTypeDecoration<TResult, TVariables>
+{
+  __apiType?: DocumentTypeDecoration<TResult, TVariables>['__apiType'];
+
+  constructor(private value: string, public __meta__?: Record<string, any>) {
+    super(value);
+  }
+
+  toString(): string & DocumentTypeDecoration<TResult, TVariables> {
+    return this.value;
+  }
+}
+
+export const GetNodesDocument = new TypedDocumentString(`
+    subscription GetNodes {
+  node {
+    id
+    name
+    node_id
+    type
+    order
+  }
+}
+    `) as unknown as TypedDocumentString<GetNodesSubscription, GetNodesSubscriptionVariables>;
+export const UpdateNodeNameDocument = new TypedDocumentString(`
+    mutation updateNodeName($id: Int!, $name: String!) {
+  update_node_by_pk(pk_columns: {id: $id}, _set: {name: $name}) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateNodeNameMutation, UpdateNodeNameMutationVariables>;
