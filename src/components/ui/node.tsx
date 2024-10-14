@@ -44,9 +44,15 @@ const NodeText = forwardRef<HTMLButtonElement, NodeTextProps>(
 				ref={ref}
 			>
 				{hasChildren ? (
-					<IconFolder className="w-4 h-4 shrink-0 text-muted-foreground" />
+					<IconFolder
+						className="w-4 h-4 shrink-0 text-muted-foreground"
+						stroke={0.5}
+					/>
 				) : (
-					<IconFile className="w-4 h-4 shrink-0 text-muted-foreground" />
+					<IconFile
+						className="w-4 h-4 shrink-0 text-muted-foreground"
+						stroke={0.5}
+					/>
 				)}
 				<div className="p-1 font-thin">{node.name}</div>
 			</Button>
@@ -59,7 +65,6 @@ type NodeEditorProps = {
 }
 
 const confirmNodeName = (value: string): void => {
-	stopEditing()
 	console.log(value)
 }
 

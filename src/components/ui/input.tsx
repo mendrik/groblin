@@ -23,7 +23,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 		)
 		return Icon ? (
 			<div className="flex flex-row relative items-center w-full">
-				<Icon className="absolute translate-x-1 shrink-0 w-4 h-4" />
+				<Icon
+					className="absolute translate-x-1 shrink-0 w-4 h-4"
+					stroke={0.5}
+				/>
 				<Inp {...props} className={cn(className, 'pl-[24px] flex-1')} />
 			</div>
 		) : (
