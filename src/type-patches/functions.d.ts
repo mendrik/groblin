@@ -1,1 +1,1 @@
-export type Fn<A, R> = (a: A) => R
+export type Fn<A = never, R = any> = (a?: A) => R

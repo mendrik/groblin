@@ -55,7 +55,7 @@ const NodeText = forwardRef<HTMLButtonElement, NodeTextProps>(
 						stroke={0.5}
 					/>
 				)}
-				<div className="p-1 font-thin">{node.name}</div>
+				<div className="p-1 font-thin truncate">{node.name}</div>
 			</Button>
 		</KeyListener>
 	)

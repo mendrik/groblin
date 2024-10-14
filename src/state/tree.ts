@@ -8,17 +8,20 @@ import { getItem, setItem } from '@/lib/local-storage'
 import { findNextElement, findPrevElement } from '@/lib/ramda'
 import { type TreeOf, listToTree } from '@/lib/tree'
 import { setSignal } from '@/lib/utils'
+import type { Fn } from '@/type-patches/functions'
 import { signal } from '@preact/signals-react'
 import gql from 'graphql-tag'
 import { Maybe } from 'purify-ts'
 import {
 	toString as asStr,
 	equals,
+	isNotEmpty,
 	lensProp,
 	mergeDeepLeft,
 	over,
 	pipe,
-	prop
+	prop,
+	propOr
 } from 'ramda'
 import type { ForwardedRef } from 'react'
 import { tabbable } from 'tabbable'
@@ -68,6 +71,13 @@ subscribe(
 
 $nodes.subscribe(setItem('tree-state'))
 
+const waitForUpdate = () => {
+	let unsub: Fn<never, void>
+	return new Promise(res => {
+		unsub = $root.subscribe(res)
+	}).then(() => unsub())
+}
+
 /** ---- interfaces ---- **/
 const startEditing = () => ($isEditingNode.value = $focusedNode.value)
 const notEditing = () => $isEditingNode.value === undefined
@@ -80,6 +90,8 @@ const setFocusedNode = (nodeId: number | undefined) =>
 const returnFocus =
 	<EL extends HTMLElement>(ref: ForwardedRef<EL>) =>
 	() => {
+		console.log(propOr(undefined, 'current', ref))
+
 		if (ref && 'current' in ref && ref.current) ref.current.focus()
 	}
 
@@ -96,11 +108,16 @@ const focusedNodeState = (state: Partial<NodeState>) =>
 		updateNodeState(nodeId, state)
 	})
 
-const confirmNodeName = async (value: string): Promise<any> => {
-	Maybe.fromNullable($isEditingNode.value).ifJust(id =>
-		query(UpdateNodeNameDocument, { id, name: value })
-	)
-}
+const confirmNodeName = (value: string) =>
+	Maybe.fromNullable($isEditingNode.value)
+		.filter(isNotEmpty)
+		.map(id =>
+			Promise.all([
+				query(UpdateNodeNameDocument, { id, name: value }),
+				waitForUpdate()
+			])
+		)
+
 const selectNextNode = (tree: HTMLElement | null) =>
 	Maybe.fromNullable(tree)
 		.map(tabbable)
@@ -131,5 +148,6 @@ export {
 	returnFocus,
 	startEditing,
 	stopEditing,
+	waitForUpdate,
 	type TreeNode
 }
