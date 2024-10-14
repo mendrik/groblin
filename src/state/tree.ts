@@ -56,6 +56,14 @@ export const setFocusedNode = (nodeId: number | undefined) => {
 	$focusedNode.value = nodeId
 }
 
+export const $isEditingNode = signal<number | undefined>()
+export const setEditing = (nodeId: number | undefined) => {
+	$isEditingNode.value = nodeId
+	if (nodeId === undefined) {
+		setFocusedNode(undefined)
+	}
+}
+
 export const updateNodeState = (nodeId: number, state: Partial<NodeState>) => {
 	$nodes.value = over(
 		lensProp(asStr(nodeId)),
@@ -64,7 +72,7 @@ export const updateNodeState = (nodeId: number, state: Partial<NodeState>) => {
 	)
 }
 
-export const updateFocusNodeState = (state: Partial<NodeState>) => {
+export const focusedNodeState = (state: Partial<NodeState>) => {
 	if ($focusedNode.value) {
 		updateNodeState($focusedNode.value, state)
 	}

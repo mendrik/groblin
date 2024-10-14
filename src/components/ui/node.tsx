@@ -1,14 +1,81 @@
+import { inputValue } from '@/lib/dom-events'
 import { cn } from '@/lib/utils'
-import { $nodes, type TreeNode, updateNodeState } from '@/state/tree'
+import {
+	$isEditingNode,
+	$nodes,
+	type TreeNode,
+	setEditing,
+	updateNodeState
+} from '@/state/tree'
 import { IconChevronRight, IconFile, IconFolder } from '@tabler/icons-react'
-import { always, isNotEmpty } from 'ramda'
+import { always, isNotEmpty, pipe } from 'ramda'
+import { useLayoutEffect, useRef } from 'react'
 import {} from 'zod'
+import KeyListener from '../utils/key-listener'
 import { Button } from './button'
+import { Input } from './input'
+
+type NodeTextProps = {
+	node: TreeNode
+	hasChildren: boolean
+}
+
+const NodeText = ({ node, hasChildren }: NodeTextProps) => (
+	<Button
+		type="button"
+		variant="ghost"
+		className="flex flex-row gap-1 px-1 py-0 w-full items-center justify-start h-auto"
+		data-node_id={node.id}
+	>
+		{hasChildren ? (
+			<IconFolder className="w-4 h-4 shrink-0 text-muted-foreground" />
+		) : (
+			<IconFile className="w-4 h-4 shrink-0 text-muted-foreground" />
+		)}
+		<div className="p-1 font-thin">{node.name}</div>
+	</Button>
+)
+
+type NodeEditorProps = {
+	node: TreeNode
+}
+
+const confirmNodeName = (value: string) => {
+	setEditing(undefined)
+	console.log(value)
+}
+
+const abortEdit = () => {
+	setEditing(undefined)
+}
+
+const NodeEdtor = ({ node }: NodeEditorProps) => {
+	const editor = useRef<HTMLInputElement>(null)
+	useLayoutEffect(() => {
+		if (editor.current) {
+			editor.current.focus()
+		}
+	})
+	return (
+		<KeyListener
+			onEnter={pipe(inputValue, confirmNodeName)}
+			onEscape={abortEdit}
+		>
+			<Input
+				defaultValue={node.name}
+				onBlur={() => setEditing(undefined)}
+				ref={editor}
+			/>
+		</KeyListener>
+	)
+}
 
 type OwnProps = {
 	node: TreeNode
 	depth: number
 }
+
+const DummyIcon = () => <div className="w-4 h-4 shrink-0" />
 
 export const Node = ({ node, depth }: OwnProps) => {
 	const hasChildren = isNotEmpty(node.nodes)
@@ -32,21 +99,13 @@ export const Node = ({ node, depth }: OwnProps) => {
 							/>
 						</Button>
 					) : (
-						<div className="flex-0 shrink-0 w-4" />
+						<DummyIcon />
 					)}
-					<Button
-						type="button"
-						variant="ghost"
-						className="flex flex-row gap-1 px-1 py-0 w-full items-center justify-start h-auto"
-						data-node_id={node.id}
-					>
-						{hasChildren ? (
-							<IconFolder className="w-4 h-4 shrink-0 text-muted-foreground" />
-						) : (
-							<IconFile className="w-4 h-4 shrink-0 text-muted-foreground" />
-						)}
-						<div className="p-1 font-thin">{node.name}</div>
-					</Button>
+					{node.id === $isEditingNode.value ? (
+						<NodeEdtor node={node} />
+					) : (
+						<NodeText hasChildren={hasChildren} node={node} />
+					)}
 				</div>
 				{node.nodes.filter(always(isOpen)).map(child => (
 					<Node node={child} key={child.id} depth={depth + 1} />

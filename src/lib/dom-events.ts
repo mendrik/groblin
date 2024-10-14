@@ -15,3 +15,12 @@ export const data =
 
 export const focusWithin = (container: HTMLElement | null) => (): boolean =>
 	container?.matches(':focus-within') ?? false
+
+export const inputValue = (
+	e: KeyboardEvent | SyntheticEvent<HTMLInputElement>
+): string => {
+	if (e.target instanceof HTMLInputElement) {
+		return e.target.value
+	}
+	return ''
+}
