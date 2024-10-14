@@ -31,45 +31,44 @@ const query = gql`
 		}
   	}
 `
-
+/** ---- types ---- **/
 type Node = DocumentType<typeof GetNodesDocument>['node'][number]
-export type TreeNode = TreeOf<Node, 'nodes'>
-
-export const $root = signal<TreeNode>()
-
-subscribe<ResultOf<typeof GetNodesDocument>>(
-	query,
-	pipe(prop('node'), listToTree('id', 'node_id', 'nodes'), setSignal($root))
-)
-
+type TreeNode = TreeOf<Node, 'nodes'>
 type NodeState = {
 	open: boolean
 	selected: boolean
 }
 
-export const $nodes = signal<Record<string, NodeState>>(
-	getItem('tree-state') ?? {}
+/** ---- state ---- **/
+const $root = signal<TreeNode>()
+const $nodes = signal<Record<string, NodeState>>(getItem('tree-state') ?? {})
+const $focusedNode = signal<number>()
+const $isEditingNode = signal<number | undefined>()
+
+/** ---- subscriptions ---- **/
+subscribe<ResultOf<typeof GetNodesDocument>>(
+	query,
+	pipe(prop('node'), listToTree('id', 'node_id', 'nodes'), setSignal($root))
 )
+
 $nodes.subscribe(setItem('tree-state'))
 
-export const $focusedNode = signal<number>()
-export const setFocusedNode = (nodeId: number | undefined) => {
-	$focusedNode.value = nodeId
-}
+/** ---- interfaces ---- **/
+const startEditing = () => ($isEditingNode.value = $focusedNode.value)
+const notEditing = () => $isEditingNode.value === undefined
+const stopEditing = () => ($isEditingNode.value = undefined)
+const removeFocusedNode = () => setFocusedNode(undefined)
 
-export const $isEditingNode = signal<number | undefined>()
-export const startEditing = () => ($isEditingNode.value = $focusedNode.value)
+const setFocusedNode = (nodeId: number | undefined) =>
+	($focusedNode.value = nodeId)
 
-export const notEditing = () => $isEditingNode.value === undefined
-export const stopEditing = () => ($isEditingNode.value = undefined)
-
-export const returnFocus =
+const returnFocus =
 	<EL extends HTMLElement>(ref: ForwardedRef<EL>) =>
 	() => {
 		if (ref && 'current' in ref && ref.current) ref.current.focus()
 	}
 
-export const updateNodeState = (nodeId: number, state: Partial<NodeState>) => {
+const updateNodeState = (nodeId: number, state: Partial<NodeState>) => {
 	$nodes.value = over(
 		lensProp(asStr(nodeId)),
 		mergeDeepLeft(state),
@@ -77,13 +76,13 @@ export const updateNodeState = (nodeId: number, state: Partial<NodeState>) => {
 	)
 }
 
-export const focusedNodeState = (state: Partial<NodeState>) => {
+const focusedNodeState = (state: Partial<NodeState>) => {
 	if ($focusedNode.value) {
 		updateNodeState($focusedNode.value, state)
 	}
 }
 
-export const selectNextNode = (tree: HTMLElement | null) => {
+const selectNextNode = (tree: HTMLElement | null) => {
 	if (tree) {
 		const tabbables = tabbable(tree)
 		const current = tabbables.find(equals(document.activeElement))
@@ -91,10 +90,28 @@ export const selectNextNode = (tree: HTMLElement | null) => {
 	}
 }
 
-export const selectPreviousNode = (tree: HTMLElement | null) => {
+const selectPreviousNode = (tree: HTMLElement | null) => {
 	if (tree) {
 		const tabbables = tabbable(tree)
 		const current = tabbables.find(equals(document.activeElement))
 		findPrevElement<FocusableElement>(equals(current))(tabbables)?.focus()
 	}
+}
+
+/** ---- exports ---- **/
+export {
+	$isEditingNode,
+	$nodes,
+	$root,
+	focusedNodeState,
+	removeFocusedNode,
+	selectNextNode,
+	selectPreviousNode,
+	updateNodeState,
+	setFocusedNode,
+	notEditing,
+	returnFocus,
+	startEditing,
+	stopEditing,
+	type TreeNode
 }

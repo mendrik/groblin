@@ -3,6 +3,7 @@ import { data, focusWithin } from '@/lib/dom-events'
 import {
 	type TreeNode,
 	focusedNodeState,
+	removeFocusedNode,
 	selectNextNode,
 	selectPreviousNode,
 	setFocusedNode
@@ -15,8 +16,6 @@ type OwnProps = {
 	root: TreeNode
 	renderRoot?: boolean
 }
-
-const resetNode = () => setFocusedNode(undefined)
 
 export const Tree = ({ root, renderRoot = false }: OwnProps) => {
 	const tree = useRef<HTMLDivElement>(null)
@@ -31,7 +30,7 @@ export const Tree = ({ root, renderRoot = false }: OwnProps) => {
 				ref={tree}
 				className="w-full h-full p-1 pl-0"
 				onFocus={pipe(data('node_id', Number), setFocusedNode)}
-				onBlur={unless(() => focusWithin(tree.current), resetNode)}
+				onBlur={unless(() => focusWithin(tree.current), removeFocusedNode)}
 			>
 				{renderRoot ? (
 					<Node node={root} depth={0} />
