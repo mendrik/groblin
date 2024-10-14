@@ -17,7 +17,7 @@ import {
 	pipe,
 	prop
 } from 'ramda'
-import type { SyntheticEvent } from 'react'
+import type { ForwardedRef, SyntheticEvent } from 'react'
 import { type FocusableElement, tabbable } from 'tabbable'
 
 const query = gql`
@@ -64,6 +64,18 @@ export const setEditing = (nodeId: number | undefined) => {
 		setFocusedNode(undefined)
 	}
 }
+export const notEditing = () => $isEditingNode.value === undefined
+export const stopEditing = <E extends SyntheticEvent>(e: E): E => {
+	$isEditingNode.value = undefined
+	return e
+}
+
+export const returnFocus =
+	<EL extends HTMLElement>(ref: ForwardedRef<EL>) =>
+	<E extends SyntheticEvent>(e: E): E => {
+		if (ref && 'current' in ref && ref.current) ref.current.focus()
+		return e
+	}
 
 export const updateNodeState = (nodeId: number, state: Partial<NodeState>) => {
 	$nodes.value = over(
@@ -72,21 +84,6 @@ export const updateNodeState = (nodeId: number, state: Partial<NodeState>) => {
 		$nodes.value
 	)
 }
-
-export const returnFocus =
-	(nodeId: number) =>
-	<E extends SyntheticEvent>(e: E): E => {
-		if (e.target instanceof HTMLElement) {
-			const tree = e.target.closest('.tree')
-			setTimeout(() => {
-				const node = tree?.querySelector(`.node[data-node_id="${nodeId}"]`)
-				if (node instanceof HTMLElement) {
-					node.focus()
-				}
-			}, 30)
-		}
-		return e
-	}
 
 export const focusedNodeState = (state: Partial<NodeState>) => {
 	if ($focusedNode.value) {
