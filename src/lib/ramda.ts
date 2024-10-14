@@ -64,6 +64,6 @@ export const asyncPipeTap =
 	<T, FUNCTIONS extends Array<(arg: T) => any>>(...fns: FUNCTIONS) =>
 	(arg: T) =>
 		fns.reduce(
-			(pc, fn) => pc.then(async () => fn(arg)),
+			(pc, fn) => pc.then(async () => await fn(arg)),
 			Promise.resolve(arg)
 		) as LastReturnType<FUNCTIONS>

@@ -11,7 +11,7 @@ import { setSignal } from '@/lib/utils'
 import type { Fn } from '@/type-patches/functions'
 import { signal } from '@preact/signals-react'
 import gql from 'graphql-tag'
-import { Maybe } from 'purify-ts'
+import { Maybe, MaybeAsync } from 'purify-ts'
 import {
 	toString as asStr,
 	equals,
@@ -26,6 +26,7 @@ import {
 import type { ForwardedRef } from 'react'
 import { tabbable } from 'tabbable'
 
+/** ---- queries ---- **/
 gql`
 subscription GetNodes {     
 	node {
@@ -108,15 +109,11 @@ const focusedNodeState = (state: Partial<NodeState>) =>
 		updateNodeState(nodeId, state)
 	})
 
-const confirmNodeName = (value: string) =>
-	Maybe.fromNullable($isEditingNode.value)
+const confirmNodeName = (value: string): MaybeAsync<any> =>
+	MaybeAsync.liftMaybe(Maybe.fromNullable($isEditingNode.value))
 		.filter(isNotEmpty)
-		.map(id =>
-			Promise.all([
-				query(UpdateNodeNameDocument, { id, name: value }),
-				waitForUpdate()
-			])
-		)
+		.map(id => query(UpdateNodeNameDocument, { id, name: value }))
+		.map(waitForUpdate)
 
 const selectNextNode = (tree: HTMLElement | null) =>
 	Maybe.fromNullable(tree)
