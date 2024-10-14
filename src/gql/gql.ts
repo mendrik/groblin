@@ -15,14 +15,14 @@ import * as types from './graphql';
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 const documents = {
-    "\nsubscription GetNodes {     \n\tnode {\n\t\tid\n\t\tname\n\t\tnode_id\n\t\ttype\n\t\torder\n\t}\n}\n": types.GetNodesDocument,
+    "\nsubscription GetNodes {     \n\tnode( order_by: { id: asc }) {\n\t\tid\n\t\tname\n\t\tnode_id\n\t\ttype\n\t\torder\n\t}\n}\n": types.GetNodesDocument,
     "\nmutation updateNodeName($id: Int!, $name: String!) {\n\tupdate_node_by_pk (\n\tpk_columns: { id: $id }\n\t_set: { name: $name }\n\t) { \n\t\tid\n\t}\n}\n": types.UpdateNodeNameDocument,
 };
 
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\nsubscription GetNodes {     \n\tnode {\n\t\tid\n\t\tname\n\t\tnode_id\n\t\ttype\n\t\torder\n\t}\n}\n"): typeof import('./graphql').GetNodesDocument;
+export function graphql(source: "\nsubscription GetNodes {     \n\tnode( order_by: { id: asc }) {\n\t\tid\n\t\tname\n\t\tnode_id\n\t\ttype\n\t\torder\n\t}\n}\n"): typeof import('./graphql').GetNodesDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

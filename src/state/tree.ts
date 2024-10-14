@@ -20,8 +20,7 @@ import {
 	mergeDeepLeft,
 	over,
 	pipe,
-	prop,
-	propOr
+	prop
 } from 'ramda'
 import type { ForwardedRef } from 'react'
 import { tabbable } from 'tabbable'
@@ -29,7 +28,7 @@ import { tabbable } from 'tabbable'
 /** ---- queries ---- **/
 gql`
 subscription GetNodes {     
-	node {
+	node( order_by: { id: asc }) {
 		id
 		name
 		node_id
@@ -91,8 +90,6 @@ const setFocusedNode = (nodeId: number | undefined) =>
 const returnFocus =
 	<EL extends HTMLElement>(ref: ForwardedRef<EL>) =>
 	() => {
-		console.log(propOr(undefined, 'current', ref))
-
 		if (ref && 'current' in ref && ref.current) ref.current.focus()
 	}
 

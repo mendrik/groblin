@@ -63,10 +63,11 @@ const NodeText = forwardRef<HTMLButtonElement, NodeTextProps>(
 
 type NodeEditorProps = {
 	node: TreeNode
+	textBtn: React.Ref<HTMLButtonElement>
 }
 
 const NodeEditor = forwardRef<HTMLInputElement, NodeEditorProps>(
-	({ node }, ref) => {
+	({ node, textBtn }, ref) => {
 		useLayoutEffect(() => {
 			if (isActiveRef(ref)) {
 				ref.current.select()
@@ -78,9 +79,9 @@ const NodeEditor = forwardRef<HTMLInputElement, NodeEditorProps>(
 					stopPropagation,
 					pipe(inputValue, confirmNodeName),
 					stopEditing,
-					returnFocus(ref)
+					returnFocus(textBtn)
 				)}
-				onEscape={pipeTap(stopPropagation, returnFocus(ref), stopEditing)}
+				onEscape={pipeTap(stopPropagation, returnFocus(textBtn), stopEditing)}
 			>
 				<Input
 					defaultValue={node.name}
@@ -136,7 +137,7 @@ export const Node = ({ node, depth }: OwnProps) => {
 						<DummyIcon />
 					)}
 					{node.id === $isEditingNode.value ? (
-						<NodeEditor node={node} ref={editor} />
+						<NodeEditor node={node} ref={editor} textBtn={textBtn} />
 					) : (
 						<NodeText hasChildren={hasChildren} node={node} ref={textBtn} />
 					)}

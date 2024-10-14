@@ -355,7 +355,7 @@ export class TypedDocumentString<TResult, TVariables>
 
 export const GetNodesDocument = new TypedDocumentString(`
     subscription GetNodes {
-  node {
+  node(order_by: {id: asc}) {
     id
     name
     node_id
