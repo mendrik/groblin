@@ -1,18 +1,23 @@
 import { inputValue, stopPropagation } from '@/lib/dom-events'
+import { pipeTap } from '@/lib/ramda'
 import { isActiveRef } from '@/lib/react'
 import { cn } from '@/lib/utils'
 import {
-	$focusedNode,
 	$isEditingNode,
 	$nodes,
 	type TreeNode,
 	notEditing,
 	returnFocus,
-	setEditing,
+	startEditing,
 	stopEditing,
 	updateNodeState
 } from '@/state/tree'
-import { IconChevronRight, IconFile, IconFolder } from '@tabler/icons-react'
+import {
+	IconChevronRight,
+	IconFile,
+	IconFolder,
+	IconPencil
+} from '@tabler/icons-react'
 import { always, isNotEmpty, pipe, when } from 'ramda'
 import { forwardRef, useLayoutEffect, useRef } from 'react'
 import { usePrevious } from 'react-use'
@@ -29,10 +34,7 @@ type NodeTextProps = {
 const NodeText = forwardRef<HTMLButtonElement, NodeTextProps>(
 	({ node, hasChildren }, ref) => (
 		<KeyListener
-			onEnter={pipe(
-				stopPropagation,
-				when(notEditing, () => setEditing($focusedNode.value))
-			)}
+			onEnter={pipeTap(stopPropagation, when(notEditing, startEditing))}
 		>
 			<Button
 				type="button"
@@ -57,29 +59,37 @@ type NodeEditorProps = {
 }
 
 const confirmNodeName = (value: string): void => {
-	setEditing(undefined)
+	stopEditing()
 	console.log(value)
 }
 
 const NodeEditor = forwardRef<HTMLInputElement, NodeEditorProps>(
-	({ node }, ref) => (
-		<KeyListener
-			onEnter={pipe(
-				stopPropagation,
-				stopEditing,
-				returnFocus(ref),
-				inputValue,
-				confirmNodeName
-			)}
-			onEscape={pipe(stopPropagation, returnFocus(ref), stopEditing)}
-		>
-			<Input
-				defaultValue={node.name}
-				onBlur={() => setEditing(undefined)}
-				ref={ref}
-			/>
-		</KeyListener>
-	)
+	({ node }, ref) => {
+		useLayoutEffect(() => {
+			if (isActiveRef(ref)) {
+				ref.current.select()
+			}
+		}, [ref])
+		return (
+			<KeyListener
+				onEnter={pipeTap(
+					stopPropagation,
+					stopEditing,
+					returnFocus(ref),
+					pipe(inputValue, confirmNodeName)
+				)}
+				onEscape={pipeTap(stopPropagation, returnFocus(ref), stopEditing)}
+			>
+				<Input
+					defaultValue={node.name}
+					icon={IconPencil}
+					ref={ref}
+					className="py-1 h-7"
+					onBlur={pipeTap(stopPropagation, stopEditing)}
+				/>
+			</KeyListener>
+		)
+	}
 )
 
 type OwnProps = {

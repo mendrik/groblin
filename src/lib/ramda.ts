@@ -44,3 +44,10 @@ export const findPrevElement = <T>(
 		defaultTo([]),
 		nth(0)
 	)
+
+type Last<Type extends any[]> = Type extends [...any[], infer R] ? R : never
+
+export const pipeTap =
+	<T, FUNCTIONS extends Array<(arg: T) => any>>(...fns: FUNCTIONS) =>
+	(arg: T): ReturnType<Last<FUNCTIONS>> =>
+		fns.reduce((_, fn) => fn(arg), undefined) as ReturnType<Last<FUNCTIONS>>

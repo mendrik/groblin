@@ -23,7 +23,5 @@ export const inputValue = <E extends SyntheticEvent>(e: E): string => {
 	return ''
 }
 
-export const stopPropagation = <E extends SyntheticEvent>(e: E): E => {
+export const stopPropagation = <E extends SyntheticEvent>(e: E): void =>
 	e.stopPropagation()
-	return e
-}

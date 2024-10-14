@@ -24,7 +24,8 @@
 				"useArrowFunction": "error"
 			},
 			"suspicious": {
-				"noExplicitAny": "off"
+				"noExplicitAny": "off",
+				"noAssignInExpressions": "off"
 			},
 			"correctness": {
 				"noUnusedImports": "error"

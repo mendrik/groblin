@@ -17,7 +17,7 @@ import {
 	pipe,
 	prop
 } from 'ramda'
-import type { ForwardedRef, SyntheticEvent } from 'react'
+import type { ForwardedRef } from 'react'
 import { type FocusableElement, tabbable } from 'tabbable'
 
 const query = gql`
@@ -58,23 +58,15 @@ export const setFocusedNode = (nodeId: number | undefined) => {
 }
 
 export const $isEditingNode = signal<number | undefined>()
-export const setEditing = (nodeId: number | undefined) => {
-	$isEditingNode.value = nodeId
-	if (nodeId === undefined) {
-		setFocusedNode(undefined)
-	}
-}
+export const startEditing = () => ($isEditingNode.value = $focusedNode.value)
+
 export const notEditing = () => $isEditingNode.value === undefined
-export const stopEditing = <E extends SyntheticEvent>(e: E): E => {
-	$isEditingNode.value = undefined
-	return e
-}
+export const stopEditing = () => ($isEditingNode.value = undefined)
 
 export const returnFocus =
 	<EL extends HTMLElement>(ref: ForwardedRef<EL>) =>
-	<E extends SyntheticEvent>(e: E): E => {
+	() => {
 		if (ref && 'current' in ref && ref.current) ref.current.focus()
-		return e
 	}
 
 export const updateNodeState = (nodeId: number, state: Partial<NodeState>) => {
