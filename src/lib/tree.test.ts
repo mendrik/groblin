@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { listToTree } from './tree.ts'
 
 describe('listToTree', () => {
-	it('should work', () => {
+	it('converts list to tree', () => {
 		const nodes = [
 			{ id: '1', name: 'Root', parent_id: null },
 			{ id: '2', name: 'Child 1', parent_id: '1' },

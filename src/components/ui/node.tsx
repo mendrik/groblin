@@ -39,7 +39,7 @@ const NodeText = forwardRef<HTMLButtonElement, NodeTextProps>(
 			<Button
 				type="button"
 				variant="ghost"
-				className="node flex flex-row gap-1 px-1 py-0 w-full items-center justify-start h-auto"
+				className="node flex flex-row px-1 py-0 w-full items-center justify-start h-auto"
 				data-node_id={node.id}
 				ref={ref}
 			>
