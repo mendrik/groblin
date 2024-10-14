@@ -1,9 +1,10 @@
-import { inputValue } from '@/lib/dom-events'
+import { inputValue, stopPropagation } from '@/lib/dom-events'
 import { cn } from '@/lib/utils'
 import {
 	$isEditingNode,
 	$nodes,
 	type TreeNode,
+	returnFocus,
 	setEditing,
 	updateNodeState
 } from '@/state/tree'
@@ -24,7 +25,7 @@ const NodeText = ({ node, hasChildren }: NodeTextProps) => (
 	<Button
 		type="button"
 		variant="ghost"
-		className="flex flex-row gap-1 px-1 py-0 w-full items-center justify-start h-auto"
+		className="node flex flex-row gap-1 px-1 py-0 w-full items-center justify-start h-auto"
 		data-node_id={node.id}
 	>
 		{hasChildren ? (
@@ -40,12 +41,12 @@ type NodeEditorProps = {
 	node: TreeNode
 }
 
-const confirmNodeName = (value: string) => {
+const confirmNodeName = (value: string): void => {
 	setEditing(undefined)
 	console.log(value)
 }
 
-const abortEdit = () => {
+const abortEdit = (): void => {
 	setEditing(undefined)
 }
 
@@ -58,8 +59,13 @@ const NodeEdtor = ({ node }: NodeEditorProps) => {
 	})
 	return (
 		<KeyListener
-			onEnter={pipe(inputValue, confirmNodeName)}
-			onEscape={abortEdit}
+			onEnter={pipe(
+				stopPropagation,
+				returnFocus(node.id),
+				inputValue,
+				confirmNodeName
+			)}
+			onEscape={pipe(stopPropagation, returnFocus(node.id), abortEdit)}
 		>
 			<Input
 				defaultValue={node.name}

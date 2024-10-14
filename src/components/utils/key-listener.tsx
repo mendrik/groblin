@@ -2,7 +2,9 @@ import { useEvent } from 'react-use'
 import type { Key } from 'ts-key-enum'
 
 type KeyHandlers = {
-	[K in `on${Capitalize<keyof typeof Key>}`]?: (event: KeyboardEvent) => void
+	[K in `on${Capitalize<keyof typeof Key>}`]?: (
+		event: React.KeyboardEvent
+	) => void
 }
 
 interface KeyListenerProps extends KeyHandlers {
@@ -10,7 +12,7 @@ interface KeyListenerProps extends KeyHandlers {
 }
 
 const KeyListener = ({ children, ...handlers }: KeyListenerProps) => {
-	useEvent('keydown', (event: KeyboardEvent) => {
+	useEvent('keydown', (event: React.KeyboardEvent) => {
 		const handlerName = `on${event.key}` as keyof KeyHandlers
 
 		if (handlerName in handlers) {
