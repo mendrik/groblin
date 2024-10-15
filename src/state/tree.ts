@@ -137,6 +137,7 @@ const selectPreviousNode = (tree: HTMLElement | null) =>
 export {
 	$isEditingNode,
 	$nodes,
+	$focusedNode,
 	$root,
 	confirmNodeName,
 	focusedNodeState,

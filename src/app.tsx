@@ -12,18 +12,18 @@ import {} from './state/tree'
 
 export function App() {
 	return (
-		<ResizablePanelGroup
-			direction="horizontal"
-			className="w-full"
-			onLayout={setSignal($panelSizes)}
-		>
-			<ResizablePanel defaultSize={$panelSizes.value[0]}>
-				<ScrollArea className="w-full p-2 pl-0 pr-1">
+		<ScrollArea className="w-full h-full">
+			<ResizablePanelGroup
+				direction="horizontal"
+				className="w-full"
+				onLayout={setSignal($panelSizes)}
+			>
+				<ResizablePanel defaultSize={$panelSizes.value[0]}>
 					<DocumentTree />
-				</ScrollArea>
-			</ResizablePanel>
-			<ResizableHandle />
-			<ResizablePanel defaultSize={$panelSizes.value[1]} />
-		</ResizablePanelGroup>
+				</ResizablePanel>
+				<ResizableHandle />
+				<ResizablePanel defaultSize={$panelSizes.value[1]} />
+			</ResizablePanelGroup>
+		</ScrollArea>
 	)
 }

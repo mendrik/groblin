@@ -7,7 +7,7 @@ export const DocumentTree = () => {
 		return null
 	}
 	return (
-		<div className="w-full h-full rct-dark pr-1">
+		<div className="w-full h-full">
 			<Tree root={root} />
 		</div>
 	)
