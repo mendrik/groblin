@@ -21,6 +21,7 @@ import {
 	IconTrash
 } from '@tabler/icons-react'
 import type { RefObject } from 'react'
+import { NodeDelete } from './node-delete'
 
 type OwnProps = {
 	node: TreeNode
@@ -54,14 +55,14 @@ export const NodeOptions = ({ node, editor }: OwnProps) => {
 				<DropdownMenuSeparator />
 				<DropdownMenuItem
 					className="flex gap-2 items-center"
-					onClick={pipeTap(stopPropagation, startEditing, focusOn(editor))}
+					onClick={pipeTap(startEditing, focusOn(editor))}
 				>
 					<IconCursorText className="w-4 h-4" />
 					<span>Rename</span>
 				</DropdownMenuItem>
 				<DropdownMenuItem className="flex gap-2 items-center">
 					<IconTrash className="w-4 h-4" />
-					<span>Delete...</span>
+					<NodeDelete />
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
