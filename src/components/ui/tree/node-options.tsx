@@ -1,4 +1,11 @@
-import { stopPropagation } from '@/lib/dom-events'
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
+import { preventDefault, stopPropagation } from '@/lib/dom-events'
 import { pipeTap } from '@/lib/ramda'
 import {
 	$lastFocusedNode,
@@ -6,13 +13,6 @@ import {
 	focusOn,
 	startEditing
 } from '@/state/tree'
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger
-} from '@radix-ui/react-dropdown-menu'
 import {
 	IconCursorText,
 	IconDots,
@@ -38,14 +38,18 @@ export const NodeOptions = ({ node, editor }: OwnProps) => {
 					stroke={0.5}
 				/>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent className="border-muted-foreground">
+			<DropdownMenuContent
+				className="border-muted-foreground"
+				onCloseAutoFocus={preventDefault}
+				onKeyDown={stopPropagation}
+			>
 				<DropdownMenuItem className="flex gap-2 items-center">
 					<IconRowInsertTop className="w-4 h-4" />
-					<span>Add above</span>
+					<span>Insert above...</span>
 				</DropdownMenuItem>
 				<DropdownMenuItem className="flex gap-2 items-center">
 					<IconRowInsertBottom className="w-4 h-4" />
-					<span>Add below</span>
+					<span>Insert below...</span>
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem
