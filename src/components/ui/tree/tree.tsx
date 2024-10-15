@@ -1,4 +1,4 @@
-import { Node } from '@/components/ui/node'
+import { Node } from '@/components/ui/tree/node'
 import { data, focusWithin } from '@/lib/dom-events'
 import {
 	type TreeNode,
@@ -10,7 +10,7 @@ import {
 } from '@/state/tree'
 import { pipe, unless } from 'ramda'
 import { useRef } from 'react'
-import KeyListener from '../utils/key-listener'
+import KeyListener from '../../utils/key-listener'
 
 type OwnProps = {
 	root: TreeNode
