@@ -59,7 +59,7 @@ type NodeState = {
 
 /** ---- state ---- **/
 const $root = signal<TreeNode>()
-const $nodes = signal<Record<string, NodeState>>(getItem('tree-state') ?? {})
+const $nodes = signal<Record<string, NodeState>>(getItem('tree-state', {}))
 const $focusedNode = signal<number>()
 const $isEditingNode = signal<number | undefined>()
 

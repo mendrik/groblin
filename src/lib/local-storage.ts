@@ -7,7 +7,10 @@ export const setItem =
 
 const safeParse = tryCatch(JSON.parse, console.error)
 
-export const getItem = <T>(key: string): T | undefined => {
+export const getItem = <T>(
+	key: string,
+	initial?: T | undefined
+): typeof initial extends undefined ? T | undefined : T => {
 	const item = localStorage.getItem(key)
-	return item ? safeParse(item) : undefined
+	return item ? safeParse(item) : initial
 }
