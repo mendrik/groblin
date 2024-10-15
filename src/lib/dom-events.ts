@@ -25,3 +25,6 @@ export const inputValue = <E extends SyntheticEvent>(e: E): string => {
 
 export const stopPropagation = <E extends SyntheticEvent>(e: E): void =>
 	e.stopPropagation()
+
+export const preventDefault = <E extends SyntheticEvent>(e: E): void =>
+	e.preventDefault()

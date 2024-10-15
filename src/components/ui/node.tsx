@@ -3,6 +3,7 @@ import { asyncPipeTap, pipeTap } from '@/lib/ramda'
 import { isActiveRef } from '@/lib/react'
 import { cn } from '@/lib/utils'
 import {
+	$focusedNode,
 	$isEditingNode,
 	$nodes,
 	type TreeNode,
@@ -16,6 +17,7 @@ import {
 } from '@/state/tree'
 import {
 	IconChevronRight,
+	IconDots,
 	IconFile,
 	IconFolder,
 	IconPencil
@@ -46,11 +48,15 @@ const NodeText = forwardRef<HTMLButtonElement, NodeTextProps>(
 			>
 				{hasChildren ? (
 					<IconFolder
+						focusable={false}
+						tabIndex={-1}
 						className="w-4 h-4 shrink-0 text-muted-foreground"
 						stroke={0.5}
 					/>
 				) : (
 					<IconFile
+						focusable={false}
+						tabIndex={-1}
 						className="w-4 h-4 shrink-0 text-muted-foreground"
 						stroke={0.5}
 					/>
@@ -97,6 +103,30 @@ const NodeEditor = forwardRef<HTMLInputElement, NodeEditorProps>(
 	}
 )
 
+type NodeOptionsProps = {
+	node: TreeNode
+}
+
+const NodeOptions = ({ node }: NodeOptionsProps) => {
+	return $focusedNode.value === node.id ? (
+		<Button
+			type="button"
+			variant="ghost"
+			className="h-6 w-6 flex items-center justify-center px-1 py-0 ml-auto"
+			tabIndex={-1}
+		>
+			<IconDots
+				className="w-4 h-4 shrink-0 text-muted-foreground"
+				focusable={false}
+				tabIndex={-1}
+				stroke={0.5}
+			/>
+		</Button>
+	) : (
+		<div className="w-6 h-6 shrink-0 ml-auto" />
+	)
+}
+
 type OwnProps = {
 	node: TreeNode
 	depth: number
@@ -113,7 +143,7 @@ export const Node = ({ node, depth }: OwnProps) => {
 	return (
 		<ol className={cn(`list-none m-0`)} style={{ paddingLeft: depth * 16 }}>
 			<li data-node_id={node.id}>
-				<div className="flex flex-row items-center justify-start w-full">
+				<div className="flex flex-row items-center justify-start w-full gap-1">
 					{hasChildren ? (
 						<Button
 							type="button"
@@ -125,6 +155,8 @@ export const Node = ({ node, depth }: OwnProps) => {
 								className={cn('w-4 h-4 transition-all duration-100', {
 									'rotate-90': isOpen
 								})}
+								focusable={false}
+								tabIndex={-1}
 								onClick={() => updateNodeState(node.id, { open: !isOpen })}
 							/>
 						</Button>
@@ -136,6 +168,7 @@ export const Node = ({ node, depth }: OwnProps) => {
 					) : (
 						<NodeText hasChildren={hasChildren} node={node} ref={textBtn} />
 					)}
+					<NodeOptions node={node} />
 				</div>
 				{node.nodes.filter(always(isOpen)).map(child => (
 					<Node node={child} key={child.id} depth={depth + 1} />
