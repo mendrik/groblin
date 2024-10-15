@@ -71,7 +71,7 @@ subscribe(
 $nodes.subscribe(setItem('tree-state'))
 
 const $rootUpdates = signal(0)
-$root.subscribe(() => $rootUpdates.value++)
+$root.subscribe(() => ($rootUpdates.value = ($rootUpdates.value + 1) % 1000))
 
 const waitForUpdate = () => {
 	const current = $rootUpdates.value
