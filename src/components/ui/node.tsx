@@ -81,7 +81,7 @@ const NodeEditor = forwardRef<HTMLInputElement, NodeEditorProps>(
 					stopEditing,
 					returnFocus(textBtn)
 				)}
-				onEscape={pipeTap(stopPropagation, returnFocus(textBtn), stopEditing)}
+				onEscape={pipeTap(stopPropagation, stopEditing, returnFocus(textBtn))}
 			>
 				<Input
 					defaultValue={node.name}

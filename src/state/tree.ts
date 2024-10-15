@@ -102,15 +102,15 @@ const updateNodeState = (nodeId: number, state: Partial<NodeState>) => {
 }
 
 const focusedNodeState = (state: Partial<NodeState>) =>
-	Maybe.fromNullable($focusedNode.value).ifJust(nodeId => {
+	Maybe.fromNullable($focusedNode.value).ifJust(nodeId =>
 		updateNodeState(nodeId, state)
-	})
+	)
 
-const confirmNodeName = (value: string): MaybeAsync<any> =>
+const confirmNodeName = (value: string) =>
 	MaybeAsync.liftMaybe(Maybe.fromNullable($isEditingNode.value))
 		.filter(isNotEmpty)
 		.map(id => query(UpdateNodeNameDocument, { id, name: value }))
-		.map(waitForUpdate)
+		.run()
 
 const selectNextNode = (tree: HTMLElement | null) =>
 	Maybe.fromNullable(tree)

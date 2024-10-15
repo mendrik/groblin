@@ -23,27 +23,23 @@ export const prependLast: <T>(l: T[]) => T[] = converge(prepend, [
 	identity
 ])
 
-export const findNextElement = <T>(
-	predicate: Pred<[T]>
-): Fn<T[], T | undefined> =>
+export const findNextElement = <T>(predicate: Pred<[T]>) =>
 	pipe(
 		appendFirst,
 		aperture(2),
 		find<[T, T]>(([curr]) => predicate(curr)),
 		defaultTo([]),
 		nth(1)
-	)
+	) as Fn<T[], T | undefined>
 
-export const findPrevElement = <T>(
-	predicate: Pred<[T]>
-): Fn<T[], T | undefined> =>
+export const findPrevElement = <T>(predicate: Pred<[T]>) =>
 	pipe(
 		prependLast,
 		aperture(2),
 		find<[T, T]>(([_, next]) => predicate(next)),
 		defaultTo([]),
 		nth(0)
-	)
+	) as Fn<T[], T | undefined>
 
 type Last<Type extends any[]> = Type extends [...any[], infer R] ? R : never
 
@@ -64,6 +60,6 @@ export const asyncPipeTap =
 	<T, FUNCTIONS extends Array<(arg: T) => any>>(...fns: FUNCTIONS) =>
 	(arg: T) =>
 		fns.reduce(
-			(pc, fn) => pc.then(async () => await fn(arg)),
-			Promise.resolve(arg)
+			(pc, fn) => pc.then(() => fn(arg)),
+			Promise.resolve()
 		) as LastReturnType<FUNCTIONS>
