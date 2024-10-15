@@ -23,6 +23,7 @@ import {
 	IconPencil
 } from '@tabler/icons-react'
 import { always, isNotEmpty, pipe, when } from 'ramda'
+import { delayP } from 'ramda-adjunct'
 import { forwardRef, useLayoutEffect, useRef } from 'react'
 import {} from 'zod'
 import KeyListener from '../utils/key-listener'
@@ -89,7 +90,12 @@ const NodeEditor = forwardRef<HTMLInputElement, NodeEditorProps>(
 					stopEditing,
 					returnFocus(textBtn)
 				)}
-				onEscape={pipeTap(stopPropagation, stopEditing, returnFocus(textBtn))}
+				onEscape={asyncPipeTap(
+					stopPropagation,
+					stopEditing,
+					always(delayP(20)),
+					returnFocus(textBtn)
+				)}
 			>
 				<Input
 					defaultValue={node.name}
