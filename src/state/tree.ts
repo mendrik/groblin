@@ -8,7 +8,6 @@ import { getItem, setItem } from '@/lib/local-storage'
 import { findNextElement, findPrevElement } from '@/lib/ramda'
 import { type TreeOf, listToTree } from '@/lib/tree'
 import { setSignal } from '@/lib/utils'
-import type { Fn } from '@/type-patches/functions'
 import { signal } from '@preact/signals-react'
 import gql from 'graphql-tag'
 import { Maybe, MaybeAsync } from 'purify-ts'
@@ -71,11 +70,19 @@ subscribe(
 
 $nodes.subscribe(setItem('tree-state'))
 
+const $rootUpdates = signal(0)
+$root.subscribe(() => $rootUpdates.value++)
+
 const waitForUpdate = () => {
-	let unsub: Fn<never, void>
+	const current = $rootUpdates.value
 	return new Promise(res => {
-		unsub = $root.subscribe(res)
-	}).then(() => unsub())
+		const unsub = $rootUpdates.subscribe(val => {
+			if (val !== current) {
+				unsub()
+				res(val)
+			}
+		})
+	})
 }
 
 /** ---- interfaces ---- **/

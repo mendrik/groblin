@@ -11,7 +11,8 @@ import {
 	returnFocus,
 	startEditing,
 	stopEditing,
-	updateNodeState
+	updateNodeState,
+	waitForUpdate
 } from '@/state/tree'
 import {
 	IconChevronRight,
@@ -21,7 +22,6 @@ import {
 } from '@tabler/icons-react'
 import { always, isNotEmpty, pipe, when } from 'ramda'
 import { forwardRef, useLayoutEffect, useRef } from 'react'
-import { usePrevious } from 'react-use'
 import {} from 'zod'
 import KeyListener from '../utils/key-listener'
 import { Button } from './button'
@@ -73,11 +73,13 @@ const NodeEditor = forwardRef<HTMLInputElement, NodeEditorProps>(
 				ref.current.select()
 			}
 		}, [ref])
+
 		return (
 			<KeyListener
 				onEnter={asyncPipeTap(
 					stopPropagation,
 					pipe(inputValue, confirmNodeName),
+					waitForUpdate,
 					stopEditing,
 					returnFocus(textBtn)
 				)}
@@ -87,7 +89,7 @@ const NodeEditor = forwardRef<HTMLInputElement, NodeEditorProps>(
 					defaultValue={node.name}
 					icon={IconPencil}
 					ref={ref}
-					className="py-1 h-7"
+					className="py-1 h-7 bg-teal-900"
 					onBlur={pipeTap(stopPropagation, stopEditing)}
 				/>
 			</KeyListener>
@@ -107,13 +109,6 @@ export const Node = ({ node, depth }: OwnProps) => {
 	const isOpen = $nodes.value[node.id]?.open
 	const editor = useRef<HTMLInputElement>(null)
 	const textBtn = useRef<HTMLButtonElement>(null)
-	const previouslyEdited = usePrevious($isEditingNode.value)
-
-	useLayoutEffect(() => {
-		if (isActiveRef(textBtn) && previouslyEdited === node.id) {
-			textBtn.current.focus()
-		}
-	}, [previouslyEdited, node.id])
 
 	return (
 		<ol className={cn(`list-none m-0`)} style={{ paddingLeft: depth * 16 }}>
