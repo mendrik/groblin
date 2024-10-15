@@ -6,16 +6,17 @@ import {
 	AlertDialogDescription,
 	AlertDialogFooter,
 	AlertDialogHeader,
-	AlertDialogTitle,
-	AlertDialogTrigger
+	AlertDialogTitle
 } from '@/components/ui/alert-dialog'
+import { setSignal } from '@/lib/utils'
+import { signal } from '@preact/signals-react'
+import { F, pipe } from 'ramda'
+
+export const $deleteDialogOpen = signal(false)
 
 export const NodeDelete = () => (
-	<AlertDialog>
-		<AlertDialogTrigger asChild>
-			<span>Delete...</span>
-		</AlertDialogTrigger>
-		<AlertDialogContent>
+	<AlertDialog open={$deleteDialogOpen.value}>
+		<AlertDialogContent className="border-muted-foreground">
 			<AlertDialogHeader>
 				<AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
 				<AlertDialogDescription>
@@ -24,7 +25,9 @@ export const NodeDelete = () => (
 				</AlertDialogDescription>
 			</AlertDialogHeader>
 			<AlertDialogFooter>
-				<AlertDialogCancel>Cancel</AlertDialogCancel>
+				<AlertDialogCancel onClick={pipe(F, setSignal($deleteDialogOpen))}>
+					Cancel
+				</AlertDialogCancel>
 				<AlertDialogAction>Continue</AlertDialogAction>
 			</AlertDialogFooter>
 		</AlertDialogContent>
