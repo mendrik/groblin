@@ -14,15 +14,19 @@ import { Maybe, MaybeAsync } from 'purify-ts'
 import {
 	toString as asStr,
 	equals,
+	filter,
 	isNotEmpty,
+	isNotNil,
 	lensProp,
 	mergeDeepLeft,
 	over,
 	pipe,
-	prop
+	prop,
+	when
 } from 'ramda'
+import { delayP } from 'ramda-adjunct'
 import type { ForwardedRef } from 'react'
-import { tabbable } from 'tabbable'
+import { type FocusableElement, tabbable } from 'tabbable'
 
 /** ---- queries ---- **/
 gql`
@@ -60,6 +64,7 @@ type NodeState = {
 const $root = signal<TreeNode>()
 const $nodes = signal<Record<string, NodeState>>(getItem('tree-state', {}))
 const $focusedNode = signal<number>()
+const $lastFocusedNode = signal<number>()
 const $isEditingNode = signal<number | undefined>()
 
 /** ---- subscriptions ---- **/
@@ -69,6 +74,7 @@ subscribe(
 )
 
 $nodes.subscribe(setItem('tree-state'))
+$focusedNode.subscribe(when(isNotNil, setSignal($lastFocusedNode)))
 
 const $rootUpdates = signal(0)
 $root.subscribe(() => ($rootUpdates.value = ($rootUpdates.value + 1) % 1000))
@@ -86,7 +92,8 @@ const waitForUpdate = () => {
 }
 
 /** ---- interfaces ---- **/
-const startEditing = () => ($isEditingNode.value = $focusedNode.value)
+const startEditing = () =>
+	($isEditingNode.value = $focusedNode.value ?? $lastFocusedNode.value)
 const notEditing = () => $isEditingNode.value === undefined
 const stopEditing = () => ($isEditingNode.value = undefined)
 const removeFocusedNode = () => setFocusedNode(undefined)
@@ -94,11 +101,12 @@ const removeFocusedNode = () => setFocusedNode(undefined)
 const setFocusedNode = (nodeId: number | undefined) =>
 	($focusedNode.value = nodeId)
 
-const returnFocus =
+const focusOn =
 	<EL extends HTMLElement>(ref: ForwardedRef<EL>) =>
-	() => {
-		if (ref && 'current' in ref && ref.current) ref.current.focus()
-	}
+	(): Promise<void> =>
+		delayP(20).then(() => {
+			if (ref && 'current' in ref && ref.current) ref.current.focus()
+		})
 
 const updateNodeState = (nodeId: number, state: Partial<NodeState>) => {
 	$nodes.value = over(
@@ -119,9 +127,12 @@ const confirmNodeName = (value: string) =>
 		.map(id => query(UpdateNodeNameDocument, { id, name: value }))
 		.run()
 
+const skippables = (el: FocusableElement) => !el.classList.contains('no-focus')
+
 const selectNextNode = (tree: HTMLElement | null) =>
 	Maybe.fromNullable(tree)
 		.map(tabbable)
+		.map(filter(skippables))
 		.map(findNextElement(equals(document.activeElement)))
 		.chain(Maybe.fromNullable)
 		.ifJust(e => e instanceof HTMLElement && e.focus())
@@ -129,6 +140,7 @@ const selectNextNode = (tree: HTMLElement | null) =>
 const selectPreviousNode = (tree: HTMLElement | null) =>
 	Maybe.fromNullable(tree)
 		.map(tabbable)
+		.map(filter(skippables))
 		.map(findPrevElement(equals(document.activeElement)))
 		.chain(Maybe.fromNullable)
 		.ifJust(e => e instanceof HTMLElement && e.focus())
@@ -138,6 +150,7 @@ export {
 	$isEditingNode,
 	$nodes,
 	$focusedNode,
+	$lastFocusedNode,
 	$root,
 	confirmNodeName,
 	focusedNodeState,
@@ -147,7 +160,7 @@ export {
 	updateNodeState,
 	setFocusedNode,
 	notEditing,
-	returnFocus,
+	focusOn,
 	startEditing,
 	stopEditing,
 	waitForUpdate,

@@ -1,15 +1,22 @@
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
 import { inputValue, stopPropagation } from '@/lib/dom-events'
 import { asyncPipeTap, pipeTap } from '@/lib/ramda'
 import { isActiveRef } from '@/lib/react'
 import { cn } from '@/lib/utils'
 import {
-	$focusedNode,
 	$isEditingNode,
+	$lastFocusedNode,
 	$nodes,
 	type TreeNode,
 	confirmNodeName,
+	focusOn,
 	notEditing,
-	returnFocus,
 	startEditing,
 	stopEditing,
 	updateNodeState,
@@ -17,14 +24,17 @@ import {
 } from '@/state/tree'
 import {
 	IconChevronRight,
+	IconCursorText,
 	IconDots,
 	IconFile,
 	IconFolder,
-	IconPencil
+	IconPencil,
+	IconRowInsertBottom,
+	IconRowInsertTop,
+	IconTrash
 } from '@tabler/icons-react'
 import { always, isNotEmpty, pipe, when } from 'ramda'
-import { delayP } from 'ramda-adjunct'
-import { forwardRef, useLayoutEffect, useRef } from 'react'
+import { type RefObject, forwardRef, useLayoutEffect, useRef } from 'react'
 import {} from 'zod'
 import KeyListener from '../utils/key-listener'
 import { Button } from './button'
@@ -43,7 +53,7 @@ const NodeText = forwardRef<HTMLButtonElement, NodeTextProps>(
 			<Button
 				type="button"
 				variant="ghost"
-				className="node flex flex-row px-1 py-0 w-full items-center justify-start h-auto"
+				className="node flex flex-row px-1 py-0 w-full items-center justify-start h-7"
 				data-node_id={node.id}
 				ref={ref}
 			>
@@ -88,14 +98,9 @@ const NodeEditor = forwardRef<HTMLInputElement, NodeEditorProps>(
 					pipe(inputValue, confirmNodeName),
 					waitForUpdate,
 					stopEditing,
-					returnFocus(textBtn)
+					focusOn(textBtn)
 				)}
-				onEscape={asyncPipeTap(
-					stopPropagation,
-					stopEditing,
-					always(delayP(20)),
-					returnFocus(textBtn)
-				)}
+				onEscape={asyncPipeTap(stopPropagation, stopEditing, focusOn(textBtn))}
 			>
 				<Input
 					defaultValue={node.name}
@@ -111,25 +116,45 @@ const NodeEditor = forwardRef<HTMLInputElement, NodeEditorProps>(
 
 type NodeOptionsProps = {
 	node: TreeNode
+	editor: RefObject<HTMLInputElement>
 }
 
-const NodeOptions = ({ node }: NodeOptionsProps) => {
-	return $focusedNode.value === node.id ? (
-		<Button
-			type="button"
-			variant="ghost"
-			className="h-6 w-6 flex items-center justify-center px-1 py-0 ml-auto"
-			tabIndex={-1}
-		>
-			<IconDots
-				className="w-4 h-4 shrink-0 text-muted-foreground"
-				focusable={false}
-				tabIndex={-1}
-				stroke={0.5}
-			/>
-		</Button>
+const NodeOptions = ({ node, editor }: NodeOptionsProps) => {
+	return $lastFocusedNode.value === node.id ? (
+		<DropdownMenu>
+			<DropdownMenuTrigger className="no-focus">
+				<IconDots
+					className="w-4 h-4 shrink-0 text-muted-foreground"
+					focusable={false}
+					tabIndex={-1}
+					stroke={0.5}
+				/>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent className="border-muted-foreground">
+				<DropdownMenuItem className="flex gap-2 items-center">
+					<IconRowInsertTop className="w-4 h-4" />
+					<span>Add above</span>
+				</DropdownMenuItem>
+				<DropdownMenuItem className="flex gap-2 items-center">
+					<IconRowInsertBottom className="w-4 h-4" />
+					<span>Add below</span>
+				</DropdownMenuItem>
+				<DropdownMenuSeparator />
+				<DropdownMenuItem
+					className="flex gap-2 items-center"
+					onClick={pipeTap(stopPropagation, startEditing, focusOn(editor))}
+				>
+					<IconCursorText className="w-4 h-4" />
+					<span>Rename</span>
+				</DropdownMenuItem>
+				<DropdownMenuItem className="flex gap-2 items-center">
+					<IconTrash className="w-4 h-4" />
+					<span>Delete...</span>
+				</DropdownMenuItem>
+			</DropdownMenuContent>
+		</DropdownMenu>
 	) : (
-		<div className="w-6 h-6 shrink-0 ml-auto" />
+		<div className="w-4 h-6 shrink-0 ml-auto" />
 	)
 }
 
@@ -174,7 +199,7 @@ export const Node = ({ node, depth }: OwnProps) => {
 					) : (
 						<NodeText hasChildren={hasChildren} node={node} ref={textBtn} />
 					)}
-					<NodeOptions node={node} />
+					<NodeOptions node={node} editor={editor} />
 				</div>
 				{node.nodes.filter(always(isOpen)).map(child => (
 					<Node node={child} key={child.id} depth={depth + 1} />
