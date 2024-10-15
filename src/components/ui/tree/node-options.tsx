@@ -31,7 +31,7 @@ type OwnProps = {
 export const NodeOptions = ({ node, editor }: OwnProps) => {
 	return $lastFocusedNode.value === node.id ? (
 		<DropdownMenu>
-			<DropdownMenuTrigger className="no-focus">
+			<DropdownMenuTrigger className="no-focus" onKeyDown={stopPropagation}>
 				<IconDots
 					className="w-4 h-4 shrink-0 text-muted-foreground"
 					focusable={false}

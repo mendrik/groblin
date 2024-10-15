@@ -79,9 +79,9 @@ $focusedNode.subscribe(when(isNotNil, setSignal($lastFocusedNode)))
 const $rootUpdates = signal(0)
 $root.subscribe(() => ($rootUpdates.value = ($rootUpdates.value + 1) % 1000))
 
-const waitForUpdate = () => {
-	const current = $rootUpdates.value
-	return new Promise(res => {
+const waitForUpdate = () =>
+	new Promise(res => {
+		const current = $rootUpdates.value
 		const unsub = $rootUpdates.subscribe(val => {
 			if (val !== current) {
 				unsub()
@@ -89,13 +89,13 @@ const waitForUpdate = () => {
 			}
 		})
 	})
-}
 
 /** ---- interfaces ---- **/
 const startEditing = () =>
 	($isEditingNode.value = $focusedNode.value ?? $lastFocusedNode.value)
 const notEditing = () => $isEditingNode.value === undefined
 const stopEditing = () => ($isEditingNode.value = undefined)
+
 const removeFocusedNode = () => setFocusedNode(undefined)
 
 const setFocusedNode = (nodeId: number | undefined) =>
