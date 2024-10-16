@@ -6,28 +6,30 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
+import { stopPropagation } from '@/lib/dom-events'
 import { setSignal } from '@/lib/utils'
 import {} from '@/state/tree'
 import { signal } from '@preact/signals-react'
 import { F, T, pipe } from 'ramda'
 import { Button } from '../button'
+import { ZodForm } from '../zod-form/zod-form'
+
+type NodeCreatePosition = 'child' | 'sibling-above' | 'sibling-below'
 
 export const $createDialogOpen = signal(false)
-export const $createNodePosition = signal<
-	'child' | 'sibling-above' | 'sibling-below'
->('child')
-const close = pipe(F, setSignal($createDialogOpen))
+export const $createNodePosition = signal<NodeCreatePosition>('child')
 export const openNodeCreate = pipe(
 	setSignal($createNodePosition),
-	T,
-	setSignal($createDialogOpen)
+	pipe(T, setSignal($createDialogOpen))
 )
+const close = pipe(F, setSignal($createDialogOpen))
 
 export const NodeCreate = () => (
 	<Dialog open={$createDialogOpen.value}>
 		<DialogContent
 			className="border-muted-foreground"
 			onEscapeKeyDown={close}
+			onKeyDown={stopPropagation}
 			onInteractOutside={close}
 		>
 			<DialogHeader>
@@ -37,6 +39,7 @@ export const NodeCreate = () => (
 					specified location.
 				</DialogDescription>
 			</DialogHeader>
+			<ZodForm />
 			<DialogFooter>
 				<Button onClick={close} variant="secondary">
 					Cancel
