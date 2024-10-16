@@ -15,6 +15,7 @@ import {
 	startEditing
 } from '@/state/tree'
 import {
+	IconCopyPlus,
 	IconCursorText,
 	IconDots,
 	IconRowInsertBottom,
@@ -23,7 +24,8 @@ import {
 } from '@tabler/icons-react'
 import { not } from 'ramda'
 import type { RefObject } from 'react'
-import { $deleteDialogOpen, NodeDelete } from './node-delete'
+import { openNodeCreate } from './node-create'
+import { $deleteDialogOpen } from './node-delete'
 
 type OwnProps = {
 	node: TreeNode
@@ -32,48 +34,58 @@ type OwnProps = {
 
 export const NodeOptions = ({ node, editor }: OwnProps) => {
 	return $lastFocusedNode.value === node.id ? (
-		<>
-			<DropdownMenu>
-				<DropdownMenuTrigger className="no-focus" onKeyDown={stopPropagation}>
-					<IconDots
-						className="w-4 h-4 shrink-0 text-muted-foreground"
-						focusable={false}
-						tabIndex={-1}
-						stroke={0.5}
-					/>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent
-					className="border-muted-foreground"
-					onCloseAutoFocus={preventDefault}
-					onKeyDown={stopPropagation}
+		<DropdownMenu>
+			<DropdownMenuTrigger className="no-focus" onKeyDown={stopPropagation}>
+				<IconDots
+					className="w-4 h-4 shrink-0 text-muted-foreground"
+					focusable={false}
+					tabIndex={-1}
+					stroke={0.5}
+				/>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent
+				className="border-muted-foreground"
+				onCloseAutoFocus={preventDefault}
+				onKeyDown={stopPropagation}
+			>
+				<DropdownMenuItem
+					className="flex gap-2 items-center"
+					onClick={() => openNodeCreate('child')}
 				>
-					<DropdownMenuItem className="flex gap-2 items-center">
-						<IconRowInsertTop className="w-4 h-4" />
-						<span>Insert above...</span>
-					</DropdownMenuItem>
-					<DropdownMenuItem className="flex gap-2 items-center">
-						<IconRowInsertBottom className="w-4 h-4" />
-						<span>Insert below...</span>
-					</DropdownMenuItem>
-					<DropdownMenuSeparator />
-					<DropdownMenuItem
-						className="flex gap-2 items-center"
-						onClick={pipeTap(startEditing, focusOn(editor))}
-					>
-						<IconCursorText className="w-4 h-4" />
-						<span>Rename</span>
-					</DropdownMenuItem>
-					<DropdownMenuItem
-						className="flex gap-2 items-center"
-						onSelect={() => updateSignal($deleteDialogOpen)(not)}
-					>
-						<IconTrash className="w-4 h-4" />
-						<span>Delete...</span>
-					</DropdownMenuItem>
-				</DropdownMenuContent>
-			</DropdownMenu>
-			<NodeDelete />
-		</>
+					<IconCopyPlus className="w-4 h-4" />
+					<span>Add child...</span>
+				</DropdownMenuItem>
+				<DropdownMenuItem
+					className="flex gap-2 items-center"
+					onClick={() => openNodeCreate('sibling-above')}
+				>
+					<IconRowInsertTop className="w-4 h-4" />
+					<span>Insert above...</span>
+				</DropdownMenuItem>
+				<DropdownMenuItem
+					className="flex gap-2 items-center"
+					onClick={() => openNodeCreate('sibling-below')}
+				>
+					<IconRowInsertBottom className="w-4 h-4" />
+					<span>Insert below...</span>
+				</DropdownMenuItem>
+				<DropdownMenuSeparator />
+				<DropdownMenuItem
+					className="flex gap-2 items-center"
+					onClick={pipeTap(startEditing, focusOn(editor))}
+				>
+					<IconCursorText className="w-4 h-4" />
+					<span>Rename</span>
+				</DropdownMenuItem>
+				<DropdownMenuItem
+					className="flex gap-2 items-center"
+					onSelect={() => updateSignal($deleteDialogOpen)(not)}
+				>
+					<IconTrash className="w-4 h-4" />
+					<span>Delete...</span>
+				</DropdownMenuItem>
+			</DropdownMenuContent>
+		</DropdownMenu>
 	) : (
 		<div className="w-4 h-6 shrink-0 ml-auto" />
 	)

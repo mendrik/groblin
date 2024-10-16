@@ -1,5 +1,6 @@
 import { query, subscribe } from '@/gql-client'
 import {
+	DeleteNodeDocument,
 	GetNodesDocument,
 	type GetNodesSubscription,
 	UpdateNodeNameDocument
@@ -47,6 +48,16 @@ mutation updateNodeName($id: Int!, $name: String!) {
 	pk_columns: { id: $id }
 	_set: { name: $name }
 	) { 
+		id
+	}
+}
+`
+
+gql`
+mutation deleteNode($id: Int!) {
+	delete_node_by_pk (
+		id: $id
+	) {
 		id
 	}
 }
@@ -127,6 +138,11 @@ const confirmNodeName = (value: string) =>
 		.map(id => query(UpdateNodeNameDocument, { id, name: value }))
 		.run()
 
+const deleteNode = (id: number | undefined) =>
+	MaybeAsync.liftMaybe(Maybe.fromNullable(id))
+		.map(id => query(DeleteNodeDocument, { id }))
+		.run()
+
 const skippables = (el: FocusableElement) => !el.classList.contains('no-focus')
 
 const selectNextNode = (tree: HTMLElement | null) =>
@@ -153,16 +169,17 @@ export {
 	$lastFocusedNode,
 	$root,
 	confirmNodeName,
+	deleteNode,
 	focusedNodeState,
+	focusOn,
+	notEditing,
 	removeFocusedNode,
 	selectNextNode,
 	selectPreviousNode,
-	updateNodeState,
 	setFocusedNode,
-	notEditing,
-	focusOn,
 	startEditing,
 	stopEditing,
+	updateNodeState,
 	waitForUpdate,
 	type TreeNode
 }

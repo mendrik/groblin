@@ -338,6 +338,13 @@ export type UpdateNodeNameMutationVariables = Exact<{
 
 export type UpdateNodeNameMutation = { __typename?: 'mutation_root', update_node_by_pk?: { __typename?: 'node', id: number } | null };
 
+export type DeleteNodeMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteNodeMutation = { __typename?: 'mutation_root', delete_node_by_pk?: { __typename?: 'node', id: number } | null };
+
 export class TypedDocumentString<TResult, TVariables>
   extends String
   implements DocumentTypeDecoration<TResult, TVariables>
@@ -371,3 +378,10 @@ export const UpdateNodeNameDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UpdateNodeNameMutation, UpdateNodeNameMutationVariables>;
+export const DeleteNodeDocument = new TypedDocumentString(`
+    mutation deleteNode($id: Int!) {
+  delete_node_by_pk(id: $id) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteNodeMutation, DeleteNodeMutationVariables>;
