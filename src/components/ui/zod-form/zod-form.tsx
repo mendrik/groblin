@@ -2,7 +2,7 @@ import { pattern } from '@/lib/ramda'
 import { T, equals as eq } from 'ramda'
 import type { ReactNode } from 'react'
 import { useForm } from 'react-hook-form'
-import type { ZodObject, ZodTypeAny } from 'zod'
+import { ZodDefault, type ZodObject, type ZodTypeAny } from 'zod'
 import {
 	FormControl,
 	FormDescription,
@@ -25,6 +25,9 @@ const getEditor = pattern<[EditorType, any], ReactNode>([
 	[eq<EditorType>(EditorType.input), T, (_, value) => <Input defaultValue={value} />]
 ])
 
+const getDefaultValue = (zodRef: ZodTypeAny) =>
+	zodRef instanceof ZodDefault ? zodRef._def.defaultValue() : undefined
+
 export const ZodForm = ({ schema }: OwnProps) => {
 	const form = useForm()
 	return (
@@ -40,7 +43,7 @@ export const ZodForm = ({ schema }: OwnProps) => {
 							<FormItem>
 								<FormLabel>Username</FormLabel>
 								<FormControl>
-									{getEditor(fieldData.editor, fieldData.defaultValue)}
+									{getEditor(fieldData.editor, getDefaultValue(schema))}
 									<Input placeholder="shadcn" {...field} />
 								</FormControl>
 								<FormDescription>

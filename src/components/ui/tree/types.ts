@@ -1,4 +1,4 @@
-import { type TypeOf, any, nativeEnum, object, string } from 'zod'
+import { type TypeOf, nativeEnum, object, string } from 'zod'
 
 export enum NodeType {
 	object = 'object',
@@ -20,7 +20,6 @@ export enum EditorType {
 }
 
 export const ZodFormField = object({
-	defaultValue: any().optional(),
 	label: string(),
 	description: string().optional(),
 	editor: nativeEnum(EditorType)
