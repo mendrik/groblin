@@ -1,9 +1,12 @@
+import { preventDefault } from '@/lib/dom-events'
 import { pattern } from '@/lib/ramda'
-import { T, equals as eq } from 'ramda'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { T as _ } from 'ramda'
 import type { ReactNode } from 'react'
-import { useForm } from 'react-hook-form'
-import { ZodDefault, type ZodObject, type ZodTypeAny } from 'zod'
+import { type ControllerRenderProps, useForm } from 'react-hook-form'
+import type { ZodObject, ZodTypeAny } from 'zod'
 import {
+	Form,
 	FormControl,
 	FormDescription,
 	FormField,
@@ -14,47 +17,51 @@ import {
 import { Input } from '../input'
 import { Select } from '../select'
 import { EditorType, ZodFormField } from '../tree/types'
+import { generateDefaults } from './utils'
 
 type OwnProps = {
 	schema: ZodObject<any>
 }
 
+const isType = (type: EditorType) => (obj: ZodFormField) => obj.editor === type
+
 // biome-ignore format: keep pattern
-const getEditor = pattern<[EditorType, any], ReactNode>([
-	[eq<EditorType>(EditorType.select), T, (_, value) => <Select defaultValue={value} />],
-	[eq<EditorType>(EditorType.input), T, (_, value) => <Input defaultValue={value} />]
+const getEditor = pattern<[ZodFormField, ControllerRenderProps], ReactNode>([
+	[isType(EditorType.select), _, (desc, field) => <Select {...field}/>],
+	[isType(EditorType.input), _, (desc, field) => <Input {...field} placeholder={desc.placeholder} />]
 ])
 
-const getDefaultValue = (zodRef: ZodTypeAny) =>
-	zodRef instanceof ZodDefault ? zodRef._def.defaultValue() : undefined
-
 export const ZodForm = ({ schema }: OwnProps) => {
-	const form = useForm()
+	const form = useForm({
+		resolver: zodResolver(schema),
+		defaultValues: generateDefaults(schema)
+	})
 	return (
-		<div className="">
-			{Object.entries<ZodTypeAny>(schema.shape).map(([name, schema]) => {
-				const fieldData = ZodFormField.parse(schema.description)
-				return (
-					<FormField
-						key={name}
-						control={form.control}
-						name={name}
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Username</FormLabel>
-								<FormControl>
-									{getEditor(fieldData.editor, getDefaultValue(schema))}
-									<Input placeholder="shadcn" {...field} />
-								</FormControl>
-								<FormDescription>
-									This is your public display name.
-								</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-				)
-			})}
-		</div>
+		<Form {...form}>
+			<form className="" onSubmit={preventDefault}>
+				{Object.entries<ZodTypeAny>(schema.shape).map(([name, schema]) => {
+					const fieldData = ZodFormField.parse(
+						JSON.parse(schema.description as string)
+					)
+					return (
+						<FormField
+							key={name}
+							control={form.control}
+							name={name}
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>{fieldData.label}</FormLabel>
+									<FormControl>{getEditor(fieldData, field)}</FormControl>
+									{fieldData.description && (
+										<FormDescription>{fieldData.description}</FormDescription>
+									)}
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					)
+				})}
+			</form>
+		</Form>
 	)
 }

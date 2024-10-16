@@ -22,7 +22,8 @@ export enum EditorType {
 export const ZodFormField = object({
 	label: string(),
 	description: string().optional(),
-	editor: nativeEnum(EditorType)
+	editor: nativeEnum(EditorType),
+	placeholder: string().optional()
 })
 
 export type ZodFormField = TypeOf<typeof ZodFormField>

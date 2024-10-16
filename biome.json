@@ -30,6 +30,9 @@
 			"correctness": {
 				"noUnusedImports": "error"
 			},
+			"performance": {
+				"noAccumulatingSpread": "off"
+			},
 			"style": {
 				"noUselessElse": "off",
 				"noUnusedTemplateLiteral": "off",
