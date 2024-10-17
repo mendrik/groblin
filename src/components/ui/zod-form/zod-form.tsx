@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { equals as eq } from 'ramda'
 import type { PropsWithChildren } from 'react'
 import { type DefaultValues, useForm } from 'react-hook-form'
-import type { ZodObject, ZodRawShape, ZodTypeAny } from 'zod'
+import type { ZodObject, ZodRawShape } from 'zod'
 import {
 	Form,
 	FormDescription,
@@ -35,6 +35,29 @@ const colSpan = match<[number], string>(
 	caseOf([eq(3)], () => 'sm:col-span-3')
 )
 
+function* schemaIterator<T extends ZodRawShape>(schema: ZodObject<T>) {
+	for (const [name, zodSchema] of Object.entries(schema.shape)) {
+		const fieldData = ZodFormField.parse(
+			JSON.parse(zodSchema.description as string)
+		)
+		yield {
+			name,
+			schema: zodSchema,
+			fieldData,
+			renderer: ({ field }: any) => (
+				<FormItem className={colSpan(fieldData.span ?? 1)}>
+					<FormLabel>{fieldData.label}</FormLabel>
+					{getEditor(fieldData, zodSchema, field)}
+					{fieldData.description && (
+						<FormDescription>{fieldData.description}</FormDescription>
+					)}
+					<FormMessage />
+				</FormItem>
+			)
+		}
+	}
+}
+
 export const ZodForm = <T extends ZodRawShape>({
 	schema,
 	columns = 1,
@@ -45,6 +68,7 @@ export const ZodForm = <T extends ZodRawShape>({
 		resolver: zodResolver(schema),
 		defaultValues: generateDefaults(schema) as DefaultValues<any>
 	})
+
 	return (
 		<Form {...form}>
 			<form
@@ -52,28 +76,14 @@ export const ZodForm = <T extends ZodRawShape>({
 				className="flex flex-col gap-6"
 			>
 				<div className={`grid ${cols(columns)} gap-4`}>
-					{Object.entries<ZodTypeAny>(schema.shape).map(([name, schema]) => {
-						const fieldData = ZodFormField.parse(
-							JSON.parse(schema.description as string)
-						)
-						return (
-							<FormField
-								key={name}
-								control={form.control}
-								name={name}
-								render={({ field }) => (
-									<FormItem className={colSpan(fieldData.span ?? 1)}>
-										<FormLabel>{fieldData.label}</FormLabel>
-										{getEditor(fieldData, schema, field)}
-										{fieldData.description && (
-											<FormDescription>{fieldData.description}</FormDescription>
-										)}
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-						)
-					})}
+					{[...schemaIterator(schema)].map(({ name, renderer }) => (
+						<FormField
+							key={name}
+							control={form.control}
+							name={name}
+							render={renderer}
+						/>
+					))}
 				</div>
 				{children}
 			</form>
