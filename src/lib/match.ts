@@ -1,6 +1,3 @@
-import {} from 'ramda'
-import {} from 'ramda-adjunct'
-
 // 1. Define a generic Guard type
 type Guard<T> = (value: unknown) => value is T
 
@@ -29,7 +26,7 @@ type MatchCase<
 
 // 6. Function to create a MatchCase with inferred types
 export function caseOf<
-	Preds extends readonly GuardOrPredicate[],
+	Preds extends [GuardOrPredicate, ...GuardOrPredicate[]],
 	Args extends readonly unknown[],
 	R
 >(
@@ -49,7 +46,6 @@ export function match<Args extends readonly unknown[], R>(
 
 			const allMatch = predicates.every((pred, index) => pred(values[index]))
 			if (allMatch) {
-				// Type assertion as HandlerArgs<Preds, Args>
 				return handler(...(values as HandlerArgs<typeof predicates, Args>))
 			}
 		}

@@ -8,15 +8,15 @@ describe('pattern', () => {
 	it('should match the correct case', () => {
 		const matcher = match<[string | number | boolean, number], string>(
 			caseOf(
-				[isString, equals(42)] as const,
+				[isString, equals(42)],
 				(r1, r2) => `string: ${r1}, number: ${r2}`
 			),
 			caseOf(
-				[isNumber, equals(10)] as const,
+				[isNumber, equals(10)],
 				(r3, r4) => `number: ${r3}, number: ${r4}`
 			),
 			caseOf(
-				[() => true, gt(20)] as const,
+				[() => true, gt(20)],
 				(r5, r6) => `string | number | boolean: ${r5}, number: ${r6}`
 			)
 		)
