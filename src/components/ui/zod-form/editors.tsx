@@ -15,7 +15,7 @@ import {
 import { caseOf, match } from '@/lib/match'
 import { Input } from '../input'
 import { EditorType, type ZodFormField } from '../tree/types'
-import { isZodType } from './utils'
+import { innerType, isZodType } from './utils'
 
 const isOfType =
 	(type: EditorType) =>
@@ -28,7 +28,7 @@ export const getEditor = match<
 >(
 	caseOf(
 		[isOfType(EditorType.select), isZodType(ZodNativeEnum), _],
-		(desc, _, field) => (
+		(desc, type, field) => (
 			<Select onValueChange={field.onChange} defaultValue={field.value}>
 				<FormControl>
 					<SelectTrigger>
@@ -36,9 +36,11 @@ export const getEditor = match<
 					</SelectTrigger>
 				</FormControl>
 				<SelectContent>
-					<SelectItem value="m@example.com">m@example.com</SelectItem>
-					<SelectItem value="m@google.com">m@google.com</SelectItem>
-					<SelectItem value="m@support.com">m@support.com</SelectItem>
+					{Object.entries(innerType(type).enum).map(([key, value]) => (
+						<SelectItem key={key} value={`${value}`}>
+							{value}
+						</SelectItem>
+					))}
 				</SelectContent>
 			</Select>
 		)
