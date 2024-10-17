@@ -28,6 +28,13 @@ export const openNodeCreate = pipe(
 const close = pipe(F, setSignal($createDialogOpen))
 
 const newNodeSchema = strictObject({
+	name: string().describe(
+		asField({
+			label: 'Name',
+			editor: EditorType.input,
+			autofill: 'off'
+		})
+	),
 	type: nativeEnum(NodeType)
 		.describe(
 			asField({
@@ -36,13 +43,7 @@ const newNodeSchema = strictObject({
 				editor: EditorType.select
 			})
 		)
-		.default(NodeType.object),
-	name: string().describe(
-		asField({
-			label: 'Name',
-			editor: EditorType.input
-		})
-	)
+		.default(NodeType.object)
 })
 
 export const NodeCreate = () => (
@@ -60,7 +61,7 @@ export const NodeCreate = () => (
 					specified location.
 				</DialogDescription>
 			</DialogHeader>
-			<ZodForm schema={newNodeSchema} />
+			<ZodForm schema={newNodeSchema} columns={2} />
 			<DialogFooter>
 				<Button onClick={close} variant="secondary">
 					Cancel

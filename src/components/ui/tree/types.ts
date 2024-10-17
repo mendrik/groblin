@@ -1,4 +1,4 @@
-import { type TypeOf, nativeEnum, object, string } from 'zod'
+import { type TypeOf, nativeEnum, number, object, string } from 'zod'
 
 export enum NodeType {
 	object = 'object',
@@ -23,7 +23,9 @@ export const ZodFormField = object({
 	label: string(),
 	description: string().optional(),
 	editor: nativeEnum(EditorType),
-	placeholder: string().optional()
+	placeholder: string().optional(),
+	span: number().optional(),
+	autofill: string().optional()
 })
 
 export type ZodFormField = TypeOf<typeof ZodFormField>

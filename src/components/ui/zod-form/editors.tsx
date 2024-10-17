@@ -47,7 +47,11 @@ export const getEditor = match<
 	),
 	caseOf([isOfType(EditorType.input), _, _], (desc, _, field) => (
 		<FormControl>
-			<Input {...field} placeholder={desc.placeholder} />
+			<Input
+				{...field}
+				placeholder={desc.placeholder}
+				autoComplete={desc.autofill}
+			/>
 		</FormControl>
 	)),
 	caseOf([_, _, _], (a, b, _) => (
