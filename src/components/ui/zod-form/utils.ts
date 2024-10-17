@@ -1,10 +1,13 @@
 import { mergeAll } from 'ramda'
 import * as z from 'zod'
+import type { ZodType } from 'zod'
 import type { ZodFormField } from '../tree/types'
 
 export const asField = (meta: ZodFormField): string => JSON.stringify(meta)
 
-const objectHandler = (zodRef: z.AnyZodObject): Record<string, z.ZodTypeAny> =>
+export const objectHandler = (
+	zodRef: z.AnyZodObject
+): Record<string, z.ZodTypeAny> =>
 	Object.keys(zodRef.shape).reduce(
 		(carry, key) => {
 			const res = generateDefaults<z.ZodTypeAny>(zodRef.shape[key])
@@ -27,4 +30,22 @@ export const generateDefaults = <T extends z.ZodTypeAny>(
 		return mergeAll(zodRef._def.options.map(generateDefaults))
 	}
 	return undefined
+}
+
+export type IsZodType<T extends ZodType<any, any>> = T extends ZodType<
+	infer U,
+	any
+>
+	? U
+	: never
+
+export function isZodType<T extends ZodType<any, any>>(
+	type: new (...args: any[]) => T
+) {
+	return (checkType: ZodType<any, any>): checkType is T => {
+		// Check if checkType is an instance of the provided Zod type
+		return (
+			checkType instanceof type || checkType._def?.innerType instanceof type
+		)
+	}
 }

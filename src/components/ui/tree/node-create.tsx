@@ -19,7 +19,7 @@ import { EditorType, NodeType } from './types'
 
 type NodeCreatePosition = 'child' | 'sibling-above' | 'sibling-below'
 
-export const $createDialogOpen = signal(false)
+export const $createDialogOpen = signal(true)
 export const $createNodePosition = signal<NodeCreatePosition>('child')
 export const openNodeCreate = pipe(
 	setSignal($createNodePosition),

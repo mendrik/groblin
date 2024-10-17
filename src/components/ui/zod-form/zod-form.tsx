@@ -27,7 +27,7 @@ export const ZodForm = ({ schema }: OwnProps) => {
 	})
 	return (
 		<Form {...form}>
-			<form className="" onSubmit={preventDefault}>
+			<form className="flex flex-col gap-4" onSubmit={preventDefault}>
 				{Object.entries<ZodTypeAny>(schema.shape).map(([name, schema]) => {
 					const fieldData = ZodFormField.parse(
 						JSON.parse(schema.description as string)

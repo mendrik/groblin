@@ -1,4 +1,4 @@
-import { T as _, is } from 'ramda'
+import { T as _ } from 'ramda'
 import type { ReactNode } from 'react'
 import type { ControllerRenderProps } from 'react-hook-form'
 import { ZodNativeEnum, type ZodTypeAny } from 'zod'
@@ -15,6 +15,7 @@ import {
 import { caseOf, match } from '@/lib/match'
 import { Input } from '../input'
 import { EditorType, type ZodFormField } from '../tree/types'
+import { isZodType } from './utils'
 
 const isOfType =
 	(type: EditorType) =>
@@ -26,8 +27,8 @@ export const getEditor = match<
 	ReactNode
 >(
 	caseOf(
-		[isOfType(EditorType.select), is(ZodNativeEnum), _],
-		(desc, e, field) => (
+		[isOfType(EditorType.select), isZodType(ZodNativeEnum), _],
+		(desc, _, field) => (
 			<Select onValueChange={field.onChange} defaultValue={field.value}>
 				<FormControl>
 					<SelectTrigger>
@@ -42,9 +43,15 @@ export const getEditor = match<
 			</Select>
 		)
 	),
-	caseOf([isOfType(EditorType.input), _, _] as const, (desc, _, field) => (
+	caseOf([isOfType(EditorType.input), _, _], (desc, _, field) => (
 		<FormControl>
 			<Input {...field} placeholder={desc.placeholder} />
 		</FormControl>
+	)),
+	caseOf([_, _, _], (a, b, _) => (
+		<div>
+			Unsupported editor for "{`${a.label}`}":{' '}
+			{`${a.editor}/${typeof b.constructor.name}`}
+		</div>
 	))
 )
