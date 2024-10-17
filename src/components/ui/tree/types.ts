@@ -1,12 +1,12 @@
 import { type TypeOf, nativeEnum, number, object, string } from 'zod'
 
 export enum NodeType {
-	object = 'object',
-	string = 'string',
-	number = 'number',
-	boolean = 'boolean',
-	list = 'list',
-	date = 'date'
+	object = 'Object',
+	string = 'String',
+	number = 'Number',
+	boolean = 'Boolean',
+	list = 'List',
+	date = 'Date'
 }
 
 export enum EditorType {

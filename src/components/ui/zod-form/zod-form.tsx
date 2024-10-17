@@ -1,9 +1,9 @@
-import { preventDefault } from '@/lib/dom-events'
 import { caseOf, match } from '@/lib/match'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { equals as eq } from 'ramda'
-import { useForm } from 'react-hook-form'
-import type { ZodObject, ZodTypeAny } from 'zod'
+import type { PropsWithChildren } from 'react'
+import { type DefaultValues, useForm } from 'react-hook-form'
+import type { ZodObject, ZodRawShape, ZodTypeAny } from 'zod'
 import {
 	Form,
 	FormDescription,
@@ -17,8 +17,9 @@ import { ZodFormField } from '../tree/types'
 import { getEditor } from './editors'
 import { generateDefaults } from './utils'
 
-type OwnProps = {
-	schema: ZodObject<any>
+type OwnProps<T extends ZodRawShape> = {
+	schema: ZodObject<T>
+	onSubmit: (data: T) => void
 	columns?: number
 }
 
@@ -34,36 +35,47 @@ const colSpan = match<[number], string>(
 	caseOf([eq(3)], () => 'sm:col-span-3')
 )
 
-export const ZodForm = ({ schema, columns = 1 }: OwnProps) => {
+export const ZodForm = <T extends ZodRawShape>({
+	schema,
+	columns = 1,
+	onSubmit,
+	children
+}: PropsWithChildren<OwnProps<T>>) => {
 	const form = useForm({
 		resolver: zodResolver(schema),
-		defaultValues: generateDefaults(schema)
+		defaultValues: generateDefaults(schema) as DefaultValues<any>
 	})
 	return (
 		<Form {...form}>
-			<form className={`grid ${cols(columns)} gap-4`} onSubmit={preventDefault}>
-				{Object.entries<ZodTypeAny>(schema.shape).map(([name, schema]) => {
-					const fieldData = ZodFormField.parse(
-						JSON.parse(schema.description as string)
-					)
-					return (
-						<FormField
-							key={name}
-							control={form.control}
-							name={name}
-							render={({ field }) => (
-								<FormItem className={colSpan(fieldData.span ?? 1)}>
-									<FormLabel>{fieldData.label}</FormLabel>
-									{getEditor(fieldData, schema, field)}
-									{fieldData.description && (
-										<FormDescription>{fieldData.description}</FormDescription>
-									)}
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-					)
-				})}
+			<form
+				onSubmit={form.handleSubmit(onSubmit)}
+				className="flex flex-col gap-6"
+			>
+				<div className={`grid ${cols(columns)} gap-4`}>
+					{Object.entries<ZodTypeAny>(schema.shape).map(([name, schema]) => {
+						const fieldData = ZodFormField.parse(
+							JSON.parse(schema.description as string)
+						)
+						return (
+							<FormField
+								key={name}
+								control={form.control}
+								name={name}
+								render={({ field }) => (
+									<FormItem className={colSpan(fieldData.span ?? 1)}>
+										<FormLabel>{fieldData.label}</FormLabel>
+										{getEditor(fieldData, schema, field)}
+										{fieldData.description && (
+											<FormDescription>{fieldData.description}</FormDescription>
+										)}
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						)
+					})}
+				</div>
+				<div>{children}</div>
 			</form>
 		</Form>
 	)

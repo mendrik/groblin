@@ -28,22 +28,25 @@ export const getEditor = match<
 >(
 	caseOf(
 		[isOfType(EditorType.select), isZodType(ZodNativeEnum), _],
-		(desc, type, field) => (
-			<Select onValueChange={field.onChange} defaultValue={field.value}>
-				<FormControl>
-					<SelectTrigger>
-						<SelectValue placeholder={desc.placeholder} />
-					</SelectTrigger>
-				</FormControl>
-				<SelectContent>
-					{Object.entries(innerType(type).enum).map(([key, value]) => (
-						<SelectItem key={key} value={`${value}`}>
-							{value}
-						</SelectItem>
-					))}
-				</SelectContent>
-			</Select>
-		)
+		(desc, type, field) => {
+			const enumValue: Record<string, any> = innerType(type).enum
+			return (
+				<Select onValueChange={field.onChange} defaultValue={field.value}>
+					<FormControl>
+						<SelectTrigger>
+							<SelectValue placeholder={desc.placeholder} />
+						</SelectTrigger>
+					</FormControl>
+					<SelectContent>
+						{Object.entries(enumValue).map(([key, value]) => (
+							<SelectItem key={key} value={enumValue[key]}>
+								{value}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+			)
+		}
 	),
 	caseOf([isOfType(EditorType.input), _, _], (desc, _, field) => (
 		<FormControl>
