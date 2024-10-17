@@ -15,7 +15,7 @@ import {
 import {} from '../select'
 import { ZodFormField } from '../tree/types'
 import { getEditor } from './editors'
-import { generateDefaults } from './utils'
+import { type RendererProps, generateDefaults } from './utils'
 
 type OwnProps<T extends ZodRawShape> = {
 	schema: ZodObject<T>
@@ -42,9 +42,7 @@ function* schemaIterator<T extends ZodRawShape>(schema: ZodObject<T>) {
 		)
 		yield {
 			name,
-			schema: zodSchema,
-			fieldData,
-			renderer: ({ field }: any) => (
+			renderer: ({ field }: RendererProps) => (
 				<FormItem className={colSpan(fieldData.span ?? 1)}>
 					<FormLabel>{fieldData.label}</FormLabel>
 					{getEditor(fieldData, zodSchema, field)}

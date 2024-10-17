@@ -1,4 +1,5 @@
 import { mergeAll } from 'ramda'
+import type { ControllerProps, FieldPath, FieldValues } from 'react-hook-form'
 import type { AnyZodObject, ZodType } from 'zod'
 import * as z from 'zod'
 import type { ZodFormField } from '../tree/types'
@@ -72,3 +73,8 @@ export function innerType<T extends z.ZodTypeAny>(schema: T): UnwrapZod<T> {
 		return schema as UnwrapZod<T>
 	}
 }
+
+export type RendererProps<
+	TFieldValues extends FieldValues = FieldValues,
+	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
+> = Parameters<ControllerProps<TFieldValues, TName>['render']>[0]
