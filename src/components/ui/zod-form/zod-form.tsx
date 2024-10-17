@@ -75,7 +75,7 @@ export const ZodForm = <T extends ZodRawShape>({
 						)
 					})}
 				</div>
-				<div>{children}</div>
+				{children}
 			</form>
 		</Form>
 	)
