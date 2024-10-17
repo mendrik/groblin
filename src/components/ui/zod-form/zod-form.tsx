@@ -1,35 +1,24 @@
 import { preventDefault } from '@/lib/dom-events'
-import { pattern } from '@/lib/ramda'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { T as _ } from 'ramda'
-import type { ReactNode } from 'react'
-import { type ControllerRenderProps, useForm } from 'react-hook-form'
+import {} from 'ramda'
+import { useForm } from 'react-hook-form'
 import type { ZodObject, ZodTypeAny } from 'zod'
 import {
 	Form,
-	FormControl,
 	FormDescription,
 	FormField,
 	FormItem,
 	FormLabel,
 	FormMessage
 } from '../form'
-import { Input } from '../input'
-import { Select } from '../select'
-import { EditorType, ZodFormField } from '../tree/types'
+import {} from '../select'
+import { ZodFormField } from '../tree/types'
+import { getEditor } from './editors'
 import { generateDefaults } from './utils'
 
 type OwnProps = {
 	schema: ZodObject<any>
 }
-
-const isType = (type: EditorType) => (obj: ZodFormField) => obj.editor === type
-
-// biome-ignore format: keep pattern
-const getEditor = pattern<[ZodFormField, ControllerRenderProps], ReactNode>([
-	[isType(EditorType.select), _, (desc, field) => <Select {...field}/>],
-	[isType(EditorType.input), _, (desc, field) => <Input {...field} placeholder={desc.placeholder} />]
-])
 
 export const ZodForm = ({ schema }: OwnProps) => {
 	const form = useForm({
@@ -51,7 +40,7 @@ export const ZodForm = ({ schema }: OwnProps) => {
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel>{fieldData.label}</FormLabel>
-									<FormControl>{getEditor(fieldData, field)}</FormControl>
+									{getEditor(fieldData, schema, field)}
 									{fieldData.description && (
 										<FormDescription>{fieldData.description}</FormDescription>
 									)}
