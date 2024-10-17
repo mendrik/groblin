@@ -1,8 +1,8 @@
 // 1. Define a generic Guard type
-type Guard<T> = (value: unknown) => value is T
+type Guard<T> = (value: any) => value is T
 
 // 2. Define a non-generic GuardOrPredicate type
-type GuardOrPredicate = ((value: any) => boolean) | Guard<any>
+export type GuardOrPredicate = ((value: any) => boolean) | Guard<any>
 
 // 3. Utility type to infer the type from a predicate
 type InferPredicate<P, A> = P extends Guard<infer T> ? T : A

@@ -16,7 +16,7 @@ import { caseOf, match } from '@/lib/match'
 import { Input } from '../input'
 import { EditorType, type ZodFormField } from '../tree/types'
 
-const isType =
+const isOfType =
 	(type: EditorType) =>
 	(obj: ZodFormField): boolean =>
 		obj.editor === type
@@ -24,9 +24,9 @@ const isType =
 export const getEditor = match<
 	[ZodFormField, ZodTypeAny, ControllerRenderProps],
 	ReactNode
->([
+>(
 	caseOf(
-		[isType(EditorType.select), is(ZodNativeEnum), _] as const,
+		[isOfType(EditorType.select), is(ZodNativeEnum), _],
 		(desc, e, field) => (
 			<Select onValueChange={field.onChange} defaultValue={field.value}>
 				<FormControl>
@@ -42,9 +42,9 @@ export const getEditor = match<
 			</Select>
 		)
 	),
-	caseOf([isType(EditorType.input), _, _] as const, (desc, _, field) => (
+	caseOf([isOfType(EditorType.input), _, _] as const, (desc, _, field) => (
 		<FormControl>
 			<Input {...field} placeholder={desc.placeholder} />
 		</FormControl>
 	))
-])
+)
