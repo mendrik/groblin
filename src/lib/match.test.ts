@@ -1,7 +1,7 @@
 import { equals, gt } from 'ramda'
 import { isNumber, isString } from 'ramda-adjunct'
 import { describe, expect, it } from 'vitest'
-import { caseOf, match } from './pattern'
+import { caseOf, match } from './match'
 
 describe('pattern', () => {
 	// 8. Example usage>
