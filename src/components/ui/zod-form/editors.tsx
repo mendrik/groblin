@@ -1,5 +1,5 @@
-import { T as _ } from 'ramda'
-import type { ReactNode } from 'react'
+import { T as _, apply, pipe } from 'ramda'
+import type { FC, ReactNode } from 'react'
 import type { ControllerRenderProps } from 'react-hook-form'
 import { ZodNativeEnum, type ZodTypeAny } from 'zod'
 import { FormControl } from '../form'
@@ -13,6 +13,7 @@ import {
 } from '../select'
 
 import { caseOf, match } from '@/lib/match'
+import type { Fn } from '@/type-patches/functions'
 import { Input } from '../input'
 import { EditorType, type ZodFormField } from '../tree/types'
 import { innerType, isZodType } from './utils'
@@ -22,10 +23,15 @@ const isOfType =
 	(obj: ZodFormField): boolean =>
 		obj.editor === type
 
-export const getEditor = match<
-	[ZodFormField, ZodTypeAny, ControllerRenderProps],
-	ReactNode
->(
+type OwnProps = {
+	desc: ZodFormField
+	type: ZodTypeAny
+	field: ControllerRenderProps
+}
+
+type Args = readonly [ZodFormField, ZodTypeAny, ControllerRenderProps]
+
+const matcher = match<Args, ReactNode>(
 	caseOf(
 		[isOfType(EditorType.select), isZodType(ZodNativeEnum), _],
 		(desc, type, field) => {
@@ -63,4 +69,12 @@ export const getEditor = match<
 			{`${a.editor}/${typeof b.constructor.name}`}
 		</div>
 	))
+)
+
+const propsToArgs = ({ desc, type, field }: OwnProps) =>
+	[desc, type, field] as Args
+
+export const Editor: FC<OwnProps> = pipe(
+	propsToArgs as Fn<OwnProps, [...Args]>,
+	apply(matcher)
 )
