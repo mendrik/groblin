@@ -2,9 +2,9 @@ import { caseOf, match } from '@/lib/match'
 import { assertExists } from '@/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { equals as eq } from 'ramda'
-import type { PropsWithChildren } from 'react'
-import { type DefaultValues, useForm } from 'react-hook-form'
-import type { ZodObject, ZodRawShape } from 'zod'
+import { type PropsWithChildren, useMemo } from 'react'
+import { type DefaultValues, type Path, useForm } from 'react-hook-form'
+import type { TypeOf, ZodObject, ZodRawShape } from 'zod'
 import {
 	Form,
 	FormDescription,
@@ -18,9 +18,9 @@ import { ZodFormField } from '../tree/types'
 import { Editor } from './editors'
 import { type RendererProps, generateDefaults } from './utils'
 
-type OwnProps<T extends ZodRawShape> = {
-	schema: ZodObject<T>
-	onSubmit: (data: T) => void
+type OwnProps<T extends ZodObject<any>> = {
+	schema: T
+	onSubmit: (data: TypeOf<T>) => void
 	columns?: number
 }
 
@@ -42,7 +42,7 @@ function* schemaIterator<T extends ZodRawShape>(schema: ZodObject<T>) {
 		const fieldData = ZodFormField.parse(JSON.parse(zodSchema.description))
 		yield {
 			name,
-			renderer: ({ field }: RendererProps) => (
+			renderer: ({ field }: RendererProps<any>) => (
 				<FormItem className={colSpan(fieldData.span ?? 1)}>
 					<FormLabel>{fieldData.label}</FormLabel>
 					<Editor desc={fieldData} type={zodSchema} field={field} />
@@ -56,15 +56,20 @@ function* schemaIterator<T extends ZodRawShape>(schema: ZodObject<T>) {
 	}
 }
 
-export const ZodForm = <T extends ZodRawShape>({
+export const ZodForm = <T extends ZodObject<any>>({
 	schema,
 	columns = 1,
 	onSubmit,
 	children
 }: PropsWithChildren<OwnProps<T>>) => {
-	const form = useForm({
+	const defaultValues = useMemo(
+		() => generateDefaults(schema) as DefaultValues<TypeOf<T>>,
+		[schema]
+	)
+
+	const form = useForm<TypeOf<T>>({
 		resolver: zodResolver(schema),
-		defaultValues: generateDefaults(schema) as DefaultValues<any>
+		defaultValues
 	})
 
 	return (
@@ -78,7 +83,7 @@ export const ZodForm = <T extends ZodRawShape>({
 						<FormField
 							key={name}
 							control={form.control}
-							name={name}
+							name={name as Path<TypeOf<T>>}
 							render={renderer}
 						/>
 					))}

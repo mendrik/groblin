@@ -21,7 +21,7 @@ export const objectHandler = (
 
 export const generateDefaults = <T extends z.ZodTypeAny>(
 	zodRef: T
-): z.infer<typeof zodRef> => {
+): z.infer<T> => {
 	if (zodRef instanceof z.ZodObject) {
 		return objectHandler(zodRef)
 	} else if (zodRef instanceof z.ZodDefault) {

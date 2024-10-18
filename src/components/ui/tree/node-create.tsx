@@ -55,6 +55,7 @@ const position = match<[NodeCreatePosition], string>(
 
 export const NodeCreate = () => {
 	const submit = console.log
+
 	return (
 		<Dialog open={$createDialogOpen.value}>
 			<DialogContent
