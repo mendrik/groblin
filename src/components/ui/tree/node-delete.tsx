@@ -8,19 +8,35 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle
 } from '@/components/ui/alert-dialog'
+import { stopPropagation } from '@/lib/dom-events'
+import { asyncPipeTap } from '@/lib/ramda'
 import { setSignal } from '@/lib/utils'
-import { $lastFocusedNode, deleteNode } from '@/state/tree'
+import {
+	deleteNode,
+	focusedNode,
+	selectPreviousNode,
+	tree,
+	waitForUpdate
+} from '@/state/tree'
 import { signal } from '@preact/signals-react'
 import { F, pipe } from 'ramda'
+import type { SyntheticEvent } from 'react'
 
 export const $deleteDialogOpen = signal(false)
 const close = pipe(F, setSignal($deleteDialogOpen))
+
+export const deleteNodeCommand: (ev: SyntheticEvent) => void = asyncPipeTap(
+	pipe(focusedNode, deleteNode),
+	waitForUpdate,
+	pipe(tree, selectPreviousNode) // todo fix this
+)
 
 export const NodeDelete = () => (
 	<AlertDialog open={$deleteDialogOpen.value}>
 		<AlertDialogContent
 			className="border-muted-foreground"
 			onEscapeKeyDown={close}
+			onKeyDown={stopPropagation}
 		>
 			<AlertDialogHeader>
 				<AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
@@ -31,14 +47,7 @@ export const NodeDelete = () => (
 			</AlertDialogHeader>
 			<AlertDialogFooter>
 				<AlertDialogCancel onClick={close}>Cancel</AlertDialogCancel>
-				<AlertDialogAction
-					onClick={
-						pipe(
-							() => deleteNode($lastFocusedNode.value),
-							close
-						) /* todo focus previous node */
-					}
-				>
+				<AlertDialogAction onClick={pipe(deleteNodeCommand, close)}>
 					Continue
 				</AlertDialogAction>
 			</AlertDialogFooter>

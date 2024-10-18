@@ -28,7 +28,7 @@ import {
 	when
 } from 'ramda'
 import { delayP } from 'ramda-adjunct'
-import type { ForwardedRef } from 'react'
+import type { ForwardedRef, SyntheticEvent } from 'react'
 import { type FocusableElement, tabbable } from 'tabbable'
 
 /** ---- queries ---- **/
@@ -138,8 +138,19 @@ export const focusNode = (nodeId: number): Promise<void> =>
 		)
 	})
 
-export const openNode = (nodeId: number): void =>
-	updateNodeState(nodeId, { open: true })
+export const openNode = (nodeId: number | undefined) =>
+	Maybe.fromNullable(nodeId).ifJust(nodeId =>
+		updateNodeState(nodeId, { open: true })
+	)
+
+export const focusedNode = (): number | undefined => $lastFocusedNode.value
+
+export const tree = (ev: SyntheticEvent): HTMLElement | null => {
+	if (ev.target instanceof HTMLElement) {
+		return ev.target.closest('.tree')
+	}
+	return null
+}
 
 export const updateNodeState = (nodeId: number, state: Partial<NodeState>) => {
 	$nodes.value = over(
@@ -198,11 +209,11 @@ function* iterateNodes(root: TreeNode): Generator<TreeNode> {
 	}
 }
 
-export const parentForRoot = (
-	root: TreeNode,
+export const parentInTree = (
+	tree: TreeNode,
 	node_id: number | undefined
 ): number => {
-	for (const node of iterateNodes(root)) {
+	for (const node of iterateNodes(tree)) {
 		if (node.nodes.some(n => n.id === node_id)) return node.id
 	}
 	throw new Error(`Parent for node id ${node_id} not found`)
@@ -211,5 +222,5 @@ export const parentForRoot = (
 export const parentOf = (node_id: number | undefined): number => {
 	assertExists(node_id, 'parentOf needs a valid node_id')
 	assertExists($root.value, 'Root node is missing')
-	return parentForRoot($root.value, node_id)
+	return parentInTree($root.value, node_id)
 }

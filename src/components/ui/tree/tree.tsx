@@ -31,7 +31,7 @@ export const Tree = ({ root, renderRoot = false }: OwnProps) => {
 			>
 				<div
 					ref={tree}
-					className="w-full h-full p-1 pl-0"
+					className="w-full h-full p-1 pl-0 tree"
 					onFocus={pipe(data('node_id', Number), setFocusedNode)}
 					onBlur={unless(() => focusWithin(tree.current), removeFocusedNode)}
 				>
