@@ -34,12 +34,12 @@ type Args = readonly [ZodFormField, ZodTypeAny, ControllerRenderProps]
 const matcher = match<Args, ReactNode>(
 	caseOf(
 		[isOfType(EditorType.select), isZodType(ZodNativeEnum), _],
-		(desc, type, field) => {
+		(desc, type, { ref, ...field }) => {
 			const enumValue: Record<string, any> = innerType(type).enum
 			return (
-				<Select onValueChange={field.onChange} defaultValue={field.value}>
+				<Select {...field}>
 					<FormControl>
-						<SelectTrigger>
+						<SelectTrigger ref={ref}>
 							<SelectValue placeholder={desc.placeholder} />
 						</SelectTrigger>
 					</FormControl>
