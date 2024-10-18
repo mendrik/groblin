@@ -1,11 +1,13 @@
 import KeyListener from '@/components/utils/key-listener'
 import { stopPropagation } from '@/lib/dom-events'
 import { pipeTap } from '@/lib/ramda'
+import { setSignal } from '@/lib/utils'
 import { type TreeNode, notEditing, startEditing } from '@/state/tree'
 import { IconFile, IconFolder } from '@tabler/icons-react'
-import { isNotEmpty, when } from 'ramda'
+import { T, isNotEmpty, pipe, when } from 'ramda'
 import { forwardRef } from 'react'
 import { Button } from '../button'
+import { $deleteDialogOpen } from './node-delete'
 
 type OwnProps = {
 	node: TreeNode
@@ -17,6 +19,7 @@ export const NodeText = forwardRef<HTMLButtonElement, OwnProps>(
 		return (
 			<KeyListener
 				onEnter={pipeTap(stopPropagation, when(notEditing, startEditing))}
+				onDelete={pipe(stopPropagation, T, setSignal($deleteDialogOpen))}
 			>
 				<Button
 					type="button"
