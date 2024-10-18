@@ -2,10 +2,10 @@ import { equals } from 'ramda'
 import { describe, expect, it, vi } from 'vitest'
 import {
 	appendFirst,
-	asyncPipeTap,
 	findNextElement,
 	findPrevElement,
 	pipeTap,
+	pipeTapAsync,
 	prependLast
 } from './ramda.ts'
 
@@ -77,7 +77,7 @@ describe('pipeTap', () => {
 		const fn2 = vi.fn(() => new Promise(res => setTimeout(res, 50)))
 		const fn3 = vi.fn((x: number) => x - 3)
 
-		const result = await asyncPipeTap<number, any[]>(fn1, fn2, fn3)(5)
+		const result = await pipeTapAsync<number, any[]>(fn1, fn2, fn3)(5)
 
 		expect(fn1).toHaveBeenCalledWith(5)
 		expect(fn2).toHaveBeenCalledWith(5)
@@ -93,7 +93,7 @@ describe('pipeTap', () => {
 		)
 		const fn3 = vi.fn(() => console.log('fn3'))
 
-		const result = await asyncPipeTap<number, any[]>(fn1, fn2, fn3)(5)
+		const result = await pipeTapAsync<number, any[]>(fn1, fn2, fn3)(5)
 
 		expect(fn1).toHaveBeenCalledWith(5)
 		expect(fn2).toHaveBeenCalledWith(5)

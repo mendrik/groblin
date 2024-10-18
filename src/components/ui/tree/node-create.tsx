@@ -6,12 +6,14 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
+import type { Node_Insert_Input } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
 import { caseOf, match } from '@/lib/match'
-import { assertExists, setSignal } from '@/lib/utils'
-import { $focusedNode, insertNode, parentOf } from '@/state/tree'
+import { pipeAsync, pipeTapAsync } from '@/lib/ramda'
+import { setSignal } from '@/lib/utils'
+import { focusNode, insertNode, parentNode, waitForUpdate } from '@/state/tree'
 import { signal } from '@preact/signals-react'
-import { F, T, equals as eq, nthArg, pipe } from 'ramda'
+import { F, T, equals as eq, mergeLeft, pipe } from 'ramda'
 import { type TypeOf, nativeEnum, strictObject, string } from 'zod'
 import { Button } from '../button'
 import { asField } from '../zod-form/utils'
@@ -57,26 +59,15 @@ const position = match<[NodeCreatePosition], string>(
 	caseOf([eq('sibling-below')], _ => 'as a sibling below')
 )
 
-const parent = match<[NodeCreatePosition, number], number>(
-	caseOf([eq('child'), T], nthArg(1)),
-	caseOf([eq('sibling-above'), T], pipe(nthArg(1), parentOf)),
-	caseOf([eq('sibling-below'), T], pipe(nthArg(1), parentOf)),
-	caseOf([T, T], console.error as any)
+const createNode: (data: Partial<Node_Insert_Input>) => void = pipeTapAsync(
+	mergeLeft({
+		node_id: parentNode(),
+		order: 0
+	}),
+	pipeAsync(insertNode, waitForUpdate, focusNode)
 )
 
 export const NodeCreate = () => {
-	const submit = (data: NewNodeSchema) => {
-		assertExists($focusedNode.value, 'No focused node to create under')
-		assertExists($createNodePosition.value, 'No position to create node')
-		const node_id = parent($createNodePosition.value, $focusedNode.value)
-		assertExists(node_id, `Failed to locate node parent for insert: ${node_id}`)
-		return insertNode({
-			...data,
-			node_id,
-			order: 0
-		})
-	}
-
 	return (
 		<Dialog open={$createDialogOpen.value}>
 			<DialogContent
@@ -94,7 +85,7 @@ export const NodeCreate = () => {
 						specified location.
 					</DialogDescription>
 				</DialogHeader>
-				<ZodForm schema={newNodeSchema} columns={2} onSubmit={submit}>
+				<ZodForm schema={newNodeSchema} columns={2} onSubmit={createNode}>
 					<DialogFooter className="gap-y-2">
 						<Button onClick={close} variant="secondary">
 							Cancel

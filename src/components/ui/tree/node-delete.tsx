@@ -9,7 +9,7 @@ import {
 	AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import { stopPropagation } from '@/lib/dom-events'
-import { asyncPipeTap } from '@/lib/ramda'
+import { pipeTapAsync } from '@/lib/ramda'
 import { setSignal } from '@/lib/utils'
 import {
 	deleteNode,
@@ -24,7 +24,7 @@ import { F, pipe } from 'ramda'
 export const $deleteDialogOpen = signal(false)
 const close = pipe(F, setSignal($deleteDialogOpen))
 
-export const deleteNodeCommand = asyncPipeTap(
+export const deleteNodeCommand = pipeTapAsync(
 	pipe(focusedNode, deleteNode),
 	waitForUpdate,
 	pipe(previousNode, focusNode)

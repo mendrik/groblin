@@ -1,6 +1,6 @@
 import KeyListener from '@/components/utils/key-listener'
 import { focusOn, inputValue, stopPropagation } from '@/lib/dom-events'
-import { asyncPipeTap, pipeTap } from '@/lib/ramda'
+import { pipeTap, pipeTapAsync } from '@/lib/ramda'
 import { isActiveRef } from '@/lib/react'
 import {
 	type TreeNode,
@@ -28,14 +28,14 @@ export const NodeEditor = forwardRef<HTMLInputElement, OwnProps>(
 
 		return (
 			<KeyListener
-				onEnter={asyncPipeTap(
+				onEnter={pipeTapAsync(
 					stopPropagation,
 					pipe(inputValue, confirmNodeName),
 					waitForUpdate,
 					stopEditing,
 					focusOn(textBtn)
 				)}
-				onEscape={asyncPipeTap(stopPropagation, stopEditing, focusOn(textBtn))}
+				onEscape={pipeTapAsync(stopPropagation, stopEditing, focusOn(textBtn))}
 			>
 				<Input
 					defaultValue={node.name}

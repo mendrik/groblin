@@ -13,10 +13,18 @@ type LastReturnType<Type extends any[]> = Type extends [...any[], infer LAST_FN]
 			: never
 	: never
 
-export const asyncPipeTap =
+export const pipeTapAsync =
 	<T, FUNCTIONS extends Array<(arg: T) => any>>(...fns: FUNCTIONS) =>
 	(arg: T) =>
 		fns.reduce(
 			(pc, fn) => pc.then(() => fn(arg)),
 			Promise.resolve()
+		) as LastReturnType<FUNCTIONS>
+
+export const pipeAsync =
+	<T, FUNCTIONS extends Array<(arg: any) => any>>(...fns: FUNCTIONS) =>
+	(arg: T) =>
+		fns.reduce(
+			(pc, fn) => pc.then(arg => fn(arg)),
+			Promise.resolve(arg)
 		) as LastReturnType<FUNCTIONS>

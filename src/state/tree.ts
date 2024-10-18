@@ -103,13 +103,13 @@ $nodeStates.subscribe(setItem('tree-state'))
 const $rootUpdates = signal(0)
 $root.subscribe(() => ($rootUpdates.value = ($rootUpdates.value + 1) % 1000))
 
-export const waitForUpdate = () =>
-	new Promise(res => {
+export const waitForUpdate = <T>(arg: T): Promise<T> =>
+	new Promise<T>(res => {
 		const current = $rootUpdates.value
 		const unsub = $rootUpdates.subscribe(val => {
 			if (val !== current) {
 				unsub()
-				res(val)
+				res(arg)
 			}
 		})
 	})
@@ -152,13 +152,18 @@ export const focusedNode = (): number => {
 }
 
 export const previousNode = (): number => {
-	assertExists($previousNode.value, 'Focused node is missing')
+	assertExists($previousNode.value, 'Previous node is missing')
 	return $previousNode.value
 }
 
 export const nextNode = (): number => {
-	assertExists($nextNode.value, 'Focused node is missing')
+	assertExists($nextNode.value, 'Next node is missing')
 	return $nextNode.value
+}
+
+export const parentNode = (): number => {
+	assertExists($parentNode.value, 'Parent node is missing')
+	return $parentNode.value
 }
 
 export const focusNode = (nodeId: number) => {
