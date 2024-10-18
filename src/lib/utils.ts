@@ -15,3 +15,12 @@ export const setSignal = curry(<T>(signal: Signal<T>, value: T) => {
 export const updateSignal = curry(<T>(signal: Signal<T>, fn: Fn<T, T>) => {
 	signal.value = fn(signal.value)
 })
+
+export function assertExists<T>(
+	val: T | undefined,
+	message: string
+): asserts val is T {
+	if (val == null) {
+		throw new Error(message)
+	}
+}

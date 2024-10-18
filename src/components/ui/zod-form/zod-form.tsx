@@ -1,4 +1,5 @@
 import { caseOf, match } from '@/lib/match'
+import { assertExists } from '@/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { equals as eq } from 'ramda'
 import type { PropsWithChildren } from 'react'
@@ -37,9 +38,8 @@ const colSpan = match<[number], string>(
 
 function* schemaIterator<T extends ZodRawShape>(schema: ZodObject<T>) {
 	for (const [name, zodSchema] of Object.entries(schema.shape)) {
-		const fieldData = ZodFormField.parse(
-			JSON.parse(zodSchema.description as string)
-		)
+		assertExists(zodSchema.description, `Missing description for field ${name}`)
+		const fieldData = ZodFormField.parse(JSON.parse(zodSchema.description))
 		yield {
 			name,
 			renderer: ({ field }: RendererProps) => (

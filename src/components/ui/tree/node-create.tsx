@@ -73,7 +73,7 @@ export const NodeCreate = () => {
 					</DialogDescription>
 				</DialogHeader>
 				<ZodForm schema={newNodeSchema} columns={2} onSubmit={submit}>
-					<DialogFooter>
+					<DialogFooter className="gap-y-2">
 						<Button onClick={close} variant="secondary">
 							Cancel
 						</Button>
