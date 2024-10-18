@@ -32,7 +32,12 @@ export const NodeDelete = () => (
 			<AlertDialogFooter>
 				<AlertDialogCancel onClick={close}>Cancel</AlertDialogCancel>
 				<AlertDialogAction
-					onClick={pipe(() => deleteNode($lastFocusedNode.value), close)}
+					onClick={
+						pipe(
+							() => deleteNode($lastFocusedNode.value),
+							close
+						) /* todo focus previous node */
+					}
 				>
 					Continue
 				</AlertDialogAction>
