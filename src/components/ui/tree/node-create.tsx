@@ -29,13 +29,15 @@ export const openNodeCreate = pipe(
 const close = pipe(F, setSignal($createDialogOpen))
 
 const newNodeSchema = strictObject({
-	name: string().describe(
-		asField({
-			label: 'Name',
-			editor: EditorType.input,
-			autofill: 'off'
-		})
-	),
+	name: string()
+		.describe(
+			asField({
+				label: 'Name',
+				editor: EditorType.input,
+				autofill: 'off'
+			})
+		)
+		.default('New node'),
 	type: nativeEnum(NodeType)
 		.describe(
 			asField({

@@ -3,7 +3,12 @@ import { assertExists } from '@/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { equals as eq } from 'ramda'
 import { type PropsWithChildren, useMemo } from 'react'
-import { type DefaultValues, type Path, useForm } from 'react-hook-form'
+import {
+	type DefaultValues,
+	type Path,
+	type UseFormReturn,
+	useForm
+} from 'react-hook-form'
 import type { TypeOf, ZodObject, ZodRawShape } from 'zod'
 import {
 	Form,
@@ -56,6 +61,24 @@ function* schemaIterator<T extends ZodRawShape>(schema: ZodObject<T>) {
 	}
 }
 
+type FieldProps<T extends ZodRawShape> = {
+	form: UseFormReturn<TypeOf<ZodObject<T>>>
+	schema: ZodObject<T>
+}
+
+export const Fields = <T extends ZodRawShape>({
+	form,
+	schema
+}: FieldProps<T>) =>
+	[...schemaIterator(schema)].map(({ name, renderer }) => (
+		<FormField
+			key={name}
+			control={form.control}
+			name={name as Path<TypeOf<ZodObject<T>>>}
+			render={renderer}
+		/>
+	))
+
 export const ZodForm = <T extends ZodObject<any>>({
 	schema,
 	columns = 1,
@@ -79,14 +102,7 @@ export const ZodForm = <T extends ZodObject<any>>({
 				className="flex flex-col gap-6"
 			>
 				<div className={`grid ${cols(columns)} gap-4`}>
-					{[...schemaIterator(schema)].map(({ name, renderer }) => (
-						<FormField
-							key={name}
-							control={form.control}
-							name={name as Path<TypeOf<T>>}
-							render={renderer}
-						/>
-					))}
+					<Fields form={form} schema={schema} />
 				</div>
 				{children}
 			</form>
