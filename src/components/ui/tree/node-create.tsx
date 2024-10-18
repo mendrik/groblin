@@ -6,7 +6,6 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { stopPropagation } from '@/lib/dom-events'
 import { caseOf, match } from '@/lib/match'
 import { setSignal } from '@/lib/utils'
 import {} from '@/state/tree'
@@ -63,7 +62,6 @@ export const NodeCreate = () => {
 			<DialogContent
 				className="border-muted-foreground"
 				onEscapeKeyDown={close}
-				onKeyDown={stopPropagation}
 				onInteractOutside={close}
 			>
 				<DialogHeader>

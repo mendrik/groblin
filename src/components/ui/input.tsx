@@ -8,9 +8,9 @@ export interface InputProps
 	icon?: Icon
 }
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
+const Inp = React.forwardRef<HTMLInputElement, InputProps>(
 	({ className, type, icon: Icon, ...props }, ref) => {
-		const Inp = ({ className, ...props }: InputProps) => (
+		return (
 			<input
 				type={type}
 				className={cn(
@@ -21,16 +21,26 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 				{...props}
 			/>
 		)
+	}
+)
+Inp.displayName = 'NativeInput'
+
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+	({ className, type, icon: Icon, ...props }, ref) => {
 		return Icon ? (
 			<div className="flex flex-row relative items-center w-full">
 				<Icon
 					className="absolute translate-x-1 shrink-0 w-4 h-4"
 					stroke={0.5}
 				/>
-				<Inp {...props} className={cn(className, 'pl-[24px] flex-1')} />
+				<Inp
+					{...props}
+					className={cn(className, 'pl-[24px] flex-1')}
+					ref={ref}
+				/>
 			</div>
 		) : (
-			<Inp className={className} {...props} />
+			<Inp className={className} {...props} ref={ref} />
 		)
 	}
 )
