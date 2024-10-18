@@ -1,3 +1,5 @@
+import 'ramda'
+
 declare module 'ramda' {
 	export function prop<O extends object, K extends keyof O>(
 		prop: K
@@ -41,10 +43,17 @@ declare module 'ramda' {
 
 	export type Pred<T extends any[]> = (...v: T) => boolean
 
-	export function unless<T, U>(
-		pred: (a: T) => boolean,
-		whenFalseFn: (a: T) => U
-	): (a: T) => T | U
-}
+	export type ExcludeNever<T, U> = [U] extends [never]
+		? NonNullable<T>
+		: Exclude<T, U>
 
-import 'ramda'
+	export function unless<T, S extends T>(
+		pred: (a: T) => a is S,
+		whenFalseFn: (a: ExcludeNever<T, S>) => any
+	): (a: T) => T | ReturnType<typeof whenFalseFn>
+
+	export function when<T, S extends T>(
+		pred: (a: T) => a is S,
+		whenTrueFn: (a: S) => T
+	): (a: T) => T
+}

@@ -1,7 +1,14 @@
 import { Node } from '@/components/ui/tree/node'
-import { data, focusWithin } from '@/lib/dom-events'
-import { type TreeNode, removeFocusedNode, setFocusedNode } from '@/state/tree'
-import { isNil, pipe, unless } from 'ramda'
+import { data } from '@/lib/dom-events'
+import {
+	type TreeNode,
+	focusNode,
+	nextNode,
+	nodeState,
+	previousNode,
+	setFocusedNode
+} from '@/state/tree'
+import { isNotNil, pipe, when } from 'ramda'
 import { useRef } from 'react'
 import KeyListener from '../../utils/key-listener'
 import { NodeCreate } from './node-create'
@@ -17,16 +24,18 @@ export const Tree = ({ root, renderRoot = false }: OwnProps) => {
 	return (
 		<>
 			<KeyListener
-				onArrowLeft={() => void 0}
-				onArrowRight={() => void 0}
-				onArrowDown={() => void 0}
-				onArrowUp={() => void 0}
+				onArrowLeft={() => nodeState({ open: false })}
+				onArrowRight={() => nodeState({ open: true })}
+				onArrowDown={pipe(nextNode, focusNode)}
+				onArrowUp={pipe(previousNode, focusNode)}
 			>
 				<div
 					ref={tree}
 					className="w-full h-full p-1 pl-0 tree"
-					onFocus={pipe(data('node_id', Number), unless(isNil, setFocusedNode))}
-					onBlur={unless(() => focusWithin(tree.current), removeFocusedNode)}
+					onFocus={pipe(
+						data('node_id', Number),
+						when(isNotNil, setFocusedNode)
+					)}
 				>
 					{renderRoot ? (
 						<Node node={root} depth={0} />

@@ -114,21 +114,10 @@ export const waitForUpdate = () =>
 		})
 	})
 
-$focusedNode.subscribe(nodeId => console.log('Focused node:', nodeId))
-$previousNode.subscribe(nodeId => console.log('Previous node:', nodeId))
-$nextNode.subscribe(nodeId => console.log('Next node:', nodeId))
-$parentNode.subscribe(nodeId => console.log('Parent node:', nodeId))
-
 /** ---- interfaces ---- **/
 export const startEditing = () => ($editingNode.value = $focusedNode.value)
 export const notEditing = () => $editingNode.value === undefined
 export const stopEditing = () => ($editingNode.value = undefined)
-export const removeFocusedNode = () => {
-	$previousNode.value = undefined
-	$focusedNode.value = undefined
-	$nextNode.value = undefined
-	$parentNode.value = undefined
-}
 
 export const setFocusedNode = (nodeId: number) => {
 	assertExists($root.value, 'Root node is missing')
@@ -154,12 +143,29 @@ export const setFocusedNode = (nodeId: number) => {
 	}
 }
 
-export const openNode = (nodeId: number | undefined) =>
-	Maybe.fromNullable(nodeId).ifJust(nodeId =>
-		updateNodeState(nodeId, { open: true })
-	)
+export const openNode = (nodeId: number) =>
+	updateNodeState(nodeId, { open: true })
 
-export const focusedNode = (): number | undefined => $focusedNode.value
+export const focusedNode = (): number => {
+	assertExists($focusedNode.value, 'Focused node is missing')
+	return $focusedNode.value
+}
+
+export const previousNode = (): number => {
+	assertExists($previousNode.value, 'Focused node is missing')
+	return $previousNode.value
+}
+
+export const nextNode = (): number => {
+	assertExists($nextNode.value, 'Focused node is missing')
+	return $nextNode.value
+}
+
+export const focusNode = (nodeId: number) => {
+	Maybe.fromNullable(document.getElementById(`node-${asStr(nodeId)}`)).ifJust(
+		node => node.focus()
+	)
+}
 
 export const updateNodeState = (nodeId: number, state: Partial<NodeState>) => {
 	$nodeStates.value = over(
@@ -170,9 +176,9 @@ export const updateNodeState = (nodeId: number, state: Partial<NodeState>) => {
 }
 
 export const nodeState = (state: Partial<NodeState>) =>
-	Maybe.fromNullable($focusedNode.value).ifJust(nodeId =>
-		updateNodeState(nodeId, state)
-	)
+	Maybe.fromNullable($focusedNode.value)
+		.ifJust(nodeId => updateNodeState(nodeId, state))
+		.ifJust(setFocusedNode)
 
 export const confirmNodeName = (value: string) =>
 	MaybeAsync.liftMaybe(Maybe.fromNullable($editingNode.value))
@@ -180,7 +186,7 @@ export const confirmNodeName = (value: string) =>
 		.map(id => query(UpdateNodeNameDocument, { id, name: value }))
 		.run()
 
-export const deleteNode = (id: number | undefined) =>
+export const deleteNode = (id: number) =>
 	MaybeAsync.liftMaybe(Maybe.fromNullable(id))
 		.map(id => query(DeleteNodeDocument, { id }))
 		.run()
