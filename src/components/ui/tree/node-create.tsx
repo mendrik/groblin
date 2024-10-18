@@ -7,10 +7,11 @@ import {
 	DialogTitle
 } from '@/components/ui/dialog'
 import { stopPropagation } from '@/lib/dom-events'
+import { caseOf, match } from '@/lib/match'
 import { setSignal } from '@/lib/utils'
 import {} from '@/state/tree'
 import { signal } from '@preact/signals-react'
-import { F, T, pipe } from 'ramda'
+import { F, T, equals as eq, pipe } from 'ramda'
 import { nativeEnum, strictObject, string } from 'zod'
 import { Button } from '../button'
 import { asField } from '../zod-form/utils'
@@ -46,6 +47,12 @@ const newNodeSchema = strictObject({
 		.default(NodeType.object)
 })
 
+const position = match<[NodeCreatePosition], string>(
+	caseOf([eq('child')], _ => 'as a child'),
+	caseOf([eq('sibling-above')], _ => 'as a sibling above'),
+	caseOf([eq('sibling-below')], _ => 'as a sibling below')
+)
+
 export const NodeCreate = () => {
 	const submit = console.log
 	return (
@@ -57,7 +64,9 @@ export const NodeCreate = () => {
 				onInteractOutside={close}
 			>
 				<DialogHeader>
-					<DialogTitle>Create node</DialogTitle>
+					<DialogTitle>
+						Create node {position($createNodePosition.value)}
+					</DialogTitle>
 					<DialogDescription>
 						Please select the type of node you want to add to the tree at the
 						specified location.
