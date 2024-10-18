@@ -7,11 +7,11 @@ import {
 	DialogTitle
 } from '@/components/ui/dialog'
 import { caseOf, match } from '@/lib/match'
-import { setSignal } from '@/lib/utils'
-import {} from '@/state/tree'
+import { assertExists, setSignal } from '@/lib/utils'
+import { $lastFocusedNode, insertNode, parentOf } from '@/state/tree'
 import { signal } from '@preact/signals-react'
-import { F, T, equals as eq, pipe } from 'ramda'
-import { nativeEnum, strictObject, string } from 'zod'
+import { F, T, equals as eq, nthArg, pipe } from 'ramda'
+import { type TypeOf, nativeEnum, strictObject, string } from 'zod'
 import { Button } from '../button'
 import { asField } from '../zod-form/utils'
 import { ZodForm } from '../zod-form/zod-form'
@@ -19,7 +19,7 @@ import { EditorType, NodeType } from './types'
 
 type NodeCreatePosition = 'child' | 'sibling-above' | 'sibling-below'
 
-export const $createDialogOpen = signal(true)
+export const $createDialogOpen = signal(false)
 export const $createNodePosition = signal<NodeCreatePosition>('child')
 export const openNodeCreate = pipe(
 	setSignal($createNodePosition),
@@ -48,14 +48,32 @@ const newNodeSchema = strictObject({
 		.default(NodeType.object)
 })
 
+export type NewNodeSchema = TypeOf<typeof newNodeSchema>
+
 const position = match<[NodeCreatePosition], string>(
 	caseOf([eq('child')], _ => 'as a child'),
 	caseOf([eq('sibling-above')], _ => 'as a sibling above'),
 	caseOf([eq('sibling-below')], _ => 'as a sibling below')
 )
 
+const parent = match<[NodeCreatePosition, number], number>(
+	caseOf([eq('child')], nthArg(1)),
+	caseOf([eq('sibling-above')], pipe(nthArg(1), parentOf)),
+	caseOf([eq('sibling-below')], pipe(nthArg(1), parentOf))
+)
+
 export const NodeCreate = () => {
-	const submit = console.log
+	const submit = (data: NewNodeSchema) => {
+		assertExists($lastFocusedNode.value, 'No focused node to create under')
+		assertExists($createNodePosition.value, 'No position to create node')
+		const node_id = parent($createNodePosition.value, $lastFocusedNode.value)
+		assertExists(node_id, 'Failed to locate node parent for insert')
+		return insertNode({
+			...data,
+			node_id,
+			order: 0
+		})
+	}
 
 	return (
 		<Dialog open={$createDialogOpen.value}>
