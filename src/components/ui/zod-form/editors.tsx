@@ -37,7 +37,7 @@ const matcher = match<Args, ReactNode>(
 		(desc, type, field) => {
 			const enumValue: Record<string, any> = innerType(type).enum
 			return (
-				<Select>
+				<Select onValueChange={field.onChange} defaultValue={field.value}>
 					<FormControl>
 						<SelectTrigger {...field}>
 							<SelectValue placeholder={desc.placeholder} />
