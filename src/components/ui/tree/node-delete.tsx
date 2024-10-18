@@ -11,13 +11,7 @@ import {
 import { stopPropagation } from '@/lib/dom-events'
 import { asyncPipeTap } from '@/lib/ramda'
 import { setSignal } from '@/lib/utils'
-import {
-	deleteNode,
-	focusedNode,
-	selectPreviousNode,
-	tree,
-	waitForUpdate
-} from '@/state/tree'
+import { deleteNode, focusedNode, waitForUpdate } from '@/state/tree'
 import { signal } from '@preact/signals-react'
 import { F, pipe } from 'ramda'
 import type { SyntheticEvent } from 'react'
@@ -27,8 +21,7 @@ const close = pipe(F, setSignal($deleteDialogOpen))
 
 export const deleteNodeCommand: (ev: SyntheticEvent) => void = asyncPipeTap(
 	pipe(focusedNode, deleteNode),
-	waitForUpdate,
-	pipe(tree, selectPreviousNode) // todo fix this
+	waitForUpdate
 )
 
 export const NodeDelete = () => (

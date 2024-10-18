@@ -40,6 +40,11 @@ declare module 'ramda' {
 	export function pluck<R extends any[]>(prop: string): (list: any) => R
 
 	export type Pred<T extends any[]> = (...v: T) => boolean
+
+	export function unless<T, U>(
+		pred: (a: T) => boolean,
+		whenFalseFn: (a: T) => U
+	): (a: T) => T | U
 }
 
 import 'ramda'

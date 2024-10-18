@@ -8,28 +8,27 @@ import {
 	UpdateNodeNameDocument
 } from '@/gql/graphql'
 import { getItem, setItem } from '@/lib/local-storage'
-import { findNextElement, findPrevElement } from '@/lib/ramda'
+import {} from '@/lib/ramda'
 import { type TreeOf, listToTree } from '@/lib/tree'
 import { assertExists, failOnNil, setSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import gql from 'graphql-tag'
 import { Maybe, MaybeAsync } from 'purify-ts'
 import {
+	type NonEmptyArray,
+	aperture,
 	toString as asStr,
-	equals,
-	filter,
+	find,
+	head,
 	isNotEmpty,
-	isNotNil,
+	last,
 	lensProp,
 	mergeDeepLeft,
 	over,
 	pipe,
-	prop,
-	when
+	prop
 } from 'ramda'
-import { delayP } from 'ramda-adjunct'
-import type { ForwardedRef, SyntheticEvent } from 'react'
-import { type FocusableElement, tabbable } from 'tabbable'
+import {} from 'tabbable'
 
 /** ---- queries ---- **/
 gql`
@@ -83,22 +82,24 @@ type NodeState = {
 
 /** ---- state ---- **/
 export const $root = signal<TreeNode>()
-export const $nodes = signal<Record<string, NodeState>>(
+export const $nodeStates = signal<Record<string, NodeState>>(
 	getItem('tree-state', {})
 )
+export const $previousNode = signal<number>()
 export const $focusedNode = signal<number>()
-export const $lastFocusedNode = signal<number>()
-export const $isEditingNode = signal<number | undefined>()
+export const $nextNode = signal<number>()
+export const $parentNode = signal<number>()
+export const $editingNode = signal<number | undefined>()
 
 /** ---- subscriptions ---- **/
 subscribe(
 	GetNodesDocument,
 	pipe(prop('node'), listToTree('id', 'node_id', 'nodes'), setSignal($root))
 )
-
-$nodes.subscribe(setItem('tree-state'))
-$focusedNode.subscribe(when(isNotNil, setSignal($lastFocusedNode)))
-
+$root.subscribe(root =>
+	root ? updateNodeState(root.id, { open: true }) : ($nodeStates.value = {})
+)
+$nodeStates.subscribe(setItem('tree-state'))
 const $rootUpdates = signal(0)
 $root.subscribe(() => ($rootUpdates.value = ($rootUpdates.value + 1) % 1000))
 
@@ -113,60 +114,68 @@ export const waitForUpdate = () =>
 		})
 	})
 
+$focusedNode.subscribe(nodeId => console.log('Focused node:', nodeId))
+$previousNode.subscribe(nodeId => console.log('Previous node:', nodeId))
+$nextNode.subscribe(nodeId => console.log('Next node:', nodeId))
+$parentNode.subscribe(nodeId => console.log('Parent node:', nodeId))
+
 /** ---- interfaces ---- **/
-export const startEditing = () =>
-	($isEditingNode.value = $focusedNode.value ?? $lastFocusedNode.value)
-export const notEditing = () => $isEditingNode.value === undefined
-export const stopEditing = () => ($isEditingNode.value = undefined)
+export const startEditing = () => ($editingNode.value = $focusedNode.value)
+export const notEditing = () => $editingNode.value === undefined
+export const stopEditing = () => ($editingNode.value = undefined)
+export const removeFocusedNode = () => {
+	$previousNode.value = undefined
+	$focusedNode.value = undefined
+	$nextNode.value = undefined
+	$parentNode.value = undefined
+}
 
-export const removeFocusedNode = () => setFocusedNode(undefined)
+export const setFocusedNode = (nodeId: number) => {
+	assertExists($root.value, 'Root node is missing')
+	const openNodes = [
+		...iterateOpenNodes($root.value)
+	] as NonEmptyArray<TreeNode>
 
-export const setFocusedNode = (nodeId: number | undefined) =>
-	($focusedNode.value = nodeId)
+	const clampedList = [last(openNodes), ...openNodes, head(openNodes)].map(
+		node => node.id
+	)
 
-export const focusOn =
-	<EL extends HTMLElement>(ref: ForwardedRef<EL>) =>
-	(): Promise<void> =>
-		delayP(20).then(() => {
-			if (ref && 'current' in ref && ref.current) ref.current.focus()
-		})
-
-export const focusNode = (nodeId: number): Promise<void> =>
-	delayP(20).then(() => {
-		Maybe.fromNullable(document.getElementById(`node-${nodeId}`)).ifJust(el =>
-			el.focus()
-		)
-	})
+	const findFocused = pipe(
+		aperture(3) as (a: number[]) => [number, number, number][],
+		find<[number, number, number]>(([_p, curr, _n]) => curr === nodeId)
+	)
+	const res = findFocused(clampedList)
+	if (res != null) {
+		const [prev, focused, next] = res
+		$previousNode.value = prev
+		$focusedNode.value = focused
+		$nextNode.value = next
+		$parentNode.value = parentOf(focused)
+	}
+}
 
 export const openNode = (nodeId: number | undefined) =>
 	Maybe.fromNullable(nodeId).ifJust(nodeId =>
 		updateNodeState(nodeId, { open: true })
 	)
 
-export const focusedNode = (): number | undefined => $lastFocusedNode.value
-
-export const tree = (ev: SyntheticEvent): HTMLElement | null => {
-	if (ev.target instanceof HTMLElement) {
-		return ev.target.closest('.tree')
-	}
-	return null
-}
+export const focusedNode = (): number | undefined => $focusedNode.value
 
 export const updateNodeState = (nodeId: number, state: Partial<NodeState>) => {
-	$nodes.value = over(
+	$nodeStates.value = over(
 		lensProp(asStr(nodeId)),
 		mergeDeepLeft(state),
-		$nodes.value
+		$nodeStates.value
 	)
 }
 
-export const focusedNodeState = (state: Partial<NodeState>) =>
+export const nodeState = (state: Partial<NodeState>) =>
 	Maybe.fromNullable($focusedNode.value).ifJust(nodeId =>
 		updateNodeState(nodeId, state)
 	)
 
 export const confirmNodeName = (value: string) =>
-	MaybeAsync.liftMaybe(Maybe.fromNullable($isEditingNode.value))
+	MaybeAsync.liftMaybe(Maybe.fromNullable($editingNode.value))
 		.filter(isNotEmpty)
 		.map(id => query(UpdateNodeNameDocument, { id, name: value }))
 		.run()
@@ -181,31 +190,21 @@ export const insertNode = (object: Node_Insert_Input): Promise<number> =>
 		.then(x => x.insert_node_one?.id)
 		.then(failOnNil('Failed to insert node'))
 
-const skippables = (el: FocusableElement) => !el.classList.contains('no-focus')
-
-export const selectNextNode = (tree: HTMLElement | null) =>
-	Maybe.fromNullable(tree)
-		.map(tabbable)
-		.map(filter(skippables))
-		.map(findNextElement(equals(document.activeElement)))
-		.chain(Maybe.fromNullable)
-		.ifJust(e => e instanceof HTMLElement && e.focus())
-
-export const selectPreviousNode = (tree: HTMLElement | null) =>
-	Maybe.fromNullable(tree)
-		.map(tabbable)
-		.map(filter(skippables))
-		.map(findPrevElement(equals(document.activeElement)))
-		.chain(Maybe.fromNullable)
-		.ifJust(e => e instanceof HTMLElement && e.focus())
-
 function* iterateNodes(root: TreeNode): Generator<TreeNode> {
-	// Yield the current node
 	yield root
-
-	// Recursively iterate through child nodes
 	for (const child of root.nodes) {
 		yield* iterateNodes(child)
+	}
+}
+
+function* iterateOpenNodes(root: TreeNode): Generator<TreeNode> {
+	if (root.id !== $root.value?.id) {
+		yield root
+	}
+	if ($nodeStates.value[root.id]?.open === true) {
+		for (const child of root.nodes) {
+			yield* iterateOpenNodes(child)
+		}
 	}
 }
 

@@ -1,7 +1,7 @@
 import {} from '@/lib/dom-events'
 import {} from '@/lib/ramda'
 import { cn } from '@/lib/utils'
-import { $isEditingNode, $nodes, type TreeNode } from '@/state/tree'
+import { $editingNode, $nodeStates, type TreeNode } from '@/state/tree'
 import { always } from 'ramda'
 import { useRef } from 'react'
 import {} from 'zod'
@@ -16,7 +16,7 @@ type OwnProps = {
 }
 
 export const Node = ({ node, depth }: OwnProps) => {
-	const isOpen = $nodes.value[node.id]?.open
+	const isOpen = $nodeStates.value[node.id]?.open
 	const editor = useRef<HTMLInputElement>(null)
 	const textBtn = useRef<HTMLButtonElement>(null)
 
@@ -25,7 +25,7 @@ export const Node = ({ node, depth }: OwnProps) => {
 			<li data-node_id={node.id}>
 				<div className="flex flex-row items-center justify-start w-full gap-1">
 					<NodeChevron node={node} />
-					{node.id === $isEditingNode.value ? (
+					{node.id === $editingNode.value ? (
 						<NodeEditor node={node} ref={editor} textBtn={textBtn} />
 					) : (
 						<NodeText node={node} ref={textBtn} />

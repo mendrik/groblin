@@ -39,14 +39,10 @@ export type IsZodType<T extends ZodType<any, any>> = T extends ZodType<
 	? U
 	: never
 
-export function isZodType<T extends ZodType<any, any>>(
-	type: new (...args: any[]) => T
-) {
-	return (checkType: ZodType<any, any>): checkType is T => {
-		// Check if checkType is an instance of the provided Zod type
-		return checkType instanceof type || innerType(checkType) instanceof type
-	}
-}
+export const isZodType =
+	<T extends ZodType<any, any>>(type: new (...args: any[]) => T) =>
+	(checkType: ZodType<any, any>): checkType is T =>
+		checkType instanceof type || innerType(checkType) instanceof type
 
 // Type-level unwrapping
 type UnwrapZod<T extends z.ZodTypeAny> = T extends z.ZodNullable<infer U>

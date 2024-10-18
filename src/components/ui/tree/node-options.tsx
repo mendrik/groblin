@@ -5,15 +5,10 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { preventDefault, stopPropagation } from '@/lib/dom-events'
+import { focusOn, preventDefault, stopPropagation } from '@/lib/dom-events'
 import { pipeTap } from '@/lib/ramda'
 import { updateSignal } from '@/lib/utils'
-import {
-	$lastFocusedNode,
-	type TreeNode,
-	focusOn,
-	startEditing
-} from '@/state/tree'
+import { $focusedNode, type TreeNode, startEditing } from '@/state/tree'
 import {
 	IconCopyPlus,
 	IconCursorText,
@@ -33,7 +28,7 @@ type OwnProps = {
 }
 
 export const NodeOptions = ({ node, editor }: OwnProps) => {
-	return $lastFocusedNode.value === node.id ? (
+	return $focusedNode.value === node.id ? (
 		<DropdownMenu>
 			<DropdownMenuTrigger className="no-focus" onKeyDown={stopPropagation}>
 				<IconDots

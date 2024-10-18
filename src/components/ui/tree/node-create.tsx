@@ -8,18 +8,10 @@ import {
 } from '@/components/ui/dialog'
 import { stopPropagation } from '@/lib/dom-events'
 import { caseOf, match } from '@/lib/match'
-import { asyncPipeTap } from '@/lib/ramda'
 import { assertExists, setSignal } from '@/lib/utils'
-import {
-	$lastFocusedNode,
-	focusNode,
-	insertNode,
-	openNode,
-	parentOf,
-	waitForUpdate
-} from '@/state/tree'
+import { $focusedNode, insertNode, parentOf } from '@/state/tree'
 import { signal } from '@preact/signals-react'
-import { F, T, always, equals as eq, nthArg, pipe } from 'ramda'
+import { F, T, equals as eq, nthArg, pipe } from 'ramda'
 import { type TypeOf, nativeEnum, strictObject, string } from 'zod'
 import { Button } from '../button'
 import { asField } from '../zod-form/utils'
@@ -74,17 +66,15 @@ const parent = match<[NodeCreatePosition, number], number>(
 
 export const NodeCreate = () => {
 	const submit = (data: NewNodeSchema) => {
-		assertExists($lastFocusedNode.value, 'No focused node to create under')
+		assertExists($focusedNode.value, 'No focused node to create under')
 		assertExists($createNodePosition.value, 'No position to create node')
-		const node_id = parent($createNodePosition.value, $lastFocusedNode.value)
+		const node_id = parent($createNodePosition.value, $focusedNode.value)
 		assertExists(node_id, `Failed to locate node parent for insert: ${node_id}`)
 		return insertNode({
 			...data,
 			node_id,
 			order: 0
 		})
-			.then(always(node_id))
-			.then(asyncPipeTap(close, waitForUpdate, openNode, focusNode))
 	}
 
 	return (

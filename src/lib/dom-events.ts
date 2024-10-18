@@ -1,4 +1,5 @@
-import type { SyntheticEvent } from 'react'
+import { delayP } from 'ramda-adjunct'
+import type { ForwardedRef, SyntheticEvent } from 'react'
 
 export const data =
 	<FN extends (value: string) => any>(key: string, fn?: FN) =>
@@ -28,3 +29,10 @@ export const stopPropagation = <E extends SyntheticEvent | Event>(e: E): void =>
 
 export const preventDefault = <E extends SyntheticEvent | Event>(e: E): void =>
 	e.preventDefault()
+
+export const focusOn =
+	<EL extends HTMLElement>(ref: ForwardedRef<EL>) =>
+	(): Promise<void> =>
+		delayP(20).then(() => {
+			if (ref && 'current' in ref && ref.current) ref.current.focus()
+		})

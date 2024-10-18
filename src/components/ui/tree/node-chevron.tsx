@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { $nodes, type TreeNode, updateNodeState } from '@/state/tree'
+import { $nodeStates, type TreeNode, updateNodeState } from '@/state/tree'
 import { IconChevronRight } from '@tabler/icons-react'
 import { isNotEmpty } from 'ramda'
 import { Button } from '../button'
@@ -12,7 +12,7 @@ const DummyIcon = () => <div className="w-4 h-4 shrink-0" />
 
 export const NodeChevron = ({ node }: OwnProps) => {
 	const hasChildren = isNotEmpty(node.nodes)
-	const isOpen = $nodes.value[node.id]?.open
+	const isOpen = $nodeStates.value[node.id]?.open
 
 	return hasChildren ? (
 		<Button

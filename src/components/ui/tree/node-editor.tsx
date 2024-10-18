@@ -1,11 +1,10 @@
 import KeyListener from '@/components/utils/key-listener'
-import { inputValue, stopPropagation } from '@/lib/dom-events'
+import { focusOn, inputValue, stopPropagation } from '@/lib/dom-events'
 import { asyncPipeTap, pipeTap } from '@/lib/ramda'
 import { isActiveRef } from '@/lib/react'
 import {
 	type TreeNode,
 	confirmNodeName,
-	focusOn,
 	stopEditing,
 	waitForUpdate
 } from '@/state/tree'
