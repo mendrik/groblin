@@ -6,11 +6,20 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
+import { stopPropagation } from '@/lib/dom-events'
 import { caseOf, match } from '@/lib/match'
+import { asyncPipeTap } from '@/lib/ramda'
 import { assertExists, setSignal } from '@/lib/utils'
-import { $lastFocusedNode, insertNode, parentOf } from '@/state/tree'
+import {
+	$lastFocusedNode,
+	focusNode,
+	insertNode,
+	openNode,
+	parentOf,
+	waitForUpdate
+} from '@/state/tree'
 import { signal } from '@preact/signals-react'
-import { F, T, equals as eq, nthArg, pipe } from 'ramda'
+import { F, T, always, equals as eq, nthArg, pipe } from 'ramda'
 import { type TypeOf, nativeEnum, strictObject, string } from 'zod'
 import { Button } from '../button'
 import { asField } from '../zod-form/utils'
@@ -57,9 +66,10 @@ const position = match<[NodeCreatePosition], string>(
 )
 
 const parent = match<[NodeCreatePosition, number], number>(
-	caseOf([eq('child')], nthArg(1)),
-	caseOf([eq('sibling-above')], pipe(nthArg(1), parentOf)),
-	caseOf([eq('sibling-below')], pipe(nthArg(1), parentOf))
+	caseOf([eq('child'), T], nthArg(1)),
+	caseOf([eq('sibling-above'), T], pipe(nthArg(1), parentOf)),
+	caseOf([eq('sibling-below'), T], pipe(nthArg(1), parentOf)),
+	caseOf([T, T], console.error as any)
 )
 
 export const NodeCreate = () => {
@@ -67,12 +77,14 @@ export const NodeCreate = () => {
 		assertExists($lastFocusedNode.value, 'No focused node to create under')
 		assertExists($createNodePosition.value, 'No position to create node')
 		const node_id = parent($createNodePosition.value, $lastFocusedNode.value)
-		assertExists(node_id, 'Failed to locate node parent for insert')
+		assertExists(node_id, `Failed to locate node parent for insert: ${node_id}`)
 		return insertNode({
 			...data,
 			node_id,
 			order: 0
 		})
+			.then(always(node_id))
+			.then(asyncPipeTap(close, waitForUpdate, openNode, focusNode))
 	}
 
 	return (
@@ -80,6 +92,7 @@ export const NodeCreate = () => {
 			<DialogContent
 				className="border-muted-foreground"
 				onEscapeKeyDown={close}
+				onKeyDown={stopPropagation}
 				onInteractOutside={close}
 			>
 				<DialogHeader>

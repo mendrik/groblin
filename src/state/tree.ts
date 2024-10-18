@@ -10,7 +10,7 @@ import {
 import { getItem, setItem } from '@/lib/local-storage'
 import { findNextElement, findPrevElement } from '@/lib/ramda'
 import { type TreeOf, listToTree } from '@/lib/tree'
-import { assertExists, setSignal } from '@/lib/utils'
+import { assertExists, failOnNil, setSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import gql from 'graphql-tag'
 import { Maybe, MaybeAsync } from 'purify-ts'
@@ -131,6 +131,16 @@ export const focusOn =
 			if (ref && 'current' in ref && ref.current) ref.current.focus()
 		})
 
+export const focusNode = (nodeId: number): Promise<void> =>
+	delayP(20).then(() => {
+		Maybe.fromNullable(document.getElementById(`node-${nodeId}`)).ifJust(el =>
+			el.focus()
+		)
+	})
+
+export const openNode = (nodeId: number): void =>
+	updateNodeState(nodeId, { open: true })
+
 export const updateNodeState = (nodeId: number, state: Partial<NodeState>) => {
 	$nodes.value = over(
 		lensProp(asStr(nodeId)),
@@ -155,8 +165,10 @@ export const deleteNode = (id: number | undefined) =>
 		.map(id => query(DeleteNodeDocument, { id }))
 		.run()
 
-export const insertNode = (object: Node_Insert_Input) =>
+export const insertNode = (object: Node_Insert_Input): Promise<number> =>
 	query(Insert_NodeDocument, { object })
+		.then(x => x.insert_node_one?.id)
+		.then(failOnNil('Failed to insert node'))
 
 const skippables = (el: FocusableElement) => !el.classList.contains('no-focus')
 
@@ -186,11 +198,18 @@ function* iterateNodes(root: TreeNode): Generator<TreeNode> {
 	}
 }
 
-export const parentOf = (node_id: number | undefined): number => {
-	assertExists(node_id, 'parentOf needs a valid node_id')
-	assertExists($root.value, 'Root node is missing')
-	for (const node of iterateNodes($root.value)) {
+export const parentForRoot = (
+	root: TreeNode,
+	node_id: number | undefined
+): number => {
+	for (const node of iterateNodes(root)) {
 		if (node.nodes.some(n => n.id === node_id)) return node.id
 	}
 	throw new Error(`Parent for node id ${node_id} not found`)
+}
+
+export const parentOf = (node_id: number | undefined): number => {
+	assertExists(node_id, 'parentOf needs a valid node_id')
+	assertExists($root.value, 'Root node is missing')
+	return parentForRoot($root.value, node_id)
 }

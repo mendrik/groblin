@@ -24,3 +24,12 @@ export function assertExists<T>(
 		throw new Error(message)
 	}
 }
+
+export const failOnNil =
+	<T>(message: string) =>
+	(val: T | null | undefined): T => {
+		if (val == null) {
+			throw new Error(message)
+		}
+		return val
+	}

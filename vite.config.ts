@@ -17,6 +17,7 @@ export default defineConfig({
 		}
 	},
 	test: {
+		setupFiles: ['vitest-localstorage-mock'],
 		include: ['src/**/*.test.ts']
 	}
 })
