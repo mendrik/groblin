@@ -10,9 +10,9 @@ import type { Node_Insert_Input } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
 import { evolveAlt } from '@/lib/evolveAlt'
 import { caseOf, match } from '@/lib/match'
-import { pipeAsync } from '@/lib/ramda'
+import { pipeAsync } from '@/lib/pipeAsync'
 import { setSignal } from '@/lib/utils'
-import { focusNode, insertNode, parentNode, waitForUpdate } from '@/state/tree'
+import { focusNode, focusedNode, insertNode, waitForUpdate } from '@/state/tree'
 import { signal } from '@preact/signals-react'
 import { F, T, always, equals as eq, pipe } from 'ramda'
 import { type TypeOf, nativeEnum, strictObject, string } from 'zod'
@@ -62,7 +62,7 @@ const position = match<[NodeCreatePosition], string>(
 
 const createNode: (data: Partial<Node_Insert_Input>) => void = pipeAsync(
 	evolveAlt({
-		node_id: parentNode,
+		node_id: focusedNode,
 		order: always(0)
 	}),
 	pipeAsync(insertNode, waitForUpdate, focusNode)
