@@ -1,3 +1,4 @@
+import { always, inc, pipe, prop } from 'ramda'
 // Import the necessary functions from Vitest
 import { describe, expect, it } from 'vitest'
 import { evolveAlt } from './evolveAlt' // Adjust the import path accordingly
@@ -158,5 +159,16 @@ describe('evolveAlt', () => {
 		}
 		const result = evolveAlt(transformations, obj)
 		expect(result).toEqual({ a: { b: { c: 2 } } })
+	})
+
+	it('ramda test', () => {
+		const obj = { a: 2, d: 0 }
+		const transformations = {
+			a: inc,
+			b: always(3),
+			c: pipe(prop('a'), inc)
+		}
+		const result = evolveAlt(transformations, obj)
+		expect(result).toEqual({ a: 3, b: 3, c: 3, d: 0 })
 	})
 })

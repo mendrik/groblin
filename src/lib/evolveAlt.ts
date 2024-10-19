@@ -40,10 +40,11 @@ export function evolveAlt<
 
 // Function type: (transformations) => (object)
 export function evolveAlt<
+	O,
 	T extends {
-		[K in keyof T]: any
+		[K in keyof T | keyof O]: any
 	}
->(transformations: T): <O extends object>(object: O) => EvolveResult<O, T>
+>(transformations: T): <O2 extends O>(object: O2) => EvolveResult<O2, T>
 
 // Function implementation
 export function evolveAlt(transformations: any, object?: any): any {
@@ -55,8 +56,6 @@ export function evolveAlt(transformations: any, object?: any): any {
 			const transformFn = transformations[key]
 			if (Object.prototype.hasOwnProperty.call(object, key)) {
 				result[key] = transformFn(object[key])
-			} else if (key in object) {
-				result[key] = transformFn(object)
 			} else {
 				result[key] = transformFn(object)
 			}
