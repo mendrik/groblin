@@ -168,9 +168,9 @@ export const parentNode = (): number => {
 }
 
 export const focusNode = (nodeId: number) => {
-	Maybe.fromNullable(document.getElementById(`node-${asStr(nodeId)}`)).ifJust(
-		node => node.focus()
-	)
+	const node = document.getElementById(`node-${asStr(nodeId)}`)
+	assertExists(node, `Node with id ${nodeId} not found`)
+	node.focus()
 }
 
 export const updateNodeState =

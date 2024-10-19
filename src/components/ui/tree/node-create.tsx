@@ -65,7 +65,9 @@ const createNode: (data: Partial<Node_Insert_Input>) => void = pipeAsync(
 		node_id: focusedNode,
 		order: always(0)
 	}),
-	pipeAsync(insertNode, waitForUpdate, focusNode)
+	insertNode,
+	waitForUpdate,
+	focusNode
 )
 
 export const NodeCreate = () => {

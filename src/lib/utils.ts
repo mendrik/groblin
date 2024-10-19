@@ -17,7 +17,7 @@ export const updateSignal = curry(<T>(signal: Signal<T>, fn: Fn<T, T>) => {
 })
 
 export function assertExists<T>(
-	val: T | undefined,
+	val: T | undefined | null,
 	message: string
 ): asserts val is T {
 	if (val == null) {
