@@ -1,7 +1,7 @@
 import {} from '@/lib/dom-events'
 import {} from '@/lib/ramda'
 import { cn } from '@/lib/utils'
-import { $editingNode, $nodeStates, type TreeNode } from '@/state/tree'
+import { $editingNode, type TreeNode, isOpen } from '@/state/tree'
 import { always } from 'ramda'
 import { useRef } from 'react'
 import {} from 'zod'
@@ -16,7 +16,7 @@ type OwnProps = {
 }
 
 export const Node = ({ node, depth }: OwnProps) => {
-	const isOpen = $nodeStates.value[node.id]?.open
+	const open = isOpen(node.id)
 	const editor = useRef<HTMLInputElement>(null)
 	const textBtn = useRef<HTMLButtonElement>(null)
 
@@ -32,7 +32,7 @@ export const Node = ({ node, depth }: OwnProps) => {
 					)}
 					<NodeOptions node={node} editor={editor} />
 				</div>
-				{node.nodes.filter(always(isOpen)).map(child => (
+				{node.nodes.filter(always(open)).map(child => (
 					<Node node={child} key={child.id} depth={depth + 1} />
 				))}
 			</li>

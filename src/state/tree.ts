@@ -21,12 +21,14 @@ import {
 	find,
 	head,
 	isNotEmpty,
+	isNotNil,
 	last,
 	lensProp,
 	mergeDeepLeft,
 	over,
 	pipe,
-	prop
+	prop,
+	when
 } from 'ramda'
 import {} from 'tabbable'
 
@@ -85,6 +87,7 @@ export const $root = signal<TreeNode>()
 export const $nodeStates = signal<Record<string, NodeState>>(
 	getItem('tree-state', {})
 )
+
 export const $previousNode = signal<number>()
 export const $focusedNode = signal<number>()
 export const $nextNode = signal<number>()
@@ -96,8 +99,8 @@ subscribe(
 	GetNodesDocument,
 	pipe(prop('node'), listToTree('id', 'node_id', 'nodes'), setSignal($root))
 )
-$root.subscribe(root =>
-	root ? updateNodeState(root.id, { open: true }) : ($nodeStates.value = {})
+$root.subscribe(
+	when(isNotNil, node => updateNodeState({ open: true })(node.id))
 )
 $nodeStates.subscribe(setItem('tree-state'))
 const $rootUpdates = signal(0)
@@ -117,6 +120,8 @@ export const waitForUpdate = <T>(arg: T): Promise<T> =>
 /** ---- interfaces ---- **/
 export const startEditing = () => ($editingNode.value = $focusedNode.value)
 export const notEditing = () => $editingNode.value === undefined
+export const isOpen = (nodeId: number): boolean =>
+	$nodeStates.value[`${nodeId}`]?.open
 export const stopEditing = () => ($editingNode.value = undefined)
 
 export const setFocusedNode = (nodeId: number) => {
@@ -142,9 +147,6 @@ export const setFocusedNode = (nodeId: number) => {
 		$parentNode.value = parentOf(focused)
 	}
 }
-
-export const openNode = (nodeId: number) =>
-	updateNodeState(nodeId, { open: true })
 
 export const focusedNode = (): number => {
 	assertExists($focusedNode.value, 'Focused node is missing')
@@ -172,18 +174,21 @@ export const focusNode = (nodeId: number) => {
 	)
 }
 
-export const updateNodeState = (nodeId: number, state: Partial<NodeState>) => {
-	$nodeStates.value = over(
-		lensProp(asStr(nodeId)),
-		mergeDeepLeft(state),
-		$nodeStates.value
-	)
-}
+export const updateNodeState =
+	(state: Partial<NodeState>) => (nodeId: number) => {
+		$nodeStates.value = over(
+			lensProp(asStr(nodeId)),
+			mergeDeepLeft(state),
+			$nodeStates.value
+		)
+	}
 
 export const nodeState = (state: Partial<NodeState>) =>
 	Maybe.fromNullable($focusedNode.value)
-		.ifJust(nodeId => updateNodeState(nodeId, state))
+		.ifJust(updateNodeState(state))
 		.ifJust(setFocusedNode)
+
+export const openNode = updateNodeState({ open: true })
 
 export const confirmNodeName = (value: string) =>
 	MaybeAsync.liftMaybe(Maybe.fromNullable($editingNode.value))

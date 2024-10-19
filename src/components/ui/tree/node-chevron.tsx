@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { $nodeStates, type TreeNode, updateNodeState } from '@/state/tree'
+import { type TreeNode, isOpen, updateNodeState } from '@/state/tree'
 import { IconChevronRight } from '@tabler/icons-react'
 import { isNotEmpty } from 'ramda'
 import { Button } from '../button'
@@ -12,7 +12,7 @@ const DummyIcon = () => <div className="w-4 h-4 shrink-0" />
 
 export const NodeChevron = ({ node }: OwnProps) => {
 	const hasChildren = isNotEmpty(node.nodes)
-	const isOpen = $nodeStates.value[node.id]?.open
+	const open = isOpen(node.id)
 
 	return hasChildren ? (
 		<Button
@@ -23,11 +23,11 @@ export const NodeChevron = ({ node }: OwnProps) => {
 		>
 			<IconChevronRight
 				className={cn('w-4 h-4 transition-all duration-100', {
-					'rotate-90': isOpen
+					'rotate-90': open
 				})}
 				focusable={false}
 				tabIndex={-1}
-				onClick={() => updateNodeState(node.id, { open: !isOpen })}
+				onClick={() => updateNodeState({ open: !open })(node.id)}
 			/>
 		</Button>
 	) : (

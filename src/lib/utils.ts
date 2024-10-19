@@ -25,6 +25,16 @@ export function assertExists<T>(
 	}
 }
 
+export function assertThat<T>(
+	predicate: (val: unknown) => val is T,
+	val: unknown,
+	message: string
+): asserts val is T {
+	if (!predicate(val)) {
+		throw new Error(`${message}: ${val} is ${typeof val}`)
+	}
+}
+
 export const failOnNil =
 	<T>(message: string) =>
 	(val: T | null | undefined): T => {

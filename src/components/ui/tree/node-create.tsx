@@ -8,12 +8,13 @@ import {
 } from '@/components/ui/dialog'
 import type { Node_Insert_Input } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
+import { evolveAlt } from '@/lib/evolveAlt'
 import { caseOf, match } from '@/lib/match'
 import { pipeAsync, pipeTapAsync } from '@/lib/ramda'
 import { setSignal } from '@/lib/utils'
 import { focusNode, insertNode, parentNode, waitForUpdate } from '@/state/tree'
 import { signal } from '@preact/signals-react'
-import { F, T, equals as eq, mergeLeft, pipe } from 'ramda'
+import { F, T, always, equals as eq, pipe } from 'ramda'
 import { type TypeOf, nativeEnum, strictObject, string } from 'zod'
 import { Button } from '../button'
 import { asField } from '../zod-form/utils'
@@ -60,9 +61,9 @@ const position = match<[NodeCreatePosition], string>(
 )
 
 const createNode: (data: Partial<Node_Insert_Input>) => void = pipeTapAsync(
-	mergeLeft({
-		node_id: parentNode(),
-		order: 0
+	evolveAlt({
+		node_id: parentNode,
+		order: always(0)
 	}),
 	pipeAsync(insertNode, waitForUpdate, focusNode)
 )
