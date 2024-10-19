@@ -4,6 +4,7 @@ import {
 	type TreeNode,
 	focusNode,
 	nextNode,
+	openNode,
 	previousNode,
 	setFocusedNode,
 	updateNodeState
@@ -28,10 +29,7 @@ export const Tree = ({ root, renderRoot = false }: OwnProps) => {
 					data('node_id', Number.parseInt),
 					updateNodeState({ open: false })
 				)}
-				onArrowRight={pipe(
-					data('node_id', Number.parseInt),
-					updateNodeState({ open: true })
-				)}
+				onArrowRight={pipe(data('node_id', Number.parseInt), openNode)}
 				onArrowDown={pipe(nextNode, focusNode)}
 				onArrowUp={pipe(previousNode, focusNode)}
 			>

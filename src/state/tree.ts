@@ -8,7 +8,6 @@ import {
 	UpdateNodeNameDocument
 } from '@/gql/graphql'
 import { getItem, setItem } from '@/lib/local-storage'
-import {} from '@/lib/ramda'
 import { type TreeOf, listToTree } from '@/lib/tree'
 import { assertExists, failOnNil, setSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
@@ -181,14 +180,14 @@ export const updateNodeState =
 			mergeDeepLeft(state),
 			$nodeStates.value
 		)
+		setFocusedNode(nodeId)
 	}
 
 export const nodeState = (state: Partial<NodeState>) =>
-	Maybe.fromNullable($focusedNode.value)
-		.ifJust(updateNodeState(state))
-		.ifJust(setFocusedNode)
+	Maybe.fromNullable($focusedNode.value).ifJust(updateNodeState(state))
 
 export const openNode = updateNodeState({ open: true })
+export const closeNode = updateNodeState({ open: false })
 
 export const confirmNodeName = (value: string) =>
 	MaybeAsync.liftMaybe(Maybe.fromNullable($editingNode.value))
