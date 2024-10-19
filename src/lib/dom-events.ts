@@ -1,4 +1,4 @@
-import { is } from 'ramda'
+import { is, tryCatch } from 'ramda'
 import { delayP } from 'ramda-adjunct'
 import type { ForwardedRef, SyntheticEvent } from 'react'
 import { assertExists, assertThat } from './utils'
@@ -13,6 +13,10 @@ export const data =
 		assertExists(value, `no data attribute found for key: ${key}`)
 		return transformer(value)
 	}
+
+export const dataInt = (key: string) => data(key, Number.parseInt)
+export const safeDataInt = (key: string) =>
+	tryCatch(dataInt(key), () => (_: SyntheticEvent) => undefined)
 
 export const focusWithin = (container: HTMLElement | null): boolean =>
 	container?.matches(':focus-within') ?? false

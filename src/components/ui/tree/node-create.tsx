@@ -14,7 +14,7 @@ import { pipeAsync, pipeTapAsync } from '@/lib/ramda'
 import { setSignal } from '@/lib/utils'
 import { focusNode, insertNode, parentNode, waitForUpdate } from '@/state/tree'
 import { signal } from '@preact/signals-react'
-import { F, T, always, equals as eq, pipe } from 'ramda'
+import { F, T, always, equals as eq, pipe, tap } from 'ramda'
 import { type TypeOf, nativeEnum, strictObject, string } from 'zod'
 import { Button } from '../button'
 import { asField } from '../zod-form/utils'
@@ -65,6 +65,7 @@ const createNode: (data: Partial<Node_Insert_Input>) => void = pipeTapAsync(
 		node_id: parentNode,
 		order: always(0)
 	}),
+	tap(console.log),
 	pipeAsync(insertNode, waitForUpdate, focusNode)
 )
 

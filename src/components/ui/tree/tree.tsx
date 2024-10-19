@@ -1,15 +1,15 @@
 import { Node } from '@/components/ui/tree/node'
-import { data } from '@/lib/dom-events'
+import { dataInt, safeDataInt } from '@/lib/dom-events'
 import {
 	type TreeNode,
+	closeNode,
 	focusNode,
 	nextNode,
 	openNode,
 	previousNode,
-	setFocusedNode,
-	updateNodeState
+	setFocusedNode
 } from '@/state/tree'
-import { pipe } from 'ramda'
+import { isNotNil, pipe, when } from 'ramda'
 import { useRef } from 'react'
 import KeyListener from '../../utils/key-listener'
 import { NodeCreate } from './node-create'
@@ -25,18 +25,15 @@ export const Tree = ({ root, renderRoot = false }: OwnProps) => {
 	return (
 		<>
 			<KeyListener
-				onArrowLeft={pipe(
-					data('node_id', Number.parseInt),
-					updateNodeState({ open: false })
-				)}
-				onArrowRight={pipe(data('node_id', Number.parseInt), openNode)}
+				onArrowLeft={pipe(dataInt('node_id'), closeNode)}
+				onArrowRight={pipe(dataInt('node_id'), openNode)}
 				onArrowDown={pipe(nextNode, focusNode)}
 				onArrowUp={pipe(previousNode, focusNode)}
 			>
 				<div
 					ref={tree}
 					className="w-full h-full p-1 pl-0 tree"
-					onFocus={pipe(data('node_id', Number), setFocusedNode)}
+					onFocus={pipe(safeDataInt('node_id'), when(isNotNil, setFocusedNode))}
 				>
 					{renderRoot ? (
 						<Node node={root} depth={0} />
