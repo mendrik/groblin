@@ -56,11 +56,18 @@ mutation updateNodeName($id: Int!, $name: String!) {
 `
 
 gql`
-mutation deleteNode($id: Int!) {
+mutation deleteNode($id: Int!, $parent_id: Int!, $order: Int!) {
 	delete_node_by_pk (
 		id: $id
 	) {
 		id
+	}
+
+	update_node(
+		where: { order: { _gte: $order }, node_id: { _eq: $parent_id } },
+		_inc: { order: -1 }
+	) {
+		affected_rows
 	}
 }
 `
@@ -135,6 +142,7 @@ export const updateCurrentNode = (nodeId: number): number => {
 	const openNodes = [
 		...iterateOpenNodes($root.value)
 	] as NonEmptyArray<TreeNode>
+	if (openNodes.length === 0) return $root.value.id
 
 	const clampedList = [last(openNodes), ...openNodes, head(openNodes)].map(
 		node => node.id

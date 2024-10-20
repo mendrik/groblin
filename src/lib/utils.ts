@@ -25,11 +25,11 @@ export function assertExists<T>(
 	}
 }
 
-export function assertThat<T>(
-	predicate: (val: unknown) => val is T,
-	val: unknown,
+export function assertThat<T, R extends T>(
+	predicate: (val: T) => val is R,
+	val: T,
 	message: string
-): asserts val is T {
+): asserts val is R {
 	if (!predicate(val)) {
 		throw new Error(`${message}: ${val} is ${typeof val}`)
 	}
