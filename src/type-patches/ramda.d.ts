@@ -47,13 +47,14 @@ declare module 'ramda' {
 		? NonNullable<T>
 		: Exclude<T, U>
 
-	export function unless<T, S extends T>(
-		pred: (a: T) => a is S,
-		whenFalseFn: (a: ExcludeNever<T, S>) => any
-	): (a: T) => T | ReturnType<typeof whenFalseFn>
+	export function unless<T, U extends T, V>(
+		pred: (a: T) => a is U,
+		whenFalseFn: (a: ExcludeNever<T, U>) => V
+	): (a: T) => T | V
 
-	export function when<T, S extends T>(
-		pred: (a: T) => a is S,
-		whenTrueFn: (a: S) => T
-	): (a: T) => T
+	export function unless<T, U extends T, V>(
+		pred: (a: T) => a is U,
+		whenFalseFn: (a: ExcludeNever<T, U>) => V,
+		a: T
+	): T | V
 }

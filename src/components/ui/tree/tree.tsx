@@ -9,7 +9,7 @@ import {
 	previousNode,
 	updateCurrentNode
 } from '@/state/tree'
-import { isNotNil, pipe, when } from 'ramda'
+import { pipe, when } from 'ramda'
 import { useRef } from 'react'
 import KeyListener from '../../utils/key-listener'
 import { NodeCreate } from './node-create'
@@ -18,6 +18,10 @@ import { NodeDelete } from './node-delete'
 type OwnProps = {
 	root: TreeNode
 	renderRoot?: boolean
+}
+
+function isNotNil<T>(value: T | undefined): value is T {
+	return value !== undefined
 }
 
 export const Tree = ({ root, renderRoot = false }: OwnProps) => {
