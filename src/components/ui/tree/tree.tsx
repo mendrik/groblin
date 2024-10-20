@@ -7,7 +7,7 @@ import {
 	nextNode,
 	openNode,
 	previousNode,
-	setFocusedNode
+	updateCurrentNode
 } from '@/state/tree'
 import { isNotNil, pipe, when } from 'ramda'
 import { useRef } from 'react'
@@ -33,7 +33,10 @@ export const Tree = ({ root, renderRoot = false }: OwnProps) => {
 				<div
 					ref={tree}
 					className="w-full h-full p-1 pl-0 tree"
-					onFocus={pipe(safeDataInt('node_id'), when(isNotNil, setFocusedNode))}
+					onFocus={pipe(
+						safeDataInt('node_id'),
+						when(isNotNil, updateCurrentNode)
+					)}
 				>
 					{renderRoot ? (
 						<Node node={root} depth={0} />

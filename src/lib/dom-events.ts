@@ -15,8 +15,11 @@ export const data =
 	}
 
 export const dataInt = (key: string) => data(key, Number.parseInt)
-export const safeDataInt = (key: string) =>
-	tryCatch(dataInt(key), () => (_: SyntheticEvent) => undefined)
+
+export const safeDataInt = (
+	key: string
+): ((e: SyntheticEvent) => number | undefined) =>
+	tryCatch(dataInt(key), () => undefined)
 
 export const focusWithin = (container: HTMLElement | null): boolean =>
 	container?.matches(':focus-within') ?? false

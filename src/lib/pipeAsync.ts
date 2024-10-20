@@ -32,13 +32,31 @@ export function pipeAsync<A, B, C, D, E, F>(
 	fn5: AsyncFn<Awaited<E>, F>
 ): (input: A) => Promise<Awaited<F>>
 
+export function pipeAsync<A, B, C, D, E, F, G>(
+	fn1: AsyncFn<A, B>,
+	fn2: AsyncFn<Awaited<B>, C>,
+	fn3: AsyncFn<Awaited<C>, D>,
+	fn4: AsyncFn<Awaited<D>, E>,
+	fn5: AsyncFn<Awaited<E>, F>,
+	fn6: AsyncFn<Awaited<F>, G>
+): (input: A) => Promise<Awaited<G>>
+
+export function pipeAsync<A, B, C, D, E, F, G, H>(
+	fn1: AsyncFn<A, B>,
+	fn2: AsyncFn<Awaited<B>, C>,
+	fn3: AsyncFn<Awaited<C>, D>,
+	fn4: AsyncFn<Awaited<D>, E>,
+	fn5: AsyncFn<Awaited<E>, F>,
+	fn6: AsyncFn<Awaited<F>, G>,
+	fn7: AsyncFn<Awaited<G>, H>
+): (input: A) => Promise<Awaited<H>>
+
 export function pipeAsync(
 	...fns: Array<(arg: any) => any>
 ): (input: any) => Promise<any> {
 	return (input: any) =>
 		fns.reduce(
-			(promiseChain, currentFunction) =>
-				promiseChain.then(res => currentFunction(res)),
+			(promiseChain, currentFunction) => promiseChain.then(currentFunction),
 			Promise.resolve(input)
 		)
 }

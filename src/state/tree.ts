@@ -123,7 +123,9 @@ export const isOpen = (nodeId: number): boolean =>
 	$nodeStates.value[`${nodeId}`]?.open
 export const stopEditing = () => ($editingNode.value = undefined)
 
-export const setFocusedNode = (nodeId: number) => {
+export const updateCurrentNode = (nodeId: number) => {
+	console.log(`updateCurrentNode: ${node(nodeId).name}`)
+
 	assertExists($root.value, 'Root node is missing')
 	const openNodes = [
 		...iterateOpenNodes($root.value)
@@ -150,6 +152,13 @@ export const setFocusedNode = (nodeId: number) => {
 export const focusedNode = (): number => {
 	assertExists($focusedNode.value, 'Focused node is missing')
 	return $focusedNode.value
+}
+
+export const node = (nodeId: number): TreeNode => {
+	assertExists($root.value, 'Root node is missing')
+	const res = [...iterateNodes($root.value)].find(node => node.id === nodeId)
+	assertExists(res, `Node with id ${nodeId} not found`)
+	return res
 }
 
 export const previousNode = (): number => {
@@ -180,7 +189,7 @@ export const updateNodeState =
 			mergeDeepLeft(state),
 			$nodeStates.value
 		)
-		setFocusedNode(nodeId)
+		updateCurrentNode(nodeId)
 	}
 
 export const nodeState = (state: Partial<NodeState>) =>

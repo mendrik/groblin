@@ -15,17 +15,19 @@ import {
 	deleteNode,
 	focusNode,
 	focusedNode,
+	node,
 	previousNode,
 	waitForUpdate
 } from '@/state/tree'
 import { signal } from '@preact/signals-react'
-import { F, pipe } from 'ramda'
+import { F, pipe, tap } from 'ramda'
 
 export const $deleteDialogOpen = signal(false)
 const close = pipe(F, setSignal($deleteDialogOpen))
 
 export const deleteNodeCommand = pipeAsync(
 	focusedNode,
+	tap(x => console.log('deleting node', node(x).name)),
 	deleteNode,
 	waitForUpdate,
 	previousNode,
@@ -48,7 +50,10 @@ export const NodeDelete = () => (
 			</AlertDialogHeader>
 			<AlertDialogFooter>
 				<AlertDialogCancel onClick={close}>Cancel</AlertDialogCancel>
-				<AlertDialogAction onClick={pipe(deleteNodeCommand, close)}>
+				<AlertDialogAction
+					onClick={pipe(tap(console.log), deleteNodeCommand, close)}
+					autoFocus
+				>
 					Continue
 				</AlertDialogAction>
 			</AlertDialogFooter>

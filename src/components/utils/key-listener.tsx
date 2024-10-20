@@ -9,9 +9,10 @@ type KeyHandlers = {
 
 interface KeyListenerProps extends KeyHandlers {
 	children?: React.ReactNode
+	ref?: React.MutableRefObject<Element>
 }
 
-const KeyListener = ({ children, ...handlers }: KeyListenerProps) => {
+const KeyListener = ({ children, ref, ...handlers }: KeyListenerProps) => {
 	useEvent('keydown', (event: React.KeyboardEvent) => {
 		const handlerName = `on${event.key}` as keyof KeyHandlers
 
