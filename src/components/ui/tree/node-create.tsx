@@ -17,6 +17,7 @@ import {
 	focusedNode,
 	insertNode,
 	openNode,
+	refocus,
 	updateCurrentNode,
 	waitForUpdate
 } from '@/state/tree'
@@ -84,7 +85,7 @@ export const NodeCreate = () => {
 		<Dialog open={$createDialogOpen.value}>
 			<DialogContent
 				className="border-muted-foreground"
-				onEscapeKeyDown={close}
+				onEscapeKeyDown={pipe(tap(console.log), close, refocus)}
 				onKeyDown={stopPropagation}
 				onInteractOutside={close}
 			>
@@ -97,7 +98,11 @@ export const NodeCreate = () => {
 						specified location.
 					</DialogDescription>
 				</DialogHeader>
-				<ZodForm schema={newNodeSchema} columns={2} onSubmit={createNode}>
+				<ZodForm
+					schema={newNodeSchema}
+					columns={2}
+					onSubmit={pipe(createNode, close)}
+				>
 					<DialogFooter className="gap-y-2">
 						<Button onClick={close} variant="secondary">
 							Cancel
