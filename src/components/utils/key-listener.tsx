@@ -1,36 +1,48 @@
-import { is } from 'ramda'
-import { useEvent } from 'react-use'
 import type { Key } from 'ts-key-enum'
 
 type KeyHandlers = {
-	[K in `on${Capitalize<keyof typeof Key>}`]?: (
-		event: React.KeyboardEvent
-	) => void
+	[K in `on${Capitalize<keyof typeof Key>}`]?: (event: KeyboardEvent) => void
 }
 
 interface KeyListenerProps extends KeyHandlers {
 	children?: React.ReactNode
-	container?: React.RefObject<Element>
 }
 
-const KeyListener = ({
-	children,
-	container,
-	...handlers
-}: KeyListenerProps) => {
-	useEvent('keydown', (event: React.KeyboardEvent) => {
-		const handlerName = `on${event.key}` as keyof KeyHandlers
-		const { current } = container ?? {}
-		if (
-			((is(HTMLElement, current) && current.contains(event.target as Node)) ||
-				!current) &&
-			handlerName in handlers
-		) {
-			handlers[handlerName]?.(event)
+import type React from 'react'
+import { useEffect, useRef } from 'react'
+
+interface KeyListenerProps extends KeyHandlers {
+	children?: React.ReactNode
+}
+
+const KeyListener = ({ children, ...handlers }: KeyListenerProps) => {
+	const ref = useRef<HTMLDivElement>(null)
+
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			const handlerName = `on${e.key}` as keyof KeyHandlers
+			if (handlerName in handlers) {
+				handlers[handlerName]?.(e)
+			}
+		}
+
+		const currentRef = ref.current
+		if (currentRef) {
+			currentRef.addEventListener('keydown', handleKeyDown)
+		}
+
+		return () => {
+			if (currentRef) {
+				currentRef.removeEventListener('keydown', handleKeyDown)
+			}
 		}
 	})
 
-	return children || null
+	return (
+		<div className="contents" ref={ref}>
+			{children || null}
+		</div>
+	)
 }
 
 export default KeyListener

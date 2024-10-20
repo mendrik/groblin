@@ -5,7 +5,7 @@ import { assertExists, assertThat } from './utils'
 
 export const data =
 	<FN extends (value: string) => any>(key: string, transformer: FN) =>
-	(e: SyntheticEvent): ReturnType<FN> => {
+	(e: Event | SyntheticEvent): ReturnType<FN> => {
 		assertThat(is(Element), e.target, 'target is not an HTMLElement')
 		const dataElement = e.target.closest(`[data-${key}]`)
 		assertThat(is(HTMLElement), dataElement, 'no data attribute found')
@@ -18,7 +18,7 @@ export const dataInt = (key: string) => data(key, Number.parseInt)
 
 export const safeDataInt = (
 	key: string
-): ((e: SyntheticEvent) => number | undefined) =>
+): ((e: Event | SyntheticEvent) => number | undefined) =>
 	tryCatch(dataInt(key), () => undefined)
 
 export const focusWithin = (container: HTMLElement | null): boolean =>

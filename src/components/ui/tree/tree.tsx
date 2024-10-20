@@ -33,7 +33,6 @@ export const Tree = ({ root, renderRoot = false }: OwnProps) => {
 				onArrowRight={pipe(dataInt('node_id'), openNode)}
 				onArrowDown={pipe(nextNode, focusNode)}
 				onArrowUp={pipe(previousNode, focusNode)}
-				container={tree}
 			>
 				<div
 					ref={tree}

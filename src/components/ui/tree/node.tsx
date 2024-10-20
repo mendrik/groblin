@@ -21,7 +21,7 @@ export const Node = ({ node, depth }: OwnProps) => {
 	const textBtn = useRef<HTMLButtonElement>(null)
 
 	return (
-		<ol className={cn(`list-none m-0`)} style={{ paddingLeft: depth * 16 }}>
+		<ol className={cn(`list-none m-0`)} style={{ paddingLeft: depth * 8 }}>
 			<li data-node_id={node.id}>
 				<div className="flex flex-row items-center justify-start w-full gap-1">
 					<NodeChevron node={node} />
