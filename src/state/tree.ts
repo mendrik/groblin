@@ -123,9 +123,7 @@ export const isOpen = (nodeId: number): boolean =>
 	$nodeStates.value[`${nodeId}`]?.open
 export const stopEditing = () => ($editingNode.value = undefined)
 
-export const updateCurrentNode = (nodeId: number) => {
-	console.log(`updateCurrentNode: ${node(nodeId).name}`)
-
+export const updateCurrentNode = (nodeId: number): number => {
 	assertExists($root.value, 'Root node is missing')
 	const openNodes = [
 		...iterateOpenNodes($root.value)
@@ -147,6 +145,7 @@ export const updateCurrentNode = (nodeId: number) => {
 		$nextNode.value = next
 		$parentNode.value = parentOf(focused)
 	}
+	return nodeId
 }
 
 export const focusedNode = (): number => {

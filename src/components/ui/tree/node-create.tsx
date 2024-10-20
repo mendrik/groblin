@@ -12,9 +12,16 @@ import { evolveAlt } from '@/lib/evolveAlt'
 import { caseOf, match } from '@/lib/match'
 import { pipeAsync } from '@/lib/pipeAsync'
 import { setSignal } from '@/lib/utils'
-import { focusNode, focusedNode, insertNode, waitForUpdate } from '@/state/tree'
+import {
+	focusNode,
+	focusedNode,
+	insertNode,
+	openNode,
+	updateCurrentNode,
+	waitForUpdate
+} from '@/state/tree'
 import { signal } from '@preact/signals-react'
-import { F, T, always, equals as eq, pipe } from 'ramda'
+import { F, T, always, equals as eq, pipe, tap } from 'ramda'
 import { type TypeOf, nativeEnum, strictObject, string } from 'zod'
 import { Button } from '../button'
 import { asField } from '../zod-form/utils'
@@ -65,7 +72,9 @@ const createNode: (data: Partial<Node_Insert_Input>) => void = pipeAsync(
 		node_id: focusedNode,
 		order: always(0)
 	}),
+	tap(({ node_id }) => openNode(node_id)),
 	insertNode,
+	updateCurrentNode,
 	waitForUpdate,
 	focusNode
 )

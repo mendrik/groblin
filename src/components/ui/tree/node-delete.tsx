@@ -50,10 +50,7 @@ export const NodeDelete = () => (
 			</AlertDialogHeader>
 			<AlertDialogFooter>
 				<AlertDialogCancel onClick={close}>Cancel</AlertDialogCancel>
-				<AlertDialogAction
-					onClick={pipe(tap(console.log), deleteNodeCommand, close)}
-					autoFocus
-				>
+				<AlertDialogAction onClick={pipe(deleteNodeCommand, close)} autoFocus>
 					Continue
 				</AlertDialogAction>
 			</AlertDialogFooter>
