@@ -40,7 +40,7 @@ export function caseOf<
 export function match<Args extends readonly unknown[], R>(
 	...cases: MatchCase<readonly GuardOrPredicate[], Args, R>[]
 ) {
-	return (...values: Args): R | undefined => {
+	return (...values: Args): R => {
 		for (const [predicates, handler] of cases) {
 			if (predicates.length !== values.length) continue
 
@@ -49,6 +49,6 @@ export function match<Args extends readonly unknown[], R>(
 				return handler(...(values as HandlerArgs<typeof predicates, Args>))
 			}
 		}
-		return undefined
+		throw new Error('No match found')
 	}
 }

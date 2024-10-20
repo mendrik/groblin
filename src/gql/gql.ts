@@ -15,16 +15,16 @@ import * as types from './graphql';
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 const documents = {
-    "\nsubscription GetNodes {     \n\tnode( order_by: { id: asc }) {\n\t\tid\n\t\tname\n\t\tnode_id\n\t\ttype\n\t\torder\n\t}\n}\n": types.GetNodesDocument,
+    "\nsubscription GetNodes {     \n\tnode( order_by: { order: asc }) {\n\t\tid\n\t\tname\n\t\tnode_id\n\t\ttype\n\t\torder\n\t}\n}\n": types.GetNodesDocument,
     "\nmutation updateNodeName($id: Int!, $name: String!) {\n\tupdate_node_by_pk (\n\tpk_columns: { id: $id }\n\t_set: { name: $name }\n\t) { \n\t\tid\n\t}\n}\n": types.UpdateNodeNameDocument,
     "\nmutation deleteNode($id: Int!) {\n\tdelete_node_by_pk (\n\t\tid: $id\n\t) {\n\t\tid\n\t}\n}\n": types.DeleteNodeDocument,
-    "\nmutation insert_node($object: node_insert_input!) {\n  \tinsert_node_one(object: $object) {\n    \tid\n\t}\n}\n": types.Insert_NodeDocument,
+    "\nmutation insert_node($object: node_insert_input!, $parent_id: Int!, $order: Int!) {\n\tupdate_node(\n\t\twhere: { order: { _gte: $order }, node_id: { _eq: $parent_id } },\n\t\t_inc: { order: 1 }\n\t) {\n\t\taffected_rows\n\t}\n\n  \tinsert_node_one(object: $object) {\n    \tid\n\t}\n}\n": types.Insert_NodeDocument,
 };
 
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\nsubscription GetNodes {     \n\tnode( order_by: { id: asc }) {\n\t\tid\n\t\tname\n\t\tnode_id\n\t\ttype\n\t\torder\n\t}\n}\n"): typeof import('./graphql').GetNodesDocument;
+export function graphql(source: "\nsubscription GetNodes {     \n\tnode( order_by: { order: asc }) {\n\t\tid\n\t\tname\n\t\tnode_id\n\t\ttype\n\t\torder\n\t}\n}\n"): typeof import('./graphql').GetNodesDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -36,7 +36,7 @@ export function graphql(source: "\nmutation deleteNode($id: Int!) {\n\tdelete_no
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\nmutation insert_node($object: node_insert_input!) {\n  \tinsert_node_one(object: $object) {\n    \tid\n\t}\n}\n"): typeof import('./graphql').Insert_NodeDocument;
+export function graphql(source: "\nmutation insert_node($object: node_insert_input!, $parent_id: Int!, $order: Int!) {\n\tupdate_node(\n\t\twhere: { order: { _gte: $order }, node_id: { _eq: $parent_id } },\n\t\t_inc: { order: 1 }\n\t) {\n\t\taffected_rows\n\t}\n\n  \tinsert_node_one(object: $object) {\n    \tid\n\t}\n}\n"): typeof import('./graphql').Insert_NodeDocument;
 
 
 export function graphql(source: string) {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { listToTree } from './tree.ts'
+import { listToTree } from './list-to-tree.ts'
 
 describe('listToTree', () => {
 	it('converts list to tree', () => {

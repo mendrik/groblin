@@ -9,7 +9,7 @@ import {
 	AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import { stopPropagation } from '@/lib/dom-events'
-import { pipeAsync } from '@/lib/pipeAsync'
+import { pipeAsync } from '@/lib/pipe-async'
 import { setSignal } from '@/lib/utils'
 import {
 	deleteNode,

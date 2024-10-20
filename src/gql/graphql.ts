@@ -347,10 +347,12 @@ export type DeleteNodeMutation = { __typename?: 'mutation_root', delete_node_by_
 
 export type Insert_NodeMutationVariables = Exact<{
   object: Node_Insert_Input;
+  parent_id: Scalars['Int']['input'];
+  order: Scalars['Int']['input'];
 }>;
 
 
-export type Insert_NodeMutation = { __typename?: 'mutation_root', insert_node_one?: { __typename?: 'node', id: number } | null };
+export type Insert_NodeMutation = { __typename?: 'mutation_root', update_node?: { __typename?: 'node_mutation_response', affected_rows: number } | null, insert_node_one?: { __typename?: 'node', id: number } | null };
 
 export class TypedDocumentString<TResult, TVariables>
   extends String
@@ -369,7 +371,7 @@ export class TypedDocumentString<TResult, TVariables>
 
 export const GetNodesDocument = new TypedDocumentString(`
     subscription GetNodes {
-  node(order_by: {id: asc}) {
+  node(order_by: {order: asc}) {
     id
     name
     node_id
@@ -393,7 +395,13 @@ export const DeleteNodeDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<DeleteNodeMutation, DeleteNodeMutationVariables>;
 export const Insert_NodeDocument = new TypedDocumentString(`
-    mutation insert_node($object: node_insert_input!) {
+    mutation insert_node($object: node_insert_input!, $parent_id: Int!, $order: Int!) {
+  update_node(
+    where: {order: {_gte: $order}, node_id: {_eq: $parent_id}}
+    _inc: {order: 1}
+  ) {
+    affected_rows
+  }
   insert_node_one(object: $object) {
     id
   }

@@ -1,5 +1,5 @@
 import { describe, expect, expectTypeOf, test } from 'vitest'
-import { pipeAsync } from './pipeAsync'
+import { pipeAsync } from './pipe-async'
 
 describe('pipeAsync', () => {
 	test('should correctly pipe synchronous and asynchronous functions', async () => {

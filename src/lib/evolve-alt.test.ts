@@ -1,7 +1,7 @@
 import { always, inc, pipe, prop } from 'ramda'
 // Import the necessary functions from Vitest
 import { describe, expect, it } from 'vitest'
-import { evolveAlt } from './evolveAlt' // Adjust the import path accordingly
+import { evolveAlt } from './evolve-alt' // Adjust the import path accordingly
 
 describe('evolveAlt', () => {
 	it('should transform existing properties correctly', () => {

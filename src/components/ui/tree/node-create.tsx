@@ -8,21 +8,23 @@ import {
 } from '@/components/ui/dialog'
 import type { Node_Insert_Input } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
-import { evolveAlt } from '@/lib/evolveAlt'
+import { evolveAlt } from '@/lib/evolve-alt'
 import { caseOf, match } from '@/lib/match'
-import { pipeAsync } from '@/lib/pipeAsync'
+import { pipeAsync } from '@/lib/pipe-async'
 import { setSignal } from '@/lib/utils'
 import {
+	asNode,
 	focusNode,
 	focusedNode,
 	insertNode,
 	openNode,
+	parentNode,
 	refocus,
 	updateCurrentNode,
 	waitForUpdate
 } from '@/state/tree'
 import { signal } from '@preact/signals-react'
-import { F, T, always, equals as eq, pipe, tap } from 'ramda'
+import { F, T, equals as eq, pipe, tap } from 'ramda'
 import { type TypeOf, nativeEnum, strictObject, string } from 'zod'
 import { Button } from '../button'
 import { asField } from '../zod-form/utils'
@@ -68,10 +70,31 @@ const position = match<[NodeCreatePosition], string>(
 	caseOf([eq('sibling-below')], _ => 'as a sibling below')
 )
 
+const parent = match<[NodeCreatePosition], number>(
+	caseOf([eq('child')], focusedNode),
+	caseOf([eq('sibling-above')], () => parentNode()),
+	caseOf([eq('sibling-below')], () => parentNode())
+)
+
+const order = match<[NodeCreatePosition], number>(
+	caseOf(
+		[eq('child')],
+		pipe(focusedNode, asNode, n => n.nodes.length)
+	),
+	caseOf(
+		[eq('sibling-above')],
+		pipe(focusedNode, asNode, n => n.order)
+	),
+	caseOf(
+		[eq('sibling-below')],
+		pipe(focusedNode, asNode, n => n.order + 1)
+	)
+)
+
 const createNode: (data: Partial<Node_Insert_Input>) => void = pipeAsync(
 	evolveAlt({
-		node_id: focusedNode,
-		order: always(0)
+		node_id: () => parent($createNodePosition.value),
+		order: () => order($createNodePosition.value)
 	}),
 	tap(({ node_id }) => openNode(node_id)),
 	insertNode,

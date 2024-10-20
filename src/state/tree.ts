@@ -7,8 +7,8 @@ import {
 	type Node_Insert_Input,
 	UpdateNodeNameDocument
 } from '@/gql/graphql'
+import { type TreeOf, listToTree } from '@/lib/list-to-tree'
 import { getItem, setItem } from '@/lib/local-storage'
-import { type TreeOf, listToTree } from '@/lib/tree'
 import { assertExists, failOnNil, setSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import gql from 'graphql-tag'
@@ -34,7 +34,7 @@ import {} from 'tabbable'
 /** ---- queries ---- **/
 gql`
 subscription GetNodes {     
-	node( order_by: { id: asc }) {
+	node( order_by: { order: asc }) {
 		id
 		name
 		node_id
@@ -66,7 +66,14 @@ mutation deleteNode($id: Int!) {
 `
 
 gql`
-mutation insert_node($object: node_insert_input!) {
+mutation insert_node($object: node_insert_input!, $parent_id: Int!, $order: Int!) {
+	update_node(
+		where: { order: { _gte: $order }, node_id: { _eq: $parent_id } },
+		_inc: { order: 1 }
+	) {
+		affected_rows
+	}
+
   	insert_node_one(object: $object) {
     	id
 	}
@@ -153,7 +160,7 @@ export const focusedNode = (): number => {
 	return $focusedNode.value
 }
 
-export const node = (nodeId: number): TreeNode => {
+export const asNode = (nodeId: number): TreeNode => {
 	assertExists($root.value, 'Root node is missing')
 	const res = [...iterateNodes($root.value)].find(node => node.id === nodeId)
 	assertExists(res, `Node with id ${nodeId} not found`)
@@ -215,10 +222,17 @@ export const deleteNode = (id: number) =>
 		.map(id => query(DeleteNodeDocument, { id }))
 		.run()
 
-export const insertNode = (object: Node_Insert_Input): Promise<number> =>
-	query(Insert_NodeDocument, { object })
+export const insertNode = (object: Node_Insert_Input): Promise<number> => {
+	assertExists(object.node_id, 'insertNode needs a valid node_id')
+	assertExists(object.order, 'insertNode needs a valid order')
+	return query(Insert_NodeDocument, {
+		object,
+		order: object.order,
+		parent_id: object.node_id
+	})
 		.then(x => x.insert_node_one?.id)
 		.then(failOnNil('Failed to insert node'))
+}
 
 function* iterateNodes(root: TreeNode): Generator<TreeNode> {
 	yield root
