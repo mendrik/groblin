@@ -36,11 +36,7 @@ export const deleteNodeCommand = pipeAsync(
 
 export const NodeDelete = () => (
 	<AlertDialog open={$deleteDialogOpen.value}>
-		<AlertDialogContent
-			className="border-muted-foreground"
-			onEscapeKeyDown={close}
-			onKeyDown={stopPropagation}
-		>
+		<AlertDialogContent onEscapeKeyDown={close} onKeyDown={stopPropagation}>
 			<AlertDialogHeader>
 				<AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
 				<AlertDialogDescription>

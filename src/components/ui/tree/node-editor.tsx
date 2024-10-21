@@ -41,7 +41,7 @@ export const NodeEditor = forwardRef<HTMLInputElement, OwnProps>(
 					defaultValue={node.name}
 					icon={IconPencil}
 					ref={ref}
-					className="py-1 h-7 bg-teal-950"
+					className="py-1 h-7 bg-input"
 					onBlur={pipeTap(stopPropagation, stopEditing)}
 				/>
 			</KeyListener>

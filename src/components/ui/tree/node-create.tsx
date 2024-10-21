@@ -115,7 +115,6 @@ export const NodeCreate = () => {
 	return (
 		<Dialog open={$createDialogOpen.value}>
 			<DialogContent
-				className="border-muted-foreground"
 				onEscapeKeyDown={pipe(close, refocus)}
 				onKeyDown={stopPropagation}
 				onInteractOutside={close}
