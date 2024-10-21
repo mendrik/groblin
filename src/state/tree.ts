@@ -44,7 +44,7 @@ subscription GetNodes {
 `
 
 gql`
-mutation updateNodeName($id: Int!, $name: String!) {
+mutation updateNodeName($id: bigint!, $name: String!) {
 	update_node_by_pk (
 	pk_columns: { id: $id }
 	_set: { name: $name }
@@ -55,7 +55,7 @@ mutation updateNodeName($id: Int!, $name: String!) {
 `
 
 gql`
-mutation deleteNode($id: Int!, $parent_id: Int!, $order: Int!) {
+mutation deleteNode($id: bigint!, $parent_id: bigint!, $order: Int!) {
 	delete_node_by_pk (
 		id: $id
 	) {
@@ -72,7 +72,7 @@ mutation deleteNode($id: Int!, $parent_id: Int!, $order: Int!) {
 `
 
 gql`
-mutation insert_node($object: node_insert_input!, $parent_id: Int!, $order: Int!) {
+mutation insert_node($object: node_insert_input!, $parent_id: bigint!, $order: Int!) {
 	update_node(
 		where: { order: { _gte: $order }, node_id: { _eq: $parent_id } },
 		_inc: { order: 1 }
