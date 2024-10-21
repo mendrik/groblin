@@ -100,7 +100,6 @@ const order = match<[NodeCreatePosition], number>(
 )
 
 const createNodeCommand: (data: Partial<Node_Insert_Input>) => void = pipeAsync(
-	tap(x => console.log('createNodeCommand', x)),
 	evolveAlt({
 		node_id: () => parent($createNodePosition.value),
 		order: () => order($createNodePosition.value)
