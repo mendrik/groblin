@@ -29,7 +29,6 @@ import {
 	prop,
 	when
 } from 'ramda'
-import {} from 'tabbable'
 
 /** ---- queries ---- **/
 gql`

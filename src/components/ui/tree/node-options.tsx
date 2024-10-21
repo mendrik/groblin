@@ -39,7 +39,6 @@ export const NodeOptions = ({ node, editor }: OwnProps) => {
 				/>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent
-				className="border-muted-foreground"
 				onCloseAutoFocus={preventDefault}
 				onKeyDown={stopPropagation}
 			>
