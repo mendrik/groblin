@@ -37,7 +37,7 @@ export const Tree = ({ root }: OwnProps) => {
 			>
 				<div
 					ref={tree}
-					className="w-full h-full p-1 tree"
+					className="w-full px-2 tree grid-lines"
 					onFocus={pipe(
 						safeDataInt('node_id'),
 						when(isNotNil, updateCurrentNode)

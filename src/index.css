@@ -109,3 +109,8 @@
   }
 }
 
+
+.grid-lines {
+  background-image: linear-gradient(to bottom, transparent 27px, hsl(var(--border) / 50%) 28px);
+  background-size: 100% 28px; /* Repeat every 28 pixels */
+}
