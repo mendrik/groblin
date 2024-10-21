@@ -1,4 +1,5 @@
 import { Node } from '@/components/ui/tree/node'
+import { EmptyList } from '@/components/utils/empty-list'
 import { dataInt, safeDataInt } from '@/lib/dom-events'
 import {
 	type TreeNode,
@@ -12,19 +13,19 @@ import {
 import { pipe, when } from 'ramda'
 import { useRef } from 'react'
 import KeyListener from '../../utils/key-listener'
-import { NodeCreate } from './node-create'
+import { Button } from '../button'
+import { NodeCreate, openNodeCreate } from './node-create'
 import { NodeDelete } from './node-delete'
 
 type OwnProps = {
 	root: TreeNode
-	renderRoot?: boolean
 }
 
 function isNotNil<T>(value: T | undefined): value is T {
 	return value !== undefined
 }
 
-export const Tree = ({ root, renderRoot = false }: OwnProps) => {
+export const Tree = ({ root }: OwnProps) => {
 	const tree = useRef<HTMLDivElement>(null)
 	return (
 		<>
@@ -42,13 +43,19 @@ export const Tree = ({ root, renderRoot = false }: OwnProps) => {
 						when(isNotNil, updateCurrentNode)
 					)}
 				>
-					{renderRoot ? (
-						<Node node={root} depth={0} />
-					) : (
-						root.nodes.map(child => (
-							<Node node={child} key={child.id} depth={0} />
-						))
-					)}
+					{root.nodes.map(child => (
+						<Node node={child} key={child.id} depth={0} />
+					))}
+					<EmptyList list={root.nodes}>
+						<div className="flex justify-center p-4">
+							<Button
+								onClick={() => openNodeCreate('root-child')}
+								variant="outline"
+							>
+								Add node...
+							</Button>
+						</div>
+					</EmptyList>
 				</div>
 			</KeyListener>
 			<NodeDelete />

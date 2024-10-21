@@ -340,10 +340,12 @@ export type UpdateNodeNameMutation = { __typename?: 'mutation_root', update_node
 
 export type DeleteNodeMutationVariables = Exact<{
   id: Scalars['Int']['input'];
+  parent_id: Scalars['Int']['input'];
+  order: Scalars['Int']['input'];
 }>;
 
 
-export type DeleteNodeMutation = { __typename?: 'mutation_root', delete_node_by_pk?: { __typename?: 'node', id: number } | null };
+export type DeleteNodeMutation = { __typename?: 'mutation_root', delete_node_by_pk?: { __typename?: 'node', id: number } | null, update_node?: { __typename?: 'node_mutation_response', affected_rows: number } | null };
 
 export type Insert_NodeMutationVariables = Exact<{
   object: Node_Insert_Input;
@@ -388,9 +390,15 @@ export const UpdateNodeNameDocument = new TypedDocumentString(`
 }
     `) as unknown as TypedDocumentString<UpdateNodeNameMutation, UpdateNodeNameMutationVariables>;
 export const DeleteNodeDocument = new TypedDocumentString(`
-    mutation deleteNode($id: Int!) {
+    mutation deleteNode($id: Int!, $parent_id: Int!, $order: Int!) {
   delete_node_by_pk(id: $id) {
     id
+  }
+  update_node(
+    where: {order: {_gte: $order}, node_id: {_eq: $parent_id}}
+    _inc: {order: -1}
+  ) {
+    affected_rows
   }
 }
     `) as unknown as TypedDocumentString<DeleteNodeMutation, DeleteNodeMutationVariables>;

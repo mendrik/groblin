@@ -227,7 +227,13 @@ export const confirmNodeName = (value: string) =>
 
 export const deleteNode = (id: number) =>
 	MaybeAsync.liftMaybe(Maybe.fromNullable(id))
-		.map(id => query(DeleteNodeDocument, { id }))
+		.map(id =>
+			query(DeleteNodeDocument, {
+				id,
+				parent_id: parentOf(id),
+				order: asNode(id).order
+			})
+		)
 		.run()
 
 export const insertNode = (object: Node_Insert_Input): Promise<number> => {

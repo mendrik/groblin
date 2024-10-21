@@ -13,6 +13,7 @@ import { caseOf, match } from '@/lib/match'
 import { pipeAsync } from '@/lib/pipe-async'
 import { setSignal } from '@/lib/utils'
 import {
+	$root,
 	asNode,
 	focusNode,
 	focusedNode,
@@ -31,7 +32,11 @@ import { asField } from '../zod-form/utils'
 import { ZodForm } from '../zod-form/zod-form'
 import { EditorType, NodeType } from './types'
 
-type NodeCreatePosition = 'child' | 'sibling-above' | 'sibling-below'
+type NodeCreatePosition =
+	| 'root-child'
+	| 'child'
+	| 'sibling-above'
+	| 'sibling-below'
 
 export const $createDialogOpen = signal(false)
 export const $createNodePosition = signal<NodeCreatePosition>('child')
@@ -65,18 +70,21 @@ const newNodeSchema = strictObject({
 export type NewNodeSchema = TypeOf<typeof newNodeSchema>
 
 const position = match<[NodeCreatePosition], string>(
+	caseOf([eq('root-child')], _ => 'as a root child'),
 	caseOf([eq('child')], _ => 'as a child'),
 	caseOf([eq('sibling-above')], _ => 'as a sibling above'),
 	caseOf([eq('sibling-below')], _ => 'as a sibling below')
 )
 
 const parent = match<[NodeCreatePosition], number>(
+	caseOf([eq('root-child')], () => $root.value?.id as number),
 	caseOf([eq('child')], focusedNode),
 	caseOf([eq('sibling-above')], () => parentNode()),
 	caseOf([eq('sibling-below')], () => parentNode())
 )
 
 const order = match<[NodeCreatePosition], number>(
+	caseOf([eq('root-child')], () => 0),
 	caseOf(
 		[eq('child')],
 		pipe(focusedNode, asNode, n => n.nodes.length)
@@ -96,7 +104,7 @@ const createNode: (data: Partial<Node_Insert_Input>) => void = pipeAsync(
 		node_id: () => parent($createNodePosition.value),
 		order: () => order($createNodePosition.value)
 	}),
-	tap(({ node_id }) => openNode(node_id)),
+	tap(({ node_id }) => node_id && openNode(node_id)),
 	insertNode,
 	updateCurrentNode,
 	waitForUpdate,
