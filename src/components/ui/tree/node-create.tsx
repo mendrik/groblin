@@ -99,7 +99,8 @@ const order = match<[NodeCreatePosition], number>(
 	)
 )
 
-const createNode: (data: Partial<Node_Insert_Input>) => void = pipeAsync(
+const createNodeCommand: (data: Partial<Node_Insert_Input>) => void = pipeAsync(
+	tap(x => console.log('createNodeCommand', x)),
 	evolveAlt({
 		node_id: () => parent($createNodePosition.value),
 		order: () => order($createNodePosition.value)
@@ -132,7 +133,7 @@ export const NodeCreate = () => {
 				<ZodForm
 					schema={newNodeSchema}
 					columns={2}
-					onSubmit={pipe(createNode, close)}
+					onSubmit={pipe(createNodeCommand, close)}
 				>
 					<DialogFooter className="gap-y-2">
 						<Button onClick={close} variant="secondary">
