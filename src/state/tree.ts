@@ -137,6 +137,15 @@ export const isOpen = (nodeId: number): boolean =>
 	$nodeStates.value[`${nodeId}`]?.open
 export const stopEditing = () => ($editingNode.value = undefined)
 
+/**
+ * Many node operations require access to surrounding nodes of the
+ * currtly focused one. For example deleting a node, needs to focus
+ * the previous node after its completion. Instead of cluttering the
+ * code with these look-ups, we keep the node "context" armed at all
+ * times.
+ * @param nodeId
+ * @returns same as input so we can tap through this function
+ */
 export const updateCurrentNode = (nodeId: number): number => {
 	assertExists($root.value, 'Root node is missing')
 	const openNodes = [
@@ -163,6 +172,12 @@ export const updateCurrentNode = (nodeId: number): number => {
 	return nodeId
 }
 
+/**
+ * Technically this is the last focused node, not necessarily the
+ * element that is currently focused. This is because the focus
+ * transers to dialogs and dropdowns, but we still want to know
+ * where the focus was before.
+ */
 export const focusedNode = (): number => {
 	assertExists($focusedNode.value, 'Focused node is missing')
 	return $focusedNode.value
@@ -198,9 +213,7 @@ export const focusNode = (nodeId: number) => {
 
 export const refocus = () => {
 	const nodeId = focusedNode()
-	const node = document.getElementById(`node-${asStr(nodeId)}`)
-	assertExists(node, `Node with id ${nodeId} not found`)
-	setTimeout(() => node.focus(), 40)
+	focusNode(nodeId)
 }
 
 export const updateNodeState =
@@ -226,15 +239,11 @@ export const confirmNodeName = (value: string) =>
 		.run()
 
 export const deleteNode = (id: number) =>
-	MaybeAsync.liftMaybe(Maybe.fromNullable(id))
-		.map(id =>
-			query(DeleteNodeDocument, {
-				id,
-				parent_id: parentOf(id),
-				order: asNode(id).order
-			})
-		)
-		.run()
+	query(DeleteNodeDocument, {
+		id,
+		parent_id: parentOf(id),
+		order: asNode(id).order
+	})
 
 export const insertNode = (object: Node_Insert_Input): Promise<number> => {
 	assertExists(object.node_id, 'insertNode needs a valid node_id')
