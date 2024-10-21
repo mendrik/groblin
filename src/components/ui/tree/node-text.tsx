@@ -1,13 +1,14 @@
 import KeyListener from '@/components/utils/key-listener'
 import { stopPropagation } from '@/lib/dom-events'
 import { pipeTap } from '@/lib/ramda'
-import { setSignal } from '@/lib/utils'
+import { cn, setSignal } from '@/lib/utils'
 import { type TreeNode, notEditing, startEditing } from '@/state/tree'
-import { IconFile, IconFolder } from '@tabler/icons-react'
+import { IconFolder } from '@tabler/icons-react'
 import { T, isNotEmpty, pipe, when } from 'ramda'
 import { forwardRef } from 'react'
 import { Button } from '../button'
 import { $deleteDialogOpen } from './node-delete'
+import { NodeIcon } from './node-icon'
 
 type OwnProps = {
 	node: TreeNode
@@ -37,14 +38,22 @@ export const NodeText = forwardRef<HTMLButtonElement, OwnProps>(
 							stroke={0.5}
 						/>
 					) : (
-						<IconFile
+						<NodeIcon
+							node={node}
 							focusable={false}
 							tabIndex={-1}
 							className="w-4 h-4 shrink-0 text-muted-foreground"
-							stroke={0.5}
+							stroke={1}
 						/>
 					)}
-					<div className="p-1 font-thin truncate">{node.name}</div>
+					<div
+						className={cn(
+							'p-1 truncate',
+							hasChildren ? 'font-medium' : 'font-thin'
+						)}
+					>
+						{node.name}
+					</div>
 				</Button>
 			</KeyListener>
 		)
