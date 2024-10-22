@@ -10,7 +10,7 @@ import {
 import { type TreeOf, listToTree } from '@/lib/list-to-tree'
 import { getItem, setItem } from '@/lib/local-storage'
 import { assertExists, failOnNil, setSignal } from '@/lib/utils'
-import { signal } from '@preact/signals-react'
+import { computed, signal } from '@preact/signals-react'
 import gql from 'graphql-tag'
 import { Maybe, MaybeAsync } from 'purify-ts'
 import {
@@ -264,7 +264,7 @@ function* iterateNodes(root: TreeNode): Generator<TreeNode> {
 	}
 }
 
-function* iterateOpenNodes(root: TreeNode): Generator<TreeNode> {
+export function* iterateOpenNodes(root: TreeNode): Generator<TreeNode> {
 	if (root.id !== $root.value?.id) {
 		yield root
 	}
@@ -284,6 +284,11 @@ export const parentInTree = (
 	}
 	throw new Error(`Parent for node id ${node_id} not found`)
 }
+
+export const $openNodes = computed((): TreeNode[] => {
+	if (!$root.value) return []
+	return [...iterateOpenNodes($root.value)]
+})
 
 export const parentOf = (node_id: number | undefined): number => {
 	assertExists(node_id, 'parentOf needs a valid node_id')

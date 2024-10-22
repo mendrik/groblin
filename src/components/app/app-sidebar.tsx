@@ -1,7 +1,5 @@
 import {} from '@/components/ui/sidebar'
-import { setSignal } from '@/lib/utils'
 import type { Icon } from '@/type-patches/icons'
-import { signal } from '@preact/signals-react'
 import {
 	Tooltip,
 	TooltipContent,
@@ -15,10 +13,8 @@ import {
 	IconSettings,
 	IconUserCog
 } from '@tabler/icons-react'
-import { F, T, pipe } from 'ramda'
+import {} from 'ramda'
 import type { PropsWithChildren } from 'react'
-
-export const $dimmer = signal(false)
 
 type OwnProps = {
 	icon: Icon
@@ -28,12 +24,12 @@ const IconLink = ({ icon: Icon, children }: PropsWithChildren<OwnProps>) => (
 	<li>
 		<Tooltip delayDuration={0}>
 			<TooltipTrigger>
-				<Icon className="w-6 h-6" stroke={1} />
+				<Icon className="w-6 h-6 hover:text-foreground" stroke={1} />
 			</TooltipTrigger>
 			<TooltipContent
 				sideOffset={5}
 				side="right"
-				className="bg-background border border-border rounded-sm px-2 py-0 shadow-2xl z-10 text-foreground"
+				className="bg-muted border border-border rounded-sm px-4 py-2 z-10 text-foreground drop-shadow-tooltip"
 			>
 				{children}
 			</TooltipContent>
@@ -43,13 +39,9 @@ const IconLink = ({ icon: Icon, children }: PropsWithChildren<OwnProps>) => (
 
 export const AppSidebar = () => {
 	return (
-		<div
-			className="p-2 border-r"
-			onMouseEnter={pipe(T, setSignal($dimmer))}
-			onMouseLeave={pipe(F, setSignal($dimmer))}
-		>
+		<div className="p-2 border-r">
 			<TooltipProvider>
-				<ul className="flex flex-col gap-y-2 text-border">
+				<ul className="flex flex-col gap-y-2 text-muted-foreground">
 					<IconLink icon={IconSettings}>Settings</IconLink>
 					<IconLink icon={IconDatabaseExport}>Export</IconLink>
 					<IconLink icon={IconDatabaseImport}>Import</IconLink>

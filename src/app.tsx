@@ -1,5 +1,7 @@
 import './app.css'
 import { DocumentTree } from './components/app/document-tree'
+import { Editors } from './components/app/editors'
+import { Tags } from './components/app/tags'
 import {
 	ResizableHandle,
 	ResizablePanel,
@@ -19,43 +21,21 @@ export function App() {
 				onLayout={setSignal($panelSizes)}
 			>
 				<ResizablePanel defaultSize={$panelSizes.value[0]}>
-					<div className="w-full h-8 shrink-0 border-b" />
+					<div className="w-full h-11 shrink-0" />
 					<DocumentTree />
 				</ResizablePanel>
 				<ResizableHandle />
 				<ResizablePanel defaultSize={$panelSizes.value[1]}>
-					<div className="w-full shrink-0 h-8 border-b" />
-					<div className="flex-1 py-2">
-						<ol className="flex flex-col text-sm px-2 grid-lines">
-							<li className="h-7 flex flex-row items-center">
-								<span>Hallo</span>
-							</li>
-							<li className="h-7 flex flex-row items-center">
-								<span>Hallo</span>
-							</li>
-							<li className="h-7 flex flex-row items-center">
-								<span>Hallo</span>
-							</li>
-							<li className="h-7 flex flex-row items-center">
-								<span>Hallo</span>
-							</li>
-							<li className="h-7 flex flex-row items-center">
-								<span>Hallo</span>
-							</li>
-							<li className="h-7 flex flex-row items-center">
-								<span>Hallo</span>
-							</li>
-							<li className="h-7 flex flex-row items-center">
-								<span>Hallo</span>
-							</li>
-							<li className="h-7 flex flex-row items-center">
-								<span>Hallo</span>
-							</li>
-							<li className="h-7 flex flex-row items-center">
-								<span>Hallo</span>
-							</li>
-						</ol>
+					<div className="w-full shrink-0 h-11 p-1">
+						<Tags />
 					</div>
+					<div className="flex-1 py-2">
+						<Editors />
+					</div>
+				</ResizablePanel>
+				<ResizableHandle />
+				<ResizablePanel defaultSize={$panelSizes.value[2]}>
+					Preview
 				</ResizablePanel>
 			</ResizablePanelGroup>
 		</ScrollArea>

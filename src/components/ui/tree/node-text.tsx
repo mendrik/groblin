@@ -25,7 +25,7 @@ export const NodeText = forwardRef<HTMLButtonElement, OwnProps>(
 				<Button
 					type="button"
 					variant="ghost"
-					className="node flex flex-row px-1 py-0 w-full items-center justify-start h-7"
+					className="node flex flex-row px-1 py-0 w-full items-center justify-start h-7 hover:bg-muted"
 					data-node_id={node.id}
 					id={`node-${node.id}`}
 					ref={ref}
@@ -46,14 +46,7 @@ export const NodeText = forwardRef<HTMLButtonElement, OwnProps>(
 							stroke={1}
 						/>
 					)}
-					<div
-						className={cn(
-							'p-1 truncate',
-							hasChildren ? 'font-medium' : 'font-thin'
-						)}
-					>
-						{node.name}
-					</div>
+					<div className={cn('p-1 truncate font-light')}>{node.name}</div>
 				</Button>
 			</KeyListener>
 		)

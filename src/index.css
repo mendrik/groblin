@@ -39,17 +39,16 @@
     --primary-foreground: 0 0% 0%;
     --secondary: 224 10% 20%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 186 10% 25%;
-    --muted-foreground: 224 5% 65%;
-    --accent: 186 10% 25%;
+    --muted: 225 10% 15%;
+    --muted-foreground: 224 5% 50%;
+    --accent: 225 10% 15%;
     --accent-foreground: 224 5% 90%;
     --destructive: 0 50% 50%;
     --destructive-foreground: 224 5% 90%;
-    --border: 224 20% 50%;
+    --border: 224 17% 17%;
     --input: 224 20% 50%;
     --ring: 224 0% 96%;
     --radius: 0.5rem;
-    
   }
 
   * {
@@ -69,6 +68,6 @@
 
 
 .grid-lines {
-  background-image: linear-gradient(to bottom, transparent 27px, hsl(var(--border) / 50%) 28px);
+  background-image: linear-gradient(to bottom, transparent 27px, hsl(var(--border) / 80%) 28px);
   background-size: 100% 28px; /* Repeat every 28 pixels */
 }
