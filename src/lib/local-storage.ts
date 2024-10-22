@@ -3,7 +3,9 @@ import { tryCatch } from 'ramda'
 export const setItem =
 	(key: string) =>
 	<T>(value: T) =>
-		localStorage.setItem(key, JSON.stringify(value))
+		setTimeout(() => {
+			localStorage.setItem(key, JSON.stringify(value))
+		}, 20)
 
 const safeParse = tryCatch(JSON.parse, console.error)
 
