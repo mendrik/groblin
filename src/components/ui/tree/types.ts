@@ -6,7 +6,8 @@ export enum NodeType {
 	number = 'Number',
 	boolean = 'Boolean',
 	list = 'List',
-	date = 'Date'
+	date = 'Date',
+	schema = 'Schema'
 }
 
 export enum EditorType {
@@ -14,6 +15,8 @@ export enum EditorType {
 	radios = 'radios',
 	multiselect = 'multiselect',
 	input = 'input',
+	password = 'password',
+	email = 'email',
 	switch = 'switch',
 	textarea = 'textarea',
 	richtext = 'richtext'

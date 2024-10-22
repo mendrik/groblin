@@ -4,12 +4,15 @@ import { App } from './app.tsx'
 import './index.css'
 import { Maybe } from 'purify-ts'
 import { StrictMode } from 'react'
+import { Layout } from './components/layout.tsx'
 import { ThemeProvider } from './components/theme-provider.tsx'
 
 const Main = () => (
 	<StrictMode>
 		<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-			<App />
+			<Layout>
+				<App />
+			</Layout>
 		</ThemeProvider>
 	</StrictMode>
 )

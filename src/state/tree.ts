@@ -247,6 +247,7 @@ export const deleteNode = (id: number) =>
 export const insertNode = (object: Node_Insert_Input): Promise<number> => {
 	assertExists(object.node_id, 'insertNode needs a valid node_id')
 	assertExists(object.order, 'insertNode needs a valid order')
+
 	return query(Insert_NodeDocument, {
 		object,
 		order: object.order,
