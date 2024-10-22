@@ -1,15 +1,18 @@
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import { cn } from '@/lib/utils'
 import type { PropsWithChildren } from 'react'
-import { AppSidebar } from './app/app-sidebar'
+import { $dimmer, AppSidebar } from './app/app-sidebar'
 
 export const Layout = ({ children }: PropsWithChildren) => {
 	return (
-		<SidebarProvider>
+		<div className="flex flex-row items-stretch min-h-screen">
 			<AppSidebar />
-			<main>
-				<SidebarTrigger />
+			<main
+				className={cn('flex-1 relative dimmable', {
+					dimmed: $dimmer.value
+				})}
+			>
 				{children}
 			</main>
-		</SidebarProvider>
+		</div>
 	)
 }
