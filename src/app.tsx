@@ -1,6 +1,6 @@
 import './app.css'
 import { DocumentTree } from './components/app/document-tree'
-import { Editors } from './components/app/editors'
+import { NodeValues } from './components/app/editors'
 import { Tags } from './components/app/tags'
 import { Layout } from './components/layout'
 import {
@@ -36,7 +36,7 @@ export function App() {
 							<Tags />
 						</div>
 						<div className="flex-1 py-2">
-							<Editors />
+							<NodeValues />
 						</div>
 					</ResizablePanel>
 					<ResizableHandle />

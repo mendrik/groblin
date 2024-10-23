@@ -37,6 +37,7 @@ export const ForgotPasswordDialog = () => {
 	return (
 		<Dialog open={true}>
 			<DialogContent
+				className="max-w-sm"
 				onEscapeKeyDown={close}
 				onKeyDown={stopPropagation}
 				onInteractOutside={close}

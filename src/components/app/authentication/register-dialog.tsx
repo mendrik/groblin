@@ -19,10 +19,28 @@ import { Link } from 'react-router-dom'
 import { type TypeOf, strictObject, string } from 'zod'
 
 const registrationSchema = strictObject({
+	name: string().describe(
+		asField({
+			label: 'Name',
+			editor: EditorType.input
+		})
+	),
 	email: string().describe(
 		asField({
 			label: 'Email',
 			editor: EditorType.email
+		})
+	),
+	password: string().describe(
+		asField({
+			label: 'Password',
+			editor: EditorType.password
+		})
+	),
+	repeatPassword: string().describe(
+		asField({
+			label: 'Repeat password',
+			editor: EditorType.password
 		})
 	)
 })
@@ -35,6 +53,7 @@ export const RegistrationDialog = () => {
 	return (
 		<Dialog open={true}>
 			<DialogContent
+				className="max-w-sm"
 				onEscapeKeyDown={close}
 				onKeyDown={stopPropagation}
 				onInteractOutside={close}

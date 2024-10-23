@@ -1,6 +1,6 @@
 import { $openNodes } from '@/state/tree'
 
-export const Editors = () => {
+export const NodeValues = () => {
 	return (
 		<ol className="flex flex-col text-sm px-2 grid-lines">
 			{$openNodes.value.map(node => (

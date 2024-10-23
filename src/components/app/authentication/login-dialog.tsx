@@ -47,6 +47,7 @@ export const LoginDialog = () => {
 	return (
 		<Dialog open={true}>
 			<DialogContent
+				className="max-w-sm"
 				onEscapeKeyDown={close}
 				onKeyDown={stopPropagation}
 				onInteractOutside={close}
@@ -57,13 +58,14 @@ export const LoginDialog = () => {
 						Please enter your email and password
 					</DialogDescription>
 				</DialogHeader>
-				<ZodForm schema={loginSchema} onSubmit={pipe(loginCommand)} columns={2}>
+				<ZodForm schema={loginSchema} onSubmit={pipe(loginCommand)}>
 					<DialogFooter className="gap-2 flex flex-row items-center">
 						<div className="mr-auto">
 							Forgot your{' '}
 							<Link to="/password" className="text-link">
 								password
-							</Link>{' '}
+							</Link>
+							<br />
 							or need to{' '}
 							<Link to="/register" className="text-link">
 								register
