@@ -1,6 +1,7 @@
 import { caseOf, match } from '@/lib/match'
 import type { TreeNode } from '@/state/tree'
 import {
+	IconBox,
 	IconCalendar,
 	IconDatabase,
 	IconLetterCase,
@@ -31,5 +32,6 @@ export const NodeIcon = ({ node, ...props }: OwnProps) =>
 		caseOf([isType(NodeType.date), _], (_, p) => <IconCalendar {...p} />),
 		caseOf([isType(NodeType.list), _], (_, p) => <IconDatabase {...p} />),
 		caseOf([isType(NodeType.number), _], (_, p) => <IconNumber123 {...p} />),
-		caseOf([isType(NodeType.string), _], (_, p) => <IconLetterCase {...p} />)
+		caseOf([isType(NodeType.string), _], (_, p) => <IconLetterCase {...p} />),
+		caseOf([isType(NodeType.schema), _], (_, p) => <IconBox {...p} />)
 	)(node, props)
