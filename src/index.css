@@ -23,6 +23,7 @@
     --destructive: 0 100% 30%;
     --destructive-foreground: 217 5% 90%;
     --border: 217 30% 50%;
+    --link: 200 100% 50%;
     --input: 217 30% 26%;
     --ring: 217 45% 27%;
     --radius: 0.5rem;
@@ -46,6 +47,7 @@
     --destructive: 0 50% 50%;
     --destructive-foreground: 224 5% 90%;
     --border: 224 17% 17%;
+    --link: 200 100% 50%;
     --input: 224 20% 50%;
     --ring: 224 0% 96%;
     --radius: 0.5rem;

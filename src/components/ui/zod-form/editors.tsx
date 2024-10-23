@@ -15,6 +15,7 @@ import {
 import { caseOf, match } from '@/lib/match'
 import type { Fn } from '@/type-patches/functions'
 import { Input } from '../input'
+import { Switch } from '../switch'
 import { EditorType, type ZodFormField } from '../tree/types'
 import { innerType, isZodType } from './utils'
 
@@ -61,6 +62,31 @@ const matcher = match<Args, ReactNode>(
 				placeholder={desc.placeholder}
 				autoComplete={desc.autofill}
 			/>
+		</FormControl>
+	)),
+	caseOf([isOfType(EditorType.email), _, _], (desc, _, field) => (
+		<FormControl>
+			<Input
+				{...field}
+				type="email"
+				placeholder={desc.placeholder}
+				autoComplete={desc.autofill}
+			/>
+		</FormControl>
+	)),
+	caseOf([isOfType(EditorType.password), _, _], (desc, _, field) => (
+		<FormControl>
+			<Input
+				{...field}
+				type="password"
+				placeholder={desc.placeholder}
+				autoComplete={desc.autofill}
+			/>
+		</FormControl>
+	)),
+	caseOf([isOfType(EditorType.switch), _, _], (_desc, _, field) => (
+		<FormControl className="block">
+			<Switch {...field} onCheckedChange={field.onChange} />
 		</FormControl>
 	)),
 	caseOf([_, _, _], (a, b, _) => (

@@ -1,18 +1,19 @@
 import { createRoot } from 'react-dom/client'
-
-import { App } from './app.tsx'
 import './index.css'
 import { Maybe } from 'purify-ts'
 import { StrictMode } from 'react'
-import { Layout } from './components/layout.tsx'
+import { BrowserRouter } from 'react-router-dom'
 import { ThemeProvider } from './components/theme-provider.tsx'
+import { LoggedIn } from './routing/logged-in.tsx'
+import { LoggedOut } from './routing/logged-out.tsx'
+import { $user } from './state/user.ts'
 
 const Main = () => (
 	<StrictMode>
 		<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-			<Layout>
-				<App />
-			</Layout>
+			<BrowserRouter basename="/">
+				{$user.value ? <LoggedIn /> : <LoggedOut />}
+			</BrowserRouter>
 		</ThemeProvider>
 	</StrictMode>
 )

@@ -2,6 +2,7 @@ import './app.css'
 import { DocumentTree } from './components/app/document-tree'
 import { Editors } from './components/app/editors'
 import { Tags } from './components/app/tags'
+import { Layout } from './components/layout'
 import {
 	ResizableHandle,
 	ResizablePanel,
@@ -14,34 +15,36 @@ import {} from './state/tree'
 
 export function App() {
 	return (
-		<ScrollArea className="w-full h-full">
-			<ResizablePanelGroup
-				direction="horizontal"
-				className="w-full"
-				onLayout={setSignal($panelSizes)}
-			>
-				<ResizablePanel defaultSize={$panelSizes.value[0]}>
-					<div className="w-full h-11 shrink-0">
-						<h1 className="px-2 py-1 text-xl font-normal text-muted-foreground tracking-tight transition-colors">
-							My Test project
-						</h1>
-					</div>
-					<DocumentTree />
-				</ResizablePanel>
-				<ResizableHandle />
-				<ResizablePanel defaultSize={$panelSizes.value[1]}>
-					<div className="w-full shrink-0 h-11 p-1">
-						<Tags />
-					</div>
-					<div className="flex-1 py-2">
-						<Editors />
-					</div>
-				</ResizablePanel>
-				<ResizableHandle />
-				<ResizablePanel defaultSize={$panelSizes.value[2]}>
-					Preview
-				</ResizablePanel>
-			</ResizablePanelGroup>
-		</ScrollArea>
+		<Layout>
+			<ScrollArea className="w-full h-full">
+				<ResizablePanelGroup
+					direction="horizontal"
+					className="w-full"
+					onLayout={setSignal($panelSizes)}
+				>
+					<ResizablePanel defaultSize={$panelSizes.value[0]}>
+						<div className="w-full h-11 shrink-0">
+							<h1 className="px-2 py-1 text-xl font-normal text-muted-foreground tracking-tight transition-colors">
+								My Test project
+							</h1>
+						</div>
+						<DocumentTree />
+					</ResizablePanel>
+					<ResizableHandle />
+					<ResizablePanel defaultSize={$panelSizes.value[1]}>
+						<div className="w-full shrink-0 h-11 p-1">
+							<Tags />
+						</div>
+						<div className="flex-1 py-2">
+							<Editors />
+						</div>
+					</ResizablePanel>
+					<ResizableHandle />
+					<ResizablePanel defaultSize={$panelSizes.value[2]}>
+						Preview
+					</ResizablePanel>
+				</ResizablePanelGroup>
+			</ScrollArea>
+		</Layout>
 	)
 }
