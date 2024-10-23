@@ -2,9 +2,16 @@ import { caseOf, match } from '@/lib/match'
 import { assertExists } from '@/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { equals as eq } from 'ramda'
-import { type PropsWithChildren, useMemo } from 'react'
+import {
+	type ForwardedRef,
+	type PropsWithChildren,
+	forwardRef,
+	useImperativeHandle,
+	useMemo
+} from 'react'
 import {
 	type DefaultValues,
+	type FieldValues,
 	type Path,
 	type UseFormReturn,
 	useForm
@@ -79,33 +86,41 @@ export const Fields = <T extends ZodRawShape>({
 		/>
 	))
 
-export const ZodForm = <T extends ZodObject<any>>({
-	schema,
-	columns = 1,
-	onSubmit,
-	children
-}: PropsWithChildren<OwnProps<T>>) => {
-	const defaultValues = useMemo(
-		() => generateDefaults(schema) as DefaultValues<TypeOf<T>>,
-		[schema]
-	)
-
-	const form = useForm<TypeOf<T>>({
-		resolver: zodResolver(schema),
-		defaultValues
-	})
-
-	return (
-		<Form {...form}>
-			<form
-				onSubmit={form.handleSubmit(onSubmit)}
-				className="flex flex-col gap-6"
-			>
-				<div className={`grid ${cols(columns)} gap-4`}>
-					<Fields form={form} schema={schema} />
-				</div>
-				{children}
-			</form>
-		</Form>
-	)
+export type FormApi<F extends FieldValues> = {
+	formState: UseFormReturn<F>['formState']
 }
+
+export const ZodForm = forwardRef(
+	<T extends ZodObject<any>>(
+		{ schema, columns = 1, onSubmit, children }: PropsWithChildren<OwnProps<T>>,
+		ref: ForwardedRef<FormApi<TypeOf<T>>>
+	) => {
+		const defaultValues = useMemo(
+			() => generateDefaults(schema) as DefaultValues<TypeOf<T>>,
+			[schema]
+		)
+
+		const form = useForm<TypeOf<T>>({
+			resolver: zodResolver(schema),
+			defaultValues
+		})
+
+		useImperativeHandle(ref, () => ({
+			formState: form.formState
+		}))
+
+		return (
+			<Form {...form}>
+				<form
+					onSubmit={form.handleSubmit(onSubmit)}
+					className="flex flex-col gap-6"
+				>
+					<div className={`grid ${cols(columns)} gap-4`}>
+						<Fields form={form} schema={schema} />
+					</div>
+					{children}
+				</form>
+			</Form>
+		)
+	}
+)

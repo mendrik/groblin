@@ -26,10 +26,11 @@ import {
 } from '@/state/tree'
 import { signal } from '@preact/signals-react'
 import { F, T, equals as eq, pipe, tap } from 'ramda'
+import { useRef } from 'react'
 import { type TypeOf, nativeEnum, strictObject, string } from 'zod'
 import { Button } from '../button'
 import { asField } from '../zod-form/utils'
-import { ZodForm } from '../zod-form/zod-form'
+import { type FormApi, ZodForm } from '../zod-form/zod-form'
 import { EditorType, NodeType } from './types'
 
 type NodeCreatePosition =
@@ -55,6 +56,7 @@ const newNodeSchema = strictObject({
 				autofill: 'off'
 			})
 		)
+		.min(1)
 		.default('New node'),
 	type: nativeEnum(NodeType)
 		.describe(
@@ -112,6 +114,7 @@ const createNodeCommand: (data: Partial<Node_Insert_Input>) => void = pipeAsync(
 )
 
 export const NodeCreate = () => {
+	const formApi = useRef<FormApi<NewNodeSchema>>(null)
 	return (
 		<Dialog open={$createDialogOpen.value}>
 			<DialogContent
@@ -132,12 +135,18 @@ export const NodeCreate = () => {
 					schema={newNodeSchema}
 					columns={2}
 					onSubmit={pipe(createNodeCommand, close)}
+					ref={formApi}
 				>
 					<DialogFooter className="gap-y-2">
 						<Button onClick={close} variant="secondary">
 							Cancel
 						</Button>
-						<Button type="submit">Create</Button>
+						<Button
+							type="submit"
+							disabled={formApi.current?.formState.isSubmitting}
+						>
+							Create
+						</Button>
 					</DialogFooter>
 				</ZodForm>
 			</DialogContent>
