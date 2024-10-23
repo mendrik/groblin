@@ -2092,9 +2092,6 @@ type tag {
   project: project!
   project_id: bigint!
 
-  """An object relationship"""
-  tag: tag
-
   """An array relationship"""
   tags(
     """distinct select on columns"""
@@ -2223,7 +2220,6 @@ input tag_bool_exp {
   parent_tag: bigint_comparison_exp
   project: project_bool_exp
   project_id: bigint_comparison_exp
-  tag: tag_bool_exp
   tags: tag_bool_exp
   tags_aggregate: tag_aggregate_bool_exp
 }
@@ -2256,7 +2252,6 @@ input tag_insert_input {
   parent_tag: bigint
   project: project_obj_rel_insert_input
   project_id: bigint
-  tag: tag_obj_rel_insert_input
   tags: tag_arr_rel_insert_input
 }
 
@@ -2308,16 +2303,6 @@ type tag_mutation_response {
 }
 
 """
-input type for inserting object relation for remote table "tag"
-"""
-input tag_obj_rel_insert_input {
-  data: tag_insert_input!
-
-  """upsert condition"""
-  on_conflict: tag_on_conflict
-}
-
-"""
 on_conflict condition type for table "tag"
 """
 input tag_on_conflict {
@@ -2333,7 +2318,6 @@ input tag_order_by {
   parent_tag: order_by
   project: project_order_by
   project_id: order_by
-  tag: tag_order_by
   tags_aggregate: tag_aggregate_order_by
 }
 
