@@ -21,7 +21,11 @@ export function App() {
 				onLayout={setSignal($panelSizes)}
 			>
 				<ResizablePanel defaultSize={$panelSizes.value[0]}>
-					<div className="w-full h-11 shrink-0" />
+					<div className="w-full h-11 shrink-0">
+						<h1 className="px-2 py-1 text-xl font-normal text-muted-foreground tracking-tight transition-colors">
+							My Test project
+						</h1>
+					</div>
 					<DocumentTree />
 				</ResizablePanel>
 				<ResizableHandle />

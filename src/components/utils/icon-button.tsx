@@ -17,7 +17,10 @@ export const IconButton = ({
 	return (
 		<Button
 			variant={variant}
-			className={cn('flex flex-row gap-1', className)}
+			className={cn(
+				'flex flex-row gap-1 py-1 px-2 text-muted-foreground rounded-lg h-7',
+				className
+			)}
 			{...props}
 		>
 			<Icon className="w-5 h-5" />

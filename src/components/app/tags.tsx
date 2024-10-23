@@ -5,22 +5,22 @@ import { IconButton } from '../utils/icon-button'
 
 export const Tags = () => {
 	return (
-		<div className="flex flex-row gap-4 items-center">
+		<div className="flex flex-row gap-1 items-center">
 			<Tabs defaultValue={$tag.value} className="w-fit">
-				<TabsList className="grid w-full grid-cols-3">
-					<TabsTrigger value="default">
+				<TabsList className="grid w-full grid-cols-3 h-8">
+					<TabsTrigger value="default" className="text-xs">
 						<div className="truncate w-full overflow-hidden">Default</div>
 					</TabsTrigger>
-					<TabsTrigger value="staging">
+					<TabsTrigger value="staging" className="text-xs">
 						<div className="truncate w-full overflow-hidden">Staging</div>
 					</TabsTrigger>
-					<TabsTrigger value="production">
+					<TabsTrigger value="production" className="text-xs">
 						<div className="truncate w-full overflow-hidden">Production</div>
 					</TabsTrigger>
 				</TabsList>
 			</Tabs>
-			<IconButton icon={IconTag} size="sm">
-				Add Tag
+			<IconButton icon={IconTag} size="sm" variant="secondary">
+				new tag
 			</IconButton>
 		</div>
 	)
