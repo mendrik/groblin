@@ -16,7 +16,7 @@ import {
 	focusNode,
 	focusedNode,
 	previousNode,
-	updateCurrentNode,
+	updateNodeContext,
 	waitForUpdate
 } from '@/state/tree'
 import { signal } from '@preact/signals-react'
@@ -31,7 +31,7 @@ export const deleteNodeCommand = pipeAsync(
 	waitForUpdate,
 	previousNode,
 	tap(focusNode),
-	updateCurrentNode
+	updateNodeContext
 )
 
 export const NodeDelete = () => (

@@ -138,14 +138,14 @@ export const stopEditing = () => ($editingNode.value = undefined)
 
 /**
  * Many node operations require access to surrounding nodes of the
- * currtly focused one. For example deleting a node, needs to focus
- * the previous node after its completion. Instead of cluttering the
+ * currently focused one. For example deleting a node needs to focus
+ * the previous node after the operation. Instead of cluttering the
  * code with these look-ups, we keep the node "context" armed at all
  * times.
  * @param nodeId
  * @returns same as input so we can tap through this function
  */
-export const updateCurrentNode = (nodeId: number): number => {
+export const updateNodeContext = (nodeId: number): number => {
 	assertExists($root.value, 'Root node is missing')
 	const openNodes = [
 		...iterateOpenNodes($root.value)
@@ -172,10 +172,10 @@ export const updateCurrentNode = (nodeId: number): number => {
 }
 
 /**
- * Technically this is the last focused node, not necessarily the
- * element that is currently focused. This is because the focus
- * transers to dialogs and dropdowns, but we still want to know
- * where the focus was before.
+ * Technically this is the last known focused node, not necessarily
+ * the element that is currently focused. This is because the focus
+ * transfers to dialogs or dropdowns, but we still want to know
+ * where the focus has been.
  */
 export const focusedNode = (): number => {
 	assertExists($focusedNode.value, 'Focused node is missing')
@@ -222,7 +222,7 @@ export const updateNodeState =
 			mergeDeepLeft(state),
 			$nodeStates.value
 		)
-		updateCurrentNode(nodeId)
+		updateNodeContext(nodeId)
 	}
 
 export const nodeState = (state: Partial<NodeState>) =>

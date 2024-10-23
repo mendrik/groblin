@@ -21,7 +21,7 @@ import {
 	openNode,
 	parentNode,
 	refocus,
-	updateCurrentNode,
+	updateNodeContext,
 	waitForUpdate
 } from '@/state/tree'
 import { signal } from '@preact/signals-react'
@@ -106,7 +106,7 @@ const createNodeCommand: (data: Partial<Node_Insert_Input>) => void = pipeAsync(
 	}),
 	tap(({ node_id }) => node_id && openNode(node_id)),
 	insertNode,
-	updateCurrentNode,
+	updateNodeContext,
 	waitForUpdate,
 	focusNode
 )

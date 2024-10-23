@@ -8,7 +8,7 @@ import {
 	nextNode,
 	openNode,
 	previousNode,
-	updateCurrentNode
+	updateNodeContext
 } from '@/state/tree'
 import { pipe, when } from 'ramda'
 import { useRef } from 'react'
@@ -40,7 +40,7 @@ export const Tree = ({ root }: OwnProps) => {
 					className="w-full px-2 tree grid-lines"
 					onFocus={pipe(
 						safeDataInt('node_id'),
-						when(isNotNil, updateCurrentNode)
+						when(isNotNil, updateNodeContext)
 					)}
 				>
 					{root.nodes.map(child => (
