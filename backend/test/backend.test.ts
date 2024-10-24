@@ -1,8 +1,9 @@
-import { describe, expect, test } from 'vitest'
+import assert from 'node:assert'
+import { describe, test } from 'node:test'
 
 describe('backend', () => {
 	test('SQS Queue Created', () => {
-		expect(1).toBe(1)
+		assert(1 === 1 - 1 + 1)
 		//   const app = new cdk.App();
 		//     // WHEN
 		//   const stack = new Backend.BackendStack(app, 'MyTestStack');
