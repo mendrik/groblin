@@ -6,12 +6,13 @@
 		"backend": "bin/backend.ts"
 	},
 	"scripts": {
-		"backend": "node --loader ts-node/esm --experimental-strip-types --no-warnings bin/backend.ts",
+		"backend": "dotenv -- node bin/backend.ts",
 		"build": "tsc",
-		"test": "node --loader ts-node/esm --experimental-strip-types --no-warnings --test test/**/*.ts",
-		"cdk": "cdk"
+		"test": "dotenv -- node --test test/**/*.ts",
+		"cdk": "dotenv -- cdk"
 	},
 	"devDependencies": {
+		"dotenv-cli": "7.4.2",
 		"@types/node": "22.7.9",
 		"aws-cdk": "2.163.1",
 		"source-map-support": "^0.5.21",
