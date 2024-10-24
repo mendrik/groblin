@@ -1,12 +1,10 @@
 {
 	"name": "backend",
 	"version": "0.1.0",
-	"type": "module",
 	"bin": {
 		"backend": "bin/backend.ts"
 	},
 	"scripts": {
-		"backend": "tsx ./bin/backend.ts",
 		"build": "tsc",
 		"test": "vitest",
 		"cdk": "cdk"
