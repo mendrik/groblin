@@ -9,12 +9,13 @@
 		"esModuleInterop": true,
 		"inlineSources": true,
 		"lib": ["ES2022", "dom", "dom.iterable", "esnext", "WebWorker"],
-		"module": "esnext",
-		"moduleResolution": "node",
+		"module": "ESNext",
+		"moduleResolution": "Node",
 		"noFallthroughCasesInSwitch": false,
 		"noImplicitAny": true,
 		"noImplicitReturns": true,
 		"noImplicitThis": true,
+		"noEmit": true,
 		"noUnusedLocals": false,
 		"noUnusedParameters": false,
 		"skipLibCheck": true,
@@ -22,9 +23,8 @@
 		"strictNullChecks": true,
 		"strictPropertyInitialization": false,
 		"target": "esnext",
-		"typeRoots": ["./node_modules/@types"],
-		"outDir": "./dist"
+		"typeRoots": ["./node_modules/@types"]
 	},
-	"exclude": ["node_modules", "cdk.out"],
+	"exclude": ["node_modules"],
 	"include": ["src"]
 }
