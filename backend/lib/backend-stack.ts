@@ -11,17 +11,10 @@ export class BackendStack extends Stack {
 	constructor(scope: Construct, id: string, props?: StackProps) {
 		super(scope, id, props)
 
-		const myFunction = new LFunction(this, 'HelloWorldFunction', {
+		const myFunction = new LFunction(this, 'RegisterFunction', {
 			runtime: Runtime.NODEJS_LATEST,
-			handler: 'index.handler',
-			code: Code.fromInline(`
-            exports.handler = async function(event) {
-              return {
-                statusCode: 200,
-                body: JSON.stringify('Hello World!'),
-              };
-            };
-          `)
+			handler: 'register.handler',
+			code: Code.fromAsset('src')
 		})
 
 		// Define the Lambda function URL resource

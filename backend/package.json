@@ -7,13 +7,18 @@
 	},
 	"scripts": {
 		"backend": "dotenv -- node bin/backend.ts",
-		"build": "tsc",
 		"test": "dotenv -- node --test test/**/*.ts",
-		"cdk": "dotenv -- cdk"
+		"cdk": "dotenv -- cdk",
+		"build": "tsc --build",
+		"cdk:build": "cdk synth > template.yaml",
+		"sam:build": "sam build",
+		"sam:local": "sam local start-api",
+		"local": "dotenv -- pnpm run cdk:build && pnpm run sam:build && pnpm run sam:local"
 	},
 	"devDependencies": {
 		"dotenv-cli": "7.4.2",
 		"@types/node": "22.7.9",
+		"@types/aws-lambda": "8.10.145",
 		"aws-cdk": "2.163.1",
 		"source-map-support": "^0.5.21",
 		"ts-node": "^10.9.2",

@@ -1,6 +1,6 @@
-import {} from '@aws-cdk/aws-lambda'
+import type { APIGatewayProxyHandlerV2 } from 'aws-lambda'
 
-export const handler = async (event: APIGatewayProxyEvent) => {
+export const handler: APIGatewayProxyHandlerV2 = async (event, context) => {
 	return {
 		statusCode: 200,
 		body: JSON.stringify({ message: 'Hello, CDK!' })
