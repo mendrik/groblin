@@ -4,6 +4,7 @@
 		"alwaysStrict": true,
 		"baseUrl": ".",
 		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
 		"forceConsistentCasingInFileNames": true,
 		"inlineSourceMap": true,
 		"esModuleInterop": true,
