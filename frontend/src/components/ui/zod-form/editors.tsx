@@ -14,9 +14,10 @@ import {
 
 import { caseOf, match } from '@/lib/match'
 import type { Fn } from '@/type-patches/functions'
+import { EditorType } from '@shared/models/enums'
 import { Input } from '../input'
 import { Switch } from '../switch'
-import { EditorType, type ZodFormField } from '../tree/types'
+import type { ZodFormField } from '../tree/types'
 import { innerType, isZodType } from './utils'
 
 const isOfType =

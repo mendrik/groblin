@@ -1,4 +1,5 @@
 import { Field, ID, ObjectType } from 'type-graphql'
+import { EditorType, NodeType } from './enums'
 
 @ObjectType()
 class Node {
@@ -8,9 +9,12 @@ class Node {
 	@Field()
 	name: string
 
-	@Field(type => Node, { nullable: true })
-	parent: Node
+	@Field(type => [Node], { defaultValue: [] })
+	nodes: Node[]
 
-	@Field({ nullable: true })
-	averageRating?: number
+	@Field(type => NodeType)
+	type: NodeType
+
+	@Field(type => EditorType)
+	editor: EditorType
 }

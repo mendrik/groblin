@@ -2,10 +2,11 @@
 	"compilerOptions": {
 		"baseUrl": ".",
 		"target": "ES2020",
-		"useDefineForClassFields": true,
 		"module": "ESNext",
+		"useDefineForClassFields": true,
 		"lib": ["ES2020", "ES2022.Error", "DOM", "DOM.Iterable"],
 		"paths": {
+			"@shared/*": ["../shared/src/*"],
 			"@/*": ["./src/*"]
 		},
 
@@ -24,5 +25,5 @@
 		"noUnusedParameters": true,
 		"noFallthroughCasesInSwitch": true
 	},
-	"include": ["src"]
+	"include": ["src", "../shared/src"]
 }
