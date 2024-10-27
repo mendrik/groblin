@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { pipeTap, pipeTapAsync } from './ramda.ts'
+import { pipeTap, pipeTapAsync } from './ramda.js'
 
 // Tests for pipeTap
 describe('pipeTap', () => {

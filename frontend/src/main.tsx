@@ -3,10 +3,10 @@ import './index.css'
 import { Maybe } from 'purify-ts'
 import { StrictMode } from 'react'
 import { BrowserRouter } from 'react-router-dom'
-import { ThemeProvider } from './components/theme-provider.tsx'
-import { LoggedIn } from './routing/logged-in.tsx'
-import { LoggedOut } from './routing/logged-out.tsx'
-import { $user } from './state/user.ts'
+import { ThemeProvider } from './components/theme-provider'
+import { LoggedIn } from './routing/logged-in'
+import { LoggedOut } from './routing/logged-out'
+import { $user } from './state/user'
 
 const Main = () => (
 	<StrictMode>

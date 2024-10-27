@@ -1,53 +1,26 @@
-import { basename, dirname } from 'node:path'
-import glob from 'fast-glob'
-// Import the framework and instantiate it
-import Fastify, { type HTTPMethods } from 'fastify'
-import { drop, dropLast, pipe, prop, reverse, split } from 'ramda'
+import 'reflect-metadata'
+import { useServer } from 'graphql-ws/lib/use/ws'
+import { Query, buildSchema } from 'type-graphql'
+import { WebSocketServer } from 'ws'
 
-const fastify = Fastify({
-	logger: {
-		transport: {
-			target: '@fastify/one-line-logger'
-		}
+// Define your GraphQL resolvers
+class HelloResolver {
+	@Query(() => String)
+	async hello() {
+		return 'Hello, world!'
 	}
-})
-
-const files = await glob('./src/functions/**/*.ts')
-
-const folder = pipe(dirname, split('/'), drop(3))
-
-const fileMethod: (s: string) => string[] = pipe(
-	basename,
-	split(/_|\./),
-	dropLast(1),
-	xs => reverse(xs)
-)
-
-for (const file of files) {
-	const [method, ...name] = fileMethod(file)
-	const paths = folder(file)
-
-	const handler = await import(file.replace('src/', '')).then(prop('default'))
-
-	const config = {
-		method: method.toUpperCase() as HTTPMethods,
-		url: `/rest/${[...paths, name.join('_')].join('/')}`
-	}
-
-	console.log(config)
-
-	fastify.route({ ...config, handler })
 }
 
-// Declare a route
-fastify.post('/register', async (request, reply) => {
-	return { hello: 'world' }
+// Build the TypeGraphQL schema
+const schema = await buildSchema({
+	resolvers: [HelloResolver]
 })
 
-// Run the server!
-try {
-	await fastify.listen({ port: 6173 })
-} catch (err) {
-	fastify.log.error(err)
-	process.exit(1)
-}
+const server = new WebSocketServer({
+	port: 4000,
+	path: '/graphql'
+})
+
+useServer({ schema }, server)
+
+console.log('Listening to port 4000')
