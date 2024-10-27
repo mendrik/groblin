@@ -24,8 +24,11 @@
 		"strict": true,
 		"strictNullChecks": true,
 		"strictPropertyInitialization": false,
-		"typeRoots": ["./node_modules/@types"]
+		"typeRoots": ["./node_modules/@types"],
+		"paths": {
+			"@shared/*": ["../shared/src/*"]
+		}
 	},
 	"exclude": ["node_modules"],
-	"include": ["src"]
+	"include": ["src", "../shared/src"]
 }
