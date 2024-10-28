@@ -1,4 +1,5 @@
 import { sql } from 'kysely'
+import { defaultTo } from 'ramda'
 import type { Context } from 'src/database.ts'
 import { NodeType } from 'src/resolvers/models/enums.ts'
 import {
@@ -68,7 +69,12 @@ export class ChangeNodeInput {
 export class NodeResolver {
 	@Query(returns => [Node])
 	async get_nodes(@Ctx() { db }: Context) {
-		await db.selectFrom('node').selectAll().orderBy('order', 'asc').execute()
+		await db
+			.selectFrom('node')
+			.selectAll()
+			.orderBy('order', 'asc')
+			.execute()
+			.then(defaultTo([]))
 	}
 
 	@Mutation(returns => Int)
