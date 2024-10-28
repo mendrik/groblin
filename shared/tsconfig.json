@@ -1,18 +1,16 @@
 {
+	"extends": "../tsconfig.base.json",
 	"compilerOptions": {
-		"target": "ES2023", // Specify ECMAScript target version
-		"module": "ES2022", // Specify module code generation
-		"moduleResolution": "node", // Specify module resolution strategy
-		"declaration": true, // Generate declaration files (.d.ts)
-		"emitDeclarationOnly": true, // Only emit declarations and not compiled files
-		"strictPropertyInitialization": false,
-		"experimentalDecorators": true,
-		"strict": true // Enable all strict type-checking options
+		"target": "ES2023", 
+		"module": "ES2022", 
+		"moduleResolution": "node", 
+		"declaration": true, 
+		"emitDeclarationOnly": true 
 	},
 	"include": [
-		"src/**/*.ts" // Include all TypeScript files in the shared directory
+		"src"
 	],
 	"exclude": [
-		"node_modules" // Exclude node_modules
+		"node_modules"
 	]
 }
