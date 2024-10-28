@@ -39,7 +39,6 @@ gql`
 		order
 		type
 		parent_id
-		editor
     }
   }
 `
@@ -211,6 +210,13 @@ export const nodeState = (state: Partial<NodeState>) =>
 	Maybe.fromNullable($focusedNode.value).ifJust(updateNodeState(state))
 
 export const openNode = updateNodeState({ open: true })
+export const openParent = <T extends Pick<TreeNode, 'parent_id'>>(
+	obj: T
+): T => {
+	if (obj.parent_id) openNode(obj.parent_id)
+	return obj
+}
+
 export const closeNode = updateNodeState({ open: false })
 
 export const confirmNodeName = (value: string) =>

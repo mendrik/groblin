@@ -12,8 +12,8 @@ import {
 	SelectValue
 } from '../select'
 
-import { EditorType } from '@/gql/graphql'
 import { caseOf, match } from '@/lib/match'
+import { EditorType } from '@shared/enums'
 import type { Fn } from '@tp/functions.ts'
 import { Input } from '../input'
 import { Switch } from '../switch'

@@ -1,4 +1,4 @@
-import { EditorType } from '@/gql/graphql'
+import { EditorType } from '@shared/enums'
 import { type TypeOf, nativeEnum, number, object, string } from 'zod'
 
 export const ZodFormField = object({

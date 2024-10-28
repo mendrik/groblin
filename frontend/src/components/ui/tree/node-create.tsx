@@ -6,7 +6,7 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { EditorType, NodeType } from '@/gql/graphql'
+import { NodeType } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
 import { evolveAlt } from '@/lib/evolve-alt'
 import { caseOf, match } from '@/lib/match'
@@ -18,14 +18,15 @@ import {
 	focusNode,
 	focusedNode,
 	insertNode,
-	openNode,
+	openParent,
 	parentNode,
 	refocus,
 	updateNodeContext,
 	waitForUpdate
 } from '@/state/tree'
 import { signal } from '@preact/signals-react'
-import { F, T, equals as eq, pipe, tap } from 'ramda'
+import { EditorType } from '@shared/enums'
+import { F, T, equals as eq, pipe } from 'ramda'
 import { useRef } from 'react'
 import { type TypeOf, nativeEnum, strictObject, string } from 'zod'
 import { Button } from '../button'
@@ -100,12 +101,12 @@ const order = match<[NodeCreatePosition], number>(
 	)
 )
 
-const createNodeCommand: (data: Partial<Node>) => void = pipeAsync(
+const createNodeCommand: (data: NewNodeSchema) => Promise<void> = pipeAsync(
 	evolveAlt({
 		parent_id: () => parent($createNodePosition.value),
 		order: () => order($createNodePosition.value)
 	}),
-	tap(({ parent_id }) => parent_id && openNode(parent_id)),
+	openParent,
 	insertNode,
 	updateNodeContext,
 	waitForUpdate,

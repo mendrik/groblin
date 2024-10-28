@@ -15,7 +15,7 @@ import * as types from './graphql';
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 const documents = {
-    "\n  query GetNodes {\n    get_nodes {\n\t\tid\n\t\tname\n\t\torder\n\t\ttype\n\t\tparent_id\n\t\teditor\n    }\n  }\n": types.GetNodesDocument,
+    "\n  query GetNodes {\n    get_nodes {\n\t\tid\n\t\tname\n\t\torder\n\t\ttype\n\t\tparent_id\n    }\n  }\n": types.GetNodesDocument,
     "\n  mutation InsertNode($data: InsertNode!) {\n    insert_node(data: $data)\n  }\n": types.InsertNodeDocument,
     "\n  mutation UpdateNode($data: ChangeNodeInput!) {\n    update_node(data: $data)\n  }\n": types.UpdateNodeDocument,
     "\n  mutation DeleteNodeById($order: Int!, $parent_id: Int!, $id: Int!) {\n    delete_node_by_id(order: $order, parent_id: $parent_id, id: $id)\n  }\n": types.DeleteNodeByIdDocument,
@@ -24,7 +24,7 @@ const documents = {
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query GetNodes {\n    get_nodes {\n\t\tid\n\t\tname\n\t\torder\n\t\ttype\n\t\tparent_id\n\t\teditor\n    }\n  }\n"): typeof import('./graphql').GetNodesDocument;
+export function graphql(source: "\n  query GetNodes {\n    get_nodes {\n\t\tid\n\t\tname\n\t\torder\n\t\ttype\n\t\tparent_id\n    }\n  }\n"): typeof import('./graphql').GetNodesDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

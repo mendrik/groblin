@@ -32,7 +32,7 @@ import { type RendererProps, generateDefaults } from './utils'
 
 type OwnProps<T extends ZodObject<any>> = {
 	schema: T
-	onSubmit: (data: TypeOf<T>) => void
+	onSubmit: (data: any) => void
 	columns?: number
 }
 

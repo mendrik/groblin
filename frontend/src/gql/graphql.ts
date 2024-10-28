@@ -24,20 +24,7 @@ export type ChangeNodeInput = {
   type?: InputMaybe<NodeType>;
 };
 
-export enum EditorType {
-  Email = 'email',
-  Input = 'input',
-  Multiselect = 'multiselect',
-  Password = 'password',
-  Radios = 'radios',
-  Richtext = 'richtext',
-  Select = 'select',
-  Switch = 'switch',
-  Textarea = 'textarea'
-}
-
 export type InsertNode = {
-  editor: EditorType;
   name: Scalars['String']['input'];
   order: Scalars['Int']['input'];
   parent_id?: InputMaybe<Scalars['Int']['input']>;
@@ -70,7 +57,6 @@ export type MutationUpdate_NodeArgs = {
 
 export type Node = {
   __typename?: 'Node';
-  editor: EditorType;
   id: Scalars['Int']['output'];
   name: Scalars['String']['output'];
   order: Scalars['Int']['output'];
@@ -96,7 +82,7 @@ export type Query = {
 export type GetNodesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetNodesQuery = { __typename?: 'Query', get_nodes: Array<{ __typename?: 'Node', id: number, name: string, order: number, type: NodeType, parent_id?: number | null, editor: EditorType }> };
+export type GetNodesQuery = { __typename?: 'Query', get_nodes: Array<{ __typename?: 'Node', id: number, name: string, order: number, type: NodeType, parent_id?: number | null }> };
 
 export type InsertNodeMutationVariables = Exact<{
   data: InsertNode;
@@ -144,7 +130,6 @@ export const GetNodesDocument = new TypedDocumentString(`
     order
     type
     parent_id
-    editor
   }
 }
     `) as unknown as TypedDocumentString<GetNodesQuery, GetNodesQueryVariables>;
