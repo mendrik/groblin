@@ -8,6 +8,7 @@ type Node {
   order: Int!
   type: NodeType!
   parent_id: Int
+  editor: EditorType!
 }
 
 enum NodeType {
@@ -20,6 +21,18 @@ enum NodeType {
   schema
 }
 
+enum EditorType {
+  select
+  radios
+  multiselect
+  input
+  password
+  email
+  switch
+  textarea
+  richtext
+}
+
 type Mutation {
   insert_node(data: InsertNode!): Int!
   update_node(data: ChangeNodeInput!): Boolean!
@@ -30,6 +43,7 @@ input InsertNode {
   name: String!
   order: Int!
   type: NodeType!
+  editor: EditorType!
   parent_id: Int
 }
 

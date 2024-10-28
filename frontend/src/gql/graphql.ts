@@ -17,7 +17,6 @@ export type Scalars = {
 };
 
 export type ChangeNodeInput = {
-  editor?: InputMaybe<EditorType>;
   id: Scalars['Int']['input'];
   name: Scalars['String']['input'];
   order?: InputMaybe<Scalars['Int']['input']>;
