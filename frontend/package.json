@@ -11,6 +11,7 @@
 		"types:gql": "graphql-codegen --config codegen.ts"
 	},
 	"dependencies": {
+		"@graphql-typed-document-node/core": "^3.2.0",
 		"@hookform/resolvers": "^3.9.0",
 		"@preact/signals-react": "2.2.0",
 		"@radix-ui/react-alert-dialog": "^1.1.2",

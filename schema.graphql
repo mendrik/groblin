@@ -1,15 +1,14 @@
 type Query {
-  nodes: [Node!]!
+  get_nodes: [Node!]!
 }
 
 type Node {
-  id: ID!
+  id: Int!
   name: String!
   order: Int!
-  nodes: [Node!]!
   type: NodeType!
   editor: EditorType!
-  parent: Node
+  parent_id: Int
 }
 
 enum NodeType {
@@ -35,9 +34,9 @@ enum EditorType {
 }
 
 type Mutation {
-  insertNode(data: InsertNode!): Int!
-  changeNodeName(data: ChangeNodeNameInput!): Boolean!
-  deleteNodeById(id: ID!): Boolean!
+  insert_node(data: InsertNode!): Int!
+  update_node(data: ChangeNodeInput!): Boolean!
+  delete_node_by_id(order: Int!, parent_id: Int!, id: Int!): Boolean!
 }
 
 input InsertNode {
@@ -45,10 +44,14 @@ input InsertNode {
   order: Int!
   type: NodeType!
   editor: EditorType!
-  parent_id: ID
+  parent_id: Int
 }
 
-input ChangeNodeNameInput {
-  id: ID!
+input ChangeNodeInput {
+  id: Int!
   name: String!
+  order: Int
+  type: NodeType
+  editor: EditorType
+  parent_id: Int
 }

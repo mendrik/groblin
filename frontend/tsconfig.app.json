@@ -8,12 +8,17 @@
 		"paths": {
 			"@shared/*": ["../shared/src/*"],
 			"@/*": ["./src/*"],
-			"@types/*": ["../type-patches/*"]
+			"@tp/*": ["../type-patches/*"]
 		},
 		/* Bundler mode */
 		"moduleResolution": "bundler",
 		"jsx": "react-jsx",
 		"jsxImportSource": "react"
 	},
-	"include": ["src", "../shared/src", "../type-patches"]
+	"include": [
+		"src",
+		"../shared/src",
+		"../type-patches",
+		"../backend/src/resolvers/models"
+	]
 }

@@ -1,16 +1,16 @@
 import { query, subscribe } from '@/gql-client'
 import {
-	DeleteNodeDocument,
+	DeleteNodeByIdDocument,
 	GetNodesDocument,
-	type GetNodesSubscription,
-	Insert_NodeDocument,
-	type Node_Insert_Input,
-	UpdateNodeNameDocument
-} from '@/gql/graphql'
-import { type TreeOf, listToTree } from '@/lib/list-to-tree'
+	type InsertNode,
+	InsertNodeDocument,
+	type Node,
+	UpdateNodeDocument
+} from '@/gql/graphql.ts'
 import { getItem, setItem } from '@/lib/local-storage'
 import { assertExists, failOnNil, setSignal } from '@/lib/utils'
 import { computed, signal } from '@preact/signals-react'
+import { type TreeOf, listToTree } from '@shared/utils/list-to-tree'
 import gql from 'graphql-tag'
 import { Maybe, MaybeAsync } from 'purify-ts'
 import {
@@ -32,62 +32,40 @@ import {
 
 /** ---- queries ---- **/
 gql`
-subscription GetNodes {     
-	node( order_by: { order: asc }) {
+  query GetNodes {
+    get_nodes {
 		id
 		name
-		node_id
-		type
 		order
-	}
-}
+		type
+		parent_id
+		editor
+    }
+  }
 `
 
+// Mutation to insert a new node
 gql`
-mutation updateNodeName($id: ID!, $name: String!) {
-	update_node_by_pk (
-	pk_columns: { id: $id }
-	_set: { name: $name }
-	) { 
-		id
-	}
-}
+  mutation InsertNode($data: InsertNode!) {
+    insert_node(data: $data)
+  }
 `
 
+// Mutation to update an existing node
 gql`
-mutation deleteNode($id: bigint!, $parent_id: bigint!, $order: Int!) {
-	delete_node_by_pk (
-		id: $id
-	) {
-		id
-	}
-
-	update_node(
-		where: { order: { _gte: $order }, node_id: { _eq: $parent_id } },
-		_inc: { order: -1 }
-	) {
-		affected_rows
-	}
-}
+  mutation UpdateNode($data: ChangeNodeInput!) {
+    update_node(data: $data)
+  }
 `
 
+// Mutation to delete a node by ID
 gql`
-mutation insert_node($object: node_insert_input!, $parent_id: bigint!, $order: Int!) {
-	update_node(
-		where: { order: { _gte: $order }, node_id: { _eq: $parent_id } },
-		_inc: { order: 1 }
-	) {
-		affected_rows
-	}
-
-  	insert_node_one(object: $object) {
-    	id
-	}
-}
+  mutation DeleteNodeById($order: Int!, $parent_id: Int!, $id: Int!) {
+    delete_node_by_id(order: $order, parent_id: $parent_id, id: $id)
+  }
 `
 
 /** ---- types ---- **/
-export type Node = GetNodesSubscription['node'][number]
 export type TreeNode = TreeOf<Node, 'nodes'>
 type NodeState = {
 	open: boolean
@@ -109,7 +87,11 @@ export const $editingNode = signal<number | undefined>()
 /** ---- subscriptions ---- **/
 subscribe(
 	GetNodesDocument,
-	pipe(prop('node'), listToTree('id', 'node_id', 'nodes'), setSignal($root))
+	pipe(
+		prop('get_nodes'),
+		listToTree('id', 'parent_id', 'nodes'),
+		setSignal($root)
+	)
 )
 $root.subscribe(
 	when(isNotNil, node => updateNodeState({ open: true })(node.id))
@@ -234,26 +216,24 @@ export const closeNode = updateNodeState({ open: false })
 export const confirmNodeName = (value: string) =>
 	MaybeAsync.liftMaybe(Maybe.fromNullable($editingNode.value))
 		.filter(isNotEmpty)
-		.map(id => query(UpdateNodeNameDocument, { id, name: value }))
+		.map(id => query(UpdateNodeDocument, { data: { id, name: value } }))
 		.run()
 
 export const deleteNode = (id: number) =>
-	query(DeleteNodeDocument, {
+	query(DeleteNodeByIdDocument, {
 		id,
 		parent_id: parentOf(id),
 		order: asNode(id).order
 	})
 
-export const insertNode = (object: Node_Insert_Input): Promise<number> => {
-	assertExists(object.node_id, 'insertNode needs a valid node_id')
-	assertExists(object.order, 'insertNode needs a valid order')
+export const insertNode = (data: InsertNode): Promise<number> => {
+	assertExists(data.parent_id, 'insertNode needs a valid node_id')
+	assertExists(data.order, 'insertNode needs a valid order')
 
-	return query(Insert_NodeDocument, {
-		object,
-		order: object.order,
-		parent_id: object.node_id
+	return query(InsertNodeDocument, {
+		data
 	})
-		.then(x => x.insert_node_one?.id)
+		.then(x => x.insert_node)
 		.then(failOnNil('Failed to insert node'))
 }
 

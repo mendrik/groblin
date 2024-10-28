@@ -1,17 +1,38 @@
-import { EditorType, NodeType } from '@shared/models/enums.ts'
-import { Node } from '@shared/models/node.js'
+import { sql } from 'kysely'
 import type { Context } from 'src/database.ts'
+import { EditorType, NodeType } from 'src/resolvers/models/enums.ts'
 import {
 	Arg,
 	Ctx,
 	Field,
-	ID,
 	InputType,
 	Int,
 	Mutation,
+	ObjectType,
 	Query,
 	Resolver
 } from 'type-graphql'
+
+@ObjectType()
+export class Node {
+	@Field(type => Int)
+	id: number
+
+	@Field(type => String)
+	name: string
+
+	@Field(type => Int)
+	order: number
+
+	@Field(type => NodeType)
+	type: NodeType
+
+	@Field(type => EditorType)
+	editor: EditorType
+
+	@Field(type => Int, { nullable: true })
+	parent_id?: number
+}
 
 @InputType()
 export class InsertNode {
@@ -27,61 +48,93 @@ export class InsertNode {
 	@Field(type => EditorType)
 	editor: EditorType
 
-	@Field(type => ID, { nullable: true })
-	parent_id: number
+	@Field(type => Int, { nullable: true })
+	parent_id?: number
 }
 
 @InputType()
-export class ChangeNodeNameInput {
-	@Field(type => ID)
+export class ChangeNodeInput {
+	@Field(type => Int)
 	id: number
 
 	@Field(type => String)
 	name: string
+
+	@Field(type => Int, { nullable: true })
+	order: number
+
+	@Field(type => NodeType, { nullable: true })
+	type: NodeType
+
+	@Field(type => EditorType, { nullable: true })
+	editor: EditorType
+
+	@Field(type => Int, { nullable: true })
+	parent_id?: number
 }
 
 @Resolver()
 export class NodeResolver {
 	@Query(returns => [Node])
-	async nodes(@Ctx() ctx: Context) {
-		return ctx.db.selectFrom('node').execute()
+	async get_nodes(@Ctx() { db }: Context) {
+		await db.selectFrom('node').selectAll().orderBy('order', 'asc').execute()
 	}
 
 	@Mutation(returns => Int)
-	async insertNode(
+	async insert_node(
 		@Arg('data', () => InsertNode) data: InsertNode,
-		@Ctx() ctx: Context
+		@Ctx() { db }: Context
 	): Promise<number> {
-		const [{ id }] = await ctx.db
-			.insertInto('node')
-			.values(data) // Adjust this according to the structure of your node
-			.returning('id as id')
-			.execute()
-		return id
+		const res = await db.transaction().execute(async trx => {
+			trx
+				.updateTable('node')
+				.where('order', '>=', data.order)
+				.where('parent_id', '=', data.parent_id ?? null)
+				.set({ order: sql`order + 1` })
+				.execute()
+
+			return trx
+				.insertInto('node')
+				.values(data) // Adjust this according to the structure of your node
+				.returning('id as id')
+				.executeTakeFirst()
+		})
+		if (!res?.id) {
+			throw new Error('Failed to insert node')
+		}
+		return res.id
 	}
 
 	@Mutation(returns => Boolean)
-	async changeNodeName(
-		@Arg('data', () => ChangeNodeNameInput) data: ChangeNodeNameInput,
+	async update_node(
+		@Arg('data', () => ChangeNodeInput) data: ChangeNodeInput,
 		@Ctx() ctx: Context
 	): Promise<boolean> {
-		const { numChangedRows = 0 } = await ctx.db
+		const { numUpdatedRows = 0 } = await ctx.db
 			.updateTable('node')
-			.set({ name: data.name })
+			.set(data)
 			.where('id', '=', data.id)
 			.executeTakeFirst()
-		return numChangedRows > 0
+		return numUpdatedRows > 0 // Returns true if at least one row was updated
 	}
 
 	@Mutation(returns => Boolean)
-	async deleteNodeById(
-		@Arg('id', () => ID) id: number,
-		@Ctx() ctx: Context
+	async delete_node_by_id(
+		@Arg('id', () => Int) id: number,
+		@Arg('parent_id', () => Int) parent_id: number | undefined,
+		@Arg('order', () => Int) order: number,
+		@Ctx() { db }: Context
 	): Promise<boolean> {
-		const { numDeletedRows } = await ctx.db
-			.deleteFrom('node')
-			.where('id', '=', id)
-			.executeTakeFirst()
+		const { numDeletedRows } = await db.transaction().execute(async trx => {
+			trx
+				.updateTable('node')
+				.where('order', '>=', order)
+				.where('parent_id', '=', parent_id ?? null)
+				.set({ order: sql`order - 1` })
+				.execute()
+
+			return db.deleteFrom('node').where('id', '=', id).executeTakeFirst()
+		})
 		return numDeletedRows > 0
 	}
 }
