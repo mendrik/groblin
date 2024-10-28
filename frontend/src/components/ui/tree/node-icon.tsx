@@ -1,6 +1,6 @@
+import { NodeType } from '@/gql/graphql'
 import { caseOf, match } from '@/lib/match'
 import type { TreeNode } from '@/state/tree'
-import { NodeType } from '@shared/models/enums'
 import {
 	IconBox,
 	IconCalendar,
@@ -27,11 +27,11 @@ const isType =
 
 export const NodeIcon = ({ node, ...props }: OwnProps) =>
 	match<[TreeNode, Icon], ReactNode>(
-		caseOf([isType(NodeType.object), _], (_, p) => <IconSitemap {...p} />),
-		caseOf([isType(NodeType.boolean), _], (_, p) => <IconToggleLeft {...p} />),
-		caseOf([isType(NodeType.date), _], (_, p) => <IconCalendar {...p} />),
-		caseOf([isType(NodeType.list), _], (_, p) => <IconDatabase {...p} />),
-		caseOf([isType(NodeType.number), _], (_, p) => <IconNumber123 {...p} />),
-		caseOf([isType(NodeType.string), _], (_, p) => <IconLetterCase {...p} />),
-		caseOf([isType(NodeType.schema), _], (_, p) => <IconBox {...p} />)
+		caseOf([isType(NodeType.Object), _], (_, p) => <IconSitemap {...p} />),
+		caseOf([isType(NodeType.Boolean), _], (_, p) => <IconToggleLeft {...p} />),
+		caseOf([isType(NodeType.Date), _], (_, p) => <IconCalendar {...p} />),
+		caseOf([isType(NodeType.List), _], (_, p) => <IconDatabase {...p} />),
+		caseOf([isType(NodeType.Number), _], (_, p) => <IconNumber123 {...p} />),
+		caseOf([isType(NodeType.String), _], (_, p) => <IconLetterCase {...p} />),
+		caseOf([isType(NodeType.Schema), _], (_, p) => <IconBox {...p} />)
 	)(node, props)

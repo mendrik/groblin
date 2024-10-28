@@ -6,6 +6,7 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
+import { EditorType, NodeType } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
 import { evolveAlt } from '@/lib/evolve-alt'
 import { caseOf, match } from '@/lib/match'
@@ -24,7 +25,6 @@ import {
 	waitForUpdate
 } from '@/state/tree'
 import { signal } from '@preact/signals-react'
-import { EditorType, NodeType } from '@shared/models/enums'
 import { F, T, equals as eq, pipe, tap } from 'ramda'
 import { useRef } from 'react'
 import { type TypeOf, nativeEnum, strictObject, string } from 'zod'
@@ -51,7 +51,7 @@ const newNodeSchema = strictObject({
 		.describe(
 			asField({
 				label: 'Name',
-				editor: EditorType.input,
+				editor: EditorType.Input,
 				autofill: 'off'
 			})
 		)
@@ -62,10 +62,10 @@ const newNodeSchema = strictObject({
 			asField({
 				label: 'Type',
 				description: 'The type of node you want to create.',
-				editor: EditorType.select
+				editor: EditorType.Select
 			})
 		)
-		.default(NodeType.object)
+		.default(NodeType.Object)
 })
 
 export type NewNodeSchema = TypeOf<typeof newNodeSchema>

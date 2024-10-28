@@ -7,13 +7,13 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { EditorType } from '@/components/ui/tree/types'
 import { asField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
+import { EditorType } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
 import {} from '@/lib/match'
 import { pipeAsync } from '@/lib/pipe-async'
-import type { Fn } from '@/type-patches/functions'
+import type { Fn } from '@tp/functions.ts'
 import { pipe } from 'ramda'
 import { Link } from 'react-router-dom'
 import { type TypeOf, boolean, strictObject, string } from 'zod'
@@ -22,19 +22,19 @@ const loginSchema = strictObject({
 	email: string().describe(
 		asField({
 			label: 'Email',
-			editor: EditorType.email
+			editor: EditorType.Email
 		})
 	),
 	password: string().describe(
 		asField({
 			label: 'Password',
-			editor: EditorType.password
+			editor: EditorType.Password
 		})
 	),
 	rememberMe: boolean().describe(
 		asField({
 			label: 'Remember me',
-			editor: EditorType.switch
+			editor: EditorType.Switch
 		})
 	)
 })

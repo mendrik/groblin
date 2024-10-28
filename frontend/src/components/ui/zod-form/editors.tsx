@@ -12,9 +12,9 @@ import {
 	SelectValue
 } from '../select'
 
+import { EditorType } from '@/gql/graphql'
 import { caseOf, match } from '@/lib/match'
-import type { Fn } from '@/type-patches/functions'
-import { EditorType } from '@shared/models/enums'
+import type { Fn } from '@tp/functions.ts'
 import { Input } from '../input'
 import { Switch } from '../switch'
 import type { ZodFormField } from '../tree/types'
@@ -35,7 +35,7 @@ type Args = readonly [ZodFormField, ZodTypeAny, ControllerRenderProps]
 
 const matcher = match<Args, ReactNode>(
 	caseOf(
-		[isOfType(EditorType.select), isZodType(ZodNativeEnum), _],
+		[isOfType(EditorType.Select), isZodType(ZodNativeEnum), _],
 		(desc, type, field) => {
 			const enumValue: Record<string, any> = innerType(type).enum
 			return (
@@ -56,7 +56,7 @@ const matcher = match<Args, ReactNode>(
 			)
 		}
 	),
-	caseOf([isOfType(EditorType.input), _, _], (desc, _, field) => (
+	caseOf([isOfType(EditorType.Input), _, _], (desc, _, field) => (
 		<FormControl>
 			<Input
 				{...field}
@@ -65,7 +65,7 @@ const matcher = match<Args, ReactNode>(
 			/>
 		</FormControl>
 	)),
-	caseOf([isOfType(EditorType.email), _, _], (desc, _, field) => (
+	caseOf([isOfType(EditorType.Email), _, _], (desc, _, field) => (
 		<FormControl>
 			<Input
 				{...field}
@@ -75,7 +75,7 @@ const matcher = match<Args, ReactNode>(
 			/>
 		</FormControl>
 	)),
-	caseOf([isOfType(EditorType.password), _, _], (desc, _, field) => (
+	caseOf([isOfType(EditorType.Password), _, _], (desc, _, field) => (
 		<FormControl>
 			<Input
 				{...field}
@@ -85,7 +85,7 @@ const matcher = match<Args, ReactNode>(
 			/>
 		</FormControl>
 	)),
-	caseOf([isOfType(EditorType.switch), _, _], (_desc, _, field) => (
+	caseOf([isOfType(EditorType.Switch), _, _], (_desc, _, field) => (
 		<FormControl className="block">
 			<Switch {...field} onCheckedChange={field.onChange} />
 		</FormControl>

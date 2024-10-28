@@ -1,4 +1,3 @@
-import {} from '@/components/ui/sidebar'
 import type { Icon } from '@/type-patches/icons'
 import {
 	Tooltip,
@@ -13,7 +12,6 @@ import {
 	IconSettings,
 	IconUserCog
 } from '@tabler/icons-react'
-import {} from 'ramda'
 import type { PropsWithChildren } from 'react'
 
 type OwnProps = {
