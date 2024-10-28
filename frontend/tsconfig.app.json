@@ -11,11 +11,13 @@
 		},
 		/* Bundler mode */
 		"moduleResolution": "bundler",
-		"isolatedModules": true,
-		"moduleDetection": "force",
-		"esModuleInterop": true,
 		"jsx": "react-jsx",
-		"jsxImportSource": "react",
+		"jsxImportSource": "react"
 	},
-	"include": ["src", "../shared/src"]
+	"include": [
+		"src",
+		"../shared/src",
+		"../type-patches/functions.d.ts",
+		"../type-patches/ramda.d.ts"
+	]
 }

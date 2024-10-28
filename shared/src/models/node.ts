@@ -2,11 +2,11 @@ import { Field, ID, ObjectType } from 'type-graphql'
 import { EditorType, NodeType } from './enums'
 
 @ObjectType()
-class Node {
+export class Node {
 	@Field(type => ID)
 	id: string
 
-	@Field()
+	@Field(type => String)
 	name: string
 
 	@Field(type => [Node], { defaultValue: [] })

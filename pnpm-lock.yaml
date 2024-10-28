@@ -33,6 +33,9 @@ importers:
 
   backend:
     dependencies:
+      fast-glob:
+        specifier: 3.3.2
+        version: 3.3.2
       graphql:
         specifier: ^16.9.0
         version: 16.9.0

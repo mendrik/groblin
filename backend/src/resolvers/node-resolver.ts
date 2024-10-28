@@ -1,11 +1,10 @@
-import { Query, Resolver } from "type-graphql";
-import { Node } from '@shared/models/node'
+import { Node } from '@shared/models/node.js'
+import { Query, Resolver } from 'type-graphql'
 
 @Resolver()
-class NodeResolver {
-  
-  @Query(returns => [Node])
-  async recipes() {
-    return await this.recipesCollection;
-  }
+export class NodeResolver {
+	@Query(returns => [Node])
+	async nodes() {
+		return []
+	}
 }

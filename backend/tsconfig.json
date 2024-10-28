@@ -2,15 +2,15 @@
 	"extends": "../tsconfig.base.json",
 	"compilerOptions": {
 		"baseUrl": ".",
-		"target": "es2021",
+		"target": "ESNext",
 		"module": "NodeNext",
 		"moduleResolution": "NodeNext",
-		"lib": ["ES2022", "dom", "dom.iterable", "esnext", "WebWorker"],
-		"typeRoots": ["./node_modules/@types"],
+		"lib": ["ESNext"],
 		"paths": {
-			"@shared/*": ["../shared/src/*"]
+			"@shared/*": ["../shared/src/*"],
+			"@types/*": ["../type-patches/*"]
 		}
 	},
 	"exclude": ["node_modules"],
-	"include": ["src", "../shared/src"]
+	"include": ["src", "../shared/src", "../type-patches"]
 }
