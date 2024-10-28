@@ -2,7 +2,7 @@ import type { ResultOf, VariablesOf } from '@graphql-typed-document-node/core'
 import { createClient } from 'graphql-ws'
 import type { TypedDocumentString } from './gql/graphql'
 
-const gql = createClient({ url: 'ws://localhost:8080/v1/graphql' })
+const gql = createClient({ url: 'ws://localhost:6173/graphql' })
 
 export const subscribe = async <D extends TypedDocumentString<any, any>>(
 	query: D,

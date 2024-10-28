@@ -14,18 +14,9 @@ export default defineConfig({
 			}
 		})
 	],
-	server: {
-		proxy: {
-			'/rest': {
-				target: 'http://localhost:6173',
-				changeOrigin: true,
-				secure: false,
-				ws: true
-			}
-		}
-	},
 	resolve: {
 		alias: {
+			'@tp': resolve(__dirname, '../type-patches/src'),
 			'@shared': resolve(__dirname, '../shared/src'),
 			'@': resolve(__dirname, './src')
 		}

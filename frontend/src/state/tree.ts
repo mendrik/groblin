@@ -1,4 +1,4 @@
-import { query, subscribe } from '@/gql-client'
+import { query } from '@/gql-client'
 import {
 	DeleteNodeByIdDocument,
 	GetNodesDocument,
@@ -27,6 +27,7 @@ import {
 	over,
 	pipe,
 	prop,
+	tap,
 	when
 } from 'ramda'
 
@@ -84,14 +85,16 @@ export const $parentNode = signal<number>()
 export const $editingNode = signal<number | undefined>()
 
 /** ---- subscriptions ---- **/
-subscribe(
-	GetNodesDocument,
-	pipe(
-		prop('get_nodes'),
-		listToTree('id', 'parent_id', 'nodes'),
-		setSignal($root)
+query(GetNodesDocument)
+	.then(tap(console.log))
+	.then(
+		pipe(
+			prop('get_nodes'),
+			listToTree('id', 'parent_id', 'nodes'),
+			setSignal($root)
+		)
 	)
-)
+
 $root.subscribe(
 	when(isNotNil, node => updateNodeState({ open: true })(node.id))
 )
