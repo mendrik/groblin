@@ -1,6 +1,6 @@
 import { sql } from 'kysely'
 import type { Context } from 'src/database.ts'
-import { EditorType, NodeType } from 'src/resolvers/models/enums.ts'
+import { NodeType } from 'src/resolvers/models/enums.ts'
 import {
 	Arg,
 	Ctx,
@@ -27,9 +27,6 @@ export class Node {
 	@Field(type => NodeType)
 	type: NodeType
 
-	@Field(type => EditorType)
-	editor: EditorType
-
 	@Field(type => Int, { nullable: true })
 	parent_id?: number
 }
@@ -44,9 +41,6 @@ export class InsertNode {
 
 	@Field(type => NodeType)
 	type: NodeType
-
-	@Field(type => EditorType)
-	editor: EditorType
 
 	@Field(type => Int, { nullable: true })
 	parent_id?: number
@@ -65,9 +59,6 @@ export class ChangeNodeInput {
 
 	@Field(type => NodeType, { nullable: true })
 	type: NodeType
-
-	@Field(type => EditorType, { nullable: true })
-	editor: EditorType
 
 	@Field(type => Int, { nullable: true })
 	parent_id?: number

@@ -1,6 +1,11 @@
 {
 	"name": "groblin",
 	"private": true,
+	"scripts": {
+		"schema:frontend": "pnpm --filter frontend run schema",
+		"schema:backend": "pnpm --filter backend run schema",
+		"schema": "pnpm schema:backend && pnpm schema:frontend"
+	},
 	"devDependencies": {
 		"@types/ramda": "^0.30.2",
 		"@biomejs/biome": "1.9.4",

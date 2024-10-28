@@ -4,6 +4,7 @@
 	"type": "module",
 	"scripts": {
 		"server": "tsx src/server.ts",
-		"test": "tsx --test src/**/*.test.ts"
+		"test": "tsx --test src/**/*.test.ts",
+		"schema": ""
 	}
 }

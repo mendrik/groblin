@@ -1,5 +1,5 @@
 {
-	"name": "groblin",
+	"name": "frontend",
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
@@ -8,7 +8,7 @@
 		"test": "node --test --experimental-strip-types --no-warnings",
 		"build": "tsc -b && vite build",
 		"preview": "vite preview",
-		"types:gql": "graphql-codegen --config codegen.ts"
+		"schema": "graphql-codegen --config codegen.ts"
 	},
 	"dependencies": {
 		"@graphql-typed-document-node/core": "^3.2.0",
