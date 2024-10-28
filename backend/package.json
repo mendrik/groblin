@@ -6,7 +6,7 @@
 		"types:db": "kysely-codegen --out-file src/database/schema.ts --dialect sqlite",
 		"types:gql": "tsx src/schema.ts",
 		"schema": "pnpm types:db && pnpm types:gql",
-		"server": "tsx src/server.ts",
+		"server": "tsx watch  --include src src/server.ts",
 		"test": "tsx --test test/**/*.ts"
 	},
 	"devDependencies": {
