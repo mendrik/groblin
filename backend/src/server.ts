@@ -1,3 +1,5 @@
+import 'dotenv/config'
+import 'reflect-metadata'
 import { writeFileSync } from 'node:fs'
 import { makeExecutableSchema } from '@graphql-tools/schema'
 import type { AnyFn } from '@types/functions'
@@ -6,9 +8,9 @@ import { execute, printSchema, subscribe } from 'graphql'
 import { useServer } from 'graphql-ws/lib/use/ws'
 import { type NonEmptyArray, flatten, map, values } from 'ramda'
 import { allP } from 'ramda-adjunct'
-import 'reflect-metadata'
 import { buildSchema } from 'type-graphql'
 import { WebSocketServer } from 'ws'
+import { context } from './database.ts'
 
 const resolvers: NonEmptyArray<AnyFn> = await fg('./src/resolvers/**/*.ts')
 	.then(
@@ -34,6 +36,6 @@ const server = new WebSocketServer({
 	path: '/graphql'
 })
 
-useServer({ schema, execute, subscribe }, server)
+useServer({ schema, execute, subscribe, context }, server)
 
 console.log('Listening to port 6173')
