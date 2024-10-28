@@ -21,9 +21,6 @@ export class InsertNode {
 	@Field(type => Int)
 	order: number
 
-	@Field(type => [Node], { defaultValue: [] })
-	nodes: Node[]
-
 	@Field(type => NodeType)
 	type: NodeType
 
@@ -41,9 +38,9 @@ export class NodeResolver {
 		return ctx.db.selectFrom('node').execute()
 	}
 
-	@Mutation(returns => Node)
+	@Mutation(returns => Int)
 	async insertNode(
-		@Arg('data') data: InsertNode,
+		@Arg('data', () => InsertNode) data: InsertNode,
 		@Ctx() ctx: Context
 	): Promise<number> {
 		const [{ id }] = await ctx.db

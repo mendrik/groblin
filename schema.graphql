@@ -5,9 +5,11 @@ type Query {
 type Node {
   id: ID!
   name: String!
+  order: Int!
   nodes: [Node!]!
   type: NodeType!
   editor: EditorType!
+  parent: Node
 }
 
 enum NodeType {
@@ -30,4 +32,16 @@ enum EditorType {
   switch
   textarea
   richtext
+}
+
+type Mutation {
+  insertNode(data: InsertNode!): Int!
+}
+
+input InsertNode {
+  name: String!
+  order: Int!
+  type: NodeType!
+  editor: EditorType!
+  parent_id: ID
 }
