@@ -4,14 +4,14 @@
  */
 
 export interface Node {
-  editor: string | null;
-  id: number;
-  name: string | null;
-  order: number | null;
-  parent_id: number | null;
-  type: string | null;
+	editor: string
+	id: number
+	name: string
+	order: number
+	parent_id: number | null
+	type: string
 }
 
 export interface DB {
-  node: Node;
+	node: Node
 }

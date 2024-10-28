@@ -1,5 +1,6 @@
 import { caseOf, match } from '@/lib/match'
 import type { TreeNode } from '@/state/tree'
+import { NodeType } from '@shared/models/enums'
 import {
 	IconBox,
 	IconCalendar,
@@ -12,7 +13,6 @@ import {
 } from '@tabler/icons-react'
 import { T as _ } from 'ramda'
 import type { ReactNode } from 'react'
-import { NodeType } from './types'
 
 type Icon = IconProps
 

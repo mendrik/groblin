@@ -6,7 +6,6 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import type { Node_Insert_Input } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
 import { evolveAlt } from '@/lib/evolve-alt'
 import { caseOf, match } from '@/lib/match'
@@ -25,13 +24,13 @@ import {
 	waitForUpdate
 } from '@/state/tree'
 import { signal } from '@preact/signals-react'
+import { EditorType, NodeType } from '@shared/models/enums'
 import { F, T, equals as eq, pipe, tap } from 'ramda'
 import { useRef } from 'react'
 import { type TypeOf, nativeEnum, strictObject, string } from 'zod'
 import { Button } from '../button'
 import { asField } from '../zod-form/utils'
 import { type FormApi, ZodForm } from '../zod-form/zod-form'
-import { EditorType, NodeType } from './types'
 
 type NodeCreatePosition =
 	| 'root-child'
@@ -101,7 +100,7 @@ const order = match<[NodeCreatePosition], number>(
 	)
 )
 
-const createNodeCommand: (data: Partial<Node_Insert_Input>) => void = pipeAsync(
+const createNodeCommand: (data: Partial<Node>) => void = pipeAsync(
 	evolveAlt({
 		node_id: () => parent($createNodePosition.value),
 		order: () => order($createNodePosition.value)

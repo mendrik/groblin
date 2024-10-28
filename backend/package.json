@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"type": "module",
 	"scripts": {
-		"types:db": "kysely-codegen --out-file src/database/schema.ts",
+		"types:db": "kysely-codegen --out-file src/database/schema.ts --dialect sqlite",
 		"server": "tsx src/server.ts",
 		"test": "tsx --test test/**/*.ts"
 	},

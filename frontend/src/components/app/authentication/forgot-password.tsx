@@ -7,13 +7,12 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { EditorType } from '@/components/ui/tree/types'
 import { asField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { stopPropagation } from '@/lib/dom-events'
 import {} from '@/lib/match'
 import { pipeAsync } from '@/lib/pipe-async'
-import type { Fn } from '@/type-patches/functions'
+import type { Fn } from '@types/functions'
 import { pipe } from 'ramda'
 import { Link } from 'react-router-dom'
 import { type TypeOf, strictObject, string } from 'zod'

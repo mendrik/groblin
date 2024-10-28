@@ -7,17 +7,13 @@
 		"lib": ["ES2020", "ES2022.Error", "DOM", "DOM.Iterable"],
 		"paths": {
 			"@shared/*": ["../shared/src/*"],
-			"@/*": ["./src/*"]
+			"@/*": ["./src/*"],
+			"@types/*": ["../type-patches/*"]
 		},
 		/* Bundler mode */
 		"moduleResolution": "bundler",
 		"jsx": "react-jsx",
 		"jsxImportSource": "react"
 	},
-	"include": [
-		"src",
-		"../shared/src",
-		"../type-patches/functions.d.ts",
-		"../type-patches/ramda.d.ts"
-	]
+	"include": ["src", "../shared/src", "../type-patches"]
 }
