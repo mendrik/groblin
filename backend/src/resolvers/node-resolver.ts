@@ -31,6 +31,15 @@ export class InsertNode {
 	parent_id: number
 }
 
+@InputType()
+export class ChangeNodeNameInput {
+	@Field(type => ID)
+	id: number
+
+	@Field(type => String)
+	name: string
+}
+
 @Resolver()
 export class NodeResolver {
 	@Query(returns => [Node])
@@ -49,5 +58,30 @@ export class NodeResolver {
 			.returning('id as id')
 			.execute()
 		return id
+	}
+
+	@Mutation(returns => Boolean)
+	async changeNodeName(
+		@Arg('data', () => ChangeNodeNameInput) data: ChangeNodeNameInput,
+		@Ctx() ctx: Context
+	): Promise<boolean> {
+		const { numChangedRows = 0 } = await ctx.db
+			.updateTable('node')
+			.set({ name: data.name })
+			.where('id', '=', data.id)
+			.executeTakeFirst()
+		return numChangedRows > 0
+	}
+
+	@Mutation(returns => Boolean)
+	async deleteNodeById(
+		@Arg('id', () => ID) id: number,
+		@Ctx() ctx: Context
+	): Promise<boolean> {
+		const { numDeletedRows } = await ctx.db
+			.deleteFrom('node')
+			.where('id', '=', id)
+			.executeTakeFirst()
+		return numDeletedRows > 0
 	}
 }

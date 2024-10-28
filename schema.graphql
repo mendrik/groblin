@@ -36,6 +36,8 @@ enum EditorType {
 
 type Mutation {
   insertNode(data: InsertNode!): Int!
+  changeNodeName(data: ChangeNodeNameInput!): Boolean!
+  deleteNodeById(id: ID!): Boolean!
 }
 
 input InsertNode {
@@ -44,4 +46,9 @@ input InsertNode {
   type: NodeType!
   editor: EditorType!
   parent_id: ID
+}
+
+input ChangeNodeNameInput {
+  id: ID!
+  name: String!
 }

@@ -44,7 +44,7 @@ subscription GetNodes {
 `
 
 gql`
-mutation updateNodeName($id: bigint!, $name: String!) {
+mutation updateNodeName($id: ID!, $name: String!) {
 	update_node_by_pk (
 	pk_columns: { id: $id }
 	_set: { name: $name }

@@ -1,9 +1,5 @@
 import type { CodegenConfig } from '@graphql-codegen/cli'
-import {
-	BigIntResolver,
-	DateTimeResolver,
-	SafeIntResolver
-} from 'graphql-scalars'
+import { BigIntResolver } from 'graphql-scalars'
 
 const config: CodegenConfig = {
 	overwrite: true,
@@ -15,9 +11,7 @@ const config: CodegenConfig = {
 			config: {
 				documentMode: 'string',
 				scalars: {
-					BigInt: BigIntResolver,
-					DateTime: DateTimeResolver,
-					Int: SafeIntResolver
+					Int: BigIntResolver
 				}
 			}
 		}
