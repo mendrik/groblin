@@ -1,0 +1,33 @@
+type Query {
+  nodes: [Node!]!
+}
+
+type Node {
+  id: ID!
+  name: String!
+  nodes: [Node!]!
+  type: NodeType!
+  editor: EditorType!
+}
+
+enum NodeType {
+  object
+  string
+  number
+  boolean
+  list
+  date
+  schema
+}
+
+enum EditorType {
+  select
+  radios
+  multiselect
+  input
+  password
+  email
+  switch
+  textarea
+  richtext
+}

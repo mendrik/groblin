@@ -1,9 +1,12 @@
-import 'reflect-metadata'
+import { writeFileSync } from 'node:fs'
+import { makeExecutableSchema } from '@graphql-tools/schema'
 import type { AnyFn } from '@types/functions'
 import fg from 'fast-glob'
+import { execute, printSchema, subscribe } from 'graphql'
 import { useServer } from 'graphql-ws/lib/use/ws'
 import { type NonEmptyArray, flatten, map, values } from 'ramda'
 import { allP } from 'ramda-adjunct'
+import 'reflect-metadata'
 import { buildSchema } from 'type-graphql'
 import { WebSocketServer } from 'ws'
 
@@ -20,12 +23,17 @@ console.log('Loaded resolvers:', ...resolvers)
 
 // Build the TypeGraphQL schema
 const schema = await buildSchema({ resolvers })
+// Write to a file
+writeFileSync('../schema.graphql', printSchema(schema), {
+	encoding: 'utf-8'
+})
+const executableSchema = makeExecutableSchema({ typeDefs: schema })
 
 const server = new WebSocketServer({
-	port: 4000,
+	port: 6173,
 	path: '/graphql'
 })
 
-useServer({ schema }, server)
+useServer({ schema, execute, subscribe }, server)
 
-console.log('Listening to port 4000')
+console.log('Listening to port 6173')
