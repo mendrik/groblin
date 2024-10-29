@@ -112,8 +112,6 @@ $root.subscribe(
 	when(isNotNil, node => updateNodeState({ open: true })(node.id))
 )
 $nodeStates.subscribe(setItem('tree-state'))
-const $rootUpdates = signal(0)
-$root.subscribe(() => ($rootUpdates.value = ($rootUpdates.value + 1) % 1000))
 
 /** ---- interfaces ---- **/
 export const startEditing = () => ($editingNode.value = $focusedNode.value)
@@ -218,14 +216,15 @@ export const nodeState = (state: Partial<NodeState>) =>
 	Maybe.fromNullable($focusedNode.value).ifJust(updateNodeState(state))
 
 export const openNode = updateNodeState({ open: true })
+
+export const closeNode = updateNodeState({ open: false })
+
 export const openParent = <T extends Pick<TreeNode, 'parent_id'>>(
 	obj: T
 ): T => {
 	if (obj.parent_id) openNode(obj.parent_id)
 	return obj
 }
-
-export const closeNode = updateNodeState({ open: false })
 
 export const confirmNodeName = (value: string) =>
 	MaybeAsync.liftMaybe(Maybe.fromNullable($editingNode.value))

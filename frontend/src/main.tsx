@@ -12,7 +12,7 @@ const Main = () => (
 	<StrictMode>
 		<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
 			<BrowserRouter basename="/">
-				{!$user.value ? <LoggedIn /> : <LoggedOut />}
+				{$user.value ? <LoggedIn /> : <LoggedOut />}
 			</BrowserRouter>
 		</ThemeProvider>
 	</StrictMode>
