@@ -1,3 +1,4 @@
+import { green } from 'ansicolor'
 import sqlite3 from 'better-sqlite3'
 import { Kysely, SqliteDialect } from 'kysely'
 import type { DB } from './database/schema.ts'
@@ -10,7 +11,11 @@ const db = new Kysely<DB>({
 	dialect: new SqliteDialect({
 		database: sqlite3(process.env.DATABASE_URL)
 	}),
-	log: ['query', 'error']
+	log(event): void {
+		if (event.level === 'query') {
+			console.log(green(event.query.sql), event.query.parameters)
+		}
+	}
 })
 
 const context: Context = {
