@@ -2,7 +2,9 @@ import type { ResultOf, VariablesOf } from '@graphql-typed-document-node/core'
 import { createClient } from 'graphql-ws'
 import type { TypedDocumentString } from './gql/graphql'
 
-const gql = createClient({ url: 'ws://localhost:6173/graphql' })
+const gql = createClient({
+	url: 'ws://localhost:6173/graphql'
+})
 
 export const query = async <D extends TypedDocumentString<any, any>>(
 	query: D,
@@ -12,7 +14,8 @@ export const query = async <D extends TypedDocumentString<any, any>>(
 		const unsub = gql.subscribe(
 			{ query: query.toString(), variables: variables ?? undefined },
 			{
-				next: ({ data }) => res(data as ResultOf<D>),
+				next: ({ data, errors }) =>
+					errors ? rej(errors) : res(data as ResultOf<D>),
 				error: err =>
 					rej(new Error(`${query.__meta__?.$name}:`, { cause: err })),
 				complete: () => unsub()

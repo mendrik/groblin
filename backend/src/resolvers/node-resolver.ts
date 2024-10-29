@@ -1,6 +1,7 @@
+import { NodeType } from '@shared/enums.ts'
 import { sql } from 'kysely'
+import { tap } from 'ramda'
 import type { Context } from 'src/database.ts'
-import { NodeType } from 'src/resolvers/models/enums.ts'
 import {
 	Arg,
 	Ctx,
@@ -68,7 +69,12 @@ export class ChangeNodeInput {
 export class NodeResolver {
 	@Query(returns => [Node])
 	get_nodes(@Ctx() { db }: Context) {
-		return db.selectFrom('node').selectAll().orderBy('order', 'asc').execute()
+		return db
+			.selectFrom('node')
+			.selectAll()
+			.orderBy('order', 'asc')
+			.execute()
+			.then(tap(console.log))
 	}
 
 	@Mutation(returns => Int)
