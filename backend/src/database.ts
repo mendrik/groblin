@@ -10,11 +10,10 @@ export const db = new Kysely<DB>({
 	}),
 	log(event): void {
 		if (event.level === 'query') {
-			const params = event.query.parameters
-			const sql = event.query.sql
-			isNilOrEmpty(params)
+			const { parameters, sql } = event.query
+			isNilOrEmpty(parameters)
 				? console.log(green('Sql: ') + lightGreen(sql))
-				: console.log(green('Sql: ') + lightGreen(sql), params)
+				: console.log(green('Sql: ') + lightGreen(sql), parameters)
 		}
 	}
 })
