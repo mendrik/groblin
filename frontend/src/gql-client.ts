@@ -7,36 +7,44 @@ const gql = createClient({
 })
 
 export const query = async <D extends TypedDocumentString<any, any>>(
-	query: D,
+	queryDoc: D,
 	variables?: VariablesOf<D>
 ): Promise<ResultOf<D>> =>
 	new Promise((res, rej) => {
 		const unsub = gql.subscribe(
-			{ query: query.toString(), variables: variables ?? undefined },
+			{ query: queryDoc.toString(), variables: variables ?? undefined },
 			{
-				next: ({ data, errors }) =>
-					errors ? rej(errors) : res(data as ResultOf<D>),
-				error: err =>
-					rej(new Error(`${query.__meta__?.$name}:`, { cause: err })),
+				next: ({ data, errors }) => {
+					unsub()
+					errors ? rej(errors) : res(data as ResultOf<D>)
+				},
+				error: err => {
+					unsub()
+					rej(new Error(`${queryDoc.__meta__?.$name}:`, { cause: err }))
+				},
 				complete: () => unsub()
 			}
 		)
 	})
 
-export const subscribe = async <D extends TypedDocumentString<any, any>>(
-	query: D,
-	callback: (d: ResultOf<D>) => any,
-	variables?: VariablesOf<D>
+export const subscribe = async <
+	Q extends TypedDocumentString<any, any>,
+	S extends TypedDocumentString<any, any>
+>(
+	queryDoc: Q,
+	subscriptionDoc: S,
+	callback: (data: ResultOf<Q>) => void,
+	variables?: VariablesOf<Q>
 ) => {
+	const run = () =>
+		query(queryDoc, variables).then(callback).catch(console.error)
 	try {
+		run()
 		const subs = gql.iterate({
-			query: query.toString(),
-			variables: variables ?? undefined
+			query: subscriptionDoc.toString()
 		})
 		for await (const { data } of subs) {
-			if (data) {
-				callback(data as ResultOf<D>)
-			}
+			if (data) run()
 		}
 	} catch (e: any) {
 		console.error(e)

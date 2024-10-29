@@ -34,7 +34,7 @@ export type InsertNode = {
 export type Mutation = {
   __typename?: 'Mutation';
   delete_node_by_id: Scalars['Boolean']['output'];
-  insert_node: Scalars['Int']['output'];
+  insert_node: Node;
   update_node: Scalars['Boolean']['output'];
 };
 
@@ -79,6 +79,16 @@ export type Query = {
   get_nodes: Array<Node>;
 };
 
+export type Subscription = {
+  __typename?: 'Subscription';
+  nodesUpdated: Array<Node>;
+};
+
+export type NodesUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type NodesUpdatedSubscription = { __typename?: 'Subscription', nodesUpdated: Array<{ __typename?: 'Node', id: number }> };
+
 export type GetNodesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -89,7 +99,7 @@ export type InsertNodeMutationVariables = Exact<{
 }>;
 
 
-export type InsertNodeMutation = { __typename?: 'Mutation', insert_node: number };
+export type InsertNodeMutation = { __typename?: 'Mutation', insert_node: { __typename?: 'Node', id: number } };
 
 export type UpdateNodeMutationVariables = Exact<{
   data: ChangeNodeInput;
@@ -122,6 +132,13 @@ export class TypedDocumentString<TResult, TVariables>
   }
 }
 
+export const NodesUpdatedDocument = new TypedDocumentString(`
+    subscription NodesUpdated {
+  nodesUpdated {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<NodesUpdatedSubscription, NodesUpdatedSubscriptionVariables>;
 export const GetNodesDocument = new TypedDocumentString(`
     query GetNodes {
   get_nodes {
@@ -135,7 +152,9 @@ export const GetNodesDocument = new TypedDocumentString(`
     `) as unknown as TypedDocumentString<GetNodesQuery, GetNodesQueryVariables>;
 export const InsertNodeDocument = new TypedDocumentString(`
     mutation InsertNode($data: InsertNode!) {
-  insert_node(data: $data)
+  insert_node(data: $data) {
+    id
+  }
 }
     `) as unknown as TypedDocumentString<InsertNodeMutation, InsertNodeMutationVariables>;
 export const UpdateNodeDocument = new TypedDocumentString(`

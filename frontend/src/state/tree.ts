@@ -1,10 +1,11 @@
-import { query } from '@/gql-client'
+import { query, subscribe } from '@/gql-client'
 import {
 	DeleteNodeByIdDocument,
 	GetNodesDocument,
 	type InsertNode,
 	InsertNodeDocument,
 	type Node,
+	NodesUpdatedDocument,
 	UpdateNodeDocument
 } from '@/gql/graphql.ts'
 import { getItem, setItem } from '@/lib/local-storage'
@@ -32,6 +33,14 @@ import {
 
 /** ---- queries ---- **/
 gql`
+  subscription NodesUpdated {
+	nodesUpdated {
+		id
+	}
+  }
+`
+
+gql`
   query GetNodes {
     get_nodes {
 		id
@@ -46,7 +55,9 @@ gql`
 // Mutation to insert a new node
 gql`
   mutation InsertNode($data: InsertNode!) {
-    insert_node(data: $data)
+    insert_node(data: $data) {
+		id
+	}
   }
 `
 
@@ -84,15 +95,15 @@ export const $parentNode = signal<number>()
 export const $editingNode = signal<number | undefined>()
 
 /** ---- subscriptions ---- **/
-query(GetNodesDocument)
-	.then(
-		pipe(
-			prop('get_nodes'),
-			listToTree('id', 'parent_id', 'nodes'),
-			setSignal($root)
-		)
+subscribe(
+	GetNodesDocument,
+	NodesUpdatedDocument,
+	pipe(
+		prop('get_nodes'),
+		listToTree('id', 'parent_id', 'nodes'),
+		setSignal($root)
 	)
-	.catch(console.error)
+)
 
 $root.subscribe(
 	when(isNotNil, node => updateNodeState({ open: true })(node.id))
@@ -100,17 +111,6 @@ $root.subscribe(
 $nodeStates.subscribe(setItem('tree-state'))
 const $rootUpdates = signal(0)
 $root.subscribe(() => ($rootUpdates.value = ($rootUpdates.value + 1) % 1000))
-
-export const waitForUpdate = <T>(arg: T): Promise<T> =>
-	new Promise<T>(res => {
-		const current = $rootUpdates.value
-		const unsub = $rootUpdates.subscribe(val => {
-			if (val !== current) {
-				unsub()
-				res(arg)
-			}
-		})
-	})
 
 /** ---- interfaces ---- **/
 export const startEditing = () => ($editingNode.value = $focusedNode.value)
@@ -241,7 +241,7 @@ export const insertNode = (data: InsertNode): Promise<number> => {
 	return query(InsertNodeDocument, {
 		data
 	})
-		.then(x => x.insert_node)
+		.then(x => x.insert_node.id)
 		.then(failOnNil('Failed to insert node'))
 }
 

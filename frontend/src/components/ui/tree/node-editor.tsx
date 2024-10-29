@@ -2,12 +2,7 @@ import KeyListener from '@/components/utils/key-listener'
 import { focusOn, inputValue, stopPropagation } from '@/lib/dom-events'
 import { pipeTap, pipeTapAsync } from '@/lib/ramda'
 import { isActiveRef } from '@/lib/react'
-import {
-	type TreeNode,
-	confirmNodeName,
-	stopEditing,
-	waitForUpdate
-} from '@/state/tree'
+import { type TreeNode, confirmNodeName, stopEditing } from '@/state/tree'
 import { IconPencil } from '@tabler/icons-react'
 import { pipe } from 'ramda'
 import { forwardRef, useLayoutEffect } from 'react'
@@ -31,7 +26,6 @@ export const NodeEditor = forwardRef<HTMLInputElement, OwnProps>(
 				onEnter={pipeTapAsync(
 					stopPropagation,
 					pipe(inputValue, confirmNodeName),
-					waitForUpdate,
 					stopEditing,
 					focusOn(textBtn)
 				)}
