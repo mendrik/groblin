@@ -1,6 +1,5 @@
 import { NodeType } from '@shared/enums.ts'
 import { sql } from 'kysely'
-import { tap } from 'ramda'
 import type { Context } from 'src/database.ts'
 import {
 	Arg,
@@ -69,12 +68,7 @@ export class ChangeNodeInput {
 export class NodeResolver {
 	@Query(returns => [Node])
 	get_nodes(@Ctx() { db }: Context) {
-		return db
-			.selectFrom('node')
-			.selectAll()
-			.orderBy('order', 'asc')
-			.execute()
-			.then(tap(console.log))
+		return db.selectFrom('node').selectAll().orderBy('order', 'asc').execute()
 	}
 
 	@Mutation(returns => Int)
@@ -87,7 +81,7 @@ export class NodeResolver {
 				.updateTable('node')
 				.where('order', '>=', data.order)
 				.where('parent_id', '=', data.parent_id ?? null)
-				.set({ order: sql`order + 1` })
+				.set({ order: sql`"order" + 1` })
 				.execute()
 
 			return trx
@@ -127,7 +121,7 @@ export class NodeResolver {
 				.updateTable('node')
 				.where('order', '>=', order)
 				.where('parent_id', '=', parent_id ?? null)
-				.set({ order: sql`order - 1` })
+				.set({ order: sql`"order" - 1` })
 				.execute()
 
 			return db.deleteFrom('node').where('id', '=', id).executeTakeFirst()
