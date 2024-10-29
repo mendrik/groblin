@@ -33,8 +33,7 @@ const loggingExecute = async (args: ExecutionArgs) => {
 	} else {
 		console.log(
 			yellow('Graphql: ') +
-				lightYellow(document.loc?.source.body.replace(Content, '').trim()),
-			variableValues
+				lightYellow(document.loc?.source.body.replace(Content, '').trim())
 		)
 	}
 
