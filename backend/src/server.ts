@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import 'reflect-metadata'
 import { makeExecutableSchema } from '@graphql-tools/schema'
+import { blue, green, yellow } from 'ansicolor'
 import { type ExecutionArgs, execute, subscribe } from 'graphql'
 import { useServer } from 'graphql-ws/lib/use/ws'
 import { call } from 'ramda'
@@ -10,8 +11,10 @@ import { schema as gqlSchema } from './schema-builder.ts'
 
 const schema = makeExecutableSchema({ typeDefs: gqlSchema })
 
+const port = Number.parseInt(process.env.PORT ?? '6173')
+
 const server = new WebSocketServer({
-	port: 6173,
+	port,
 	path: '/graphql'
 })
 
@@ -23,7 +26,7 @@ const loggingExecute = async (args: ExecutionArgs) => {
 
 	// Log the operation (query/mutation) and variables
 	console.log(
-		document.loc?.source.body.replace(Content, '').trim(),
+		blue(document.loc?.source.body.replace(Content, '').trim()),
 		variableValues
 	)
 
@@ -33,4 +36,4 @@ const loggingExecute = async (args: ExecutionArgs) => {
 
 useServer({ schema, execute: loggingExecute, subscribe, context }, server)
 
-console.log('Listening to port 6173')
+console.log(yellow(`Listening to port ${green(port)}`))
