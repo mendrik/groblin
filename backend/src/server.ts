@@ -15,7 +15,7 @@ const server = new WebSocketServer({
 	path: '/graphql'
 })
 
-const WhiteSpace = /\{(.|\n)*?\}/gim
+const Content = /\s+\{(.|\n)*$/gim
 
 // Custom execute function to add logging
 const loggingExecute = async (args: ExecutionArgs) => {
@@ -23,8 +23,7 @@ const loggingExecute = async (args: ExecutionArgs) => {
 
 	// Log the operation (query/mutation) and variables
 	console.log(
-		'GraphQL Request:',
-		document.loc?.source.body.replaceAll(WhiteSpace, ' '),
+		document.loc?.source.body.replace(Content, '').trim(),
 		variableValues
 	)
 

@@ -9,7 +9,8 @@ export interface Context {
 const db = new Kysely<DB>({
 	dialect: new SqliteDialect({
 		database: sqlite3(process.env.DATABASE_URL)
-	})
+	}),
+	log: ['query', 'error']
 })
 
 const context: Context = {

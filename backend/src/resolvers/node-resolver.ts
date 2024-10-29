@@ -147,12 +147,12 @@ export class NodeResolver {
 		const { numDeletedRows } = await db.transaction().execute(async trx => {
 			trx
 				.updateTable('node')
-				.where('order', '>=', order)
+				.where('order', '>', order)
 				.where('parent_id', '=', parent_id ?? null)
 				.set({ order: sql`"order" - 1` })
 				.execute()
 
-			return db.deleteFrom('node').where('id', '=', id).executeTakeFirst()
+			return trx.deleteFrom('node').where('id', '=', id).executeTakeFirst()
 		})
 		pubSub.publish('NODE_UPDATED', { nodesUpdated: [] })
 		return numDeletedRows > 0
