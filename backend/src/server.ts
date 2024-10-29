@@ -1,53 +1,39 @@
-import { basename, dirname } from 'node:path'
-import glob from 'fast-glob'
-// Import the framework and instantiate it
-import Fastify, { type HTTPMethods } from 'fastify'
-import { drop, dropLast, pipe, prop, reverse, split } from 'ramda'
+import 'dotenv/config'
+import 'reflect-metadata'
+import { makeExecutableSchema } from '@graphql-tools/schema'
+import { cyan, green, lightGreen } from 'ansicolor'
+import { type ExecutionArgs, execute, subscribe } from 'graphql'
+import { useServer } from 'graphql-ws/lib/use/ws'
+import { call } from 'ramda'
+import { WebSocketServer } from 'ws'
+import { context } from './context.ts'
+import { schema as gqlSchema } from './schema-builder.ts'
 
-const fastify = Fastify({
-	logger: {
-		transport: {
-			target: '@fastify/one-line-logger'
-		}
-	}
+const schema = makeExecutableSchema({ typeDefs: gqlSchema })
+
+const port = Number.parseInt(process.env.PORT ?? '6173')
+
+const server = new WebSocketServer({
+	port,
+	path: '/graphql'
 })
 
-const files = await glob('./src/functions/**/*.ts')
+const Content = /\s+\{(.|\n)*$/gim
 
-const folder = pipe(dirname, split('/'), drop(3))
+// Custom execute function to add logging
+const loggingExecute = async (args: ExecutionArgs) => {
+	const { document, variableValues, contextValue } = args
 
-const fileMethod: (s: string) => string[] = pipe(
-	basename,
-	split(/_|\./),
-	dropLast(1),
-	xs => reverse(xs)
-)
+	// Log the operation (query/mutation) and variables
+	console.log(
+		cyan(document.loc?.source.body.replace(Content, '').trim()),
+		variableValues
+	)
 
-for (const file of files) {
-	const [method, ...name] = fileMethod(file)
-	const paths = folder(file)
-
-	const handler = await import(file.replace('src/', '')).then(prop('default'))
-
-	const config = {
-		method: method.toUpperCase() as HTTPMethods,
-		url: `/rest/${[...paths, name.join('_')].join('/')}`
-	}
-
-	console.log(config)
-
-	fastify.route({ ...config, handler })
+	// Call the original execute function
+	return call(execute, args)
 }
 
-// Declare a route
-fastify.post('/register', async (request, reply) => {
-	return { hello: 'world' }
-})
+useServer({ schema, execute: loggingExecute, subscribe, context }, server)
 
-// Run the server!
-try {
-	await fastify.listen({ port: 6173 })
-} catch (err) {
-	fastify.log.error(err)
-	process.exit(1)
-}
+console.log(green(`Listening to port ${lightGreen(port)}`))

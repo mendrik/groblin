@@ -1,0 +1,24 @@
+{
+	"extends": "../tsconfig.base.json",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"target": "ES2020",
+		"module": "ESNext",
+		"lib": ["ES2020", "ES2022.Error", "DOM", "DOM.Iterable"],
+		"paths": {
+			"@shared/*": ["../shared/src/*"],
+			"@/*": ["./src/*"],
+			"@tp/*": ["../type-patches/*"]
+		},
+		/* Bundler mode */
+		"moduleResolution": "bundler",
+		"jsx": "react-jsx",
+		"jsxImportSource": "react"
+	},
+	"include": [
+		"src",
+		"../shared/src",
+		"../type-patches",
+		"../backend/src/resolvers/models"
+	]
+}

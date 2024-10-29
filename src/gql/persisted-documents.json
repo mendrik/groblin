@@ -1,4 +1,0 @@
-{
-  "a1af4002ae91c138caaaf5c6d65ffcd95dce475e": "subscription GetNodes { node { id name node_id order type } }",
-  "908c0f05a6f4e0b1f33316e02d0a63ed77abf301": "mutation updateNodeName($id: Int!, $name: String!) { update_node_by_pk(pk_columns: {id: $id}, _set: {name: $name}) { id } }"
-}

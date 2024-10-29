@@ -1,0 +1,10 @@
+{
+	"name": "shared",
+	"version": "0.1.0",
+	"type": "module",
+	"scripts": {
+		"server": "tsx src/server.ts",
+		"test": "tsx --test src/**/*.test.ts",
+		"schema": ""
+	}
+}
