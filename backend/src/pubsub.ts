@@ -15,21 +15,18 @@ class LoggingPubSub implements PubSub {
 
 	publish(routingKey: string, ...args: unknown[]): void {
 		if (!args?.length) {
-			console.log(`${magenta('PubSub: ')}${lightMagenta(routingKey)}`)
+			console.log(`${magenta('Pub: ')}${lightMagenta(routingKey)}`)
 		} else {
-			console.log(`${magenta('PubSub: ')}${lightMagenta(routingKey)}`, ...args)
+			console.log(`${magenta('Pub: ')}${lightMagenta(routingKey)}`, ...args)
 		}
 		this.pubSub.publish(routingKey, ...args)
 	}
 
 	subscribe(routingKey: string, dynamicId?: unknown): AsyncIterable<unknown> {
 		if (dynamicId === undefined) {
-			console.log(`${magenta('Subscribe: ')}${lightMagenta(routingKey)}`)
+			console.log(`${magenta('Sub: ')}${lightMagenta(routingKey)}`)
 		} else {
-			console.log(
-				`${magenta('Subscribe: ')}${lightMagenta(routingKey)}`,
-				dynamicId
-			)
+			console.log(`${magenta('Sub: ')}${lightMagenta(routingKey)}`, dynamicId)
 		}
 		return this.pubSub.subscribe(routingKey, dynamicId)
 	}

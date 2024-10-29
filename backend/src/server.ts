@@ -26,13 +26,13 @@ const loggingExecute = async (args: ExecutionArgs) => {
 
 	if (variableValues) {
 		console.log(
-			yellow('Graphql: ') +
+			yellow('Gql: ') +
 				lightYellow(document.loc?.source.body.replace(Content, '').trim()),
 			variableValues
 		)
 	} else {
 		console.log(
-			yellow('Graphql: ') +
+			yellow('Gql: ') +
 				lightYellow(document.loc?.source.body.replace(Content, '').trim())
 		)
 	}
@@ -43,4 +43,4 @@ const loggingExecute = async (args: ExecutionArgs) => {
 
 useServer({ schema, execute: loggingExecute, subscribe, context }, server)
 
-console.log(darkGray('Port: ') + cyan(`Started server on ${lightGreen(port)}`))
+console.log(darkGray('Prt: ') + cyan(`Started server on ${lightGreen(port)}`))

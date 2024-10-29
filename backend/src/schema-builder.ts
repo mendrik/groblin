@@ -12,7 +12,7 @@ import { pubSub } from './pubsub.ts'
 const resolvers: NonEmptyArray<AnyFn> = await fg('./src/resolvers/**/*.ts')
 	.then(
 		map<string, any>(file => {
-			console.log(`${darkGray('Resolver')}: ${cyan(basename(file))}`)
+			console.log(`${darkGray('Res:')} ${cyan(basename(file))}`)
 			return import(file.replace('./src/', 'src/')).then(values)
 		})
 	)

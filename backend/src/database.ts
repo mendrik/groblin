@@ -13,8 +13,8 @@ export const db = new Kysely<DB>({
 			const params = event.query.parameters
 			const sql = event.query.sql
 			isNilOrEmpty(params)
-				? console.log(green('Query: ') + lightGreen(sql))
-				: console.log(green('Query: ') + lightGreen(sql), params)
+				? console.log(green('Sql: ') + lightGreen(sql))
+				: console.log(green('Sql: ') + lightGreen(sql), params)
 		}
 	}
 })
