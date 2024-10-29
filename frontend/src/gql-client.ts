@@ -44,6 +44,8 @@ export const subscribe = async <
 			query: subscriptionDoc.toString()
 		})
 		for await (const { data } of subs) {
+			console.log(data)
+
 			if (data) run()
 		}
 	} catch (e: any) {

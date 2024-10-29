@@ -1,4 +1,4 @@
-import { green } from 'ansicolor'
+import { darkGray } from 'ansicolor'
 import sqlite3 from 'better-sqlite3'
 import { Kysely, SqliteDialect } from 'kysely'
 import { isNilOrEmpty } from 'ramda-adjunct'
@@ -17,8 +17,8 @@ const db = new Kysely<DB>({
 			const params = event.query.parameters
 			const sql = event.query.sql
 			isNilOrEmpty(params)
-				? console.log(green(sql))
-				: console.log(green(sql), params)
+				? console.log(darkGray(sql))
+				: console.log(darkGray(sql), params)
 		}
 	}
 })
