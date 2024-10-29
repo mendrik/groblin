@@ -10,6 +10,7 @@ import {
 } from '@/gql/graphql.ts'
 import { getItem, setItem } from '@/lib/local-storage'
 import { assertExists, failOnNil, setSignal } from '@/lib/utils'
+import { waitForId } from '@/lib/wait-for-id'
 import { computed, signal } from '@preact/signals-react'
 import { initial } from '@shared/utils/functions'
 import { type TreeOf, listToTree } from '@shared/utils/list-to-tree'
@@ -166,6 +167,9 @@ export const focusedNode = (): number => {
 	assertExists($focusedNode.value, 'Focused node is missing')
 	return $focusedNode.value
 }
+
+export const waitForNode = (id: number) =>
+	waitForId(`node-${id}`).then(() => id)
 
 export const asNode = (nodeId: number): TreeNode => {
 	assertExists($root.value, 'Root node is missing')

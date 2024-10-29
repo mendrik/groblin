@@ -83,8 +83,8 @@ importers:
         specifier: ^14.5.0
         version: 14.5.0
       '@types/node':
-        specifier: 22.8.2
-        version: 22.8.2
+        specifier: 22.8.4
+        version: 22.8.4
       '@types/ws':
         specifier: 8.5.12
         version: 8.5.12
@@ -2265,8 +2265,8 @@ packages:
   '@types/node@22.8.1':
     resolution: {integrity: sha512-k6Gi8Yyo8EtrNtkHXutUu2corfDf9su95VYVP10aGYMMROM6SAItZi0w1XszA6RtWTHSVp5OeFof37w0IEqCQg==}
 
-  '@types/node@22.8.2':
-    resolution: {integrity: sha512-NzaRNFV+FZkvK/KLCsNdTvID0SThyrs5SHB6tsD/lajr22FGC73N2QeDPM2wHtVde8mgcXuSsHQkH5cX1pbPLw==}
+  '@types/node@22.8.4':
+    resolution: {integrity: sha512-SpNNxkftTJOPk0oN+y2bIqurEXHTA2AOZ3EJDDKeJ5VzkvvORSvmQXGQarcOzWV1ac7DCaPBEdMDxBsM+d8jWw==}
 
   '@types/prop-types@15.7.13':
     resolution: {integrity: sha512-hCZTSvwbzWGvhqxp/RqVqwU999pBf2vp7hzIjiYOsl8wqOmUxkQ6ddw1cV3l8811+kdUFus/q4d1Y3E3SyEifA==}
@@ -7328,7 +7328,7 @@ snapshots:
 
   '@types/better-sqlite3@7.6.11':
     dependencies:
-      '@types/node': 22.8.2
+      '@types/node': 22.8.4
 
   '@types/estree@1.0.6': {}
 
@@ -7348,7 +7348,7 @@ snapshots:
     dependencies:
       undici-types: 6.19.8
 
-  '@types/node@22.8.2':
+  '@types/node@22.8.4':
     dependencies:
       undici-types: 6.19.8
 
@@ -7371,7 +7371,7 @@ snapshots:
 
   '@types/ws@8.5.12':
     dependencies:
-      '@types/node': 22.8.2
+      '@types/node': 22.8.4
 
   '@vitejs/plugin-react@4.3.3(vite@5.4.10(@types/node@22.8.1))':
     dependencies:
@@ -9934,7 +9934,7 @@ snapshots:
   type-graphql@2.0.0-rc.2(graphql-scalars@1.23.0(graphql@16.9.0))(graphql@16.9.0):
     dependencies:
       '@graphql-yoga/subscription': 5.0.1
-      '@types/node': 22.8.2
+      '@types/node': 22.8.4
       '@types/semver': 7.5.8
       graphql: 16.9.0
       graphql-query-complexity: 0.12.0(graphql@16.9.0)

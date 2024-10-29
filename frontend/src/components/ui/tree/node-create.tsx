@@ -21,7 +21,8 @@ import {
 	openParent,
 	parentNode,
 	refocus,
-	updateNodeContext
+	updateNodeContext,
+	waitForNode
 } from '@/state/tree'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
@@ -107,6 +108,7 @@ const createNodeCommand: (data: NewNodeSchema) => Promise<void> = pipeAsync(
 	}),
 	openParent,
 	insertNode,
+	waitForNode,
 	updateNodeContext,
 	focusNode
 )
