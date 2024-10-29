@@ -21,7 +21,7 @@ enum NodeType {
 }
 
 type Mutation {
-  insert_node(data: InsertNode!): Int!
+  insert_node(data: InsertNode!): Node!
   update_node(data: ChangeNodeInput!): Boolean!
   delete_node_by_id(order: Int!, parent_id: Int!, id: Int!): Boolean!
 }
@@ -39,4 +39,8 @@ input ChangeNodeInput {
   order: Int
   type: NodeType
   parent_id: Int
+}
+
+type Subscription {
+  nodesUpdated: [Node!]!
 }
