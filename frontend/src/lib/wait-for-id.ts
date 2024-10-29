@@ -1,5 +1,8 @@
 export const waitForId = (id: string): Promise<string> => {
 	return new Promise((resolve, reject) => {
+		if (document.getElementById(id) !== null) {
+			return resolve(id)
+		}
 		const observer = new MutationObserver(() => {
 			const node = document.getElementById(id)
 			if (node) {
