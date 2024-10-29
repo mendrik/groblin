@@ -6,7 +6,7 @@ import { type ExecutionArgs, execute, subscribe } from 'graphql'
 import { useServer } from 'graphql-ws/lib/use/ws'
 import { call } from 'ramda'
 import { WebSocketServer } from 'ws'
-import { context } from './database.ts'
+import { context } from './context.ts'
 import { schema as gqlSchema } from './schema-builder.ts'
 
 const schema = makeExecutableSchema({ typeDefs: gqlSchema })

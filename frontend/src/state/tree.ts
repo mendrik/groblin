@@ -11,6 +11,7 @@ import {
 import { getItem, setItem } from '@/lib/local-storage'
 import { assertExists, failOnNil, setSignal } from '@/lib/utils'
 import { computed, signal } from '@preact/signals-react'
+import { initial } from '@shared/utils/functions'
 import { type TreeOf, listToTree } from '@shared/utils/list-to-tree'
 import gql from 'graphql-tag'
 import { Maybe, MaybeAsync } from 'purify-ts'
@@ -34,9 +35,7 @@ import {
 /** ---- queries ---- **/
 gql`
   subscription NodesUpdated {
-	nodesUpdated {
-		id
-	}
+	nodesUpdated
   }
 `
 
@@ -96,13 +95,16 @@ export const $editingNode = signal<number | undefined>()
 
 /** ---- subscriptions ---- **/
 subscribe(
-	GetNodesDocument,
 	NodesUpdatedDocument,
-	pipe(
-		prop('get_nodes'),
-		listToTree('id', 'parent_id', 'nodes'),
-		setSignal($root)
-	)
+	initial(() => {
+		query(GetNodesDocument).then(
+			pipe(
+				prop('get_nodes'),
+				listToTree('id', 'parent_id', 'nodes'),
+				setSignal($root)
+			)
+		)
+	})
 )
 
 $root.subscribe(

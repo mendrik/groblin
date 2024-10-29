@@ -15,7 +15,7 @@ import * as types from './graphql';
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 const documents = {
-    "\n  subscription NodesUpdated {\n\tnodesUpdated {\n\t\tid\n\t}\n  }\n": types.NodesUpdatedDocument,
+    "\n  subscription NodesUpdated {\n\tnodesUpdated\n  }\n": types.NodesUpdatedDocument,
     "\n  query GetNodes {\n    get_nodes {\n\t\tid\n\t\tname\n\t\torder\n\t\ttype\n\t\tparent_id\n    }\n  }\n": types.GetNodesDocument,
     "\n  mutation InsertNode($data: InsertNode!) {\n    insert_node(data: $data) {\n\t\tid\n\t}\n  }\n": types.InsertNodeDocument,
     "\n  mutation UpdateNode($data: ChangeNodeInput!) {\n    update_node(data: $data)\n  }\n": types.UpdateNodeDocument,
@@ -25,7 +25,7 @@ const documents = {
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  subscription NodesUpdated {\n\tnodesUpdated {\n\t\tid\n\t}\n  }\n"): typeof import('./graphql').NodesUpdatedDocument;
+export function graphql(source: "\n  subscription NodesUpdated {\n\tnodesUpdated\n  }\n"): typeof import('./graphql').NodesUpdatedDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

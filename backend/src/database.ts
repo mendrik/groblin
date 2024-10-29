@@ -4,11 +4,7 @@ import { Kysely, SqliteDialect } from 'kysely'
 import { isNilOrEmpty } from 'ramda-adjunct'
 import type { DB } from './database/schema.ts'
 
-export interface Context {
-	db: Kysely<DB>
-}
-
-const db = new Kysely<DB>({
+export const db = new Kysely<DB>({
 	dialect: new SqliteDialect({
 		database: sqlite3(process.env.DATABASE_URL)
 	}),
@@ -22,9 +18,3 @@ const db = new Kysely<DB>({
 		}
 	}
 })
-
-const context: Context = {
-	db
-}
-
-export { context }

@@ -42,5 +42,5 @@ input ChangeNodeInput {
 }
 
 type Subscription {
-  nodesUpdated: [Node!]!
+  nodesUpdated: Boolean!
 }

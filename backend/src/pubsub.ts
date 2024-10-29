@@ -1,22 +1,27 @@
 import { darkGray, lightCyan } from 'ansicolor'
-import { type PubSub, createPubSub } from 'graphql-yoga'
+import { createPubSub } from 'graphql-yoga'
+import type { PubSub } from 'type-graphql'
 
-class LoggingPubSub {
-	private pubSub: PubSub<any>
+type PubSubPublishArgsByKey = {
+	[key: string]: [] | [any] | [number | string, any]
+}
+
+class LoggingPubSub implements PubSub {
+	private pubSub: PubSub
 
 	constructor() {
 		this.pubSub = createPubSub()
 	}
 
-	publish<T>(message: string, payload: T): void {
-		console.log(`${darkGray('PubSub: ')}${lightCyan(message)}`, payload)
-		this.pubSub.publish(message, payload)
+	publish(routingKey: string, ...args: unknown[]): void {
+		console.log(`${darkGray('PubSub: ')}${lightCyan(routingKey)}`, ...args)
+		this.pubSub.publish(routingKey, ...args)
 	}
 
-	subscribe<T>(message: string, callback: (payload: T) => void): () => void {
-		return this.pubSub.subscribe()
+	subscribe(routingKey: string, dynamicId?: unknown): AsyncIterable<unknown> {
+		console.log(`${darkGray('Subscribe: ')}${lightCyan(routingKey)}`, dynamicId)
+		return this.pubSub.subscribe(routingKey, dynamicId)
 	}
 }
 
-// Create an instance of LoggingPubSub
 export const pubSub = new LoggingPubSub()

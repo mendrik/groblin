@@ -81,13 +81,13 @@ export type Query = {
 
 export type Subscription = {
   __typename?: 'Subscription';
-  nodesUpdated: Array<Node>;
+  nodesUpdated: Scalars['Boolean']['output'];
 };
 
 export type NodesUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type NodesUpdatedSubscription = { __typename?: 'Subscription', nodesUpdated: Array<{ __typename?: 'Node', id: number }> };
+export type NodesUpdatedSubscription = { __typename?: 'Subscription', nodesUpdated: boolean };
 
 export type GetNodesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -134,9 +134,7 @@ export class TypedDocumentString<TResult, TVariables>
 
 export const NodesUpdatedDocument = new TypedDocumentString(`
     subscription NodesUpdated {
-  nodesUpdated {
-    id
-  }
+  nodesUpdated
 }
     `) as unknown as TypedDocumentString<NodesUpdatedSubscription, NodesUpdatedSubscriptionVariables>;
 export const GetNodesDocument = new TypedDocumentString(`

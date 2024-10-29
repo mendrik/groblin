@@ -1,9 +1,8 @@
 import { NodeType } from '@shared/enums.ts'
-import { failOn } from '@shared/utils/promises.ts'
+import { failOn } from '@shared/utils/guards.ts'
 import { sql } from 'kysely'
 import { T, isNil } from 'ramda'
-import type { Context } from 'src/database.ts'
-import { pubSub } from 'src/pubsub.ts'
+import type { Context } from 'src/context.ts'
 import {
 	Arg,
 	Ctx,
@@ -14,7 +13,6 @@ import {
 	ObjectType,
 	Query,
 	Resolver,
-	Root,
 	Subscription
 } from 'type-graphql'
 
@@ -71,12 +69,12 @@ export class ChangeNodeInput {
 
 @Resolver()
 export class NodeResolver {
-	@Subscription(returns => [Node], {
-		topics: 'NODE_UPDATED',
+	@Subscription(returns => Boolean, {
+		topics: 'NODES_UPDATED',
 		filter: T
 	})
-	nodesUpdated(@Root() updatedNodes: Node[]): Node[] {
-		return updatedNodes
+	nodesUpdated() {
+		return true
 	}
 
 	@Query(returns => [Node])
@@ -87,7 +85,7 @@ export class NodeResolver {
 	@Mutation(returns => Node)
 	async insert_node(
 		@Arg('data', () => InsertNode) data: InsertNode,
-		@Ctx() { db }: Context
+		@Ctx() { db, pubSub }: Context
 	): Promise<Node> {
 		const res = await db.transaction().execute(async trx => {
 			trx
@@ -106,26 +104,23 @@ export class NodeResolver {
 		if (!res?.id) {
 			throw new Error('Failed to insert node')
 		}
-		return this.publishNodeUpdate(db, res.id)
+		pubSub.publish('NODES_UPDATED', true)
+		return await this.getNode(db, res.id)
 	}
 
-	async publishNodeUpdate(db: Context['db'], id: number): Promise<Node> {
-		const newNode = await db
+	async getNode(db: Context['db'], id: number): Promise<Node> {
+		return db
 			.selectFrom('node')
 			.selectAll()
 			.where('id', '=', id)
 			.executeTakeFirst()
-			.then(failOn(isNil, 'Node not found'))
-
-		pubSub.publish('NODE_UPDATED', { nodesUpdated: [newNode] })
-
-		return newNode as Node
+			.then(failOn(isNil, 'Node not found')) as Promise<Node>
 	}
 
 	@Mutation(returns => Boolean)
 	async update_node(
 		@Arg('data', () => ChangeNodeInput) data: ChangeNodeInput,
-		@Ctx() { db }: Context
+		@Ctx() { db, pubSub }: Context
 	): Promise<boolean> {
 		const { numUpdatedRows = 0 } = await db
 			.updateTable('node')
@@ -133,7 +128,7 @@ export class NodeResolver {
 			.where('id', '=', data.id)
 			.executeTakeFirst()
 
-		this.publishNodeUpdate(db, data.id)
+		pubSub.publish('NODES_UPDATED', true)
 		return numUpdatedRows > 0 // Returns true if at least one row was updated
 	}
 
@@ -142,7 +137,7 @@ export class NodeResolver {
 		@Arg('id', () => Int) id: number,
 		@Arg('parent_id', () => Int) parent_id: number | undefined,
 		@Arg('order', () => Int) order: number,
-		@Ctx() { db }: Context
+		@Ctx() { db, pubSub }: Context
 	): Promise<boolean> {
 		const { numDeletedRows } = await db.transaction().execute(async trx => {
 			trx
@@ -154,7 +149,7 @@ export class NodeResolver {
 
 			return trx.deleteFrom('node').where('id', '=', id).executeTakeFirst()
 		})
-		pubSub.publish('NODE_UPDATED', { nodesUpdated: [] })
+		pubSub.publish('NODES_UPDATED', { nodesUpdated: [] })
 		return numDeletedRows > 0
 	}
 }

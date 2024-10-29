@@ -12,7 +12,7 @@ export const query = async <D extends TypedDocumentString<any, any>>(
 ): Promise<ResultOf<D>> =>
 	new Promise((res, rej) => {
 		const unsub = gql.subscribe(
-			{ query: queryDoc.toString(), variables: variables ?? undefined },
+			{ query: queryDoc.toString(), variables },
 			{
 				next: ({ data, errors }) => {
 					unsub()
@@ -27,26 +27,18 @@ export const query = async <D extends TypedDocumentString<any, any>>(
 		)
 	})
 
-export const subscribe = async <
-	Q extends TypedDocumentString<any, any>,
-	S extends TypedDocumentString<any, any>
->(
-	queryDoc: Q,
+export const subscribe = async <S extends TypedDocumentString<any, any>>(
 	subscriptionDoc: S,
-	callback: (data: ResultOf<Q>) => void,
-	variables?: VariablesOf<Q>
+	callback: (data: ResultOf<S>) => void,
+	variables?: VariablesOf<S>
 ) => {
-	const run = () =>
-		query(queryDoc, variables).then(callback).catch(console.error)
 	try {
-		run()
 		const subs = gql.iterate({
-			query: subscriptionDoc.toString()
+			query: subscriptionDoc.toString(),
+			variables
 		})
 		for await (const { data } of subs) {
-			console.log(data)
-
-			if (data) run()
+			if (data) callback(data as ResultOf<S>)
 		}
 	} catch (e: any) {
 		console.error(e)
