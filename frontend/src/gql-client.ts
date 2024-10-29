@@ -4,6 +4,22 @@ import type { TypedDocumentString } from './gql/graphql'
 
 const gql = createClient({ url: 'ws://localhost:6173/graphql' })
 
+export const query = async <D extends TypedDocumentString<any, any>>(
+	query: D,
+	variables?: VariablesOf<D>
+): Promise<ResultOf<D>> =>
+	new Promise((res, rej) => {
+		const unsub = gql.subscribe(
+			{ query: query.toString(), variables: variables ?? undefined },
+			{
+				next: ({ data }) => res(data as ResultOf<D>),
+				error: err =>
+					rej(new Error(`${query.__meta__?.$name}:`, { cause: err })),
+				complete: () => unsub()
+			}
+		)
+	})
+
 export const subscribe = async <D extends TypedDocumentString<any, any>>(
 	query: D,
 	callback: (d: ResultOf<D>) => any,
@@ -23,19 +39,3 @@ export const subscribe = async <D extends TypedDocumentString<any, any>>(
 		console.error(e)
 	}
 }
-
-export const query = async <D extends TypedDocumentString<any, any>>(
-	query: D,
-	variables?: VariablesOf<D>
-): Promise<ResultOf<D>> =>
-	new Promise((res, rej) => {
-		const unsub = gql.subscribe(
-			{ query: query.toString(), variables: variables ?? undefined },
-			{
-				next: ({ data }) => res(data as ResultOf<D>),
-				error: err =>
-					rej(new Error(`${query.__meta__?.$name}:`, { cause: err })),
-				complete: () => unsub()
-			}
-		)
-	})

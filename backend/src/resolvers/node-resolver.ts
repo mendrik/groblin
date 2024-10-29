@@ -67,15 +67,8 @@ export class ChangeNodeInput {
 @Resolver()
 export class NodeResolver {
 	@Query(returns => [Node])
-	async get_nodes(@Ctx() { db }: Context) {
-		const res = await db
-			.selectFrom('node')
-			.selectAll()
-			.orderBy('order', 'asc')
-			.execute()
-
-		console.log(res)
-		return res
+	get_nodes(@Ctx() { db }: Context) {
+		return db.selectFrom('node').selectAll().orderBy('order', 'asc').execute()
 	}
 
 	@Mutation(returns => Int)
