@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import 'reflect-metadata'
 import { makeExecutableSchema } from '@graphql-tools/schema'
-import { cyan, green, lightGreen } from 'ansicolor'
+import { cyan, darkGray, lightGreen, yellow } from 'ansicolor'
 import { type ExecutionArgs, execute, subscribe } from 'graphql'
 import { useServer } from 'graphql-ws/lib/use/ws'
 import { call } from 'ramda'
@@ -26,7 +26,8 @@ const loggingExecute = async (args: ExecutionArgs) => {
 
 	// Log the operation (query/mutation) and variables
 	console.log(
-		cyan(document.loc?.source.body.replace(Content, '').trim()),
+		yellow('Graphql: ') +
+			cyan(document.loc?.source.body.replace(Content, '').trim()),
 		variableValues
 	)
 
@@ -36,4 +37,4 @@ const loggingExecute = async (args: ExecutionArgs) => {
 
 useServer({ schema, execute: loggingExecute, subscribe, context }, server)
 
-console.log(green(`Listening to port ${lightGreen(port)}`))
+console.log(darkGray('Port: ') + cyan(`Started server on ${lightGreen(port)}`))

@@ -1,6 +1,8 @@
 import 'dotenv/config'
 import 'reflect-metadata'
+import { basename } from 'node:path'
 import type { AnyFn } from '@tp/functions.ts'
+import { cyan, darkGray } from 'ansicolor'
 import fg from 'fast-glob'
 import { type NonEmptyArray, flatten, map, values } from 'ramda'
 import { allP } from 'ramda-adjunct'
@@ -9,9 +11,10 @@ import { pubSub } from './pubsub.ts'
 
 const resolvers: NonEmptyArray<AnyFn> = await fg('./src/resolvers/**/*.ts')
 	.then(
-		map<string, any>(file =>
-			import(file.replace('./src/', 'src/')).then(values)
-		)
+		map<string, any>(file => {
+			console.log(`${darkGray('Resolver')}: ${cyan(basename(file))}`)
+			return import(file.replace('./src/', 'src/')).then(values)
+		})
 	)
 	.then(allP)
 	.then<any>(flatten)
