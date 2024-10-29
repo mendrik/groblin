@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import 'reflect-metadata'
 import { makeExecutableSchema } from '@graphql-tools/schema'
-import { cyan, darkGray, lightGreen, yellow } from 'ansicolor'
+import { cyan, darkGray, lightGreen, lightYellow, yellow } from 'ansicolor'
 import { type ExecutionArgs, execute, subscribe } from 'graphql'
 import { useServer } from 'graphql-ws/lib/use/ws'
 import { call } from 'ramda'
@@ -24,12 +24,19 @@ const Content = /\s+\{(.|\n)*$/gim
 const loggingExecute = async (args: ExecutionArgs) => {
 	const { document, variableValues, contextValue } = args
 
-	// Log the operation (query/mutation) and variables
-	console.log(
-		yellow('Graphql: ') +
-			cyan(document.loc?.source.body.replace(Content, '').trim()),
-		variableValues
-	)
+	if (variableValues) {
+		console.log(
+			yellow('Graphql: ') +
+				lightYellow(document.loc?.source.body.replace(Content, '').trim()),
+			variableValues
+		)
+	} else {
+		console.log(
+			yellow('Graphql: ') +
+				lightYellow(document.loc?.source.body.replace(Content, '').trim()),
+			variableValues
+		)
+	}
 
 	// Call the original execute function
 	return call(execute, args)

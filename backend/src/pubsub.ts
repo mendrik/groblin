@@ -1,4 +1,4 @@
-import { cyan, lightGray, lightMagenta } from 'ansicolor'
+import { lightMagenta, magenta } from 'ansicolor'
 import { createPubSub } from 'graphql-yoga'
 import type { PubSub } from 'type-graphql'
 
@@ -14,12 +14,23 @@ class LoggingPubSub implements PubSub {
 	}
 
 	publish(routingKey: string, ...args: unknown[]): void {
-		console.log(`${lightMagenta('PubSub: ')}${lightGray(routingKey)}`, ...args)
+		if (!args?.length) {
+			console.log(`${magenta('PubSub: ')}${lightMagenta(routingKey)}`)
+		} else {
+			console.log(`${magenta('PubSub: ')}${lightMagenta(routingKey)}`, ...args)
+		}
 		this.pubSub.publish(routingKey, ...args)
 	}
 
 	subscribe(routingKey: string, dynamicId?: unknown): AsyncIterable<unknown> {
-		console.log(`${lightMagenta('Subscribe: ')}${cyan(routingKey)}`, dynamicId)
+		if (dynamicId === undefined) {
+			console.log(`${magenta('Subscribe: ')}${lightMagenta(routingKey)}`)
+		} else {
+			console.log(
+				`${magenta('Subscribe: ')}${lightMagenta(routingKey)}`,
+				dynamicId
+			)
+		}
 		return this.pubSub.subscribe(routingKey, dynamicId)
 	}
 }
