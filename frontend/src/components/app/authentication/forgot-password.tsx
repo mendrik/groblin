@@ -7,7 +7,7 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { asField } from '@/components/ui/zod-form/utils'
+import { nonEmptyString } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { stopPropagation } from '@/lib/dom-events'
 import {} from '@/lib/match'
@@ -16,17 +16,10 @@ import { EditorType } from '@shared/enums'
 import type { Fn } from '@tp/functions.ts'
 import { pipe } from 'ramda'
 import { Link } from 'react-router-dom'
-import { type TypeOf, strictObject, string } from 'zod'
+import { type TypeOf, strictObject } from 'zod'
 
 const forgotPasswordSchema = strictObject({
-	email: string()
-		.describe(
-			asField({
-				label: 'Email',
-				editor: EditorType.Email
-			})
-		)
-		.default('')
+	email: nonEmptyString('Email', EditorType.Email)
 })
 
 type ForgotPassword = TypeOf<typeof forgotPasswordSchema>

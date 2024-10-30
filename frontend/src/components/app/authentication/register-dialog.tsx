@@ -7,7 +7,7 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { asField } from '@/components/ui/zod-form/utils'
+import { nonEmptyString } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { stopPropagation } from '@/lib/dom-events'
 import {} from '@/lib/match'
@@ -16,44 +16,16 @@ import { EditorType } from '@shared/enums'
 import type { Fn } from '@tp/functions.ts'
 import { pipe } from 'ramda'
 import { Link } from 'react-router-dom'
-import { type TypeOf, strictObject, string } from 'zod'
+import { type TypeOf, strictObject } from 'zod'
 
 const registrationSchema = strictObject({
-	name: string()
-		.describe(
-			asField({
-				label: 'Name',
-				editor: EditorType.Input
-			})
-		)
-		.default(''),
-	email: string()
-		.describe(
-			asField({
-				label: 'Email',
-				editor: EditorType.Email
-			})
-		)
-		.default(''),
-	password: string()
-		.describe(
-			asField({
-				label: 'Password',
-				editor: EditorType.Password
-			})
-		)
-		.default(''),
-	repeatPassword: string()
-		.describe(
-			asField({
-				label: 'Repeat password',
-				editor: EditorType.Password
-			})
-		)
-		.default('')
+	name: nonEmptyString('Name', EditorType.Input),
+	email: nonEmptyString('Email', EditorType.Email),
+	password: nonEmptyString('Password', EditorType.Password),
+	repeatPassword: nonEmptyString('Repeat password', EditorType.Password)
 }).refine(data => data.password === data.repeatPassword, {
 	message: 'Passwords must match',
-	path: ['repeatPassword'] // This specifies which field the error applies to
+	path: ['repeatPassword']
 })
 
 type Registration = TypeOf<typeof registrationSchema>

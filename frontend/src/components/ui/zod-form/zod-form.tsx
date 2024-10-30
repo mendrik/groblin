@@ -16,7 +16,13 @@ import {
 	type UseFormReturn,
 	useForm
 } from 'react-hook-form'
-import type { TypeOf, ZodObject, ZodRawShape } from 'zod'
+import type {
+	TypeOf,
+	ZodDefault,
+	ZodEffects,
+	ZodObject,
+	ZodRawShape
+} from 'zod'
 import {
 	Form,
 	FormDescription,
@@ -25,12 +31,16 @@ import {
 	FormLabel,
 	FormMessage
 } from '../form'
-import {} from '../select'
 import { ZodFormField } from '../tree/types'
 import { Editor } from './editors'
 import { type RendererProps, generateDefaults, innerType } from './utils'
 
-type OwnProps<T extends ZodObject<any>> = {
+type AllowedTypes<T extends ZodRawShape> =
+	| ZodObject<T>
+	| ZodEffects<ZodObject<T>>
+	| ZodDefault<ZodObject<T>>
+
+type OwnProps<T extends AllowedTypes<any>> = {
 	schema: T
 	onSubmit: (data: any) => void
 	columns?: number
@@ -48,7 +58,7 @@ const colSpan = match<[number], string>(
 	caseOf([eq(3)], () => 'sm:col-span-3')
 )
 
-function* schemaIterator<T extends ZodRawShape>(schema: ZodObject<T>) {
+function* schemaIterator<T extends ZodRawShape>(schema: AllowedTypes<T>) {
 	for (const [name, zodSchema] of Object.entries(innerType(schema).shape)) {
 		assertExists(zodSchema.description, `Missing description for field ${name}`)
 		const fieldData = ZodFormField.parse(JSON.parse(zodSchema.description))
@@ -69,8 +79,8 @@ function* schemaIterator<T extends ZodRawShape>(schema: ZodObject<T>) {
 }
 
 type FieldProps<T extends ZodRawShape> = {
-	form: UseFormReturn<TypeOf<ZodObject<T>>>
-	schema: ZodObject<T>
+	form: UseFormReturn<TypeOf<AllowedTypes<T>>>
+	schema: AllowedTypes<T>
 }
 
 export const Fields = <T extends ZodRawShape>({
@@ -91,7 +101,7 @@ export type FormApi<F extends FieldValues> = {
 }
 
 export const ZodForm = forwardRef(
-	<T extends ZodObject<any>>(
+	<T extends AllowedTypes<any>>(
 		{ schema, columns = 1, onSubmit, children }: PropsWithChildren<OwnProps<T>>,
 		ref: ForwardedRef<FormApi<TypeOf<T>>>
 	) => {

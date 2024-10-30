@@ -1,6 +1,7 @@
-import { mergeAll } from 'ramda'
+import type { EditorType } from '@shared/enums'
+import { isNotEmpty, mergeAll, pipe, trim } from 'ramda'
 import type { ControllerProps, FieldPath, FieldValues } from 'react-hook-form'
-import type { AnyZodObject, ZodType } from 'zod'
+import { type AnyZodObject, type ZodType, string } from 'zod'
 import * as z from 'zod'
 import type { ZodFormField } from '../tree/types'
 export const asField = (meta: ZodFormField): string => JSON.stringify(meta)
@@ -74,3 +75,9 @@ export type RendererProps<
 	TFieldValues extends FieldValues = FieldValues,
 	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
 > = Parameters<ControllerProps<TFieldValues, TName>['render']>[0]
+
+export const nonEmptyString = (label: string, editor: EditorType) =>
+	string()
+		.refine(pipe(trim, isNotEmpty), { message: 'Name is required' })
+		.describe(asField({ label, editor }))
+		.default('')
