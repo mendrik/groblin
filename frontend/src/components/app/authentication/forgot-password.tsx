@@ -19,12 +19,14 @@ import { Link } from 'react-router-dom'
 import { type TypeOf, strictObject, string } from 'zod'
 
 const forgotPasswordSchema = strictObject({
-	email: string().describe(
-		asField({
-			label: 'Email',
-			editor: EditorType.Email
-		})
-	)
+	email: string()
+		.describe(
+			asField({
+				label: 'Email',
+				editor: EditorType.Email
+			})
+		)
+		.default('')
 })
 
 type ForgotPassword = TypeOf<typeof forgotPasswordSchema>

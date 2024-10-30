@@ -19,24 +19,30 @@ import { Link } from 'react-router-dom'
 import { type TypeOf, boolean, strictObject, string } from 'zod'
 
 const loginSchema = strictObject({
-	email: string().describe(
-		asField({
-			label: 'Email',
-			editor: EditorType.Email
-		})
-	),
-	password: string().describe(
-		asField({
-			label: 'Password',
-			editor: EditorType.Password
-		})
-	),
-	rememberMe: boolean().describe(
-		asField({
-			label: 'Remember me',
-			editor: EditorType.Switch
-		})
-	)
+	email: string()
+		.describe(
+			asField({
+				label: 'Email',
+				editor: EditorType.Email
+			})
+		)
+		.default(''),
+	password: string()
+		.describe(
+			asField({
+				label: 'Password',
+				editor: EditorType.Password
+			})
+		)
+		.default(''),
+	rememberMe: boolean()
+		.describe(
+			asField({
+				label: 'Remember me',
+				editor: EditorType.Switch
+			})
+		)
+		.default(false)
 })
 
 type Login = TypeOf<typeof loginSchema>

@@ -28,7 +28,7 @@ import {
 import {} from '../select'
 import { ZodFormField } from '../tree/types'
 import { Editor } from './editors'
-import { type RendererProps, generateDefaults } from './utils'
+import { type RendererProps, generateDefaults, innerType } from './utils'
 
 type OwnProps<T extends ZodObject<any>> = {
 	schema: T
@@ -49,7 +49,7 @@ const colSpan = match<[number], string>(
 )
 
 function* schemaIterator<T extends ZodRawShape>(schema: ZodObject<T>) {
-	for (const [name, zodSchema] of Object.entries(schema.shape)) {
+	for (const [name, zodSchema] of Object.entries(innerType(schema).shape)) {
 		assertExists(zodSchema.description, `Missing description for field ${name}`)
 		const fieldData = ZodFormField.parse(JSON.parse(zodSchema.description))
 		yield {
@@ -96,7 +96,7 @@ export const ZodForm = forwardRef(
 		ref: ForwardedRef<FormApi<TypeOf<T>>>
 	) => {
 		const defaultValues = useMemo(
-			() => generateDefaults(schema) as DefaultValues<TypeOf<T>>,
+			() => generateDefaults(innerType(schema)) as DefaultValues<TypeOf<T>>,
 			[schema]
 		)
 

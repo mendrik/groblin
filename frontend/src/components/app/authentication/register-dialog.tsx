@@ -19,30 +19,41 @@ import { Link } from 'react-router-dom'
 import { type TypeOf, strictObject, string } from 'zod'
 
 const registrationSchema = strictObject({
-	name: string().describe(
-		asField({
-			label: 'Name',
-			editor: EditorType.Input
-		})
-	),
-	email: string().describe(
-		asField({
-			label: 'Email',
-			editor: EditorType.Email
-		})
-	),
-	password: string().describe(
-		asField({
-			label: 'Password',
-			editor: EditorType.Password
-		})
-	),
-	repeatPassword: string().describe(
-		asField({
-			label: 'Repeat password',
-			editor: EditorType.Password
-		})
-	)
+	name: string()
+		.describe(
+			asField({
+				label: 'Name',
+				editor: EditorType.Input
+			})
+		)
+		.default(''),
+	email: string()
+		.describe(
+			asField({
+				label: 'Email',
+				editor: EditorType.Email
+			})
+		)
+		.default(''),
+	password: string()
+		.describe(
+			asField({
+				label: 'Password',
+				editor: EditorType.Password
+			})
+		)
+		.default(''),
+	repeatPassword: string()
+		.describe(
+			asField({
+				label: 'Repeat password',
+				editor: EditorType.Password
+			})
+		)
+		.default('')
+}).refine(data => data.password === data.repeatPassword, {
+	message: 'Passwords must match',
+	path: ['repeatPassword'] // This specifies which field the error applies to
 })
 
 type Registration = TypeOf<typeof registrationSchema>
