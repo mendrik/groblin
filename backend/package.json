@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"type": "module",
 	"scripts": {
-		"types:db": "kysely-codegen --out-file src/database/schema.ts --dialect sqlite --singular",
+		"types:db": "tsx ./src/database/generate.ts",
 		"types:gql": "tsx src/schema.ts",
 		"schema": "pnpm types:db && pnpm types:gql",
 		"server": "tsx watch --include src src/server.ts",
@@ -15,7 +15,8 @@
 		"@types/node": "22.8.4",
 		"@types/ws": "8.5.12",
 		"ansicolor": "^2.0.3",
-		"kysely-codegen": "^0.17.0"
+		"kysely-codegen": "^0.17.0",
+		"kysely-migrate": "^0.0.16"
 	},
 	"dependencies": {
 		"@graphql-tools/schema": "^10.0.7",

@@ -11,6 +11,6 @@
 			"@tp/*": ["../type-patches/*"]
 		}
 	},
-	"exclude": ["node_modules"],
+	"exclude": ["node_modules", "src/database/generate.ts"],
 	"include": ["src", "../shared/src", "../type-patches"]
 }

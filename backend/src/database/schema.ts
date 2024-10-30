@@ -40,6 +40,7 @@ export interface Tag {
 }
 
 export interface User {
+  confirmed: boolean;
   email: string;
   id: Generated<number>;
   name: string;
