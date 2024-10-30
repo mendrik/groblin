@@ -81,8 +81,8 @@ const position = match<[NodeCreatePosition], string>(
 const parent = match<[NodeCreatePosition], number>(
 	caseOf([eq('root-child')], () => $root.value?.id as number),
 	caseOf([eq('child')], focusedNode),
-	caseOf([eq('sibling-above')], () => parentNode()),
-	caseOf([eq('sibling-below')], () => parentNode())
+	caseOf([eq('sibling-above')], parentNode),
+	caseOf([eq('sibling-below')], parentNode)
 )
 
 const order = match<[NodeCreatePosition], number>(
