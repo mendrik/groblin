@@ -78,6 +78,6 @@ export type RendererProps<
 
 export const nonEmptyString = (label: string, editor: EditorType) =>
 	string()
-		.refine(pipe(trim, isNotEmpty), { message: 'Name is required' })
+		.refine(pipe(trim, isNotEmpty), { message: `${label} is required` })
 		.describe(asField({ label, editor }))
 		.default('')
