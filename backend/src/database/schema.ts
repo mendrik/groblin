@@ -17,6 +17,14 @@ export interface Node {
   type: string;
 }
 
+export interface User {
+  email: string;
+  id: number;
+  name: string;
+  password: string;
+}
+
 export interface DB {
   node: Node;
+  user: User;
 }
