@@ -12,9 +12,10 @@ import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { stopPropagation } from '@/lib/dom-events'
 import {} from '@/lib/match'
 import { pipeAsync } from '@/lib/pipe-async'
+import { register } from '@/state/user'
 import { EditorType } from '@shared/enums'
 import type { Fn } from '@tp/functions.ts'
-import { pipe } from 'ramda'
+import { omit } from 'ramda'
 import { Link } from 'react-router-dom'
 import { type TypeOf, strictObject } from 'zod'
 
@@ -28,9 +29,12 @@ const registrationSchema = strictObject({
 	path: ['repeatPassword']
 })
 
-type Registration = TypeOf<typeof registrationSchema>
+export type RegistrationForm = TypeOf<typeof registrationSchema>
 
-const registerCommand: Fn<Partial<Registration>, void> = pipeAsync(console.log)
+const registerCommand: Fn<RegistrationForm, Promise<number>> = pipeAsync(
+	omit(['repeatPassword']),
+	register
+)
 
 export const RegistrationDialog = () => {
 	return (
@@ -47,7 +51,7 @@ export const RegistrationDialog = () => {
 						Sign up to Groblin and create your first project.
 					</DialogDescription>
 				</DialogHeader>
-				<ZodForm schema={registrationSchema} onSubmit={pipe(registerCommand)}>
+				<ZodForm schema={registrationSchema} onSubmit={registerCommand}>
 					<DialogFooter className="gap-2 flex flex-row items-center">
 						<div className="mr-auto">
 							Back to{' '}

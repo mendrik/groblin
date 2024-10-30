@@ -20,6 +20,7 @@ const documents = {
     "\n  mutation InsertNode($data: InsertNode!) {\n    insert_node(data: $data) {\n\t\tid\n\t}\n  }\n": types.InsertNodeDocument,
     "\n  mutation UpdateNode($data: ChangeNodeInput!) {\n    update_node(data: $data)\n  }\n": types.UpdateNodeDocument,
     "\n  mutation DeleteNodeById($order: Int!, $parent_id: Int!, $id: Int!) {\n    delete_node_by_id(order: $order, parent_id: $parent_id, id: $id)\n  }\n": types.DeleteNodeByIdDocument,
+    "\n  mutation Register($data: Registration!) {\n    register(data: $data)\n  }\n": types.RegisterDocument,
 };
 
 /**
@@ -42,6 +43,10 @@ export function graphql(source: "\n  mutation UpdateNode($data: ChangeNodeInput!
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation DeleteNodeById($order: Int!, $parent_id: Int!, $id: Int!) {\n    delete_node_by_id(order: $order, parent_id: $parent_id, id: $id)\n  }\n"): typeof import('./graphql').DeleteNodeByIdDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation Register($data: Registration!) {\n    register(data: $data)\n  }\n"): typeof import('./graphql').RegisterDocument;
 
 
 export function graphql(source: string) {

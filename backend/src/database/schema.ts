@@ -18,7 +18,7 @@ export interface Node {
 }
 
 export interface Project {
-  id: number;
+  id: Generated<number>;
   name: string;
 }
 
@@ -34,14 +34,14 @@ export interface ProjectUser {
 }
 
 export interface Tag {
-  id: number;
+  id: Generated<number>;
   name: string;
   parent_id: number | null;
 }
 
 export interface User {
   email: string;
-  id: number;
+  id: Generated<number>;
   name: string;
   password: string;
 }

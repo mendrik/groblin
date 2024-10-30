@@ -35,6 +35,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   delete_node_by_id: Scalars['Boolean']['output'];
   insert_node: Node;
+  register: Scalars['Float']['output'];
   update_node: Scalars['Boolean']['output'];
 };
 
@@ -48,6 +49,11 @@ export type MutationDelete_Node_By_IdArgs = {
 
 export type MutationInsert_NodeArgs = {
   data: InsertNode;
+};
+
+
+export type MutationRegisterArgs = {
+  data: Registration;
 };
 
 
@@ -77,6 +83,12 @@ export enum NodeType {
 export type Query = {
   __typename?: 'Query';
   get_nodes: Array<Node>;
+};
+
+export type Registration = {
+  email: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  password: Scalars['String']['input'];
 };
 
 export type Subscription = {
@@ -116,6 +128,13 @@ export type DeleteNodeByIdMutationVariables = Exact<{
 
 
 export type DeleteNodeByIdMutation = { __typename?: 'Mutation', delete_node_by_id: boolean };
+
+export type RegisterMutationVariables = Exact<{
+  data: Registration;
+}>;
+
+
+export type RegisterMutation = { __typename?: 'Mutation', register: number };
 
 export class TypedDocumentString<TResult, TVariables>
   extends String
@@ -165,3 +184,8 @@ export const DeleteNodeByIdDocument = new TypedDocumentString(`
   delete_node_by_id(order: $order, parent_id: $parent_id, id: $id)
 }
     `) as unknown as TypedDocumentString<DeleteNodeByIdMutation, DeleteNodeByIdMutationVariables>;
+export const RegisterDocument = new TypedDocumentString(`
+    mutation Register($data: Registration!) {
+  register(data: $data)
+}
+    `) as unknown as TypedDocumentString<RegisterMutation, RegisterMutationVariables>;

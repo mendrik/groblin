@@ -57,4 +57,10 @@ declare module 'ramda' {
 		whenFalseFn: (a: ExcludeNever<T, U>) => V,
 		a: T
 	): T | V
+
+	type OmitType<T, K extends keyof T> = Omit<T, K>
+
+	export function omit<T extends { [s: string]: any }, K extends keyof T>(
+		keys: K[]
+	): <T2>(obj: T2) => T2 extends T ? OmitType<T2, K> : never
 }

@@ -31,7 +31,7 @@ export class Login {
 
 @Resolver()
 export class AuthResolver {
-	@Mutation(returns => Boolean)
+	@Mutation(returns => Number)
 	async register(
 		@Arg('data', () => Registration) data: Registration,
 		@Ctx() { db }: Context
@@ -47,10 +47,10 @@ export class AuthResolver {
 			throw new Error('User already exists')
 		}
 
-		await db.insertInto('user').values(data).execute()
-
-		return true
+		const res = await db.insertInto('user').values(data).execute()
+		return res[0].insertId
 	}
+
 	/* 
 	@Mutation(returns => Boolean)
 	async login(@Arg('data') data: Login, @Ctx() ctx: Context) {
