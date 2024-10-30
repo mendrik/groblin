@@ -53,12 +53,12 @@ export const LoginDialog = () => {
 				<ZodForm schema={loginSchema} onSubmit={pipe(loginCommand)}>
 					<DialogFooter className="gap-2 flex flex-row items-center">
 						<div className="mr-auto">
-							Forgot your{' '}
+							Did you forget your{' '}
 							<Link to="/password" className="text-link">
 								password
 							</Link>
 							<br />
-							or need to{' '}
+							or still need to{' '}
 							<Link to="/register" className="text-link">
 								register
 							</Link>
