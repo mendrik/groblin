@@ -1,5 +1,5 @@
-import type { Fn } from '@/type-patches/functions'
 import type { Signal } from '@preact/signals-react'
+import type { Fn } from '@tp/functions'
 import { type ClassValue, clsx } from 'clsx'
 import { curry } from 'purify-ts'
 import { twMerge } from 'tailwind-merge'

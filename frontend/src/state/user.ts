@@ -18,7 +18,5 @@ gql`
 `
 
 export const register = (data: Registration): Promise<number> => {
-	return query(RegisterDocument, {
-		data
-	}).then(x => x.register)
+	return query(RegisterDocument, { data }).then(x => x.register)
 }
