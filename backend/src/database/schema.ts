@@ -17,6 +17,28 @@ export interface Node {
   type: string;
 }
 
+export interface Project {
+  id: number;
+  name: string;
+}
+
+export interface ProjectNode {
+  node_id: number;
+  project_id: number;
+}
+
+export interface ProjectUser {
+  project_id: number;
+  role: string;
+  user_id: number;
+}
+
+export interface Tag {
+  id: number;
+  name: string;
+  parent_id: number | null;
+}
+
 export interface User {
   email: string;
   id: number;
@@ -26,5 +48,9 @@ export interface User {
 
 export interface DB {
   node: Node;
+  project: Project;
+  project_node: ProjectNode;
+  project_user: ProjectUser;
+  tag: Tag;
   user: User;
 }

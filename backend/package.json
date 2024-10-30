@@ -3,10 +3,10 @@
 	"version": "0.1.0",
 	"type": "module",
 	"scripts": {
-		"types:db": "kysely-codegen --out-file src/database/schema.ts --dialect sqlite",
+		"types:db": "kysely-codegen --out-file src/database/schema.ts --dialect sqlite --singular",
 		"types:gql": "tsx src/schema.ts",
 		"schema": "pnpm types:db && pnpm types:gql",
-		"server": "tsx watch  --include src src/server.ts",
+		"server": "tsx watch --include src src/server.ts",
 		"test": "tsx --test test/**/*.ts"
 	},
 	"devDependencies": {

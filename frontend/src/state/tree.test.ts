@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parentInTree } from './tree'
+import { type TreeNode, parentInTree } from './tree'
 
 describe('parentForRoot', () => {
 	const mockTree = {
@@ -23,7 +23,7 @@ describe('parentForRoot', () => {
 				nodes: []
 			}
 		]
-	}
+	} as any as TreeNode
 
 	it('returns the correct parent ID for a given node', () => {
 		expect(parentInTree(mockTree, 4)).toBe(2)
