@@ -36,18 +36,23 @@ export class AuthResolver {
 		@Arg('data', () => Registration) data: Registration,
 		@Ctx() { db }: Context
 	) {
-		const { name, email, password } = data
-
 		const existingUser = await db
 			.selectFrom('user')
-			.where('email', '=', email)
+			.selectAll()
+			.where('email', '=', data.email)
 			.executeTakeFirst()
 
 		if (existingUser) {
 			throw new Error('User already exists')
 		}
 
-		const res = await db.insertInto('user').values(data).execute()
+		const res = await db
+			.insertInto('user')
+			.values({
+				...data,
+				confirmed: false
+			})
+			.execute()
 		return res[0].insertId
 	}
 

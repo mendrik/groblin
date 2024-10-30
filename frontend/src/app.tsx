@@ -1,6 +1,6 @@
 import './app.css'
 import { DocumentTree } from './components/app/document-tree'
-import { NodeValues } from './components/app/node-values'
+import { NodeValues } from './components/app/editors'
 import { Tags } from './components/app/tags'
 import { Layout } from './components/layout'
 import {

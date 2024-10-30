@@ -43,6 +43,7 @@ type AllowedTypes<T extends ZodRawShape> =
 type OwnProps<T extends AllowedTypes<any>> = {
 	schema: T
 	onSubmit: (data: any) => void
+	onError: (err: Error) => void
 	columns?: number
 }
 
@@ -102,7 +103,13 @@ export type FormApi<F extends FieldValues> = {
 
 export const ZodForm = forwardRef(
 	<T extends AllowedTypes<any>>(
-		{ schema, columns = 1, onSubmit, children }: PropsWithChildren<OwnProps<T>>,
+		{
+			schema,
+			columns = 1,
+			onSubmit,
+			onError,
+			children
+		}: PropsWithChildren<OwnProps<T>>,
 		ref: ForwardedRef<FormApi<TypeOf<T>>>
 	) => {
 		const defaultValues = useMemo(
@@ -122,7 +129,7 @@ export const ZodForm = forwardRef(
 		return (
 			<Form {...form}>
 				<form
-					onSubmit={form.handleSubmit(onSubmit)}
+					onSubmit={e => form.handleSubmit(onSubmit)(e).catch(onError)}
 					className="flex flex-col gap-6"
 				>
 					<div className={`grid ${cols(columns)} gap-4`}>

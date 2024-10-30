@@ -44,6 +44,7 @@
 		"graphql-ws": "^5.16.0",
 		"graphqurl": "^1.0.3",
 		"lucide-react": "^0.454.0",
+		"next-themes": "^0.3.0",
 		"purify-ts": "^2.1.0",
 		"ramda": "^0.30.1",
 		"ramda-adjunct": "^5.1.0",

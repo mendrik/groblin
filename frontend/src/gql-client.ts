@@ -16,11 +16,17 @@ export const query = async <D extends TypedDocumentString<any, any>>(
 			{
 				next: ({ data, errors }) => {
 					unsub()
-					errors ? rej(errors) : res(data as ResultOf<D>)
+					if (errors) {
+						console.error(...errors)
+						rej(Object.assign(new Error(), errors[0]))
+					} else {
+						res(data as ResultOf<D>)
+					}
 				},
 				error: err => {
 					unsub()
-					rej(new Error(`${queryDoc.__meta__?.$name}:`, { cause: err }))
+					console.error(err)
+					throw Object.assign(new Error(), err)
 				},
 				complete: () => unsub()
 			}
