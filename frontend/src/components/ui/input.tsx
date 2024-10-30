@@ -26,7 +26,7 @@ const Inp = React.forwardRef<HTMLInputElement, InputProps>(
 Inp.displayName = 'NativeInput'
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-	({ className, type, icon: Icon, ...props }, ref) => {
+	({ className, icon: Icon, ...props }, ref) => {
 		return Icon ? (
 			<div className="flex flex-row relative items-center w-full">
 				<Icon
