@@ -16,6 +16,7 @@ import { EditorType } from '@shared/enums'
 import type { Fn } from '@tp/functions.ts'
 import { pipe } from 'ramda'
 import { Link } from 'react-router-dom'
+import { toast } from 'sonner'
 import { type TypeOf, boolean, strictObject } from 'zod'
 
 const loginSchema = strictObject({
@@ -30,6 +31,12 @@ const loginSchema = strictObject({
 		)
 		.default(false)
 })
+
+const failed = (e: Error) =>
+	toast.error('Failed to login', {
+		description: e.message,
+		closeButton: true
+	})
 
 type Login = TypeOf<typeof loginSchema>
 
@@ -50,7 +57,11 @@ export const LoginDialog = () => {
 						Please enter your email and password
 					</DialogDescription>
 				</DialogHeader>
-				<ZodForm schema={loginSchema} onSubmit={pipe(loginCommand)}>
+				<ZodForm
+					schema={loginSchema}
+					onSubmit={pipe(loginCommand)}
+					onError={failed}
+				>
 					<DialogFooter className="gap-2 flex flex-row items-center">
 						<div className="mr-auto">
 							Did you forget your{' '}

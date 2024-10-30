@@ -2,8 +2,9 @@ import { lightMagenta, magenta } from 'ansicolor'
 import { createPubSub } from 'graphql-yoga'
 import type { PubSub } from 'type-graphql'
 
-type PubSubPublishArgsByKey = {
-	[key: string]: [] | [any] | [number | string, any]
+export enum Topic {
+	UserRegistered = 'userRegistered',
+	NodesUpdated = 'nodesUpdated'
 }
 
 class LoggingPubSub implements PubSub {

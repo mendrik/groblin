@@ -1,5 +1,6 @@
 import {} from 'ramda'
 import type { Context } from 'src/context.ts'
+import { Topic } from 'src/pubsub.ts'
 import { Arg, Ctx, Field, InputType, Mutation, Resolver } from 'type-graphql'
 
 @InputType()
@@ -34,7 +35,7 @@ export class AuthResolver {
 	@Mutation(returns => Boolean)
 	async register(
 		@Arg('data', () => Registration) data: Registration,
-		@Ctx() { db }: Context
+		@Ctx() { db, pubSub }: Context
 	) {
 		const existingUser = await db
 			.selectFrom('user')
@@ -53,6 +54,7 @@ export class AuthResolver {
 				confirmed: 0
 			})
 			.execute()
+		pubSub.publish(Topic.UserRegistered, data)
 		return res.length > 0
 	}
 

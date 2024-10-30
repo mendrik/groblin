@@ -7,12 +7,11 @@ import { useServer } from 'graphql-ws/lib/use/ws'
 import { call } from 'ramda'
 import { WebSocketServer } from 'ws'
 import { context } from './context.ts'
+import { initializeEmailService } from './emails/email-service.ts'
 import { schema as gqlSchema } from './schema-builder.ts'
 
 const schema = makeExecutableSchema({ typeDefs: gqlSchema })
-
 const port = Number.parseInt(process.env.PORT ?? '6173')
-
 const server = new WebSocketServer({
 	port,
 	path: '/graphql'
@@ -44,3 +43,5 @@ const loggingExecute = async (args: ExecutionArgs) => {
 useServer({ schema, execute: loggingExecute, subscribe, context }, server)
 
 console.log(darkGray('Prt: ') + cyan(`Started server on ${lightGreen(port)}`))
+
+initializeEmailService()

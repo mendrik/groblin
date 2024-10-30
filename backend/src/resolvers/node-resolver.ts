@@ -3,6 +3,7 @@ import { failOn } from '@shared/utils/guards.ts'
 import { sql } from 'kysely'
 import { T, isNil } from 'ramda'
 import type { Context } from 'src/context.ts'
+import { Topic } from 'src/pubsub.ts'
 import {
 	Arg,
 	Ctx,
@@ -70,7 +71,7 @@ export class ChangeNodeInput {
 @Resolver()
 export class NodeResolver {
 	@Subscription(returns => Boolean, {
-		topics: 'NODES_UPDATED',
+		topics: Topic.NodesUpdated,
 		filter: T
 	})
 	nodesUpdated() {
@@ -104,7 +105,7 @@ export class NodeResolver {
 		if (!res?.id) {
 			throw new Error('Failed to insert node')
 		}
-		pubSub.publish('NODES_UPDATED', true)
+		pubSub.publish(Topic.NodesUpdated, true)
 		return await this.getNode(db, res.id)
 	}
 
@@ -128,7 +129,7 @@ export class NodeResolver {
 			.where('id', '=', data.id)
 			.executeTakeFirst()
 
-		pubSub.publish('NODES_UPDATED', true)
+		pubSub.publish(Topic.NodesUpdated, true)
 		return numUpdatedRows > 0 // Returns true if at least one row was updated
 	}
 
@@ -149,7 +150,7 @@ export class NodeResolver {
 
 			return trx.deleteFrom('node').where('id', '=', id).executeTakeFirst()
 		})
-		pubSub.publish('NODES_UPDATED', { nodesUpdated: [] })
+		pubSub.publish(Topic.NodesUpdated, { nodesUpdated: [] })
 		return numDeletedRows > 0
 	}
 }
