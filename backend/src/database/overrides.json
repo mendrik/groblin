@@ -1,5 +1,5 @@
 {
 	"columns": {
-		"user.confirmed": "boolean"
+		"user.confirmed": "number"
 	}
 }

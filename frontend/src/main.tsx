@@ -14,7 +14,17 @@ const Main = () => (
 		<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
 			<BrowserRouter basename="/">
 				{$user.value ? <LoggedIn /> : <LoggedOut />}
-				<Toaster richColors theme="system" duration={5000} />
+				<Toaster
+					richColors
+					theme="system"
+					duration={5000}
+					toastOptions={{
+						classNames: {
+							toast:
+								'group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg group-[.toaster]:pointer-events-auto'
+						}
+					}}
+				/>
 			</BrowserRouter>
 		</ThemeProvider>
 	</StrictMode>

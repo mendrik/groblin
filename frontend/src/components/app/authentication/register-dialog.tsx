@@ -12,7 +12,9 @@ import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { stopPropagation } from '@/lib/dom-events'
 import {} from '@/lib/match'
 import { pipeAsync } from '@/lib/pipe-async'
+import { setSignal } from '@/lib/utils'
 import { register } from '@/state/user'
+import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
 import type { Fn } from '@tp/functions.ts'
 import { omit } from 'ramda'
@@ -37,34 +39,33 @@ const registrationSchema = strictObject({
 
 export type RegistrationForm = TypeOf<typeof registrationSchema>
 
+const $locked = signal(false)
+const lockForm = () => setSignal($locked, true)
+
 const success = () =>
-	toast.success('Successfully registers', {
+	toast.success('Successfully registered', {
 		description: 'Check your email for a confirmation link',
-		cancel: {
-			label: 'Close',
-			onClick: () => 0
-		}
+		closeButton: true
 	})
 
 const failed = (e: Error) =>
 	toast.error('Failed to register', {
 		description: e.message,
-		cancel: {
-			label: 'Close',
-			onClick: () => 0
-		}
+		closeButton: true
 	})
 
 const registerCommand: Fn<RegistrationForm, unknown> = pipeAsync(
 	omit(['repeatPassword']),
 	register,
-	success
+	success,
+	lockForm
 )
 
 export const RegistrationDialog = () => {
 	return (
 		<Dialog open={true}>
 			<DialogContent
+				closeButton={false}
 				className="max-w-sm"
 				onEscapeKeyDown={close}
 				onKeyDown={stopPropagation}
@@ -80,6 +81,7 @@ export const RegistrationDialog = () => {
 					schema={registrationSchema}
 					onSubmit={registerCommand}
 					onError={failed}
+					disabled={$locked.value}
 				>
 					<DialogFooter className="gap-2 flex flex-row items-center">
 						<div className="mr-auto">

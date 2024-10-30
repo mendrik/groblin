@@ -35,6 +35,8 @@ import { ZodFormField } from '../tree/types'
 import { Editor } from './editors'
 import { type RendererProps, generateDefaults, innerType } from './utils'
 
+import './zod-form.css'
+
 type AllowedTypes<T extends ZodRawShape> =
 	| ZodObject<T>
 	| ZodEffects<ZodObject<T>>
@@ -45,6 +47,7 @@ type OwnProps<T extends AllowedTypes<any>> = {
 	onSubmit: (data: any) => void
 	onError: (err: Error) => void
 	columns?: number
+	disabled?: boolean
 }
 
 const cols = match<[number], string>(
@@ -107,6 +110,7 @@ export const ZodForm = forwardRef(
 			schema,
 			columns = 1,
 			onSubmit,
+			disabled = false,
 			onError,
 			children
 		}: PropsWithChildren<OwnProps<T>>,
@@ -130,7 +134,8 @@ export const ZodForm = forwardRef(
 			<Form {...form}>
 				<form
 					onSubmit={e => form.handleSubmit(onSubmit)(e).catch(onError)}
-					className="flex flex-col gap-6"
+					className="flex flex-col gap-6 relative"
+					data-disabled={disabled ? true : undefined}
 				>
 					<div className={`grid ${cols(columns)} gap-4`}>
 						<Fields form={form} schema={schema} />

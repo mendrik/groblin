@@ -8,6 +8,7 @@ export const db = new Kysely<DB>({
 	dialect: new SqliteDialect({
 		database: sqlite3(process.env.DATABASE_URL)
 	}),
+	plugins: [],
 	log(event): void {
 		if (event.level === 'query') {
 			const { parameters, sql } = event.query

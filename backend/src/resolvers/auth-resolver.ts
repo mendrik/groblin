@@ -31,7 +31,7 @@ export class Login {
 
 @Resolver()
 export class AuthResolver {
-	@Mutation(returns => Number)
+	@Mutation(returns => Boolean)
 	async register(
 		@Arg('data', () => Registration) data: Registration,
 		@Ctx() { db }: Context
@@ -50,10 +50,10 @@ export class AuthResolver {
 			.insertInto('user')
 			.values({
 				...data,
-				confirmed: false
+				confirmed: 0
 			})
 			.execute()
-		return res[0].insertId
+		return res.length > 0
 	}
 
 	/* 

@@ -1,0 +1,6 @@
+form[data-disabled="true"] {
+  label, button, select, input, textarea {
+    opacity: 0.2;
+    pointer-events: none;  
+  }
+}
