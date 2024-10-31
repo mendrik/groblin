@@ -30,7 +30,7 @@ const Main = () => (
 	</StrictMode>
 )
 
-whoAmI().then(() =>
+whoAmI().finally(() =>
 	Maybe.fromNullable(document.getElementById('app'))
 		.map(createRoot)
 		.map(r => r.render(<Main />))

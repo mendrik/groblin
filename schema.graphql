@@ -1,5 +1,5 @@
 type Query {
-  whoami: LoggedInUser!
+  whoami: LoggedInUser
   getNodes: [Node!]!
 }
 
@@ -30,6 +30,7 @@ enum NodeType {
 type Mutation {
   register(data: Registration!): Boolean!
   login(data: Login!): Token!
+  logout: Boolean!
   insertNode(data: InsertNode!): Node!
   updateNode(data: ChangeNodeInput!): Boolean!
   deleteNodeById(order: Int!, parent_id: Int!, id: Int!): Boolean!

@@ -51,6 +51,7 @@ export type Mutation = {
   deleteNodeById: Scalars['Boolean']['output'];
   insertNode: Node;
   login: Token;
+  logout: Scalars['Boolean']['output'];
   register: Scalars['Boolean']['output'];
   updateNode: Scalars['Boolean']['output'];
 };
@@ -104,7 +105,7 @@ export enum NodeType {
 export type Query = {
   __typename?: 'Query';
   getNodes: Array<Node>;
-  whoami: LoggedInUser;
+  whoami?: Maybe<LoggedInUser>;
 };
 
 export type Registration = {
@@ -167,7 +168,7 @@ export type RegisterMutation = { __typename?: 'Mutation', register: boolean };
 export type WhoAmIQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type WhoAmIQuery = { __typename?: 'Query', whoami: { __typename?: 'LoggedInUser', id: number, email: string, name: string } };
+export type WhoAmIQuery = { __typename?: 'Query', whoami?: { __typename?: 'LoggedInUser', id: number, email: string, name: string } | null };
 
 export type LoginMutationVariables = Exact<{
   data: Login;
@@ -175,6 +176,11 @@ export type LoginMutationVariables = Exact<{
 
 
 export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'Token', token: string, expiresDate: any } };
+
+export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
 
 export class TypedDocumentString<TResult, TVariables>
   extends String
@@ -246,3 +252,8 @@ export const LoginDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<LoginMutation, LoginMutationVariables>;
+export const LogoutDocument = new TypedDocumentString(`
+    mutation Logout {
+  logout
+}
+    `) as unknown as TypedDocumentString<LogoutMutation, LogoutMutationVariables>;

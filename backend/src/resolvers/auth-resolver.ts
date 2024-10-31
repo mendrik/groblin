@@ -156,9 +156,15 @@ export class AuthResolver {
 		return { token, expiresDate }
 	}
 
-	@Query(returns => LoggedInUser)
+	@Query(returns => LoggedInUser, { nullable: true })
 	async whoami(@Ctx() ctx: Context) {
 		return ctx.extra
+	}
+
+	@Mutation(returns => Boolean)
+	async logout(@Ctx() ctx: Context) {
+		ctx.extra = undefined
+		return true
 	}
 
 	/*

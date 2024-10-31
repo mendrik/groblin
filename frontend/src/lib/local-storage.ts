@@ -16,3 +16,6 @@ export const getItem = <T>(
 	const item = localStorage.getItem(key)
 	return item ? safeParse(item) : initial
 }
+
+export const removeItems = (...keys: string[]) =>
+	keys.forEach(key => localStorage.removeItem(key))

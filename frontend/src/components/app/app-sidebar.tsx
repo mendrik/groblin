@@ -1,3 +1,5 @@
+import { removeItems } from '@/lib/local-storage'
+import { logout } from '@/state/user'
 import type { Icon } from '@/type-patches/icons'
 import {
 	Tooltip,
@@ -5,6 +7,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger
 } from '@radix-ui/react-tooltip'
+import { pipeAsync } from '@shared/utils/pipe-async'
 import {
 	IconDatabaseExport,
 	IconDatabaseImport,
@@ -12,16 +15,25 @@ import {
 	IconSettings,
 	IconUserCog
 } from '@tabler/icons-react'
-import type { PropsWithChildren } from 'react'
+import type { ButtonHTMLAttributes, PropsWithChildren } from 'react'
 
 type OwnProps = {
 	icon: Icon
-}
+} & ButtonHTMLAttributes<HTMLButtonElement>
 
-const IconLink = ({ icon: Icon, children }: PropsWithChildren<OwnProps>) => (
+export const logoutCommand = pipeAsync(
+	() => removeItems('token', 'tokenExpiresDate'),
+	logout
+)
+
+const IconLink = ({
+	icon: Icon,
+	children,
+	...button
+}: PropsWithChildren<OwnProps>) => (
 	<li>
 		<Tooltip delayDuration={0}>
-			<TooltipTrigger>
+			<TooltipTrigger {...button}>
 				<Icon className="w-6 h-6 hover:text-foreground" stroke={1} />
 			</TooltipTrigger>
 			<TooltipContent
@@ -44,7 +56,9 @@ export const AppSidebar = () => {
 					<IconLink icon={IconDatabaseExport}>Export</IconLink>
 					<IconLink icon={IconDatabaseImport}>Import</IconLink>
 					<IconLink icon={IconUserCog}>Profile</IconLink>
-					<IconLink icon={IconLogin2}>Logout</IconLink>
+					<IconLink icon={IconLogin2} onClick={logoutCommand}>
+						Logout
+					</IconLink>
 				</ul>
 			</TooltipProvider>
 		</div>

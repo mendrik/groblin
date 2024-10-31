@@ -3,6 +3,7 @@ import {
 	type LoggedInUser,
 	type Login,
 	LoginDocument,
+	LogoutDocument,
 	RegisterDocument,
 	type Registration,
 	WhoAmIDocument
@@ -41,11 +42,19 @@ gql`
   }
 `
 
+gql`
+  mutation Logout {
+    logout
+  }
+`
+
 export const register = (data: Registration): Promise<boolean> =>
 	query(RegisterDocument, { data }).then(prop('register'))
 
 export const whoAmI = () =>
 	query(WhoAmIDocument).then(prop('whoami')).then(setSignal($user))
+
+export const logout = () => query(LogoutDocument).then(whoAmI)
 
 export const login = (data: Login) =>
 	query(LoginDocument, { data })
