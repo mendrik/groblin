@@ -23,13 +23,18 @@ import { type TypeOf, strictObject } from 'zod'
 
 const registrationSchema = strictObject({
 	name: nonEmptyString('Name', EditorType.Input).default('Andreas Herd'),
-	email: nonEmptyString('Email', EditorType.Email).default(
+	email: nonEmptyString('Email', EditorType.Email, 'username').default(
 		'mendrik76@gmail.com'
 	),
-	password: nonEmptyString('Password', EditorType.Password).default('bla'),
+	password: nonEmptyString(
+		'Password',
+		EditorType.Password,
+		'new-password'
+	).default('bla'),
 	repeatPassword: nonEmptyString(
 		'Repeat password',
-		EditorType.Password
+		EditorType.Password,
+		'new-password'
 	).default('bla')
 }).refine(data => data.password === data.repeatPassword, {
 	message: 'Passwords must match',

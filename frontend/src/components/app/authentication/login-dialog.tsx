@@ -19,8 +19,8 @@ import { toast } from 'sonner'
 import { type TypeOf, boolean, strictObject } from 'zod'
 
 const loginSchema = strictObject({
-	email: nonEmptyString('Email', EditorType.Email),
-	password: nonEmptyString('Password', EditorType.Password),
+	email: nonEmptyString('Email', EditorType.Email, 'username'),
+	password: nonEmptyString('Password', EditorType.Password, 'current-password'),
 	rememberMe: boolean()
 		.describe(
 			asField({
