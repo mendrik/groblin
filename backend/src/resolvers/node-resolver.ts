@@ -3,6 +3,7 @@ import { failOn } from '@shared/utils/guards.ts'
 import { sql } from 'kysely'
 import { T, isNil } from 'ramda'
 import type { Context } from 'src/context.ts'
+import { LogAccess } from 'src/middleware/log-access.ts'
 import { Topic } from 'src/pubsub.ts'
 import {
 	Arg,
@@ -14,7 +15,8 @@ import {
 	ObjectType,
 	Query,
 	Resolver,
-	Subscription
+	Subscription,
+	UseMiddleware
 } from 'type-graphql'
 
 @ObjectType()
@@ -68,6 +70,7 @@ export class ChangeNodeInput {
 	parent_id?: number
 }
 
+@UseMiddleware(LogAccess)
 @Resolver()
 export class NodeResolver {
 	@Subscription(returns => Boolean, {

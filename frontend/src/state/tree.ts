@@ -32,6 +32,7 @@ import {
 	prop,
 	when
 } from 'ramda'
+import { $user } from './user'
 
 /** ---- queries ---- **/
 gql`
@@ -95,22 +96,24 @@ export const $parentNode = signal<number>()
 export const $editingNode = signal<number | undefined>()
 
 /** ---- subscriptions ---- **/
-subscribe(
-	NodesUpdatedDocument,
-	initial(() => {
-		query(GetNodesDocument).then(
-			pipe(
-				prop('get_nodes'),
-				listToTree('id', 'parent_id', 'nodes'),
-				setSignal($root)
+const loadNodes = () =>
+	subscribe(
+		NodesUpdatedDocument,
+		initial(() =>
+			query(GetNodesDocument).then(
+				pipe(
+					prop('get_nodes'),
+					listToTree('id', 'parent_id', 'nodes'),
+					setSignal($root)
+				)
 			)
 		)
-	})
-)
+	)
 
 $root.subscribe(
 	when(isNotNil, node => updateNodeState({ open: true })(node.id))
 )
+$user.subscribe(when(isNotNil, loadNodes))
 $nodeStates.subscribe(setItem('tree-state'))
 
 /** ---- interfaces ---- **/
