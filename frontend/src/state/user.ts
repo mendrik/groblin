@@ -1,17 +1,19 @@
 import { query } from '@/gql-client'
 import {
-	type LoggedinUser,
+	type LoggedInUser,
 	type Login,
 	LoginDocument,
 	RegisterDocument,
 	type Registration
 } from '@/gql/graphql'
-import { setSignal } from '@/lib/utils'
+import { setItem } from '@/lib/local-storage'
 import { signal } from '@preact/signals-react'
+import { evolveAlt } from '@shared/utils/evolve-alt'
+import { debug } from '@shared/utils/ramda'
 import gql from 'graphql-tag'
-import { prop } from 'ramda'
+import { pipe, prop } from 'ramda'
 
-export const $user = signal<LoggedinUser>()
+export const $user = signal<LoggedInUser>()
 
 gql`
   mutation Register($data: Registration!) {
@@ -22,10 +24,8 @@ gql`
 gql`
   mutation Login($data: Login!) {
     login(data: $data) {
-		id
 		token
-		name
-		email			
+		expiresDate
 	}
   }
 `
@@ -33,5 +33,12 @@ gql`
 export const register = (data: Registration): Promise<boolean> =>
 	query(RegisterDocument, { data }).then(prop('register'))
 
-export const login = (data: Login): Promise<LoggedinUser> =>
-	query(LoginDocument, { data }).then(prop('login')).then(setSignal($user))
+export const login = (data: Login) =>
+	query(LoginDocument, { data })
+		.then(prop('login'))
+		.then(
+			evolveAlt({
+				token: setItem('token'),
+				date: pipe(debug, prop('expiresDate'), setItem('tokenExpiresDate'))
+			})
+		)

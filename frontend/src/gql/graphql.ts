@@ -14,6 +14,8 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.This scalar is serialized to a string in ISO 8601 format and parsed from a string in ISO 8601 format. */
+  DateTimeISO: { input: any; output: any; }
 };
 
 export type ChangeNodeInput = {
@@ -31,24 +33,24 @@ export type InsertNode = {
   type: NodeType;
 };
 
-export type LoggedinUser = {
-  __typename?: 'LoggedinUser';
+export type LoggedInUser = {
+  __typename?: 'LoggedInUser';
   email: Scalars['String']['output'];
   id: Scalars['Int']['output'];
   name: Scalars['String']['output'];
-  token: Scalars['String']['output'];
 };
 
 export type Login = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
+  rememberMe?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
   deleteNodeById: Scalars['Boolean']['output'];
   insertNode: Node;
-  login: LoggedinUser;
+  login: Token;
   register: Scalars['Boolean']['output'];
   updateNode: Scalars['Boolean']['output'];
 };
@@ -102,6 +104,7 @@ export enum NodeType {
 export type Query = {
   __typename?: 'Query';
   getNodes: Array<Node>;
+  whoami: LoggedInUser;
 };
 
 export type Registration = {
@@ -113,6 +116,12 @@ export type Registration = {
 export type Subscription = {
   __typename?: 'Subscription';
   nodesUpdated: Scalars['Boolean']['output'];
+};
+
+export type Token = {
+  __typename?: 'Token';
+  expiresDate: Scalars['DateTimeISO']['output'];
+  token: Scalars['String']['output'];
 };
 
 export type NodesUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
@@ -160,7 +169,7 @@ export type LoginMutationVariables = Exact<{
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'LoggedinUser', id: number, token: string, name: string, email: string } };
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'Token', token: string, expiresDate: any } };
 
 export class TypedDocumentString<TResult, TVariables>
   extends String
@@ -218,10 +227,8 @@ export const RegisterDocument = new TypedDocumentString(`
 export const LoginDocument = new TypedDocumentString(`
     mutation Login($data: Login!) {
   login(data: $data) {
-    id
     token
-    name
-    email
+    expiresDate
   }
 }
     `) as unknown as TypedDocumentString<LoginMutation, LoginMutationVariables>;

@@ -3,7 +3,7 @@ import { tryCatch } from 'ramda'
 export const setItem =
 	(key: string) =>
 	<T>(value: T) =>
-		setTimeout(() => {
+		void setTimeout(() => {
 			localStorage.setItem(key, JSON.stringify(value))
 		}, 20)
 

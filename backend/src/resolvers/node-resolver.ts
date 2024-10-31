@@ -1,4 +1,4 @@
-import { NodeType } from '@shared/enums.ts'
+import { NodeType, Role } from '@shared/enums.ts'
 import { failOn } from '@shared/utils/guards.ts'
 import { sql } from 'kysely'
 import { T, isNil } from 'ramda'
@@ -7,6 +7,7 @@ import { LogAccess } from 'src/middleware/log-access.ts'
 import { Topic } from 'src/pubsub.ts'
 import {
 	Arg,
+	Authorized,
 	Ctx,
 	Field,
 	InputType,
@@ -71,6 +72,7 @@ export class ChangeNodeInput {
 }
 
 @UseMiddleware(LogAccess)
+@Authorized(Role.Admin, Role.Viewer)
 @Resolver()
 export class NodeResolver {
 	@Subscription(returns => Boolean, {

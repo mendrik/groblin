@@ -21,7 +21,7 @@ const documents = {
     "\n  mutation UpdateNode($data: ChangeNodeInput!) {\n    updateNode(data: $data)\n  }\n": types.UpdateNodeDocument,
     "\n  mutation DeleteNodeById($order: Int!, $parent_id: Int!, $id: Int!) {\n    deleteNodeById(order: $order, parent_id: $parent_id, id: $id)\n  }\n": types.DeleteNodeByIdDocument,
     "\n  mutation Register($data: Registration!) {\n    register(data: $data)\n  }\n": types.RegisterDocument,
-    "\n  mutation Login($data: Login!) {\n    login(data: $data) {\n\t\tid\n\t\ttoken\n\t\tname\n\t\temail\t\t\t\n\t}\n  }\n": types.LoginDocument,
+    "\n  mutation Login($data: Login!) {\n    login(data: $data) {\n\t\ttoken\n\t\texpiresDate\n\t}\n  }\n": types.LoginDocument,
 };
 
 /**
@@ -51,7 +51,7 @@ export function graphql(source: "\n  mutation Register($data: Registration!) {\n
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  mutation Login($data: Login!) {\n    login(data: $data) {\n\t\tid\n\t\ttoken\n\t\tname\n\t\temail\t\t\t\n\t}\n  }\n"): typeof import('./graphql').LoginDocument;
+export function graphql(source: "\n  mutation Login($data: Login!) {\n    login(data: $data) {\n\t\ttoken\n\t\texpiresDate\n\t}\n  }\n"): typeof import('./graphql').LoginDocument;
 
 
 export function graphql(source: string) {

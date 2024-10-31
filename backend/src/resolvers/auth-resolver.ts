@@ -3,6 +3,7 @@ import { type BinaryLike, scrypt } from 'node:crypto'
 import { evolveAlt } from '@shared/utils/evolve-alt.ts'
 import { resolveObj } from '@shared/utils/resolve-obj.ts'
 import jwt from 'jsonwebtoken'
+import ms from 'ms'
 import { F, pipe } from 'ramda'
 import type { Context } from 'src/context.ts'
 import { Topic } from 'src/pubsub.ts'
@@ -14,6 +15,7 @@ import {
 	Int,
 	Mutation,
 	ObjectType,
+	Query,
 	Resolver
 } from 'type-graphql'
 
@@ -47,12 +49,18 @@ export class Registration {
 }
 
 @ObjectType()
-export class LoggedinUser {
-	@Field(type => Int)
-	id: number
-
+export class Token {
 	@Field(type => String)
 	token: string
+
+	@Field(type => Date)
+	expiresDate: Date
+}
+
+@ObjectType()
+export class LoggedInUser {
+	@Field(type => Int)
+	id: number
 
 	@Field(type => String)
 	name: string
@@ -74,6 +82,9 @@ export class Login {
 
 	@Field(type => String)
 	password: string
+
+	@Field(type => Boolean, { nullable: true })
+	rememberMe?: boolean
 }
 
 const hashPassword = (password: string): Promise<string> =>
@@ -110,7 +121,7 @@ export class AuthResolver {
 		return res.length > 0
 	}
 
-	@Mutation(returns => LoggedinUser)
+	@Mutation(returns => Token)
 	async login(@Arg('data', () => Login) data: Login, @Ctx() { db }: Context) {
 		const user = await db
 			.selectFrom('user')
@@ -132,10 +143,20 @@ export class AuthResolver {
 			throw new Error('JWT_SECRET must be defined')
 		}
 
-		const token = jwt.sign({ userId: user.id }, jwtSecret, {
-			expiresIn: '7 days' // Adjust expiration as needed
-		})
-		return { ...user, token }
+		const expiresIn = data.rememberMe ? '60 days' : '24h'
+		const token = jwt.sign(
+			{ id: user.id, name: user.name, email: user.email },
+			jwtSecret,
+			{ expiresIn }
+		)
+		const expiresDate = new Date(Date.now() + ms(expiresIn))
+
+		return { token, expiresDate }
+	}
+
+	@Query(returns => LoggedInUser)
+	async whoami(@Ctx() { user }: Context) {
+		return user
 	}
 
 	/*

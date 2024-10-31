@@ -18,3 +18,8 @@ export enum NodeType {
 	date = 'Date',
 	schema = 'Schema'
 }
+
+export enum Role {
+	Admin = 'Admin',
+	Viewer = 'Viewer'
+}

@@ -1,3 +1,5 @@
+import { tap } from 'ramda'
+
 type Last<Type extends any[]> = Type extends [...any[], infer R] ? R : never
 
 type LastReturnType<Type extends any[]> = Type extends [...any[], infer LAST_FN]
@@ -20,3 +22,5 @@ export const pipeTapAsync =
 			(pc, fn) => pc.then(() => fn(arg)),
 			Promise.resolve()
 		) as LastReturnType<FUNCTIONS>
+
+export const debug = tap(console.log)

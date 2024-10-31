@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import 'reflect-metadata'
 import { makeExecutableSchema } from '@graphql-tools/schema'
-import { cyan, darkGray, lightGreen } from 'ansicolor'
+import { cyan, lightGreen } from 'ansicolor'
 import { execute, subscribe } from 'graphql'
 import { useServer } from 'graphql-ws/lib/use/ws'
 import { WebSocketServer } from 'ws'
@@ -18,6 +18,6 @@ const server = new WebSocketServer({
 
 useServer({ schema, execute, subscribe, context }, server)
 
-console.log(darkGray('Prt: ') + cyan(`Started server on ${lightGreen(port)}`))
+console.log(cyan(`Started server on ${lightGreen(port)}`))
 
 initializeEmailService()
