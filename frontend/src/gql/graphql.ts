@@ -31,10 +31,24 @@ export type InsertNode = {
   type: NodeType;
 };
 
+export type LoggedinUser = {
+  __typename?: 'LoggedinUser';
+  email: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
+  token: Scalars['String']['output'];
+};
+
+export type Login = {
+  email: Scalars['String']['input'];
+  password: Scalars['String']['input'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   delete_node_by_id: Scalars['Boolean']['output'];
   insert_node: Node;
+  login: LoggedinUser;
   register: Scalars['Boolean']['output'];
   update_node: Scalars['Boolean']['output'];
 };
@@ -49,6 +63,11 @@ export type MutationDelete_Node_By_IdArgs = {
 
 export type MutationInsert_NodeArgs = {
   data: InsertNode;
+};
+
+
+export type MutationLoginArgs = {
+  data: Login;
 };
 
 
@@ -136,6 +155,13 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: 'Mutation', register: boolean };
 
+export type LoginMutationVariables = Exact<{
+  data: Login;
+}>;
+
+
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'LoggedinUser', id: number, token: string, name: string, email: string } };
+
 export class TypedDocumentString<TResult, TVariables>
   extends String
   implements DocumentTypeDecoration<TResult, TVariables>
@@ -189,3 +215,13 @@ export const RegisterDocument = new TypedDocumentString(`
   register(data: $data)
 }
     `) as unknown as TypedDocumentString<RegisterMutation, RegisterMutationVariables>;
+export const LoginDocument = new TypedDocumentString(`
+    mutation Login($data: Login!) {
+  login(data: $data) {
+    id
+    token
+    name
+    email
+  }
+}
+    `) as unknown as TypedDocumentString<LoginMutation, LoginMutationVariables>;

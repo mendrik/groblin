@@ -1,10 +1,23 @@
+import 'dotenv/config'
 import { type BinaryLike, scrypt } from 'node:crypto'
 import { evolveAlt } from '@shared/utils/evolve-alt.ts'
 import { resolveObj } from '@shared/utils/resolve-obj.ts'
+import jwt from 'jsonwebtoken'
 import { F, pipe } from 'ramda'
 import type { Context } from 'src/context.ts'
 import { Topic } from 'src/pubsub.ts'
-import { Arg, Ctx, Field, InputType, Mutation, Resolver } from 'type-graphql'
+import {
+	Arg,
+	Ctx,
+	Field,
+	InputType,
+	Int,
+	Mutation,
+	ObjectType,
+	Resolver
+} from 'type-graphql'
+
+const jwtSecret = process.env.JWT_SECRET
 
 const crypt = (
 	password: BinaryLike,
@@ -28,6 +41,21 @@ export class Registration {
 
 	@Field(type => String)
 	password: string
+
+	@Field(type => String)
+	email: string
+}
+
+@ObjectType()
+export class LoggedinUser {
+	@Field(type => Int)
+	id: number
+
+	@Field(type => String)
+	token: string
+
+	@Field(type => String)
+	name: string
 
 	@Field(type => String)
 	email: string
@@ -82,27 +110,35 @@ export class AuthResolver {
 		return res.length > 0
 	}
 
-	/* 
-	@Mutation(returns => Boolean)
-	async login(@Arg('data') data: Login, @Ctx() ctx: Context) {
-		const { db } = ctx
-		const { email, password } = data
-
-		const user = await db.users.findFirst({
-			where: { email }
-		})
+	@Mutation(returns => LoggedinUser)
+	async login(@Arg('data', () => Login) data: Login, @Ctx() { db }: Context) {
+		const user = await db
+			.selectFrom('user')
+			.selectAll()
+			.where('email', '=', data.email)
+			.executeTakeFirst()
 
 		if (!user) {
 			throw new Error('User not found')
 		}
 
-		if (user.password !== password) {
+		const hashedPassword = await hashPassword(data.password)
+
+		if (user.password !== hashedPassword) {
 			throw new Error('Invalid password')
 		}
 
-		return true
+		if (jwtSecret === undefined) {
+			throw new Error('JWT_SECRET must be defined')
+		}
+
+		const token = jwt.sign({ userId: user.id }, jwtSecret, {
+			expiresIn: '7 days' // Adjust expiration as needed
+		})
+		return { ...user, token }
 	}
 
+	/*
 	@Mutation(returns => Boolean)
 	async forgotPassword(@Arg('data') data: ForgotPassword, @Ctx() ctx: Context) {
 		const { db } = ctx

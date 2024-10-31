@@ -1,15 +1,17 @@
 import { query } from '@/gql-client'
-import { RegisterDocument, type Registration } from '@/gql/graphql'
+import {
+	type LoggedinUser,
+	type Login,
+	LoginDocument,
+	RegisterDocument,
+	type Registration
+} from '@/gql/graphql'
+import { setSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import gql from 'graphql-tag'
+import { prop } from 'ramda'
 
-type User = {
-	id: number
-	name: string
-	email: string
-}
-
-export const $user = signal<User | null>(null)
+export const $user = signal<LoggedinUser>()
 
 gql`
   mutation Register($data: Registration!) {
@@ -17,6 +19,19 @@ gql`
   }
 `
 
-export const register = (data: Registration): Promise<number> => {
-	return query(RegisterDocument, { data }).then(x => x.register)
-}
+gql`
+  mutation Login($data: Login!) {
+    login(data: $data) {
+		id
+		token
+		name
+		email			
+	}
+  }
+`
+
+export const register = (data: Registration): Promise<boolean> =>
+	query(RegisterDocument, { data }).then(prop('register'))
+
+export const login = (data: Login): Promise<LoggedinUser> =>
+	query(LoginDocument, { data }).then(prop('login')).then(setSignal($user))

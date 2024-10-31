@@ -10,10 +10,9 @@ import {
 import { asField, nonEmptyString } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { stopPropagation } from '@/lib/dom-events'
+import { login } from '@/state/user'
 import { EditorType } from '@shared/enums'
 import { pipeAsync } from '@shared/utils/pipe-async'
-import type { Fn } from '@tp/functions.ts'
-import { pipe } from 'ramda'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { type TypeOf, boolean, strictObject } from 'zod'
@@ -37,9 +36,10 @@ const failed = (e: Error) =>
 		closeButton: true
 	})
 
-type Login = TypeOf<typeof loginSchema>
+type LoginForm = TypeOf<typeof loginSchema>
 
-const loginCommand: Fn<Partial<Login>, void> = pipeAsync(console.log)
+const loginCommand = ({ rememberMe, ...credentials }: LoginForm) =>
+	pipeAsync(login, () => toast.success('Successfully logged in'))(credentials)
 
 export const LoginDialog = () => {
 	return (
@@ -56,11 +56,7 @@ export const LoginDialog = () => {
 						Please enter your email and password
 					</DialogDescription>
 				</DialogHeader>
-				<ZodForm
-					schema={loginSchema}
-					onSubmit={pipe(loginCommand)}
-					onError={failed}
-				>
+				<ZodForm schema={loginSchema} onSubmit={loginCommand} onError={failed}>
 					<DialogFooter className="gap-2 flex flex-row items-center">
 						<div className="mr-auto">
 							Did you forget your{' '}

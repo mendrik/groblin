@@ -8,8 +8,9 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
 }
 
-export const setSignal = curry(<T>(signal: Signal<T>, value: T) => {
+export const setSignal = curry(<T>(signal: Signal<T>, value: T): T => {
 	signal.value = value
+	return value
 })
 
 export const updateSignal = curry(<T>(signal: Signal<T>, fn: Fn<T, T>) => {
