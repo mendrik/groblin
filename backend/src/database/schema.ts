@@ -43,6 +43,7 @@ export interface User {
   confirmed: Generated<boolean>;
   email: string;
   id: Generated<number>;
+  last_project_id: number | null;
   name: string;
   password: string;
 }

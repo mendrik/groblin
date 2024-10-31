@@ -77,7 +77,6 @@ export class AuthResolver {
 		)
 
 		const user = await regToUser(data)
-
 		const res = await db.insertInto('user').values(user).execute()
 		pubSub.publish(Topic.UserRegistered, data)
 		return res.length > 0

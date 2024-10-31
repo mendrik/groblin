@@ -35,7 +35,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   delete_node_by_id: Scalars['Boolean']['output'];
   insert_node: Node;
-  register: Scalars['Float']['output'];
+  register: Scalars['Boolean']['output'];
   update_node: Scalars['Boolean']['output'];
 };
 
@@ -134,7 +134,7 @@ export type RegisterMutationVariables = Exact<{
 }>;
 
 
-export type RegisterMutation = { __typename?: 'Mutation', register: number };
+export type RegisterMutation = { __typename?: 'Mutation', register: boolean };
 
 export class TypedDocumentString<TResult, TVariables>
   extends String

@@ -24,7 +24,7 @@ const forgotPasswordSchema = strictObject({
 type ForgotPassword = TypeOf<typeof forgotPasswordSchema>
 
 const forgotPasswordCommand: Fn<Partial<ForgotPassword>, void> = pipeAsync(
-	console.log
+	console.log // todo
 )
 
 export const ForgotPasswordDialog = () => {

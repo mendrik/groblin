@@ -21,7 +21,7 @@ enum NodeType {
 }
 
 type Mutation {
-  register(data: Registration!): Float!
+  register(data: Registration!): Boolean!
   insert_node(data: InsertNode!): Node!
   update_node(data: ChangeNodeInput!): Boolean!
   delete_node_by_id(order: Int!, parent_id: Int!, id: Int!): Boolean!

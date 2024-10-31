@@ -43,7 +43,7 @@ const success = () =>
 	})
 
 const resetPasswordCommand: Fn<Partial<ResetPassword>, void> = pipeAsync(
-	console.log
+	console.log // todo,
 )
 
 export const PasswordResetDialog = () => {
