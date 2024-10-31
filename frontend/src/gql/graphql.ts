@@ -164,6 +164,11 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: 'Mutation', register: boolean };
 
+export type WhoAmIQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type WhoAmIQuery = { __typename?: 'Query', whoami: { __typename?: 'LoggedInUser', id: number, email: string, name: string } };
+
 export type LoginMutationVariables = Exact<{
   data: Login;
 }>;
@@ -224,6 +229,15 @@ export const RegisterDocument = new TypedDocumentString(`
   register(data: $data)
 }
     `) as unknown as TypedDocumentString<RegisterMutation, RegisterMutationVariables>;
+export const WhoAmIDocument = new TypedDocumentString(`
+    query WhoAmI {
+  whoami {
+    id
+    email
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<WhoAmIQuery, WhoAmIQueryVariables>;
 export const LoginDocument = new TypedDocumentString(`
     mutation Login($data: Login!) {
   login(data: $data) {

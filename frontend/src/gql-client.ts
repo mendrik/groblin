@@ -1,9 +1,13 @@
 import type { ResultOf, VariablesOf } from '@graphql-typed-document-node/core'
 import { createClient } from 'graphql-ws'
 import type { TypedDocumentString } from './gql/graphql'
+import { getItem } from './lib/local-storage'
 
 const gql = createClient({
-	url: 'ws://localhost:6173/graphql'
+	url: 'ws://localhost:6173/graphql',
+	connectionParams: () => ({
+		authToken: getItem('token')
+	})
 })
 
 export const query = async <D extends TypedDocumentString<any, any>>(

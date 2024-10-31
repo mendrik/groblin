@@ -122,8 +122,8 @@ export class AuthResolver {
 	}
 
 	@Mutation(returns => Token)
-	async login(@Arg('data', () => Login) data: Login, @Ctx() { db }: Context) {
-		const user = await db
+	async login(@Arg('data', () => Login) data: Login, @Ctx() ctx: Context) {
+		const user = await ctx.db
 			.selectFrom('user')
 			.selectAll()
 			.where('email', '=', data.email)
@@ -144,19 +144,21 @@ export class AuthResolver {
 		}
 
 		const expiresIn = data.rememberMe ? '60 days' : '24h'
-		const token = jwt.sign(
-			{ id: user.id, name: user.name, email: user.email },
-			jwtSecret,
-			{ expiresIn }
-		)
+		const loggedInUser = {
+			id: user.id,
+			name: user.name,
+			email: user.email
+		} satisfies LoggedInUser
+		ctx.extra = loggedInUser
+		const token = jwt.sign(loggedInUser, jwtSecret, { expiresIn })
 		const expiresDate = new Date(Date.now() + ms(expiresIn))
 
 		return { token, expiresDate }
 	}
 
 	@Query(returns => LoggedInUser)
-	async whoami(@Ctx() { user }: Context) {
-		return user
+	async whoami(@Ctx() ctx: Context) {
+		return ctx.extra
 	}
 
 	/*

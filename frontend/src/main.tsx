@@ -7,7 +7,7 @@ import { ThemeProvider } from './components/theme-provider'
 import { Toaster } from './components/ui/sonner'
 import { LoggedIn } from './routing/logged-in'
 import { LoggedOut } from './routing/logged-out'
-import { $user } from './state/user'
+import { $user, whoAmI } from './state/user'
 
 const Main = () => (
 	<StrictMode>
@@ -30,7 +30,9 @@ const Main = () => (
 	</StrictMode>
 )
 
-Maybe.fromNullable(document.getElementById('app'))
-	.map(createRoot)
-	.map(r => r.render(<Main />))
-	.ifNothing(() => console.error('No element with id "app" found'))
+whoAmI().then(() =>
+	Maybe.fromNullable(document.getElementById('app'))
+		.map(createRoot)
+		.map(r => r.render(<Main />))
+		.ifNothing(() => console.error('No element with id "app" found'))
+)
