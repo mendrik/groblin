@@ -43,7 +43,7 @@ gql`
 
 gql`
   query GetNodes {
-    get_nodes {
+    getNodes {
 		id
 		name
 		order
@@ -56,7 +56,7 @@ gql`
 // Mutation to insert a new node
 gql`
   mutation InsertNode($data: InsertNode!) {
-    insert_node(data: $data) {
+    insertNode(data: $data) {
 		id
 	}
   }
@@ -65,14 +65,14 @@ gql`
 // Mutation to update an existing node
 gql`
   mutation UpdateNode($data: ChangeNodeInput!) {
-    update_node(data: $data)
+    updateNode(data: $data)
   }
 `
 
 // Mutation to delete a node by ID
 gql`
   mutation DeleteNodeById($order: Int!, $parent_id: Int!, $id: Int!) {
-    delete_node_by_id(order: $order, parent_id: $parent_id, id: $id)
+    deleteNodeById(order: $order, parent_id: $parent_id, id: $id)
   }
 `
 
@@ -102,7 +102,7 @@ const loadNodes = () =>
 		initial(() =>
 			query(GetNodesDocument).then(
 				pipe(
-					prop('get_nodes'),
+					prop('getNodes'),
 					listToTree('id', 'parent_id', 'nodes'),
 					setSignal($root)
 				)

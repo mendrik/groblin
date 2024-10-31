@@ -46,22 +46,22 @@ export type Login = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  delete_node_by_id: Scalars['Boolean']['output'];
-  insert_node: Node;
+  deleteNodeById: Scalars['Boolean']['output'];
+  insertNode: Node;
   login: LoggedinUser;
   register: Scalars['Boolean']['output'];
-  update_node: Scalars['Boolean']['output'];
+  updateNode: Scalars['Boolean']['output'];
 };
 
 
-export type MutationDelete_Node_By_IdArgs = {
+export type MutationDeleteNodeByIdArgs = {
   id: Scalars['Int']['input'];
   order: Scalars['Int']['input'];
   parent_id: Scalars['Int']['input'];
 };
 
 
-export type MutationInsert_NodeArgs = {
+export type MutationInsertNodeArgs = {
   data: InsertNode;
 };
 
@@ -76,7 +76,7 @@ export type MutationRegisterArgs = {
 };
 
 
-export type MutationUpdate_NodeArgs = {
+export type MutationUpdateNodeArgs = {
   data: ChangeNodeInput;
 };
 
@@ -101,7 +101,7 @@ export enum NodeType {
 
 export type Query = {
   __typename?: 'Query';
-  get_nodes: Array<Node>;
+  getNodes: Array<Node>;
 };
 
 export type Registration = {
@@ -123,21 +123,21 @@ export type NodesUpdatedSubscription = { __typename?: 'Subscription', nodesUpdat
 export type GetNodesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetNodesQuery = { __typename?: 'Query', get_nodes: Array<{ __typename?: 'Node', id: number, name: string, order: number, type: NodeType, parent_id?: number | null }> };
+export type GetNodesQuery = { __typename?: 'Query', getNodes: Array<{ __typename?: 'Node', id: number, name: string, order: number, type: NodeType, parent_id?: number | null }> };
 
 export type InsertNodeMutationVariables = Exact<{
   data: InsertNode;
 }>;
 
 
-export type InsertNodeMutation = { __typename?: 'Mutation', insert_node: { __typename?: 'Node', id: number } };
+export type InsertNodeMutation = { __typename?: 'Mutation', insertNode: { __typename?: 'Node', id: number } };
 
 export type UpdateNodeMutationVariables = Exact<{
   data: ChangeNodeInput;
 }>;
 
 
-export type UpdateNodeMutation = { __typename?: 'Mutation', update_node: boolean };
+export type UpdateNodeMutation = { __typename?: 'Mutation', updateNode: boolean };
 
 export type DeleteNodeByIdMutationVariables = Exact<{
   order: Scalars['Int']['input'];
@@ -146,7 +146,7 @@ export type DeleteNodeByIdMutationVariables = Exact<{
 }>;
 
 
-export type DeleteNodeByIdMutation = { __typename?: 'Mutation', delete_node_by_id: boolean };
+export type DeleteNodeByIdMutation = { __typename?: 'Mutation', deleteNodeById: boolean };
 
 export type RegisterMutationVariables = Exact<{
   data: Registration;
@@ -184,7 +184,7 @@ export const NodesUpdatedDocument = new TypedDocumentString(`
     `) as unknown as TypedDocumentString<NodesUpdatedSubscription, NodesUpdatedSubscriptionVariables>;
 export const GetNodesDocument = new TypedDocumentString(`
     query GetNodes {
-  get_nodes {
+  getNodes {
     id
     name
     order
@@ -195,19 +195,19 @@ export const GetNodesDocument = new TypedDocumentString(`
     `) as unknown as TypedDocumentString<GetNodesQuery, GetNodesQueryVariables>;
 export const InsertNodeDocument = new TypedDocumentString(`
     mutation InsertNode($data: InsertNode!) {
-  insert_node(data: $data) {
+  insertNode(data: $data) {
     id
   }
 }
     `) as unknown as TypedDocumentString<InsertNodeMutation, InsertNodeMutationVariables>;
 export const UpdateNodeDocument = new TypedDocumentString(`
     mutation UpdateNode($data: ChangeNodeInput!) {
-  update_node(data: $data)
+  updateNode(data: $data)
 }
     `) as unknown as TypedDocumentString<UpdateNodeMutation, UpdateNodeMutationVariables>;
 export const DeleteNodeByIdDocument = new TypedDocumentString(`
     mutation DeleteNodeById($order: Int!, $parent_id: Int!, $id: Int!) {
-  delete_node_by_id(order: $order, parent_id: $parent_id, id: $id)
+  deleteNodeById(order: $order, parent_id: $parent_id, id: $id)
 }
     `) as unknown as TypedDocumentString<DeleteNodeByIdMutation, DeleteNodeByIdMutationVariables>;
 export const RegisterDocument = new TypedDocumentString(`

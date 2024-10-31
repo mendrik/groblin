@@ -1,5 +1,5 @@
 type Query {
-  get_nodes: [Node!]!
+  getNodes: [Node!]!
 }
 
 type Node {
@@ -23,9 +23,9 @@ enum NodeType {
 type Mutation {
   register(data: Registration!): Boolean!
   login(data: Login!): LoggedinUser!
-  insert_node(data: InsertNode!): Node!
-  update_node(data: ChangeNodeInput!): Boolean!
-  delete_node_by_id(order: Int!, parent_id: Int!, id: Int!): Boolean!
+  insertNode(data: InsertNode!): Node!
+  updateNode(data: ChangeNodeInput!): Boolean!
+  deleteNodeById(order: Int!, parent_id: Int!, id: Int!): Boolean!
 }
 
 input Registration {

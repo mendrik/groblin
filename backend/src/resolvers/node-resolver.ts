@@ -82,12 +82,12 @@ export class NodeResolver {
 	}
 
 	@Query(returns => [Node])
-	get_nodes(@Ctx() { db }: Context) {
+	getNodes(@Ctx() { db }: Context) {
 		return db.selectFrom('node').selectAll().orderBy('order', 'asc').execute()
 	}
 
 	@Mutation(returns => Node)
-	async insert_node(
+	async insertNode(
 		@Arg('data', () => InsertNode) data: InsertNode,
 		@Ctx() { db, pubSub }: Context
 	): Promise<Node> {
@@ -122,7 +122,7 @@ export class NodeResolver {
 	}
 
 	@Mutation(returns => Boolean)
-	async update_node(
+	async updateNode(
 		@Arg('data', () => ChangeNodeInput) data: ChangeNodeInput,
 		@Ctx() { db, pubSub }: Context
 	): Promise<boolean> {
@@ -137,7 +137,7 @@ export class NodeResolver {
 	}
 
 	@Mutation(returns => Boolean)
-	async delete_node_by_id(
+	async deleteNodeById(
 		@Arg('id', () => Int) id: number,
 		@Arg('parent_id', () => Int) parent_id: number | undefined,
 		@Arg('order', () => Int) order: number,
