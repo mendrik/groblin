@@ -1,25 +1,21 @@
-import { lightYellow, yellow } from 'ansicolor'
+import { blue, green, lightYellow, yellow } from 'ansicolor'
 import type { Context } from 'src/context.ts'
 import type { MiddlewareInterface, NextFn, ResolverData } from 'type-graphql'
 
 const Content = /\s+\{(.|\n)*$/gim
 
 export class LogAccess implements MiddlewareInterface<Context> {
-	async use({ context, args }: ResolverData<Context>, next: NextFn) {
+	async use(
+		{ context, args, info, root }: ResolverData<Context>,
+		next: NextFn
+	) {
 		const username: string = context.user?.name || 'guest'
 		const { document, variableValues } = args
-
+		console.log(
+			`${yellow(`Gql:`)} ${green(username)} ${blue(info.path.typename)} ${lightYellow(info.path.key)}`
+		)
 		if (variableValues) {
-			console.log(
-				yellow(`Gql: ${username} -> `) +
-					lightYellow(document.loc?.source.body.replace(Content, '').trim()),
-				variableValues
-			)
-		} else {
-			console.log(
-				yellow(`Gql: ${username} -> `) +
-					lightYellow(document.loc?.source.body.replace(Content, '').trim())
-			)
+			console.log(variableValues)
 		}
 		return next()
 	}
