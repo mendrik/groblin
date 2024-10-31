@@ -11,32 +11,27 @@ import { nonEmptyString } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { stopPropagation } from '@/lib/dom-events'
 import { setSignal } from '@/lib/utils'
-import { register } from '@/state/user'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import type { Fn } from '@tp/functions.ts'
-import { omit } from 'ramda'
-import { Link } from 'react-router-dom'
+import { pipe } from 'ramda'
 import { toast } from 'sonner'
 import { type TypeOf, strictObject } from 'zod'
 
-const registrationSchema = strictObject({
-	name: nonEmptyString('Name', EditorType.Input).default('Andreas Herd'),
-	email: nonEmptyString('Email', EditorType.Email).default(
-		'mendrik76@gmail.com'
-	),
-	password: nonEmptyString('Password', EditorType.Password).default('bla'),
+const resetPasswordSchema = strictObject({
+	password: nonEmptyString('Password', EditorType.Password, 'new-password'),
 	repeatPassword: nonEmptyString(
 		'Repeat password',
-		EditorType.Password
-	).default('bla')
+		EditorType.Password,
+		'new-password'
+	)
 }).refine(data => data.password === data.repeatPassword, {
 	message: 'Passwords must match',
 	path: ['repeatPassword']
 })
 
-export type RegistrationForm = TypeOf<typeof registrationSchema>
+type ResetPassword = TypeOf<typeof resetPasswordSchema>
 
 const $locked = signal(false)
 const lockForm = () => setSignal($locked, true)
@@ -47,54 +42,34 @@ const success = () =>
 		closeButton: true
 	})
 
-const failed = (e: Error) =>
-	toast.error('Failed to register', {
-		description: e.message,
-		closeButton: true
-	})
-
-const registerCommand: Fn<RegistrationForm, unknown> = pipeAsync(
-	omit(['repeatPassword']),
-	register,
-	success,
-	lockForm
+const resetPasswordCommand: Fn<Partial<ResetPassword>, void> = pipeAsync(
+	console.log
 )
 
-export const RegistrationDialog = () => {
+export const PasswordResetDialog = () => {
 	return (
 		<Dialog open={true}>
 			<DialogContent
-				closeButton={false}
 				className="max-w-sm"
 				onEscapeKeyDown={close}
 				onKeyDown={stopPropagation}
 				onInteractOutside={close}
 			>
 				<DialogHeader>
-					<DialogTitle>Register an account</DialogTitle>
+					<DialogTitle>Reset your password</DialogTitle>
 					<DialogDescription>
-						Sign up to Groblin and create your first project.
+						Please enter your new password and repeat it in the field below.
 					</DialogDescription>
 				</DialogHeader>
 				<ZodForm
-					schema={registrationSchema}
-					onSubmit={registerCommand}
-					onError={failed}
-					disabled={$locked.value}
+					schema={resetPasswordSchema}
+					onSubmit={pipe(resetPasswordCommand)}
+					onError={console.error}
 				>
 					<DialogFooter className="gap-2 flex flex-row items-center">
-						<div className="mr-auto">
-							Back to{' '}
-							<Link to="/" className="text-link">
-								login
-							</Link>{' '}
-							or forgot your{' '}
-							<Link to="/password" className="text-link">
-								password
-							</Link>
-							?
-						</div>
-						<Button type="submit">Send email</Button>
+						<Button type="submit" className="ml-auto">
+							Reset password
+						</Button>
 					</DialogFooter>
 				</ZodForm>
 			</DialogContent>

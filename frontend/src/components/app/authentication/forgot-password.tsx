@@ -10,7 +10,6 @@ import {
 import { nonEmptyString } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { stopPropagation } from '@/lib/dom-events'
-import {} from '@/lib/match'
 import { EditorType } from '@shared/enums'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import type { Fn } from '@tp/functions.ts'
@@ -47,6 +46,7 @@ export const ForgotPasswordDialog = () => {
 				<ZodForm
 					schema={forgotPasswordSchema}
 					onSubmit={pipe(forgotPasswordCommand)}
+					onError={console.error}
 				>
 					<DialogFooter className="gap-2 flex flex-row items-center">
 						<div className="mr-auto">

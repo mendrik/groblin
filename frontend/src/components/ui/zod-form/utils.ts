@@ -76,8 +76,12 @@ export type RendererProps<
 	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
 > = Parameters<ControllerProps<TFieldValues, TName>['render']>[0]
 
-export const nonEmptyString = (label: string, editor: EditorType) =>
+export const nonEmptyString = (
+	label: string,
+	editor: EditorType,
+	autofill?: string
+) =>
 	string()
 		.refine(pipe(trim, isNotEmpty), { message: `${label} is required` })
-		.describe(asField({ label, editor }))
+		.describe(asField({ label, editor, autofill }))
 		.default('')

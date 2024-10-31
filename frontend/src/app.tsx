@@ -11,7 +11,6 @@ import {
 import { ScrollArea } from './components/ui/scroll-area'
 import { setSignal } from './lib/utils'
 import { $panelSizes } from './state/panels'
-import {} from './state/tree'
 
 export function App() {
 	return (
