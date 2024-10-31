@@ -249,7 +249,7 @@ export const insertNode = (data: InsertNode): Promise<number> => {
 	return query(InsertNodeDocument, {
 		data
 	})
-		.then(x => x.insert_node.id)
+		.then(x => x.insertNode.id)
 		.then(failOnNil('Failed to insert node'))
 }
 
