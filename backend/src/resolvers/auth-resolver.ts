@@ -1,7 +1,7 @@
 import { type BinaryLike, scrypt } from 'node:crypto'
 import { evolveAlt } from '@shared/utils/evolve-alt.ts'
 import { resolveObj } from '@shared/utils/resolve-obj.ts'
-import { pipe } from 'ramda'
+import { F, pipe } from 'ramda'
 import type { Context } from 'src/context.ts'
 import { Topic } from 'src/pubsub.ts'
 import { Arg, Ctx, Field, InputType, Mutation, Resolver } from 'type-graphql'
@@ -71,7 +71,7 @@ export class AuthResolver {
 		const regToUser = pipe(
 			evolveAlt({
 				password: hashPassword,
-				confirmed: () => 0
+				confirmed: F
 			}),
 			resolveObj
 		)

@@ -3,20 +3,19 @@
 	"version": "0.1.0",
 	"type": "module",
 	"scripts": {
-		"types:db": "tsx ./src/database/generate.ts",
+		"types:db": "kysely-codegen --out-file src/database/schema.ts --dialect postgres",
 		"types:gql": "tsx src/schema.ts",
 		"schema": "pnpm types:db && pnpm types:gql",
 		"server": "tsx watch --include src src/server.ts",
 		"test": "tsx --test test/**/*.ts"
 	},
 	"devDependencies": {
-		"@types/better-sqlite3": "^7.6.11",
 		"@types/graphql": "^14.5.0",
-		"@types/node": "22.8.4",
+		"@types/node": "22.8.5",
+		"@types/pg": "^8.11.10",
 		"@types/ws": "8.5.12",
 		"ansicolor": "^2.0.3",
-		"kysely-codegen": "^0.17.0",
-		"kysely-migrate": "^0.0.16"
+		"kysely-codegen": "^0.17.0"
 	},
 	"dependencies": {
 		"@graphql-tools/schema": "^10.0.7",
@@ -29,6 +28,7 @@
 		"graphql-yoga": "^5.7.0",
 		"jsonwebtoken": "^9.0.2",
 		"kysely": "^0.27.4",
+		"pg": "^8.13.1",
 		"prisma": "^5.21.1",
 		"reflect-metadata": "^0.2.2",
 		"type-graphql": "2.0.0-rc.2",
