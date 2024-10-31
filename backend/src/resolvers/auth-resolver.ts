@@ -1,11 +1,14 @@
 import 'dotenv/config'
 import { type BinaryLike, scrypt } from 'node:crypto'
+import { assertThat } from '@shared/asserts.ts'
 import { evolveAlt } from '@shared/utils/evolve-alt.ts'
 import { resolveObj } from '@shared/utils/resolve-obj.ts'
 import jwt from 'jsonwebtoken'
+import type { Kysely } from 'kysely'
 import ms from 'ms'
-import { F, pipe } from 'ramda'
+import { F, equals, isNil, isNotNil, pipe } from 'ramda'
 import type { Context } from 'src/context.ts'
+import type { DB } from 'src/database/schema.ts'
 import { Topic } from 'src/pubsub.ts'
 import {
 	Arg,
@@ -90,6 +93,13 @@ export class Login {
 const hashPassword = (password: string): Promise<string> =>
 	crypt(password, 'salt', 64)
 
+const userByEmail = (db: Kysely<DB>, email: string) =>
+	db
+		.selectFrom('user')
+		.selectAll()
+		.where('email', '=', email)
+		.executeTakeFirst()
+
 @Resolver()
 export class AuthResolver {
 	@Mutation(returns => Boolean)
@@ -97,15 +107,8 @@ export class AuthResolver {
 		@Arg('data', () => Registration) data: Registration,
 		@Ctx() { db, pubSub }: Context
 	) {
-		const existingUser = await db
-			.selectFrom('user')
-			.selectAll()
-			.where('email', '=', data.email)
-			.executeTakeFirst()
-
-		if (existingUser) {
-			throw new Error('User already exists')
-		}
+		const existingUser = await userByEmail(db, data.email)
+		assertThat(isNil, existingUser, 'User already exists')
 
 		const regToUser = pipe(
 			evolveAlt({
@@ -123,25 +126,11 @@ export class AuthResolver {
 
 	@Mutation(returns => Token)
 	async login(@Arg('data', () => Login) data: Login, @Ctx() ctx: Context) {
-		const user = await ctx.db
-			.selectFrom('user')
-			.selectAll()
-			.where('email', '=', data.email)
-			.executeTakeFirst()
-
-		if (!user) {
-			throw new Error('User not found')
-		}
-
+		const user = await userByEmail(ctx.db, data.email)
 		const hashedPassword = await hashPassword(data.password)
-
-		if (user.password !== hashedPassword) {
-			throw new Error('Invalid password')
-		}
-
-		if (jwtSecret === undefined) {
-			throw new Error('JWT_SECRET must be defined')
-		}
+		assertThat(isNotNil, user, 'User not found')
+		assertThat(equals(user.password), hashedPassword, 'Invalid password')
+		assertThat(isNotNil, jwtSecret, 'JWT_SECRET must be defined')
 
 		const expiresIn = data.rememberMe ? '60 days' : '24h'
 		const loggedInUser = {
@@ -150,10 +139,11 @@ export class AuthResolver {
 			email: user.email
 		} satisfies LoggedInUser
 		ctx.extra = loggedInUser
-		const token = jwt.sign(loggedInUser, jwtSecret, { expiresIn })
-		const expiresDate = new Date(Date.now() + ms(expiresIn))
 
-		return { token, expiresDate }
+		return {
+			token: jwt.sign(loggedInUser, jwtSecret, { expiresIn }),
+			expiresDate: new Date(Date.now() + ms(expiresIn))
+		}
 	}
 
 	@Query(returns => LoggedInUser, { nullable: true })
@@ -167,19 +157,5 @@ export class AuthResolver {
 		return true
 	}
 
-	/*
-	@Mutation(returns => Boolean)
-	async forgotPassword(@Arg('data') data: ForgotPassword, @Ctx() ctx: Context) {
-		const { db } = ctx
-		const { email } = data
-
-		const user = await db.users.findFirst({
-			where: { email }
-		})
-
-		if (!user) {
-			throw new Error('User not found')
-		}
-	}
- */
+	// todo forgot password, reset password
 }

@@ -1,6 +1,6 @@
 import { caseOf, match } from '@/lib/match'
-import { assertExists } from '@/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { assertExists } from '@shared/asserts'
 import { equals as eq } from 'ramda'
 import {
 	type ForwardedRef,

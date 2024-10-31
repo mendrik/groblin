@@ -9,10 +9,12 @@ import {
 	UpdateNodeDocument
 } from '@/gql/graphql.ts'
 import { getItem, setItem } from '@/lib/local-storage'
-import { assertExists, failOnNil, setSignal } from '@/lib/utils'
+import { setSignal } from '@/lib/utils'
 import { waitForId } from '@/lib/wait-for-id'
 import { computed, signal } from '@preact/signals-react'
+import { assertExists } from '@shared/asserts'
 import { initial } from '@shared/utils/functions'
+import { failOn } from '@shared/utils/guards'
 import { type TreeOf, listToTree } from '@shared/utils/list-to-tree'
 import gql from 'graphql-tag'
 import { Maybe, MaybeAsync } from 'purify-ts'
@@ -22,6 +24,7 @@ import {
 	toString as asStr,
 	find,
 	head,
+	isNil,
 	isNotEmpty,
 	isNotNil,
 	last,
@@ -250,7 +253,7 @@ export const insertNode = (data: InsertNode): Promise<number> => {
 		data
 	})
 		.then(x => x.insertNode.id)
-		.then(failOnNil('Failed to insert node'))
+		.then(failOn(isNil, 'Failed to insert node'))
 }
 
 function* iterateNodes(root: TreeNode): Generator<TreeNode> {
