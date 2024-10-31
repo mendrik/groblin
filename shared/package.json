@@ -3,8 +3,14 @@
 	"version": "0.1.0",
 	"type": "module",
 	"scripts": {
-		"server": "tsx src/server.ts",
-		"test": "tsx --test src/**/*.test.ts",
+		"test": "vitest",
 		"schema": ""
+	},
+	"devDependencies": {
+		"tsx": "4.19.2",
+		"typescript": "5.6.3",
+		"vitest": "2.1.4",
+		"vite-plugin-checker": "^0.8.0",
+		"vite-tsconfig-paths": "^5.0.1"
 	}
 }

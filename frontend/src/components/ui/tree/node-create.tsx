@@ -8,9 +8,7 @@ import {
 } from '@/components/ui/dialog'
 import { NodeType } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
-import { evolveAlt } from '@/lib/evolve-alt'
 import { caseOf, match } from '@/lib/match'
-import { pipeAsync } from '@/lib/pipe-async'
 import { setSignal } from '@/lib/utils'
 import {
 	$root,
@@ -26,6 +24,8 @@ import {
 } from '@/state/tree'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
+import { evolveAlt } from '@shared/utils/evolve-alt'
+import { pipeAsync } from '@shared/utils/pipe-async'
 import { F, T, equals as eq, pipe } from 'ramda'
 import { useRef } from 'react'
 import { type TypeOf, nativeEnum, strictObject, string } from 'zod'
@@ -135,6 +135,7 @@ export const NodeCreate = () => {
 					schema={newNodeSchema}
 					columns={2}
 					onSubmit={pipe(createNodeCommand, close)}
+					onError={console.error}
 					ref={formApi}
 				>
 					<DialogFooter className="gap-y-2">

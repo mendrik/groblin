@@ -10,6 +10,6 @@
 			"@tp/*": ["../type-patches/*"]
 		}
 	},
-	"include": ["src", "../backend/src/resolvers/models"],
+	"include": ["src"],
 	"exclude": ["node_modules"]
 }

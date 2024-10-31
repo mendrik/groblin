@@ -1,7 +1,25 @@
-import {} from 'ramda'
+import { type BinaryLike, scrypt } from 'node:crypto'
+import { evolveAlt } from '@shared/utils/evolve-alt.ts'
+import { resolveObj } from '@shared/utils/resolve-obj.ts'
+import { pipe } from 'ramda'
 import type { Context } from 'src/context.ts'
 import { Topic } from 'src/pubsub.ts'
 import { Arg, Ctx, Field, InputType, Mutation, Resolver } from 'type-graphql'
+
+const crypt = (
+	password: BinaryLike,
+	salt: BinaryLike,
+	keylen: number
+): Promise<string> =>
+	new Promise((resolve, reject) => {
+		scrypt(password, salt, keylen, (err, derivedKey) => {
+			if (err) {
+				reject(err)
+			} else {
+				resolve(derivedKey.toString('hex'))
+			}
+		})
+	})
 
 @InputType()
 export class Registration {
@@ -30,6 +48,9 @@ export class Login {
 	password: string
 }
 
+const hashPassword = (password: string): Promise<string> =>
+	crypt(password, 'salt', 64)
+
 @Resolver()
 export class AuthResolver {
 	@Mutation(returns => Boolean)
@@ -47,13 +68,17 @@ export class AuthResolver {
 			throw new Error('User already exists')
 		}
 
-		const res = await db
-			.insertInto('user')
-			.values({
-				...data,
-				confirmed: 0
-			})
-			.execute()
+		const regToUser = pipe(
+			evolveAlt({
+				password: hashPassword,
+				confirmed: () => 0
+			}),
+			resolveObj
+		)
+
+		const user = await regToUser(data)
+
+		const res = await db.insertInto('user').values(user).execute()
 		pubSub.publish(Topic.UserRegistered, data)
 		return res.length > 0
 	}

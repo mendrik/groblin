@@ -6,9 +6,9 @@ import {
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { focusOn, preventDefault, stopPropagation } from '@/lib/dom-events'
-import { pipeTap } from '@/lib/ramda'
 import { updateSignal } from '@/lib/utils'
 import { $focusedNode, type TreeNode, startEditing } from '@/state/tree'
+import { pipeTap } from '@shared/utils/ramda'
 import {
 	IconCopyPlus,
 	IconCursorText,
