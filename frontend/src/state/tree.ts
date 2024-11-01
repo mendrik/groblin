@@ -13,7 +13,6 @@ import { computeSignal, setSignal } from '@/lib/utils'
 import { waitForId } from '@/lib/wait-for-id'
 import { computed, signal } from '@preact/signals-react'
 import { assertExists } from '@shared/asserts'
-import { initial } from '@shared/utils/functions'
 import { failOn } from '@shared/utils/guards'
 import { type TreeOf, listToTree } from '@shared/utils/list-to-tree'
 import gql from 'graphql-tag'
@@ -107,11 +106,8 @@ export const $parentNode = signal<number>()
 export const $editingNode = signal<number | undefined>()
 
 /** ---- subscriptions ---- **/
-subscribe(
-	NodesUpdatedDocument,
-	initial(() =>
-		query(GetNodesDocument).then(prop('getNodes'), setSignal($nodes))
-	)
+subscribe(NodesUpdatedDocument, () =>
+	query(GetNodesDocument).then(prop('getNodes')).then(setSignal($nodes))
 )
 
 $root.subscribe(
