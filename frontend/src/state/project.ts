@@ -4,6 +4,7 @@ import { setSignal } from '@/lib/utils'
 import { evolveAlt } from '@shared/utils/evolve-alt'
 import gql from 'graphql-tag'
 import { isNotNil, prop, when } from 'ramda'
+import { $tags } from './tag'
 import { $nodes } from './tree'
 import { $user } from './user'
 
@@ -13,6 +14,11 @@ gql`
 		nodes {
             ...Node
         }
+		tags {
+			id
+			name
+			parent_id	
+		}
     }
   }
 `
@@ -22,7 +28,8 @@ const loadProject = () =>
 		.then(prop('getProject'))
 		.then(
 			evolveAlt({
-				nodes: setSignal($nodes)
+				nodes: setSignal($nodes),
+				tags: setSignal($tags)
 			})
 		)
 

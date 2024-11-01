@@ -26,6 +26,12 @@ export type ChangeNodeInput = {
   type?: InputMaybe<NodeType>;
 };
 
+export type ChangeTagInput = {
+  id: Scalars['Int']['input'];
+  name: Scalars['String']['input'];
+  parent_id?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type InsertNode = {
   name: Scalars['String']['input'];
   order: Scalars['Int']['input'];
@@ -33,10 +39,16 @@ export type InsertNode = {
   type: NodeType;
 };
 
+export type InsertTag = {
+  name: Scalars['String']['input'];
+  parent_id?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type LoggedInUser = {
   __typename?: 'LoggedInUser';
   email: Scalars['String']['output'];
   id: Scalars['Int']['output'];
+  lastProjectId?: Maybe<Scalars['Int']['output']>;
   name: Scalars['String']['output'];
 };
 
@@ -49,11 +61,14 @@ export type Login = {
 export type Mutation = {
   __typename?: 'Mutation';
   deleteNodeById: Scalars['Boolean']['output'];
+  deleteTagById: Scalars['Boolean']['output'];
   insertNode: Node;
+  insertTag: Tag;
   login: Token;
   logout: Scalars['Boolean']['output'];
   register: Scalars['Boolean']['output'];
   updateNode: Scalars['Boolean']['output'];
+  updateTag: Scalars['Boolean']['output'];
 };
 
 
@@ -64,8 +79,18 @@ export type MutationDeleteNodeByIdArgs = {
 };
 
 
+export type MutationDeleteTagByIdArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
 export type MutationInsertNodeArgs = {
   data: InsertNode;
+};
+
+
+export type MutationInsertTagArgs = {
+  data: InsertTag;
 };
 
 
@@ -81,6 +106,11 @@ export type MutationRegisterArgs = {
 
 export type MutationUpdateNodeArgs = {
   data: ChangeNodeInput;
+};
+
+
+export type MutationUpdateTagArgs = {
+  data: ChangeTagInput;
 };
 
 export type Node = {
@@ -105,12 +135,14 @@ export enum NodeType {
 export type Project = {
   __typename?: 'Project';
   nodes: Array<Node>;
+  tags: Array<Tag>;
 };
 
 export type Query = {
   __typename?: 'Query';
   getNodes: Array<Node>;
   getProject: Project;
+  getTags: Array<Tag>;
   whoami?: Maybe<LoggedInUser>;
 };
 
@@ -123,6 +155,14 @@ export type Registration = {
 export type Subscription = {
   __typename?: 'Subscription';
   nodesUpdated: Scalars['Boolean']['output'];
+  tagsUpdated: Scalars['Boolean']['output'];
+};
+
+export type Tag = {
+  __typename?: 'Tag';
+  id: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
+  parent_id?: Maybe<Scalars['Int']['output']>;
 };
 
 export type Token = {
@@ -137,7 +177,38 @@ export type GetProjectQueryVariables = Exact<{ [key: string]: never; }>;
 export type GetProjectQuery = { __typename?: 'Query', getProject: { __typename?: 'Project', nodes: Array<(
       { __typename?: 'Node' }
       & { ' $fragmentRefs'?: { 'NodeFragment': NodeFragment } }
-    )> } };
+    )>, tags: Array<{ __typename?: 'Tag', id: number, name: string, parent_id?: number | null }> } };
+
+export type TagsUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type TagsUpdatedSubscription = { __typename?: 'Subscription', tagsUpdated: boolean };
+
+export type GetTagsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetTagsQuery = { __typename?: 'Query', getTags: Array<{ __typename?: 'Tag', id: number, parent_id?: number | null, name: string }> };
+
+export type InsertTagMutationVariables = Exact<{
+  data: InsertTag;
+}>;
+
+
+export type InsertTagMutation = { __typename?: 'Mutation', insertTag: { __typename?: 'Tag', id: number } };
+
+export type UpdateTagMutationVariables = Exact<{
+  data: ChangeTagInput;
+}>;
+
+
+export type UpdateTagMutation = { __typename?: 'Mutation', updateTag: boolean };
+
+export type DeleteTagByIdMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteTagByIdMutation = { __typename?: 'Mutation', deleteTagById: boolean };
 
 export type NodeFragment = { __typename?: 'Node', id: number, name: string, order: number, type: NodeType, parent_id?: number | null } & { ' $fragmentName'?: 'NodeFragment' };
 
@@ -230,6 +301,11 @@ export const GetProjectDocument = new TypedDocumentString(`
     nodes {
       ...Node
     }
+    tags {
+      id
+      name
+      parent_id
+    }
   }
 }
     fragment Node on Node {
@@ -239,6 +315,37 @@ export const GetProjectDocument = new TypedDocumentString(`
   type
   parent_id
 }`) as unknown as TypedDocumentString<GetProjectQuery, GetProjectQueryVariables>;
+export const TagsUpdatedDocument = new TypedDocumentString(`
+    subscription TagsUpdated {
+  tagsUpdated
+}
+    `) as unknown as TypedDocumentString<TagsUpdatedSubscription, TagsUpdatedSubscriptionVariables>;
+export const GetTagsDocument = new TypedDocumentString(`
+    query GetTags {
+  getTags {
+    id
+    parent_id
+    name
+  }
+}
+    `) as unknown as TypedDocumentString<GetTagsQuery, GetTagsQueryVariables>;
+export const InsertTagDocument = new TypedDocumentString(`
+    mutation InsertTag($data: InsertTag!) {
+  insertTag(data: $data) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<InsertTagMutation, InsertTagMutationVariables>;
+export const UpdateTagDocument = new TypedDocumentString(`
+    mutation UpdateTag($data: ChangeTagInput!) {
+  updateTag(data: $data)
+}
+    `) as unknown as TypedDocumentString<UpdateTagMutation, UpdateTagMutationVariables>;
+export const DeleteTagByIdDocument = new TypedDocumentString(`
+    mutation DeleteTagById($id: Int!) {
+  deleteTagById(id: $id)
+}
+    `) as unknown as TypedDocumentString<DeleteTagByIdMutation, DeleteTagByIdMutationVariables>;
 export const NodesUpdatedDocument = new TypedDocumentString(`
     subscription NodesUpdated {
   nodesUpdated

@@ -2,15 +2,16 @@ import { type BinaryLike, scrypt } from 'node:crypto'
 import { assertThat } from '@shared/asserts.ts'
 import { evolveAlt } from '@shared/utils/evolve-alt.ts'
 import { resolveObj } from '@shared/utils/resolve-obj.ts'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 import jwt from 'jsonwebtoken'
 import type { Kysely } from 'kysely'
 import ms from 'ms'
-import { F, equals, isNil, isNotNil, pipe } from 'ramda'
+import { F, equals, isNil, isNotNil, pipe, prop, when } from 'ramda'
 import type { Context } from 'src/context.ts'
 import type { DB } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import { Topic } from 'src/pubsub.ts'
+import { ProjectService } from 'src/services/project-service.ts'
 import {
 	Arg,
 	Ctx,
@@ -72,6 +73,9 @@ export class LoggedInUser {
 
 	@Field(type => String)
 	email: string
+
+	@Field(type => Int, { nullable: true })
+	lastProjectId?: number
 }
 
 @InputType()
@@ -106,6 +110,9 @@ const userByEmail = (db: Kysely<DB>, email: string) =>
 @UseMiddleware(LogAccess)
 @Resolver()
 export class AuthResolver {
+	@inject(ProjectService)
+	private readonly projectService: ProjectService
+
 	@Mutation(returns => Boolean)
 	async register(
 		@Arg('data', () => Registration) data: Registration,
@@ -137,12 +144,20 @@ export class AuthResolver {
 		assertThat(isNotNil, jwtSecret, 'JWT_SECRET must be defined')
 
 		const expiresIn = data.rememberMe ? '60 days' : '24h'
-		const loggedInUser = {
-			id: user.id,
-			name: user.name,
-			email: user.email
-		} satisfies LoggedInUser
-		ctx.extra = loggedInUser
+		const init = (): Promise<number> =>
+			this.projectService.initializeProject(user, ctx)
+
+		const loggedInUser = pipe(
+			evolveAlt({
+				id: prop('id'),
+				email: prop('email'),
+				name: prop('name'),
+				lastProjectId: pipe(prop('lastProjectId'), when(isNil, init))
+			}),
+			resolveObj
+		)
+
+		ctx.extra = (await loggedInUser(user)) as LoggedInUser // todo fix this cast
 
 		return {
 			token: jwt.sign(loggedInUser, jwtSecret, { expiresIn }),

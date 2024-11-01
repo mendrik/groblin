@@ -1,3 +1,4 @@
+import { assertExists } from '@shared/asserts.ts'
 import { NodeType, Role } from '@shared/enums.ts'
 import { failOn } from '@shared/utils/guards.ts'
 import { injectable } from 'inversify'
@@ -114,9 +115,7 @@ export class NodeResolver {
 				.returning('id as id')
 				.executeTakeFirst()
 		})
-		if (!res?.id) {
-			throw new Error('Failed to insert node')
-		}
+		assertExists(res?.id, 'Failed to insert node')
 		pubSub.publish(Topic.NodesUpdated, true)
 		return await this.getNode(db, res.id)
 	}

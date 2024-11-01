@@ -12,11 +12,15 @@ import {
 	UseMiddleware
 } from 'type-graphql'
 import { Node, NodeResolver } from './node-resolver.ts'
+import { Tag, TagResolver } from './tag-resolver.ts'
 
 @ObjectType()
 export class Project {
 	@Field(type => [Node])
 	nodes: Node[]
+
+	@Field(type => [Tag])
+	tags: Tag[]
 }
 
 @injectable()
@@ -27,11 +31,16 @@ export class ProjectResolver {
 	@inject(NodeResolver)
 	private readonly nodeResolver: NodeResolver
 
+	@inject(TagResolver)
+	private readonly tagResolver: TagResolver
+
 	@Query(returns => Project)
 	async getProject(@Ctx() ctx: Context) {
 		const nodes = await this.nodeResolver.getNodes(ctx)
+		const tags = await this.tagResolver.getTags(ctx)
 		return {
-			nodes
+			nodes,
+			tags
 		}
 	}
 }

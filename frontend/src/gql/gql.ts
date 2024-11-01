@@ -15,7 +15,12 @@ import * as types from './graphql';
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 const documents = {
-    "\n  query GetProject {\n    getProject {\n\t\tnodes {\n            ...Node\n        }\n    }\n  }\n": types.GetProjectDocument,
+    "\n  query GetProject {\n    getProject {\n\t\tnodes {\n            ...Node\n        }\n\t\ttags {\n\t\t\tid\n\t\t\tname\n\t\t\tparent_id\t\n\t\t}\n    }\n  }\n": types.GetProjectDocument,
+    "\n  subscription TagsUpdated {\n\ttagsUpdated\n  }\n": types.TagsUpdatedDocument,
+    "\n  query GetTags {\n    getTags {\n\t\tid\n        parent_id\n        name\n    }\n  }\n": types.GetTagsDocument,
+    "\n  mutation InsertTag($data: InsertTag!) {\n    insertTag(data: $data) {\n\t\tid\n\t}\n  }\n": types.InsertTagDocument,
+    "\n  mutation UpdateTag($data: ChangeTagInput!) {\n    updateTag(data: $data)\n  }\n": types.UpdateTagDocument,
+    "\n  mutation DeleteTagById($id: Int!) {\n    deleteTagById(id: $id)\n  }\n": types.DeleteTagByIdDocument,
     "\n  fragment Node on Node {\n\tid\n\tname\n\torder\n\ttype\n\tparent_id\n  }\n": types.NodeFragmentDoc,
     "\n  subscription NodesUpdated {\n\tnodesUpdated\n  }\n": types.NodesUpdatedDocument,
     "\n  query GetNodes {\n    getNodes {\n\t\t...Node\n    }\n  }\n": types.GetNodesDocument,
@@ -31,7 +36,27 @@ const documents = {
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query GetProject {\n    getProject {\n\t\tnodes {\n            ...Node\n        }\n    }\n  }\n"): typeof import('./graphql').GetProjectDocument;
+export function graphql(source: "\n  query GetProject {\n    getProject {\n\t\tnodes {\n            ...Node\n        }\n\t\ttags {\n\t\t\tid\n\t\t\tname\n\t\t\tparent_id\t\n\t\t}\n    }\n  }\n"): typeof import('./graphql').GetProjectDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  subscription TagsUpdated {\n\ttagsUpdated\n  }\n"): typeof import('./graphql').TagsUpdatedDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query GetTags {\n    getTags {\n\t\tid\n        parent_id\n        name\n    }\n  }\n"): typeof import('./graphql').GetTagsDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation InsertTag($data: InsertTag!) {\n    insertTag(data: $data) {\n\t\tid\n\t}\n  }\n"): typeof import('./graphql').InsertTagDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation UpdateTag($data: ChangeTagInput!) {\n    updateTag(data: $data)\n  }\n"): typeof import('./graphql').UpdateTagDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation DeleteTagById($id: Int!) {\n    deleteTagById(id: $id)\n  }\n"): typeof import('./graphql').DeleteTagByIdDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

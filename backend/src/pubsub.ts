@@ -4,7 +4,8 @@ import type { PubSub } from 'type-graphql'
 
 export enum Topic {
 	UserRegistered = 'userRegistered',
-	NodesUpdated = 'nodesUpdated'
+	NodesUpdated = 'nodesUpdated',
+	TagsUpdated = 'tagsUpdated'
 }
 
 class LoggingPubSub implements PubSub {

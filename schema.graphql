@@ -1,6 +1,7 @@
 type Query {
   whoami: LoggedInUser
   getNodes: [Node!]!
+  getTags: [Tag!]!
   getProject: Project!
 }
 
@@ -8,6 +9,7 @@ type LoggedInUser {
   id: Int!
   name: String!
   email: String!
+  lastProjectId: Int
 }
 
 type Node {
@@ -28,8 +30,15 @@ enum NodeType {
   schema
 }
 
+type Tag {
+  id: Int!
+  name: String!
+  parent_id: Int
+}
+
 type Project {
   nodes: [Node!]!
+  tags: [Tag!]!
 }
 
 type Mutation {
@@ -39,6 +48,9 @@ type Mutation {
   insertNode(data: InsertNode!): Node!
   updateNode(data: ChangeNodeInput!): Boolean!
   deleteNodeById(order: Int!, parent_id: Int!, id: Int!): Boolean!
+  insertTag(data: InsertTag!): Tag!
+  updateTag(data: ChangeTagInput!): Boolean!
+  deleteTagById(id: Int!): Boolean!
 }
 
 input Registration {
@@ -78,6 +90,18 @@ input ChangeNodeInput {
   parent_id: Int
 }
 
+input InsertTag {
+  name: String!
+  parent_id: Int
+}
+
+input ChangeTagInput {
+  id: Int!
+  name: String!
+  parent_id: Int
+}
+
 type Subscription {
   nodesUpdated: Boolean!
+  tagsUpdated: Boolean!
 }
