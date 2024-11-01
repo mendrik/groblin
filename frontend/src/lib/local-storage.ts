@@ -1,4 +1,4 @@
-import { tryCatch } from 'ramda'
+import { forEach, tryCatch } from 'ramda'
 
 export const setItem =
 	(key: string) =>
@@ -17,5 +17,6 @@ export const getItem = <T>(
 	return item ? safeParse(item) : initial
 }
 
-export const removeItems = (...keys: string[]) =>
-	keys.forEach(key => localStorage.removeItem(key))
+const removeItem = localStorage.removeItem.bind(localStorage)
+
+export const removeItems = forEach<string>(removeItem)
