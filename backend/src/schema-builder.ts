@@ -1,4 +1,5 @@
 import 'dotenv/config'
+import 'reflect-metadata'
 import { Container } from 'inversify'
 import { type NonEmptyArray, buildSchema } from 'type-graphql'
 import { authChecker } from './middleware/auth-checker.ts'

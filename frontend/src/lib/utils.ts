@@ -1,4 +1,8 @@
-import type { Signal } from '@preact/signals-react'
+import {
+	type ReadonlySignal,
+	type Signal,
+	computed
+} from '@preact/signals-react'
 import type { Fn } from '@tp/functions'
 import { type ClassValue, clsx } from 'clsx'
 import { curry } from 'purify-ts'
@@ -16,3 +20,8 @@ export const setSignal = curry(<T>(signal: Signal<T>, value: T): T => {
 export const updateSignal = curry(<T>(signal: Signal<T>, fn: Fn<T, T>) => {
 	signal.value = fn(signal.value)
 })
+
+export const computeSignal = <T, R>(
+	signal: Signal<T>,
+	fn: (v: T) => R
+): ReadonlySignal<R> => computed(() => fn(signal.value))

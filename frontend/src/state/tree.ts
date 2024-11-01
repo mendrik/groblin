@@ -9,7 +9,7 @@ import {
 	UpdateNodeDocument
 } from '@/gql/graphql.ts'
 import { getItem, setItem } from '@/lib/local-storage'
-import { setSignal } from '@/lib/utils'
+import { computeSignal, setSignal } from '@/lib/utils'
 import { waitForId } from '@/lib/wait-for-id'
 import { computed, signal } from '@preact/signals-react'
 import { assertExists } from '@shared/asserts'
@@ -35,9 +35,17 @@ import {
 	prop,
 	when
 } from 'ramda'
-import { $user } from './user'
 
 /** ---- queries ---- **/
+gql`
+  fragment Node on Node {
+	id
+	name
+	order
+	type
+	parent_id
+  }
+`
 gql`
   subscription NodesUpdated {
 	nodesUpdated
@@ -47,11 +55,7 @@ gql`
 gql`
   query GetNodes {
     getNodes {
-		id
-		name
-		order
-		type
-		parent_id
+		...Node
     }
   }
 `
@@ -87,7 +91,11 @@ type NodeState = {
 }
 
 /** ---- state ---- **/
-export const $root = signal<TreeNode>()
+export const $nodes = signal<Node[]>([])
+export const $root = computeSignal(
+	$nodes,
+	listToTree('id', 'parent_id', 'nodes')
+)
 export const $nodeStates = signal<Record<string, NodeState>>(
 	getItem('tree-state', {})
 )
@@ -99,24 +107,16 @@ export const $parentNode = signal<number>()
 export const $editingNode = signal<number | undefined>()
 
 /** ---- subscriptions ---- **/
-const loadNodes = () =>
-	subscribe(
-		NodesUpdatedDocument,
-		initial(() =>
-			query(GetNodesDocument).then(
-				pipe(
-					prop('getNodes'),
-					listToTree('id', 'parent_id', 'nodes'),
-					setSignal($root)
-				)
-			)
-		)
+subscribe(
+	NodesUpdatedDocument,
+	initial(() =>
+		query(GetNodesDocument).then(prop('getNodes'), setSignal($nodes))
 	)
+)
 
 $root.subscribe(
 	when(isNotNil, node => updateNodeState({ open: true })(node.id))
 )
-$user.subscribe(when(isNotNil, loadNodes))
 $nodeStates.subscribe(setItem('tree-state'))
 
 /** ---- interfaces ---- **/

@@ -1,6 +1,7 @@
 type Query {
   whoami: LoggedInUser
   getNodes: [Node!]!
+  getProject: Project!
 }
 
 type LoggedInUser {
@@ -25,6 +26,10 @@ enum NodeType {
   list
   date
   schema
+}
+
+type Project {
+  nodes: [Node!]!
 }
 
 type Mutation {

@@ -8,6 +8,7 @@ import { Toaster } from './components/ui/sonner'
 import { LoggedIn } from './routing/logged-in'
 import { LoggedOut } from './routing/logged-out'
 import { $user, whoAmI } from './state/user'
+import './state/project'
 
 const Main = () => (
 	<StrictMode>

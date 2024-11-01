@@ -15,8 +15,10 @@ import * as types from './graphql';
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 const documents = {
+    "\n  query GetProject {\n    getProject {\n\t\tnodes {\n            ...Node\n        }\n    }\n  }\n": types.GetProjectDocument,
+    "\n  fragment Node on Node {\n\tid\n\tname\n\torder\n\ttype\n\tparent_id\n  }\n": types.NodeFragmentDoc,
     "\n  subscription NodesUpdated {\n\tnodesUpdated\n  }\n": types.NodesUpdatedDocument,
-    "\n  query GetNodes {\n    getNodes {\n\t\tid\n\t\tname\n\t\torder\n\t\ttype\n\t\tparent_id\n    }\n  }\n": types.GetNodesDocument,
+    "\n  query GetNodes {\n    getNodes {\n\t\t...Node\n    }\n  }\n": types.GetNodesDocument,
     "\n  mutation InsertNode($data: InsertNode!) {\n    insertNode(data: $data) {\n\t\tid\n\t}\n  }\n": types.InsertNodeDocument,
     "\n  mutation UpdateNode($data: ChangeNodeInput!) {\n    updateNode(data: $data)\n  }\n": types.UpdateNodeDocument,
     "\n  mutation DeleteNodeById($order: Int!, $parent_id: Int!, $id: Int!) {\n    deleteNodeById(order: $order, parent_id: $parent_id, id: $id)\n  }\n": types.DeleteNodeByIdDocument,
@@ -29,11 +31,19 @@ const documents = {
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n  query GetProject {\n    getProject {\n\t\tnodes {\n            ...Node\n        }\n    }\n  }\n"): typeof import('./graphql').GetProjectDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment Node on Node {\n\tid\n\tname\n\torder\n\ttype\n\tparent_id\n  }\n"): typeof import('./graphql').NodeFragmentDoc;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n  subscription NodesUpdated {\n\tnodesUpdated\n  }\n"): typeof import('./graphql').NodesUpdatedDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query GetNodes {\n    getNodes {\n\t\tid\n\t\tname\n\t\torder\n\t\ttype\n\t\tparent_id\n    }\n  }\n"): typeof import('./graphql').GetNodesDocument;
+export function graphql(source: "\n  query GetNodes {\n    getNodes {\n\t\t...Node\n    }\n  }\n"): typeof import('./graphql').GetNodesDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

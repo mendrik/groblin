@@ -11,7 +11,7 @@ import {
 	Resolver,
 	UseMiddleware
 } from 'type-graphql'
-import { Node, type NodeResolver } from './node-resolver.ts'
+import { Node, NodeResolver } from './node-resolver.ts'
 
 @ObjectType()
 export class Project {
@@ -24,11 +24,11 @@ export class Project {
 @Authorized(Role.Admin, Role.Viewer)
 @Resolver()
 export class ProjectResolver {
-	@inject('NodeResolver')
+	@inject(NodeResolver)
 	private readonly nodeResolver: NodeResolver
 
 	@Query(returns => Project)
-	async getNodes(@Ctx() ctx: Context) {
+	async getProject(@Ctx() ctx: Context) {
 		const nodes = await this.nodeResolver.getNodes(ctx)
 		return {
 			nodes

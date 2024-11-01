@@ -102,9 +102,15 @@ export enum NodeType {
   String = 'string'
 }
 
+export type Project = {
+  __typename?: 'Project';
+  nodes: Array<Node>;
+};
+
 export type Query = {
   __typename?: 'Query';
   getNodes: Array<Node>;
+  getProject: Project;
   whoami?: Maybe<LoggedInUser>;
 };
 
@@ -125,6 +131,16 @@ export type Token = {
   token: Scalars['String']['output'];
 };
 
+export type GetProjectQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetProjectQuery = { __typename?: 'Query', getProject: { __typename?: 'Project', nodes: Array<(
+      { __typename?: 'Node' }
+      & { ' $fragmentRefs'?: { 'NodeFragment': NodeFragment } }
+    )> } };
+
+export type NodeFragment = { __typename?: 'Node', id: number, name: string, order: number, type: NodeType, parent_id?: number | null } & { ' $fragmentName'?: 'NodeFragment' };
+
 export type NodesUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -133,7 +149,10 @@ export type NodesUpdatedSubscription = { __typename?: 'Subscription', nodesUpdat
 export type GetNodesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetNodesQuery = { __typename?: 'Query', getNodes: Array<{ __typename?: 'Node', id: number, name: string, order: number, type: NodeType, parent_id?: number | null }> };
+export type GetNodesQuery = { __typename?: 'Query', getNodes: Array<(
+    { __typename?: 'Node' }
+    & { ' $fragmentRefs'?: { 'NodeFragment': NodeFragment } }
+  )> };
 
 export type InsertNodeMutationVariables = Exact<{
   data: InsertNode;
@@ -196,7 +215,30 @@ export class TypedDocumentString<TResult, TVariables>
     return this.value;
   }
 }
-
+export const NodeFragmentDoc = new TypedDocumentString(`
+    fragment Node on Node {
+  id
+  name
+  order
+  type
+  parent_id
+}
+    `, {"fragmentName":"Node"}) as unknown as TypedDocumentString<NodeFragment, unknown>;
+export const GetProjectDocument = new TypedDocumentString(`
+    query GetProject {
+  getProject {
+    nodes {
+      ...Node
+    }
+  }
+}
+    fragment Node on Node {
+  id
+  name
+  order
+  type
+  parent_id
+}`) as unknown as TypedDocumentString<GetProjectQuery, GetProjectQueryVariables>;
 export const NodesUpdatedDocument = new TypedDocumentString(`
     subscription NodesUpdated {
   nodesUpdated
@@ -205,14 +247,16 @@ export const NodesUpdatedDocument = new TypedDocumentString(`
 export const GetNodesDocument = new TypedDocumentString(`
     query GetNodes {
   getNodes {
-    id
-    name
-    order
-    type
-    parent_id
+    ...Node
   }
 }
-    `) as unknown as TypedDocumentString<GetNodesQuery, GetNodesQueryVariables>;
+    fragment Node on Node {
+  id
+  name
+  order
+  type
+  parent_id
+}`) as unknown as TypedDocumentString<GetNodesQuery, GetNodesQueryVariables>;
 export const InsertNodeDocument = new TypedDocumentString(`
     mutation InsertNode($data: InsertNode!) {
   insertNode(data: $data) {
