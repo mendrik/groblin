@@ -1,14 +1,15 @@
-import 'dotenv/config'
 import { type BinaryLike, scrypt } from 'node:crypto'
 import { assertThat } from '@shared/asserts.ts'
 import { evolveAlt } from '@shared/utils/evolve-alt.ts'
 import { resolveObj } from '@shared/utils/resolve-obj.ts'
+import { injectable } from 'inversify'
 import jwt from 'jsonwebtoken'
 import type { Kysely } from 'kysely'
 import ms from 'ms'
 import { F, equals, isNil, isNotNil, pipe } from 'ramda'
 import type { Context } from 'src/context.ts'
 import type { DB } from 'src/database/schema.ts'
+import { LogAccess } from 'src/middleware/log-access.ts'
 import { Topic } from 'src/pubsub.ts'
 import {
 	Arg,
@@ -19,7 +20,8 @@ import {
 	Mutation,
 	ObjectType,
 	Query,
-	Resolver
+	Resolver,
+	UseMiddleware
 } from 'type-graphql'
 
 const jwtSecret = process.env.JWT_SECRET
@@ -100,6 +102,8 @@ const userByEmail = (db: Kysely<DB>, email: string) =>
 		.where('email', '=', email)
 		.executeTakeFirst()
 
+@injectable()
+@UseMiddleware(LogAccess)
 @Resolver()
 export class AuthResolver {
 	@Mutation(returns => Boolean)

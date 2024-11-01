@@ -4,6 +4,7 @@
 		"baseUrl": ".",
 		"target": "ESNext",
 		"module": "NodeNext",
+		"types": ["reflect-metadata"],
 		"moduleResolution": "NodeNext",
 		"lib": ["ESNext"],
 		"paths": {
@@ -11,6 +12,5 @@
 			"@tp/*": ["../type-patches/*"]
 		}
 	},
-	"exclude": ["node_modules", "src/database/generate.ts"],
 	"include": ["src", "../shared/src", "../type-patches"]
 }

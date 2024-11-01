@@ -25,7 +25,7 @@ export const NodeText = forwardRef<HTMLButtonElement, OwnProps>(
 				<Button
 					type="button"
 					variant="ghost"
-					className="node flex flex-row px-1 py-0 w-full items-center justify-start h-7 hover:bg-muted"
+					className="node flex flex-row px-1 py-0 w-full items-center justify-start h-7 hover:bg-muted focus-visible:z-10"
 					data-node_id={node.id}
 					id={`node-${node.id}`}
 					ref={ref}

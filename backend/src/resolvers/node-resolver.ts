@@ -1,5 +1,6 @@
 import { NodeType, Role } from '@shared/enums.ts'
 import { failOn } from '@shared/utils/guards.ts'
+import { injectable } from 'inversify'
 import { sql } from 'kysely'
 import { T, isNil } from 'ramda'
 import type { Context } from 'src/context.ts'
@@ -17,8 +18,13 @@ import {
 	Query,
 	Resolver,
 	Subscription,
-	UseMiddleware
+	UseMiddleware,
+	registerEnumType
 } from 'type-graphql'
+
+registerEnumType(NodeType, {
+	name: 'NodeType'
+})
 
 @ObjectType()
 export class Node {
@@ -71,6 +77,7 @@ export class ChangeNodeInput {
 	parent_id?: number
 }
 
+@injectable()
 @UseMiddleware(LogAccess)
 @Authorized(Role.Admin, Role.Viewer)
 @Resolver()

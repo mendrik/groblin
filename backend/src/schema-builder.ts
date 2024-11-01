@@ -1,23 +1,30 @@
 import 'dotenv/config'
-import 'reflect-metadata'
-import { basename } from 'node:path'
-import type { AnyFn } from '@tp/functions.ts'
-import { cyan, darkGray } from 'ansicolor'
-import fg from 'fast-glob'
-import { type NonEmptyArray, flatten, map, values } from 'ramda'
-import { allP } from 'ramda-adjunct'
-import { buildSchema } from 'type-graphql'
+import { Container } from 'inversify'
+import { type NonEmptyArray, buildSchema } from 'type-graphql'
 import { authChecker } from './middleware/auth-checker.ts'
+import { LogAccess } from './middleware/log-access.ts'
 import { pubSub } from './pubsub.ts'
+import {
+	AuthResolver,
+	NodeResolver,
+	ProjectResolver
+} from './resolvers/index.ts'
 
-const resolvers: NonEmptyArray<AnyFn> = await fg('./src/resolvers/**/*.ts')
-	.then(
-		map<string, any>(file => {
-			console.log(`${darkGray('Res:')} ${cyan(basename(file))}`)
-			return import(file.replace('./src/', 'src/')).then(values)
-		})
-	)
-	.then(allP)
-	.then<any>(flatten)
+const container = new Container()
+container.bind(NodeResolver).toSelf()
+container.bind(AuthResolver).toSelf()
+container.bind(ProjectResolver).toSelf()
+container.bind(LogAccess).toSelf()
 
-export const schema = await buildSchema({ resolvers, pubSub, authChecker })
+const resolvers: NonEmptyArray<Function> = [
+	AuthResolver,
+	ProjectResolver,
+	NodeResolver
+]
+
+export const schema = await buildSchema({
+	resolvers,
+	pubSub,
+	authChecker,
+	container
+})

@@ -1,13 +1,10 @@
 {
 	"compilerOptions": {
-		"allowJs": true,
-		"alwaysStrict": true,
 		"allowImportingTsExtensions": true,
 		"emitDecoratorMetadata": true,
 		"esModuleInterop": true,
 		"experimentalDecorators": true,
 		"forceConsistentCasingInFileNames": true,
-		"moduleDetection": "force",
 		"isolatedModules": true,
 		"inlineSourceMap": true,
 		"inlineSources": true,

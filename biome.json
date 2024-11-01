@@ -22,7 +22,8 @@
 			"recommended": true,
 			"complexity": {
 				"noForEach": "off",
-				"useArrowFunction": "error"
+				"useArrowFunction": "error",
+				"noBannedTypes": "off"
 			},
 			"suspicious": {
 				"noExplicitAny": "off",

@@ -1,5 +1,5 @@
-import 'dotenv/config'
 import 'reflect-metadata'
+import 'dotenv/config'
 import { makeExecutableSchema } from '@graphql-tools/schema'
 import { cyan, lightGreen } from 'ansicolor'
 import { execute, subscribe } from 'graphql'
