@@ -146,8 +146,6 @@ export class AuthResolver {
 		assertThat(isNotNil, jwtSecret, 'JWT_SECRET must be defined')
 
 		const expiresIn = data.rememberMe ? '60 days' : '24h'
-		console.log(ms(expiresIn))
-
 		const init = () => this.projectService.initializeProject(user, ctx)
 
 		const loggedInUser = await pipe(
@@ -158,8 +156,6 @@ export class AuthResolver {
 		)
 
 		ctx.extra = await loggedInUser(user)
-
-		console.log(ctx.extra)
 
 		return {
 			token: jwt.sign(ctx.extra, jwtSecret, { expiresIn: ms(expiresIn) }),
