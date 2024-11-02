@@ -70,6 +70,7 @@ export class TagResolver {
 	getTags(@Ctx() { db, extra: user }: Context) {
 		return db
 			.selectFrom('tag')
+			.selectAll()
 			.where('project_id', '=', user.lastProjectId)
 			.orderBy('id', 'asc')
 			.execute()

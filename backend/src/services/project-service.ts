@@ -31,6 +31,12 @@ export class ProjectService {
 				.executeTakeFirstOrThrow()
 
 			await trx
+				.updateTable('user')
+				.set({ last_project_id: project_id })
+				.where('id', '=', user.id)
+				.execute()
+
+			await trx
 				.insertInto('tag')
 				.values({
 					name: 'Default',
