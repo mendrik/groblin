@@ -140,13 +140,15 @@ export class AuthResolver {
 	async login(@Arg('data', () => Login) data: Login, @Ctx() ctx: Context) {
 		const user = await userByEmail(ctx.db, data.email)
 		const hashedPassword = await hashPassword(data.password)
+
 		assertThat(isNotNil, user, 'User not found')
 		assertThat(equals(user.password), hashedPassword, 'Invalid password')
 		assertThat(isNotNil, jwtSecret, 'JWT_SECRET must be defined')
 
 		const expiresIn = data.rememberMe ? '60 days' : '24h'
-		const init = async () =>
-			await this.projectService.initializeProject(user, ctx)
+		console.log(ms(expiresIn))
+
+		const init = () => this.projectService.initializeProject(user, ctx)
 
 		const loggedInUser = await pipe(
 			evolveAlt({
@@ -157,8 +159,10 @@ export class AuthResolver {
 
 		ctx.extra = await loggedInUser(user)
 
+		console.log(ctx.extra)
+
 		return {
-			token: jwt.sign(loggedInUser, jwtSecret, { expiresIn: ms(expiresIn) }),
+			token: jwt.sign(ctx.extra, jwtSecret, { expiresIn: ms(expiresIn) }),
 			expiresDate: new Date(Date.now() + ms(expiresIn))
 		}
 	}

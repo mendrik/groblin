@@ -53,7 +53,7 @@ gql`
 `
 
 export const $tags = signal<Tag[]>([])
-export const $tag = signal<string>('default')
+export const $tag = signal<Tag>()
 
 subscribe(TagsUpdatedDocument, () =>
 	query(GetTagsDocument).then(prop('getTags')).then(setSignal($tags))
