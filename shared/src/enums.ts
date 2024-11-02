@@ -10,6 +10,7 @@ export enum EditorType {
 }
 
 export enum NodeType {
+	root = 'Root',
 	object = 'Object',
 	string = 'String',
 	number = 'Number',

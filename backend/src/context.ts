@@ -8,12 +8,13 @@ import type { LoggedInUser } from './resolvers/auth-resolver.ts'
 export interface Context {
 	db: Kysely<DB>
 	pubSub: PubSub
-	extra?: LoggedInUser
+	extra: Required<LoggedInUser>
 }
 
 const context: Context = {
 	db,
-	pubSub
+	pubSub,
+	extra: undefined as any
 }
 
 export { context }

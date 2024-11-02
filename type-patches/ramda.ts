@@ -58,6 +58,10 @@ declare module 'ramda' {
 		a: T
 	): T | V
 
+	export function prop<O extends object, K extends keyof O>(
+		prop: K
+	): <O2 extends O, K2 extends K>(obj: O2) => O2[K2]
+
 	type OmitType<T, K extends keyof T> = Omit<T, K>
 
 	export function omit<T extends { [s: string]: any }, K extends keyof T>(

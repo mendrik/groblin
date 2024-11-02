@@ -1,4 +1,3 @@
-import { assertExists } from '@shared/asserts.ts'
 import { Role } from '@shared/enums.ts'
 import { failOn } from '@shared/utils/guards.ts'
 import { injectable } from 'inversify'
@@ -68,24 +67,30 @@ export class TagResolver {
 	}
 
 	@Query(returns => [Tag])
-	getTags(@Ctx() { db }: Context) {
-		return db.selectFrom('tag').selectAll().orderBy('id', 'asc').execute()
+	getTags(@Ctx() { db, extra: user }: Context) {
+		return db
+			.selectFrom('tag')
+			.where('project_id', '=', user.lastProjectId)
+			.orderBy('id', 'asc')
+			.execute()
 	}
 
 	@Mutation(returns => Tag)
 	async insertTag(
 		@Arg('data', () => InsertTag) data: InsertTag,
-		@Ctx() { db, pubSub }: Context
+		@Ctx() { db, pubSub, extra: user }: Context
 	): Promise<Tag> {
-		const res = await db
+		const { id } = await db
 			.insertInto('tag')
-			.values(data)
-			.returning('id as id')
-			.executeTakeFirst()
+			.values({
+				...data,
+				project_id: user.lastProjectId
+			})
+			.returning('id')
+			.executeTakeFirstOrThrow()
 
-		assertExists(res?.id, 'Failed to insert tag')
 		pubSub.publish(Topic.TagsUpdated, true)
-		return await this.getTag(db, res.id)
+		return await this.getTag(db, id)
 	}
 
 	async getTag(db: Context['db'], id: number): Promise<Tag> {
@@ -100,12 +105,13 @@ export class TagResolver {
 	@Mutation(returns => Boolean)
 	async updateTag(
 		@Arg('data', () => ChangeTagInput) data: ChangeTagInput,
-		@Ctx() { db, pubSub }: Context
+		@Ctx() { db, pubSub, extra: user }: Context
 	): Promise<boolean> {
 		const { numUpdatedRows = 0 } = await db
 			.updateTable('tag')
 			.set(data)
 			.where('id', '=', data.id)
+			.where('project_id', '=', user.lastProjectId)
 			.executeTakeFirst()
 		pubSub.publish(Topic.TagsUpdated, true)
 		return numUpdatedRows > 0 // Returns true if at least one row was updated
@@ -114,11 +120,12 @@ export class TagResolver {
 	@Mutation(returns => Boolean)
 	async deleteTagById(
 		@Arg('id', () => Int) id: number,
-		@Ctx() { db, pubSub }: Context
+		@Ctx() { db, pubSub, extra: user }: Context
 	): Promise<boolean> {
 		const { numDeletedRows } = await db
 			.deleteFrom('tag')
 			.where('id', '=', id)
+			.where('project_id', '=', user.lastProjectId)
 			.executeTakeFirst()
 		pubSub.publish(Topic.TagsUpdated, true)
 		return numDeletedRows > 0

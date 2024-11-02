@@ -14,17 +14,13 @@ export interface Node {
   name: string;
   order: number;
   parent_id: number | null;
+  project_id: number;
   type: string;
 }
 
 export interface Project {
   id: Generated<number>;
   name: string;
-}
-
-export interface ProjectNode {
-  node_id: number;
-  project_id: number;
 }
 
 export interface ProjectUser {
@@ -37,6 +33,7 @@ export interface Tag {
   id: Generated<number>;
   name: string;
   parent_id: number | null;
+  project_id: number;
 }
 
 export interface User {
@@ -51,7 +48,6 @@ export interface User {
 export interface DB {
   node: Node;
   project: Project;
-  project_node: ProjectNode;
   project_user: ProjectUser;
   tag: Tag;
   user: User;

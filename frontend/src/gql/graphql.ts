@@ -48,7 +48,7 @@ export type LoggedInUser = {
   __typename?: 'LoggedInUser';
   email: Scalars['String']['output'];
   id: Scalars['Int']['output'];
-  lastProjectId?: Maybe<Scalars['Int']['output']>;
+  lastProjectId: Scalars['Int']['output'];
   name: Scalars['String']['output'];
 };
 
@@ -128,6 +128,7 @@ export enum NodeType {
   List = 'list',
   Number = 'number',
   Object = 'object',
+  Root = 'root',
   Schema = 'schema',
   String = 'string'
 }

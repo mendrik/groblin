@@ -9,7 +9,7 @@ type LoggedInUser {
   id: Int!
   name: String!
   email: String!
-  lastProjectId: Int
+  lastProjectId: Int!
 }
 
 type Node {
@@ -21,6 +21,7 @@ type Node {
 }
 
 enum NodeType {
+  root
   object
   string
   number

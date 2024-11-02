@@ -1,4 +1,3 @@
-import { assertExists } from '@shared/asserts.ts'
 import { NodeType, Role } from '@shared/enums.ts'
 import { failOn } from '@shared/utils/guards.ts'
 import { injectable } from 'inversify'
@@ -92,16 +91,21 @@ export class NodeResolver {
 	}
 
 	@Query(returns => [Node])
-	getNodes(@Ctx() { db }: Context) {
-		return db.selectFrom('node').selectAll().orderBy('order', 'asc').execute()
+	getNodes(@Ctx() { db, extra: user }: Context) {
+		return db
+			.selectFrom('node')
+			.where('project_id', '=', user.lastProjectId)
+			.selectAll()
+			.orderBy('order', 'asc')
+			.execute()
 	}
 
 	@Mutation(returns => Node)
 	async insertNode(
 		@Arg('data', () => InsertNode) data: InsertNode,
-		@Ctx() { db, pubSub }: Context
+		@Ctx() { db, pubSub, extra: user }: Context
 	): Promise<Node> {
-		const res = await db.transaction().execute(async trx => {
+		const { id } = await db.transaction().execute(async trx => {
 			trx
 				.updateTable('node')
 				.where('order', '>=', data.order)
@@ -111,13 +115,15 @@ export class NodeResolver {
 
 			return trx
 				.insertInto('node')
-				.values(data) // Adjust this according to the structure of your node
-				.returning('id as id')
-				.executeTakeFirst()
+				.values({
+					...data,
+					project_id: user.lastProjectId
+				})
+				.returning('id')
+				.executeTakeFirstOrThrow()
 		})
-		assertExists(res?.id, 'Failed to insert node')
 		pubSub.publish(Topic.NodesUpdated, true)
-		return await this.getNode(db, res.id)
+		return await this.getNode(db, id)
 	}
 
 	async getNode(db: Context['db'], id: number): Promise<Node> {
@@ -132,12 +138,13 @@ export class NodeResolver {
 	@Mutation(returns => Boolean)
 	async updateNode(
 		@Arg('data', () => ChangeNodeInput) data: ChangeNodeInput,
-		@Ctx() { db, pubSub }: Context
+		@Ctx() { db, pubSub, extra: user }: Context
 	): Promise<boolean> {
 		const { numUpdatedRows = 0 } = await db
 			.updateTable('node')
 			.set(data)
 			.where('id', '=', data.id)
+			.where('project_id', '=', user.lastProjectId)
 			.executeTakeFirst()
 
 		pubSub.publish(Topic.NodesUpdated, true)
@@ -149,13 +156,14 @@ export class NodeResolver {
 		@Arg('id', () => Int) id: number,
 		@Arg('parent_id', () => Int) parent_id: number | undefined,
 		@Arg('order', () => Int) order: number,
-		@Ctx() { db, pubSub }: Context
+		@Ctx() { db, pubSub, extra: user }: Context
 	): Promise<boolean> {
 		const { numDeletedRows } = await db.transaction().execute(async trx => {
 			trx
 				.updateTable('node')
 				.where('order', '>', order)
 				.where('parent_id', '=', parent_id ?? null)
+				.where('project_id', '=', user.lastProjectId)
 				.set({ order: sql`"order" - 1` })
 				.execute()
 

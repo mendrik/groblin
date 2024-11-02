@@ -8,7 +8,7 @@ import {
 	type Registration,
 	WhoAmIDocument
 } from '@/gql/graphql'
-import { setItem } from '@/lib/local-storage'
+import { removeItems, setItem } from '@/lib/local-storage'
 import { setSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import { evolveAlt } from '@shared/utils/evolve-alt'
@@ -52,9 +52,17 @@ export const register = (data: Registration): Promise<boolean> =>
 	query(RegisterDocument, { data }).then(prop('register'))
 
 export const whoAmI = () =>
-	query(WhoAmIDocument).then(prop('whoami')).then(setSignal($user))
+	query(WhoAmIDocument)
+		.then(prop('whoami'))
+		.then(setSignal($user))
+		.catch(logoutClient)
 
 export const logout = () => query(LogoutDocument).then(whoAmI)
+
+export const logoutClient = () => {
+	removeItems(['token', 'tokenExpiresDate'])
+	setSignal($user, null)
+}
 
 export const login = (data: Login) =>
 	query(LoginDocument, { data })

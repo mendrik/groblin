@@ -30,7 +30,7 @@ export const query = async <D extends TypedDocumentString<any, any>>(
 				error: err => {
 					unsub()
 					console.error(err)
-					throw Object.assign(new Error(), err)
+					rej(Object.assign(new Error(), err))
 				},
 				complete: () => unsub()
 			}

@@ -7,8 +7,7 @@ import { inject, injectable } from 'inversify'
 import jwt from 'jsonwebtoken'
 import type { Kysely } from 'kysely'
 import ms from 'ms'
-import { F, equals, isNil, isNotNil, pipe, prop, unless } from 'ramda'
-import { isNumber } from 'ramda-adjunct'
+import { F, equals, isNil, isNotNil, pipe, when } from 'ramda'
 import type { Context } from 'src/context.ts'
 import type { DB } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
@@ -151,14 +150,15 @@ export class AuthResolver {
 
 		const loggedInUser = await pipe(
 			evolveAlt({
-				lastProjectId: pipe(prop('last_project_id'), unless(isNumber, init))
+				lastProjectId: pipe(x => x.last_project_id, when(isNil, init))
 			}),
 			resolveObj
 		)
+
 		ctx.extra = await loggedInUser(user)
 
 		return {
-			token: jwt.sign(loggedInUser, jwtSecret, { expiresIn }),
+			token: jwt.sign(loggedInUser, jwtSecret, { expiresIn: ms(expiresIn) }),
 			expiresDate: new Date(Date.now() + ms(expiresIn))
 		}
 	}
@@ -170,7 +170,7 @@ export class AuthResolver {
 
 	@Mutation(returns => Boolean)
 	async logout(@Ctx() ctx: Context) {
-		ctx.extra = undefined
+		ctx.extra = undefined as any
 		return true
 	}
 
