@@ -195,7 +195,7 @@ export type InsertTagMutationVariables = Exact<{
 }>;
 
 
-export type InsertTagMutation = { __typename?: 'Mutation', insertTag: { __typename?: 'Tag', id: number } };
+export type InsertTagMutation = { __typename?: 'Mutation', insertTag: { __typename?: 'Tag', id: number, name: string, parent_id?: number | null } };
 
 export type UpdateTagMutationVariables = Exact<{
   data: ChangeTagInput;
@@ -334,6 +334,8 @@ export const InsertTagDocument = new TypedDocumentString(`
     mutation InsertTag($data: InsertTag!) {
   insertTag(data: $data) {
     id
+    name
+    parent_id
   }
 }
     `) as unknown as TypedDocumentString<InsertTagMutation, InsertTagMutationVariables>;

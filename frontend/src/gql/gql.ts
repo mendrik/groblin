@@ -18,7 +18,7 @@ const documents = {
     "\n  query GetProject {\n    getProject {\n\t\tnodes {\n            ...Node\n        }\n\t\ttags {\n\t\t\tid\n\t\t\tname\n\t\t\tparent_id\t\n\t\t}\n    }\n  }\n": types.GetProjectDocument,
     "\n  subscription TagsUpdated {\n\ttagsUpdated\n  }\n": types.TagsUpdatedDocument,
     "\n  query GetTags {\n    getTags {\n\t\tid\n        parent_id\n        name\n    }\n  }\n": types.GetTagsDocument,
-    "\n  mutation InsertTag($data: InsertTag!) {\n    insertTag(data: $data) {\n\t\tid\n\t}\n  }\n": types.InsertTagDocument,
+    "\n  mutation InsertTag($data: InsertTag!) {\n    insertTag(data: $data) {\n\t\tid\n\t\tname\n\t\tparent_id\n\t}\n  }\n": types.InsertTagDocument,
     "\n  mutation UpdateTag($data: ChangeTagInput!) {\n    updateTag(data: $data)\n  }\n": types.UpdateTagDocument,
     "\n  mutation DeleteTagById($id: Int!) {\n    deleteTagById(id: $id)\n  }\n": types.DeleteTagByIdDocument,
     "\n  fragment Node on Node {\n\tid\n\tname\n\torder\n\ttype\n\tparent_id\n  }\n": types.NodeFragmentDoc,
@@ -48,7 +48,7 @@ export function graphql(source: "\n  query GetTags {\n    getTags {\n\t\tid\n   
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  mutation InsertTag($data: InsertTag!) {\n    insertTag(data: $data) {\n\t\tid\n\t}\n  }\n"): typeof import('./graphql').InsertTagDocument;
+export function graphql(source: "\n  mutation InsertTag($data: InsertTag!) {\n    insertTag(data: $data) {\n\t\tid\n\t\tname\n\t\tparent_id\n\t}\n  }\n"): typeof import('./graphql').InsertTagDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

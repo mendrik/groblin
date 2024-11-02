@@ -36,6 +36,8 @@ gql`
   mutation InsertTag($data: InsertTag!) {
     insertTag(data: $data) {
 		id
+		name
+		parent_id
 	}
   }
 `
@@ -59,13 +61,12 @@ subscribe(TagsUpdatedDocument, () =>
 	query(GetTagsDocument).then(prop('getTags')).then(setSignal($tags))
 )
 
-export const insertTag = (data: InsertTag): Promise<number> => {
-	return query(InsertTagDocument, {
+export const insertTag = (data: InsertTag): Promise<Tag> =>
+	query(InsertTagDocument, {
 		data
 	})
-		.then(x => x.insertTag.id)
+		.then(prop('insertTag'))
 		.then(failOn(isNil, 'Failed to insert tag'))
-}
 
 export const deleteTag = (id: number) =>
 	query(DeleteTagByIdDocument, {
@@ -74,3 +75,5 @@ export const deleteTag = (id: number) =>
 
 export const updateTag = (data: ChangeTagInput): Promise<boolean> =>
 	query(UpdateTagDocument, { data }).then(x => x.updateTag)
+
+export const selectTag = setSignal($tag)
