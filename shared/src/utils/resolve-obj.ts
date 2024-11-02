@@ -1,6 +1,6 @@
 import { isPromise } from 'ramda-adjunct'
 
-type Resolved<T> = {
+export type Resolved<T> = {
 	[K in keyof T]: T[K] extends Promise<infer R> ? R : T[K]
 }
 

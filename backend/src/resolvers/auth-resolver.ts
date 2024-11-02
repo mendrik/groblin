@@ -1,12 +1,14 @@
 import { type BinaryLike, scrypt } from 'node:crypto'
 import { assertThat } from '@shared/asserts.ts'
 import { evolveAlt } from '@shared/utils/evolve-alt.ts'
+import {} from '@shared/utils/ramda.ts'
 import { resolveObj } from '@shared/utils/resolve-obj.ts'
 import { inject, injectable } from 'inversify'
 import jwt from 'jsonwebtoken'
 import type { Kysely } from 'kysely'
 import ms from 'ms'
-import { F, equals, isNil, isNotNil, pipe, prop, when } from 'ramda'
+import { F, equals, isNil, isNotNil, pipe, prop, unless } from 'ramda'
+import { isNumber } from 'ramda-adjunct'
 import type { Context } from 'src/context.ts'
 import type { DB } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
@@ -74,7 +76,7 @@ export class LoggedInUser {
 	@Field(type => String)
 	email: string
 
-	@Field(type => Int, { nullable: true })
+	@Field(type => Int)
 	lastProjectId?: number
 }
 
@@ -144,20 +146,16 @@ export class AuthResolver {
 		assertThat(isNotNil, jwtSecret, 'JWT_SECRET must be defined')
 
 		const expiresIn = data.rememberMe ? '60 days' : '24h'
-		const init = (): Promise<number> =>
-			this.projectService.initializeProject(user, ctx)
+		const init = async () =>
+			await this.projectService.initializeProject(user, ctx)
 
-		const loggedInUser = pipe(
+		const loggedInUser = await pipe(
 			evolveAlt({
-				id: prop('id'),
-				email: prop('email'),
-				name: prop('name'),
-				lastProjectId: pipe(prop('lastProjectId'), when(isNil, init))
+				lastProjectId: pipe(prop('last_project_id'), unless(isNumber, init))
 			}),
 			resolveObj
 		)
-
-		ctx.extra = (await loggedInUser(user)) as LoggedInUser // todo fix this cast
+		ctx.extra = await loggedInUser(user)
 
 		return {
 			token: jwt.sign(loggedInUser, jwtSecret, { expiresIn }),

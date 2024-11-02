@@ -1,7 +1,8 @@
-import { always, inc, pipe, prop } from 'ramda'
+import { always, inc, isNil, pipe, prop, when } from 'ramda'
 // Import the necessary functions from Vitest
 import { describe, expect, it } from 'vitest'
 import { evolveAlt } from './evolve-alt' // Adjust the import path accordingly
+import { resolveObj } from './resolve-obj'
 
 describe('evolveAlt', () => {
 	it('should transform existing properties correctly', () => {
@@ -170,5 +171,32 @@ describe('evolveAlt', () => {
 		}
 		const result = evolveAlt(transformations, obj)
 		expect(result).toEqual({ a: 3, b: 3, c: 3, d: 0 })
+	})
+
+	it('works in combination with resolve', async () => {
+		const init = () => Promise.resolve(1)
+		const evolver = evolveAlt({
+			lastProjectId: pipe(
+				prop('last_project_id'),
+				when<number, Promise<number>>(isNil, init)
+			)
+		})
+		const loggedInUser = pipe(evolver, resolveObj)
+		const user = { name: 'test', last_project_id: null }
+		const res = await loggedInUser(user)
+		type T = typeof res
+		expect(res).toEqual({
+			name: 'test',
+			lastProjectId: 1,
+			last_project_id: null
+		})
+
+		const user2 = { name: 'test', last_project_id: 3 }
+		const res2 = await loggedInUser(user2)
+		expect(res2).toEqual({
+			name: 'test',
+			lastProjectId: 3,
+			last_project_id: 3
+		})
 	})
 })

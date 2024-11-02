@@ -24,3 +24,6 @@ export const pipeTapAsync =
 		) as LastReturnType<FUNCTIONS>
 
 export const debug = tap(console.log)
+
+export const idS = (s: string): string => s
+export const idN = (s: number): number => s
