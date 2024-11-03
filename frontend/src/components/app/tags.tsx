@@ -10,9 +10,14 @@ import {
 } from '../ui/dropdown-menu'
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs'
 import { TagCreate, openTagCreate } from '../ui/tags/tag-create'
+import { TagEdit, openTagEdit } from '../ui/tags/tag-edit'
 import { IconButton } from '../utils/icon-button'
 
 type ActiveTabProps = { tag: Tag }
+
+const deleteCommand = () => {
+	console.log('delete tag')
+}
 
 const ActiveTab = ({ tag }: ActiveTabProps) => {
 	return (
@@ -24,8 +29,10 @@ const ActiveTab = ({ tag }: ActiveTabProps) => {
 				<div className="truncate w-full overflow-hidden">{tag.name}</div>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="w-56" sideOffset={6} align="start">
-				<DropdownMenuItem>Settings</DropdownMenuItem>
-				<DropdownMenuItem>Delete</DropdownMenuItem>
+				<DropdownMenuItem onSelect={() => openTagEdit(tag)}>
+					Settings
+				</DropdownMenuItem>
+				<DropdownMenuItem onSelect={deleteCommand}>Delete</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	)
@@ -70,6 +77,7 @@ export const Tags = () => {
 				new tag
 			</IconButton>
 			<TagCreate />
+			<TagEdit />
 		</div>
 	)
 }
