@@ -1,6 +1,7 @@
 import { $tag, $tags } from '@/state/tag'
 import { IconTag } from '@tabler/icons-react'
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs'
+import { openTagCreate } from '../ui/tags/tag-create'
 import { IconButton } from '../utils/icon-button'
 
 export const Tags = () => {
@@ -16,7 +17,12 @@ export const Tags = () => {
 					))}
 				</TabsList>
 			</Tabs>
-			<IconButton icon={IconTag} size="sm" variant="secondary">
+			<IconButton
+				icon={IconTag}
+				size="sm"
+				variant="secondary"
+				onClick={openTagCreate}
+			>
 				new tag
 			</IconButton>
 		</div>
