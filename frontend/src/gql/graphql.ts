@@ -119,6 +119,7 @@ export type Node = {
   name: Scalars['String']['output'];
   order: Scalars['Int']['output'];
   parent_id?: Maybe<Scalars['Int']['output']>;
+  tag_id: Scalars['Int']['output'];
   type: NodeType;
 };
 
@@ -162,6 +163,7 @@ export type Subscription = {
 export type Tag = {
   __typename?: 'Tag';
   id: Scalars['Int']['output'];
+  master: Scalars['Boolean']['output'];
   name: Scalars['String']['output'];
   parent_id?: Maybe<Scalars['Int']['output']>;
 };
@@ -178,7 +180,7 @@ export type GetProjectQueryVariables = Exact<{ [key: string]: never; }>;
 export type GetProjectQuery = { __typename?: 'Query', getProject: { __typename?: 'Project', nodes: Array<(
       { __typename?: 'Node' }
       & { ' $fragmentRefs'?: { 'NodeFragment': NodeFragment } }
-    )>, tags: Array<{ __typename?: 'Tag', id: number, name: string, parent_id?: number | null }> } };
+    )>, tags: Array<{ __typename?: 'Tag', id: number, name: string, master: boolean, parent_id?: number | null }> } };
 
 export type TagsUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
@@ -211,7 +213,7 @@ export type DeleteTagByIdMutationVariables = Exact<{
 
 export type DeleteTagByIdMutation = { __typename?: 'Mutation', deleteTagById: boolean };
 
-export type NodeFragment = { __typename?: 'Node', id: number, name: string, order: number, type: NodeType, parent_id?: number | null } & { ' $fragmentName'?: 'NodeFragment' };
+export type NodeFragment = { __typename?: 'Node', id: number, name: string, order: number, type: NodeType, tag_id: number, parent_id?: number | null } & { ' $fragmentName'?: 'NodeFragment' };
 
 export type NodesUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
@@ -293,6 +295,7 @@ export const NodeFragmentDoc = new TypedDocumentString(`
   name
   order
   type
+  tag_id
   parent_id
 }
     `, {"fragmentName":"Node"}) as unknown as TypedDocumentString<NodeFragment, unknown>;
@@ -305,6 +308,7 @@ export const GetProjectDocument = new TypedDocumentString(`
     tags {
       id
       name
+      master
       parent_id
     }
   }
@@ -314,6 +318,7 @@ export const GetProjectDocument = new TypedDocumentString(`
   name
   order
   type
+  tag_id
   parent_id
 }`) as unknown as TypedDocumentString<GetProjectQuery, GetProjectQueryVariables>;
 export const TagsUpdatedDocument = new TypedDocumentString(`
@@ -365,6 +370,7 @@ export const GetNodesDocument = new TypedDocumentString(`
   name
   order
   type
+  tag_id
   parent_id
 }`) as unknown as TypedDocumentString<GetNodesQuery, GetNodesQueryVariables>;
 export const InsertNodeDocument = new TypedDocumentString(`

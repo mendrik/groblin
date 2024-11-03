@@ -3,7 +3,7 @@ import { GetProjectDocument } from '@/gql/graphql'
 import { setSignal } from '@/lib/utils'
 import { evolveAlt } from '@shared/utils/evolve-alt'
 import gql from 'graphql-tag'
-import { head, isNotNil, pipe, prop, when } from 'ramda'
+import { find, isNotNil, pipe, prop, propEq, when } from 'ramda'
 import { $tag, $tags } from './tag'
 import { $nodes } from './tree'
 import { $user } from './user'
@@ -17,6 +17,7 @@ gql`
 		tags {
 			id
 			name
+			master
 			parent_id	
 		}
     }
@@ -30,7 +31,7 @@ const loadProject = () =>
 			evolveAlt({
 				nodes: setSignal($nodes),
 				tags: setSignal($tags),
-				tag: pipe(prop('tags'), head, setSignal($tag))
+				tag: pipe(prop('tags'), find(propEq(true, 'master')), setSignal($tag))
 			})
 		)
 

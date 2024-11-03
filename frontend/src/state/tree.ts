@@ -42,6 +42,7 @@ gql`
 	name
 	order
 	type
+	tag_id
 	parent_id
   }
 `

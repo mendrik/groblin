@@ -13,28 +13,19 @@ import { insertTag, selectTag } from '@/state/tag'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
 import { pipeAsync } from '@shared/utils/pipe-async'
-import { F, T, pipe } from 'ramda'
-import { type TypeOf, strictObject, string } from 'zod'
+import { pipe } from 'ramda'
+import { type TypeOf, strictObject } from 'zod'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
-import { asField } from '../zod-form/utils'
+import { nonEmptyString } from '../zod-form/utils'
 import { ZodForm } from '../zod-form/zod-form'
 
 export const $createDialogOpen = signal(false)
-export const openTagCreate = pipe(T, setSignal($createDialogOpen))
-const close = pipe(F, setSignal($createDialogOpen))
+export const openTagCreate = () => setSignal($createDialogOpen, true)
+const close = () => setSignal($createDialogOpen, false)
 
 const newTagSchema = strictObject({
-	name: string()
-		.describe(
-			asField({
-				label: 'Name',
-				editor: EditorType.Input,
-				autofill: 'off'
-			})
-		)
-		.min(1)
-		.default('New node')
+	name: nonEmptyString('Name', EditorType.Input).default('New tag')
 })
 
 export type NewTagSchema = TypeOf<typeof newTagSchema>

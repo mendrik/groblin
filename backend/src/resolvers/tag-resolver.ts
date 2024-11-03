@@ -28,6 +28,9 @@ export class Tag {
 	@Field(type => String)
 	name: string
 
+	@Field(type => Boolean)
+	master: boolean
+
 	@Field(type => Int, { nullable: true })
 	parent_id: number
 }

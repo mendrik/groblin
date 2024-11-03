@@ -15,6 +15,7 @@ export interface Node {
   order: number;
   parent_id: number | null;
   project_id: number;
+  tag_id: number;
   type: string;
 }
 
@@ -31,6 +32,7 @@ export interface ProjectUser {
 
 export interface Tag {
   id: Generated<number>;
+  master: Generated<boolean>;
   name: string;
   parent_id: number | null;
   project_id: number;

@@ -1,3 +1,4 @@
+import { assertExists } from '@shared/asserts.ts'
 import { NodeType, Role } from '@shared/enums.ts'
 import { failOn } from '@shared/utils/guards.ts'
 import { injectable } from 'inversify'
@@ -42,6 +43,9 @@ export class Node {
 
 	@Field(type => Int, { nullable: true })
 	parent_id?: number
+
+	@Field(type => Int)
+	tag_id: number
 }
 
 @InputType()
@@ -113,10 +117,14 @@ export class NodeResolver {
 				.set({ order: sql`"order" + 1` })
 				.execute()
 
+			assertExists(data.parent_id, 'Parent ID must be provided')
+			const { tag_id } = await this.getNode(db, data.parent_id)
+
 			return trx
 				.insertInto('node')
 				.values({
 					...data,
+					tag_id,
 					project_id: user.lastProjectId
 				})
 				.returning('id')

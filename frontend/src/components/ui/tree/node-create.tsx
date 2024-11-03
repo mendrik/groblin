@@ -27,10 +27,10 @@ import { EditorType } from '@shared/enums'
 import { evolveAlt } from '@shared/utils/evolve-alt'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import { F, T, equals as eq, pipe } from 'ramda'
-import { type TypeOf, nativeEnum, strictObject, string } from 'zod'
+import { type TypeOf, nativeEnum, strictObject } from 'zod'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
-import { asField } from '../zod-form/utils'
+import { asField, nonEmptyString } from '../zod-form/utils'
 import { ZodForm } from '../zod-form/zod-form'
 
 type NodeCreatePosition =
@@ -48,16 +48,7 @@ export const openNodeCreate = pipe(
 const close = pipe(F, setSignal($createDialogOpen))
 
 const newNodeSchema = strictObject({
-	name: string()
-		.describe(
-			asField({
-				label: 'Name',
-				editor: EditorType.Input,
-				autofill: 'off'
-			})
-		)
-		.min(1)
-		.default('New node'),
+	name: nonEmptyString('Name', EditorType.Input).default('New node'),
 	type: nativeEnum(NodeType)
 		.describe(
 			asField({
@@ -115,8 +106,6 @@ const createNodeCommand: (data: NewNodeSchema) => Promise<void> = pipeAsync(
 
 export const NodeCreate = () => {
 	const [formApi, ref] = useFormState<NewNodeSchema>()
-
-	console.log(formApi.isSubmitting)
 
 	return (
 		<Dialog open={$createDialogOpen.value}>
