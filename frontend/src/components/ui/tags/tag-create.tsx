@@ -14,11 +14,11 @@ import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import { F, T, pipe } from 'ramda'
-import { useRef } from 'react'
 import { type TypeOf, strictObject, string } from 'zod'
 import { Button } from '../button'
+import { useFormState } from '../zod-form/use-form-state'
 import { asField } from '../zod-form/utils'
-import { type FormApi, ZodForm } from '../zod-form/zod-form'
+import { ZodForm } from '../zod-form/zod-form'
 
 export const $createDialogOpen = signal(false)
 export const openTagCreate = pipe(T, setSignal($createDialogOpen))
@@ -45,7 +45,7 @@ const createTagCommand: (data: NewTagSchema) => Promise<void> = pipeAsync(
 )
 
 export const TagCreate = () => {
-	const formApi = useRef<FormApi<NewTagSchema>>(null)
+	const [formApi, ref] = useFormState<NewTagSchema>()
 	return (
 		<Dialog open={$createDialogOpen.value}>
 			<DialogContent
@@ -64,16 +64,13 @@ export const TagCreate = () => {
 					columns={1}
 					onSubmit={pipe(createTagCommand, close)}
 					onError={console.error}
-					ref={formApi}
+					ref={ref}
 				>
 					<DialogFooter className="gap-y-2">
 						<Button onClick={close} variant="secondary">
 							Cancel
 						</Button>
-						<Button
-							type="submit"
-							disabled={formApi.current?.formState.isSubmitting}
-						>
+						<Button type="submit" disabled={formApi.isSubmitting}>
 							Create
 						</Button>
 					</DialogFooter>

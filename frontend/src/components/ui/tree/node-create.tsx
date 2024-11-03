@@ -27,11 +27,11 @@ import { EditorType } from '@shared/enums'
 import { evolveAlt } from '@shared/utils/evolve-alt'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import { F, T, equals as eq, pipe } from 'ramda'
-import { useRef } from 'react'
 import { type TypeOf, nativeEnum, strictObject, string } from 'zod'
 import { Button } from '../button'
+import { useFormState } from '../zod-form/use-form-state'
 import { asField } from '../zod-form/utils'
-import { type FormApi, ZodForm } from '../zod-form/zod-form'
+import { ZodForm } from '../zod-form/zod-form'
 
 type NodeCreatePosition =
 	| 'root-child'
@@ -114,7 +114,10 @@ const createNodeCommand: (data: NewNodeSchema) => Promise<void> = pipeAsync(
 )
 
 export const NodeCreate = () => {
-	const formApi = useRef<FormApi<NewNodeSchema>>(null)
+	const [formApi, ref] = useFormState<NewNodeSchema>()
+
+	console.log(formApi.isSubmitting)
+
 	return (
 		<Dialog open={$createDialogOpen.value}>
 			<DialogContent
@@ -136,16 +139,13 @@ export const NodeCreate = () => {
 					columns={2}
 					onSubmit={pipe(createNodeCommand, close)}
 					onError={console.error}
-					ref={formApi}
+					ref={ref}
 				>
 					<DialogFooter className="gap-y-2">
 						<Button onClick={close} variant="secondary">
 							Cancel
 						</Button>
-						<Button
-							type="submit"
-							disabled={formApi.current?.formState.isSubmitting}
-						>
+						<Button type="submit" disabled={formApi.isSubmitting}>
 							Create
 						</Button>
 					</DialogFooter>
