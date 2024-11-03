@@ -28,6 +28,7 @@ gql`
 		id
         parent_id
         name
+		master
     }
   }
 `
@@ -38,6 +39,7 @@ gql`
 		id
 		name
 		parent_id
+		master
 	}
   }
 `

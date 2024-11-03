@@ -190,14 +190,14 @@ export type TagsUpdatedSubscription = { __typename?: 'Subscription', tagsUpdated
 export type GetTagsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetTagsQuery = { __typename?: 'Query', getTags: Array<{ __typename?: 'Tag', id: number, parent_id?: number | null, name: string }> };
+export type GetTagsQuery = { __typename?: 'Query', getTags: Array<{ __typename?: 'Tag', id: number, parent_id?: number | null, name: string, master: boolean }> };
 
 export type InsertTagMutationVariables = Exact<{
   data: InsertTag;
 }>;
 
 
-export type InsertTagMutation = { __typename?: 'Mutation', insertTag: { __typename?: 'Tag', id: number, name: string, parent_id?: number | null } };
+export type InsertTagMutation = { __typename?: 'Mutation', insertTag: { __typename?: 'Tag', id: number, name: string, parent_id?: number | null, master: boolean } };
 
 export type UpdateTagMutationVariables = Exact<{
   data: ChangeTagInput;
@@ -332,6 +332,7 @@ export const GetTagsDocument = new TypedDocumentString(`
     id
     parent_id
     name
+    master
   }
 }
     `) as unknown as TypedDocumentString<GetTagsQuery, GetTagsQueryVariables>;
@@ -341,6 +342,7 @@ export const InsertTagDocument = new TypedDocumentString(`
     id
     name
     parent_id
+    master
   }
 }
     `) as unknown as TypedDocumentString<InsertTagMutation, InsertTagMutationVariables>;
