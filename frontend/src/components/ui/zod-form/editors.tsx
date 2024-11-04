@@ -15,7 +15,7 @@ import { caseOf, match } from '@/lib/match'
 import { EditorType } from '@shared/enums'
 import type { Fn } from '@tp/functions.ts'
 import { toNumber } from 'ramda-adjunct'
-import { ZodNumber, type ZodTypeAny } from 'zod'
+import { ZodNumber, ZodOptional, type ZodTypeAny } from 'zod'
 import { Input } from '../input'
 import { Switch } from '../switch'
 import type { ZodFormField } from '../tree/types'
@@ -39,8 +39,13 @@ const matcher = match<Args, ReactNode>(
 		const onValueChange = isZodType(ZodNumber)(type)
 			? pipe(toNumber, onChange)
 			: onChange
+		const isOptional = isZodType(ZodOptional)(type)
 		return (
-			<Select onValueChange={onValueChange} defaultValue={value}>
+			<Select
+				onValueChange={onValueChange}
+				defaultValue={value}
+				required={!isOptional}
+			>
 				<FormControl>
 					<SelectTrigger {...field}>
 						<SelectValue placeholder={desc.placeholder} />

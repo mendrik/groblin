@@ -47,15 +47,6 @@ type AllowedTypes<T extends ZodRawShape> =
 	| ZodEffects<ZodObject<T>>
 	| ZodDefault<ZodObject<T>>
 
-type OwnProps<T extends AllowedTypes<any>> = {
-	schema: T
-	onSubmit: (data: any) => void
-	onError: (err: Error) => void
-	columns?: number
-	disabled?: boolean
-	defaultValues?: DefaultValues<TypeOf<T>>
-}
-
 const cols = match<[number], string>(
 	caseOf([eq(1)], () => 'grid-cols-1 sm:grid-cols-1'),
 	caseOf([eq(2)], () => 'grid-cols-1 sm:grid-cols-2'),
@@ -115,6 +106,15 @@ export type FormApi<F extends FieldValues> = {
 	formState: UseFormReturn<F>['formState']
 }
 
+type OwnProps<T extends AllowedTypes<any>> = {
+	schema: T
+	onSubmit: (data: any) => void
+	onError: (err: Error) => void
+	columns?: number
+	disabled?: boolean
+	defaultValues?: DefaultValues<TypeOf<T>>
+}
+
 export const ZodForm = forwardRef(
 	<T extends AllowedTypes<any>>(
 		{
@@ -147,7 +147,9 @@ export const ZodForm = forwardRef(
 		return (
 			<Form {...form}>
 				<form
-					onSubmit={e => form.handleSubmit(onSubmit)(e).catch(onError)}
+					onSubmit={e =>
+						form.handleSubmit(onSubmit, console.error)(e).catch(onError)
+					}
 					className="flex flex-col gap-6 relative"
 					data-disabled={disabled ? true : undefined}
 				>

@@ -38,6 +38,7 @@ const editTagSchema = () =>
 			.describe(
 				asSelectField({
 					label: 'Parent',
+					placeholder: 'No parent',
 					description: 'From which tag should values be inherited from?',
 					editor: EditorType.Select,
 					options: pipe(
@@ -62,14 +63,13 @@ export const TagEdit = () => {
 	const [formApi, ref] = useFormState<EditTagSchema>()
 	return (
 		<Dialog open={$editDialogOpen.value}>
-			<DialogContent>
+			<DialogContent close={close}>
 				<DialogHeader>
 					<DialogTitle>Edit tag</DialogTitle>
 					<DialogDescription>Please configure the your tag.</DialogDescription>
 				</DialogHeader>
 				<ZodForm
 					schema={editTagSchema()}
-					columns={1}
 					onSubmit={pipe(updateTagCommand, close)}
 					onError={console.error}
 					defaultValues={$editedTag.value}
