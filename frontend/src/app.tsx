@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import './app.css'
 import { DocumentTree } from './components/app/document-tree'
 import { NodeValues } from './components/app/node-values'
@@ -27,7 +28,9 @@ export function App() {
 								My Test project
 							</h1>
 						</div>
-						<DocumentTree />
+						<Suspense fallback="Loading...">
+							<DocumentTree />
+						</Suspense>
 					</ResizablePanel>
 					<ResizableHandle />
 					<ResizablePanel defaultSize={$panelSizes.value[1]}>

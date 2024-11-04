@@ -14,11 +14,12 @@ import {
 import { caseOf, match } from '@/lib/match'
 import { EditorType } from '@shared/enums'
 import type { Fn } from '@tp/functions.ts'
-import type { ZodTypeAny } from 'zod'
+import { toNumber } from 'ramda-adjunct'
+import { ZodNumber, type ZodTypeAny } from 'zod'
 import { Input } from '../input'
 import { Switch } from '../switch'
 import type { ZodFormField } from '../tree/types'
-import { isSelectField } from './utils'
+import { isSelectField, isZodType } from './utils'
 
 const isOfType =
 	(type: EditorType) =>
@@ -34,22 +35,27 @@ type OwnProps = {
 type Args = readonly [ZodFormField, ZodTypeAny, ControllerRenderProps]
 
 const matcher = match<Args, ReactNode>(
-	caseOf([isSelectField, _, _], (desc, _, { onChange, value, ...field }) => (
-		<Select onValueChange={onChange} defaultValue={value}>
-			<FormControl>
-				<SelectTrigger {...field}>
-					<SelectValue placeholder={desc.placeholder} />
-				</SelectTrigger>
-			</FormControl>
-			<SelectContent>
-				{Object.entries(desc.options).map(([key, value]) => (
-					<SelectItem key={key} value={value}>
-						{key}
-					</SelectItem>
-				))}
-			</SelectContent>
-		</Select>
-	)),
+	caseOf([isSelectField, _, _], (desc, type, { onChange, value, ...field }) => {
+		const onValueChange = isZodType(ZodNumber)(type)
+			? pipe(toNumber, onChange)
+			: onChange
+		return (
+			<Select onValueChange={onValueChange} defaultValue={value}>
+				<FormControl>
+					<SelectTrigger {...field}>
+						<SelectValue placeholder={desc.placeholder} />
+					</SelectTrigger>
+				</FormControl>
+				<SelectContent>
+					{Object.entries(desc.options).map(([key, value]) => (
+						<SelectItem key={key} value={value}>
+							{key}
+						</SelectItem>
+					))}
+				</SelectContent>
+			</Select>
+		)
+	}),
 	caseOf([isOfType(EditorType.Input), _, _], (desc, _, field) => (
 		<FormControl>
 			<Input

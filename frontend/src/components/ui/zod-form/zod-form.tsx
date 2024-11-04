@@ -53,6 +53,7 @@ type OwnProps<T extends AllowedTypes<any>> = {
 	onError: (err: Error) => void
 	columns?: number
 	disabled?: boolean
+	defaultValues?: DefaultValues<TypeOf<T>>
 }
 
 const cols = match<[number], string>(
@@ -122,13 +123,16 @@ export const ZodForm = forwardRef(
 			onSubmit,
 			disabled = false,
 			onError,
+			defaultValues: externalDefaults,
 			children
 		}: PropsWithChildren<OwnProps<T>>,
 		ref: ForwardedRef<FormApi<TypeOf<T>>>
 	) => {
 		const defaultValues = useMemo(
-			() => generateDefaults(innerType(schema)) as DefaultValues<TypeOf<T>>,
-			[schema]
+			() =>
+				externalDefaults ??
+				(generateDefaults(innerType(schema)) as DefaultValues<TypeOf<T>>),
+			[schema, externalDefaults]
 		)
 
 		const form = useForm<TypeOf<T>>({

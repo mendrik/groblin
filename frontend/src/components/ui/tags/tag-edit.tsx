@@ -13,7 +13,7 @@ import { notNil, setSignal } from '@/lib/utils'
 import { $tags, updateTag } from '@/state/tag'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
-import { T, pipe } from 'ramda'
+import { T, equals, pipe, reduce, reject } from 'ramda'
 import { type TypeOf, number, strictObject } from 'zod'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
@@ -30,24 +30,27 @@ export const openTagEdit = pipe(
 
 const close = () => setSignal($editDialogOpen, false)
 
-const editTagSchema = strictObject({
-	name: nonEmptyString('Name', EditorType.Input).default('New tag'),
-	parent_id: number()
-		.describe(
-			asSelectField({
-				label: 'Parent',
-				description: 'From which tag should values be inherited from?',
-				editor: EditorType.Select,
-				options: $tags.value.reduce(
-					(acc, t) => ({ ...acc, [t.name]: `${t.id}` }),
-					{}
-				)
-			})
-		)
-		.optional()
-})
+// not static because $tags change
+const editTagSchema = () =>
+	strictObject({
+		name: nonEmptyString('Name', EditorType.Input).default('New tag'),
+		parent_id: number()
+			.describe(
+				asSelectField({
+					label: 'Parent',
+					description: 'From which tag should values be inherited from?',
+					editor: EditorType.Select,
+					options: pipe(
+						reject(equals(notNil($editedTag))),
+						reduce((acc, t: Tag) => ({ ...acc, [t.name]: `${t.id}` }), {})
+					)(notNil($tags))
+				})
+			)
+			.optional()
+	})
 
-export type EditTagSchema = TypeOf<typeof editTagSchema>
+export type EditTagSchema = TypeOf<ReturnType<typeof editTagSchema>>
+
 const updateTagCommand = (data: EditTagSchema): Promise<boolean> =>
 	updateTag({
 		...data,
@@ -68,10 +71,11 @@ export const TagEdit = () => {
 					<DialogDescription>Please configure the your tag.</DialogDescription>
 				</DialogHeader>
 				<ZodForm
-					schema={editTagSchema}
+					schema={editTagSchema()}
 					columns={1}
 					onSubmit={pipe(updateTagCommand, close)}
 					onError={console.error}
+					defaultValues={notNil($editedTag)}
 					ref={ref}
 				>
 					<DialogFooter className="gap-y-2">

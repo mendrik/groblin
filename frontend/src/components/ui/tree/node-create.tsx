@@ -47,21 +47,22 @@ export const openNodeCreate = pipe(
 )
 const close = pipe(F, setSignal($createDialogOpen))
 
-const newNodeSchema = strictObject({
-	name: nonEmptyString('Name', EditorType.Input).default('New node'),
-	type: nativeEnum(NodeType)
-		.default(NodeType.Object)
-		.describe(
-			asSelectField({
-				label: 'Type',
-				description: 'The type of node you want to create.',
-				editor: EditorType.Select,
-				options: omit(['Root'], NodeType)
-			})
-		)
-})
+const newNodeSchema = () =>
+	strictObject({
+		name: nonEmptyString('Name', EditorType.Input).default('New node'),
+		type: nativeEnum(NodeType)
+			.default(NodeType.Object)
+			.describe(
+				asSelectField({
+					label: 'Type',
+					description: 'The type of node you want to create.',
+					editor: EditorType.Select,
+					options: omit(['Root'], NodeType)
+				})
+			)
+	})
 
-export type NewNodeSchema = TypeOf<typeof newNodeSchema>
+export type NewNodeSchema = TypeOf<ReturnType<typeof newNodeSchema>>
 
 const position = match<[NodeCreatePosition], string>(
 	caseOf([eq('root-child')], _ => 'as a root child'),
@@ -125,7 +126,7 @@ export const NodeCreate = () => {
 					</DialogDescription>
 				</DialogHeader>
 				<ZodForm
-					schema={newNodeSchema}
+					schema={newNodeSchema()}
 					columns={2}
 					onSubmit={pipe(createNodeCommand, close)}
 					onError={console.error}
