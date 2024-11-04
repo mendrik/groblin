@@ -7,11 +7,12 @@ import {
 	DialogTitle
 } from '@/components/ui/dialog'
 import type { Tag } from '@/gql/graphql'
-import { stopPropagation } from '@/lib/dom-events'
 import { notNil, setSignal } from '@/lib/utils'
 import { $tags, updateTag } from '@/state/tag'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
+import { evolveAlt } from '@shared/utils/evolve-alt'
+import { debug } from '@shared/utils/ramda'
 import { T, equals, pipe, reduce, reject } from 'ramda'
 import { type TypeOf, number, strictObject } from 'zod'
 import { Button } from '../button'
@@ -50,21 +51,18 @@ const editTagSchema = () =>
 
 export type EditTagSchema = TypeOf<ReturnType<typeof editTagSchema>>
 
-const updateTagCommand = (data: EditTagSchema): Promise<boolean> =>
-	updateTag({
-		...data,
-		id: notNil($editedTag).id
-	})
+const updateTagCommand: (data: EditTagSchema) => Promise<boolean> = pipe(
+	debug,
+	evolveAlt({ id: () => notNil($editedTag).id }),
+	debug,
+	updateTag
+)
 
 export const TagEdit = () => {
 	const [formApi, ref] = useFormState<EditTagSchema>()
 	return (
 		<Dialog open={$editDialogOpen.value}>
-			<DialogContent
-				onEscapeKeyDown={close}
-				onKeyDown={stopPropagation}
-				onInteractOutside={close}
-			>
+			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>Edit tag</DialogTitle>
 					<DialogDescription>Please configure the your tag.</DialogDescription>

@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/dialog'
 import { asField, nonEmptyString } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
-import { stopPropagation } from '@/lib/dom-events'
 import { login } from '@/state/user'
 import { EditorType } from '@shared/enums'
 import { pipeAsync } from '@shared/utils/pipe-async'
@@ -44,12 +43,7 @@ const loginCommand = ({ rememberMe, ...credentials }: LoginForm) =>
 export const LoginDialog = () => {
 	return (
 		<Dialog open={true}>
-			<DialogContent
-				className="max-w-sm"
-				onEscapeKeyDown={close}
-				onKeyDown={stopPropagation}
-				onInteractOutside={close}
-			>
+			<DialogContent className="max-w-sm" close={close}>
 				<DialogHeader>
 					<DialogTitle>Login</DialogTitle>
 					<DialogDescription>

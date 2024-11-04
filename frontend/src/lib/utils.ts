@@ -35,8 +35,17 @@ const waitingForSignal = <T>(signal: Signal<T>) =>
 				})
 			})
 
-export const notNil = <T>(signal: Signal<T>): NonNullable<T> | never => {
+export const notNil = <T>(signal: Signal<T>): NonNullable<T> => {
 	assertExists(signal.value, 'Signal value is nil')
+	return signal.value as NonNullable<T>
+}
+
+// don't use yet - not working https://github.com/preactjs/signals/issues/301
+export const suspense = <T>(signal: Signal<T>): NonNullable<T> | never => {
+	const mustWait = waitingForSignal(signal)
+	if (mustWait) {
+		throw mustWait
+	}
 	return signal.value as NonNullable<T>
 }
 

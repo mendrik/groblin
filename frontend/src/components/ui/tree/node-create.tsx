@@ -7,7 +7,6 @@ import {
 	DialogTitle
 } from '@/components/ui/dialog'
 import { NodeType } from '@/gql/graphql'
-import { stopPropagation } from '@/lib/dom-events'
 import { caseOf, match } from '@/lib/match'
 import { notNil, setSignal } from '@/lib/utils'
 import {
@@ -108,14 +107,11 @@ const createNodeCommand: (data: NewNodeSchema) => Promise<void> = pipeAsync(
 
 export const NodeCreate = () => {
 	const [formApi, ref] = useFormState<NewNodeSchema>()
+	const dialogClose = pipe(close, refocus)
 
 	return (
 		<Dialog open={$createDialogOpen.value}>
-			<DialogContent
-				onEscapeKeyDown={pipe(close, refocus)}
-				onKeyDown={stopPropagation}
-				onInteractOutside={close}
-			>
+			<DialogContent close={dialogClose}>
 				<DialogHeader>
 					<DialogTitle>
 						Create node {position($createNodePosition.value)}

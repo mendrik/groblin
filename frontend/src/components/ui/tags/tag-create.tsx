@@ -6,7 +6,6 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { stopPropagation } from '@/lib/dom-events'
 import {} from '@/lib/match'
 import { setSignal } from '@/lib/utils'
 import { insertTag, selectTag } from '@/state/tag'
@@ -39,11 +38,7 @@ export const TagCreate = () => {
 	const [formApi, ref] = useFormState<NewTagSchema>()
 	return (
 		<Dialog open={$createDialogOpen.value}>
-			<DialogContent
-				onEscapeKeyDown={close}
-				onKeyDown={stopPropagation}
-				onInteractOutside={close}
-			>
+			<DialogContent close={close}>
 				<DialogHeader>
 					<DialogTitle>Create tag</DialogTitle>
 					<DialogDescription>

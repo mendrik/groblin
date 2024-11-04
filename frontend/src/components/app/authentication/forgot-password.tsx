@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/dialog'
 import { nonEmptyString } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
-import { stopPropagation } from '@/lib/dom-events'
 import { EditorType } from '@shared/enums'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import type { Fn } from '@tp/functions.ts'
@@ -30,12 +29,7 @@ const forgotPasswordCommand: Fn<Partial<ForgotPassword>, void> = pipeAsync(
 export const ForgotPasswordDialog = () => {
 	return (
 		<Dialog open={true}>
-			<DialogContent
-				className="max-w-sm"
-				onEscapeKeyDown={close}
-				onKeyDown={stopPropagation}
-				onInteractOutside={close}
-			>
+			<DialogContent className="max-w-sm" close={close}>
 				<DialogHeader>
 					<DialogTitle>Forgot your password?</DialogTitle>
 					<DialogDescription>

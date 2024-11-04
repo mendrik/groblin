@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/dialog'
 import { nonEmptyString } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
-import { stopPropagation } from '@/lib/dom-events'
 import { setSignal } from '@/lib/utils'
 import { register } from '@/state/user'
 import { signal } from '@preact/signals-react'
@@ -68,13 +67,7 @@ const registerCommand: Fn<RegistrationForm, unknown> = pipeAsync(
 export const RegistrationDialog = () => {
 	return (
 		<Dialog open={true}>
-			<DialogContent
-				closeButton={false}
-				className="max-w-sm"
-				onEscapeKeyDown={close}
-				onKeyDown={stopPropagation}
-				onInteractOutside={close}
-			>
+			<DialogContent closeButton={false} className="max-w-sm" close={close}>
 				<DialogHeader>
 					<DialogTitle>Register an account</DialogTitle>
 					<DialogDescription>
