@@ -2,7 +2,6 @@ import type { Tag } from '@/gql/graphql'
 import { notNil, setSignal } from '@/lib/utils'
 import { $tag, $tags } from '@/state/tag'
 import { IconTag } from '@tabler/icons-react'
-import { Suspense } from 'react'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -77,10 +76,8 @@ export const Tags = () => {
 			>
 				new tag
 			</IconButton>
-			<Suspense fallback="Loading...">
-				<TagCreate />
-				<TagEdit />
-			</Suspense>
+			<TagCreate />
+			<TagEdit />
 		</div>
 	)
 }

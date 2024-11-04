@@ -8,7 +8,6 @@ import {
 } from '@/components/ui/dialog'
 import type { Tag } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
-import {} from '@/lib/match'
 import { notNil, setSignal } from '@/lib/utils'
 import { $tags, updateTag } from '@/state/tag'
 import { signal } from '@preact/signals-react'
@@ -41,7 +40,7 @@ const editTagSchema = () =>
 					description: 'From which tag should values be inherited from?',
 					editor: EditorType.Select,
 					options: pipe(
-						reject(equals(notNil($editedTag))),
+						reject(equals($editedTag.value)),
 						reduce((acc, t: Tag) => ({ ...acc, [t.name]: `${t.id}` }), {})
 					)(notNil($tags))
 				})
@@ -75,7 +74,7 @@ export const TagEdit = () => {
 					columns={1}
 					onSubmit={pipe(updateTagCommand, close)}
 					onError={console.error}
-					defaultValues={notNil($editedTag)}
+					defaultValues={$editedTag.value}
 					ref={ref}
 				>
 					<DialogFooter className="gap-y-2">

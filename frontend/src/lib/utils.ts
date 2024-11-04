@@ -3,6 +3,7 @@ import {
 	type Signal,
 	computed
 } from '@preact/signals-react'
+import { assertExists } from '@shared/asserts'
 import type { Fn } from '@tp/functions'
 import { type ClassValue, clsx } from 'clsx'
 import { curry } from 'purify-ts'
@@ -35,10 +36,7 @@ const waitingForSignal = <T>(signal: Signal<T>) =>
 			})
 
 export const notNil = <T>(signal: Signal<T>): NonNullable<T> | never => {
-	const hasToWait = waitingForSignal(signal)
-	if (hasToWait) {
-		throw hasToWait
-	}
+	assertExists(signal.value, 'Signal value is nil')
 	return signal.value as NonNullable<T>
 }
 
