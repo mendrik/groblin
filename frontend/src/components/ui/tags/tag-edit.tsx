@@ -12,13 +12,12 @@ import {} from '@/lib/match'
 import { notNil, setSignal } from '@/lib/utils'
 import { $tags, updateTag } from '@/state/tag'
 import { signal } from '@preact/signals-react'
-import { assertExists } from '@shared/asserts'
 import { EditorType } from '@shared/enums'
-import { type NonEmptyArray, T, pipe } from 'ramda'
-import { type TypeOf, enum as enumZ, strictObject } from 'zod'
+import { T, pipe } from 'ramda'
+import { type TypeOf, number, strictObject } from 'zod'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
-import { asField, nonEmptyString } from '../zod-form/utils'
+import { asSelectField, nonEmptyString } from '../zod-form/utils'
 import { ZodForm } from '../zod-form/zod-form'
 
 export const $editedTag = signal<Tag>()
@@ -33,19 +32,18 @@ const close = () => setSignal($editDialogOpen, false)
 
 const editTagSchema = strictObject({
 	name: nonEmptyString('Name', EditorType.Input).default('New tag'),
-	parent_id: enumZ($tags.value.map(t => t.name) as NonEmptyArray<string>)
+	parent_id: number()
 		.describe(
-			asField({
+			asSelectField({
 				label: 'Parent',
 				description: 'From which tag should values be inherited from?',
-				editor: EditorType.Select
+				editor: EditorType.Select,
+				options: $tags.value.reduce(
+					(acc, t) => ({ ...acc, [t.name]: `${t.id}` }),
+					{}
+				)
 			})
 		)
-		.transform(value => {
-			const tagId = notNil($tags).find(t => t.name === value)?.id
-			assertExists(tagId, 'Tag not found')
-			return tagId
-		})
 		.optional()
 })
 

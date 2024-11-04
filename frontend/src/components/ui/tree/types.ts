@@ -1,5 +1,5 @@
 import { EditorType } from '@shared/enums'
-import { type TypeOf, nativeEnum, number, object, string } from 'zod'
+import { type TypeOf, nativeEnum, number, object, record, string } from 'zod'
 
 export const ZodFormField = object({
 	label: string(),
@@ -11,3 +11,11 @@ export const ZodFormField = object({
 })
 
 export type ZodFormField = TypeOf<typeof ZodFormField>
+
+export const ZodFormSelectField = ZodFormField.merge(
+	object({
+		options: record(string(), string())
+	})
+)
+
+export type ZodFormSelectField = TypeOf<typeof ZodFormSelectField>

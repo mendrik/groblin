@@ -9,7 +9,7 @@ import {
 import { NodeType } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
 import { caseOf, match } from '@/lib/match'
-import { setSignal } from '@/lib/utils'
+import { notNil, setSignal } from '@/lib/utils'
 import {
 	$root,
 	asNode,
@@ -26,11 +26,11 @@ import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
 import { evolveAlt } from '@shared/utils/evolve-alt'
 import { pipeAsync } from '@shared/utils/pipe-async'
-import { F, T, equals as eq, pipe } from 'ramda'
+import { F, T, equals as eq, omit, pipe } from 'ramda'
 import { type TypeOf, nativeEnum, strictObject } from 'zod'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
-import { asField, nonEmptyString } from '../zod-form/utils'
+import { asSelectField, nonEmptyString } from '../zod-form/utils'
 import { ZodForm } from '../zod-form/zod-form'
 
 type NodeCreatePosition =
@@ -50,14 +50,15 @@ const close = pipe(F, setSignal($createDialogOpen))
 const newNodeSchema = strictObject({
 	name: nonEmptyString('Name', EditorType.Input).default('New node'),
 	type: nativeEnum(NodeType)
+		.default(NodeType.Object)
 		.describe(
-			asField({
+			asSelectField({
 				label: 'Type',
 				description: 'The type of node you want to create.',
-				editor: EditorType.Select
+				editor: EditorType.Select,
+				options: omit(['Root'], NodeType)
 			})
 		)
-		.default(NodeType.Object)
 })
 
 export type NewNodeSchema = TypeOf<typeof newNodeSchema>
@@ -70,7 +71,7 @@ const position = match<[NodeCreatePosition], string>(
 )
 
 const parent = match<[NodeCreatePosition], number>(
-	caseOf([eq('root-child')], () => $root.value?.id as number),
+	caseOf([eq('root-child')], () => notNil($root).id),
 	caseOf([eq('child')], focusedNode),
 	caseOf([eq('sibling-above')], parentNode),
 	caseOf([eq('sibling-below')], parentNode)

@@ -9,7 +9,7 @@ import {
 	UpdateNodeDocument
 } from '@/gql/graphql.ts'
 import { getItem, setItem } from '@/lib/local-storage'
-import { computeSignal, setSignal } from '@/lib/utils'
+import { computeSignal, notNil, setSignal } from '@/lib/utils'
 import { waitForId } from '@/lib/wait-for-id'
 import { computed, signal } from '@preact/signals-react'
 import { assertExists } from '@shared/asserts'
@@ -261,7 +261,7 @@ function* iterateNodes(root: TreeNode): Generator<TreeNode> {
 }
 
 export function* iterateOpenNodes(root: TreeNode): Generator<TreeNode> {
-	if (root.id !== $root.value?.id) {
+	if (root.id !== notNil($root).id) {
 		yield root
 	}
 	if ($nodeStates.value[root.id]?.open === true) {

@@ -3,8 +3,15 @@ import { isNotEmpty, mergeAll, pipe, trim } from 'ramda'
 import type { ControllerProps, FieldPath, FieldValues } from 'react-hook-form'
 import { type AnyZodObject, type ZodType, string } from 'zod'
 import * as z from 'zod'
-import type { ZodFormField } from '../tree/types'
+import { type ZodFormField, ZodFormSelectField } from '../tree/types'
 export const asField = (meta: ZodFormField): string => JSON.stringify(meta)
+export const asSelectField = (meta: ZodFormSelectField): string =>
+	JSON.stringify(meta)
+
+export const isSelectField = (obj: ZodFormField): obj is ZodFormSelectField => {
+	const validationResult = ZodFormSelectField.safeParse(obj)
+	return validationResult.success
+}
 
 export const objectHandler = (
 	zodRef: AnyZodObject

@@ -1,5 +1,5 @@
 import type { Tag } from '@/gql/graphql'
-import { setSignal } from '@/lib/utils'
+import { notNil, setSignal } from '@/lib/utils'
 import { $tag, $tags } from '@/state/tag'
 import { IconTag } from '@tabler/icons-react'
 import {
@@ -50,13 +50,13 @@ export const Tags = () => {
 	return (
 		<div className="flex flex-row gap-1 items-center">
 			<Tabs
-				value={`${$tag.value?.id}`}
+				value={`${notNil($tag).id}`}
 				className="w-fit"
 				onValueChange={selectTag}
 			>
 				<TabsList className="h-8">
 					{$tags.value.map(tag =>
-						tag.id === $tag.value?.id ? (
+						tag.id === notNil($tag).id ? (
 							<ActiveTab tag={tag} key={tag.id} />
 						) : (
 							<TabsTrigger key={tag.id} value={`${tag.id}`} className="text-xs">

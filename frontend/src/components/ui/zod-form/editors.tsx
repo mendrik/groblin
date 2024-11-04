@@ -1,7 +1,6 @@
 import { T as _, apply, pipe } from 'ramda'
 import type { FC, ReactNode } from 'react'
 import type { ControllerRenderProps } from 'react-hook-form'
-import { ZodNativeEnum, type ZodTypeAny } from 'zod'
 import { FormControl } from '../form'
 
 import {
@@ -15,10 +14,11 @@ import {
 import { caseOf, match } from '@/lib/match'
 import { EditorType } from '@shared/enums'
 import type { Fn } from '@tp/functions.ts'
+import type { ZodTypeAny } from 'zod'
 import { Input } from '../input'
 import { Switch } from '../switch'
 import type { ZodFormField } from '../tree/types'
-import { innerType, isZodType } from './utils'
+import { isSelectField } from './utils'
 
 const isOfType =
 	(type: EditorType) =>
@@ -34,28 +34,22 @@ type OwnProps = {
 type Args = readonly [ZodFormField, ZodTypeAny, ControllerRenderProps]
 
 const matcher = match<Args, ReactNode>(
-	caseOf(
-		[isOfType(EditorType.Select), isZodType(ZodNativeEnum), _],
-		(desc, type, field) => {
-			const enumValue: Record<string, any> = innerType(type).enum
-			return (
-				<Select onValueChange={field.onChange} defaultValue={field.value}>
-					<FormControl>
-						<SelectTrigger {...field}>
-							<SelectValue placeholder={desc.placeholder} />
-						</SelectTrigger>
-					</FormControl>
-					<SelectContent>
-						{Object.entries(enumValue).map(([key, value]) => (
-							<SelectItem key={key} value={enumValue[key]}>
-								{value}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
-			)
-		}
-	),
+	caseOf([isSelectField, _, _], (desc, _, { onChange, value, ...field }) => (
+		<Select onValueChange={onChange} defaultValue={value}>
+			<FormControl>
+				<SelectTrigger {...field}>
+					<SelectValue placeholder={desc.placeholder} />
+				</SelectTrigger>
+			</FormControl>
+			<SelectContent>
+				{Object.entries(desc.options).map(([key, value]) => (
+					<SelectItem key={key} value={value}>
+						{key}
+					</SelectItem>
+				))}
+			</SelectContent>
+		</Select>
+	)),
 	caseOf([isOfType(EditorType.Input), _, _], (desc, _, field) => (
 		<FormControl>
 			<Input
