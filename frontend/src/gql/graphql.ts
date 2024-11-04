@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { DocumentTypeDecoration } from '@graphql-typed-document-node/core';
+import type { DocumentTypeDecoration } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -45,7 +45,6 @@ export type InsertTag = {
 };
 
 export type LoggedInUser = {
-  __typename?: 'LoggedInUser';
   email: Scalars['String']['output'];
   id: Scalars['Int']['output'];
   lastProjectId: Scalars['Int']['output'];
@@ -59,7 +58,6 @@ export type Login = {
 };
 
 export type Mutation = {
-  __typename?: 'Mutation';
   deleteNodeById: Scalars['Boolean']['output'];
   deleteTagById: Scalars['Boolean']['output'];
   insertNode: Node;
@@ -114,7 +112,6 @@ export type MutationUpdateTagArgs = {
 };
 
 export type Node = {
-  __typename?: 'Node';
   id: Scalars['Int']['output'];
   name: Scalars['String']['output'];
   order: Scalars['Int']['output'];
@@ -135,13 +132,11 @@ export enum NodeType {
 }
 
 export type Project = {
-  __typename?: 'Project';
   nodes: Array<Node>;
   tags: Array<Tag>;
 };
 
 export type Query = {
-  __typename?: 'Query';
   getNodes: Array<Node>;
   getProject: Project;
   getTags: Array<Tag>;
@@ -155,13 +150,11 @@ export type Registration = {
 };
 
 export type Subscription = {
-  __typename?: 'Subscription';
   nodesUpdated: Scalars['Boolean']['output'];
   tagsUpdated: Scalars['Boolean']['output'];
 };
 
 export type Tag = {
-  __typename?: 'Tag';
   id: Scalars['Int']['output'];
   master: Scalars['Boolean']['output'];
   name: Scalars['String']['output'];
@@ -169,7 +162,6 @@ export type Tag = {
 };
 
 export type Token = {
-  __typename?: 'Token';
   expiresDate: Scalars['DateTimeISO']['output'];
   token: Scalars['String']['output'];
 };
@@ -177,70 +169,64 @@ export type Token = {
 export type GetProjectQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetProjectQuery = { __typename?: 'Query', getProject: { __typename?: 'Project', nodes: Array<(
-      { __typename?: 'Node' }
-      & { ' $fragmentRefs'?: { 'NodeFragment': NodeFragment } }
-    )>, tags: Array<{ __typename?: 'Tag', id: number, name: string, master: boolean, parent_id?: number | null }> } };
+export type GetProjectQuery = { getProject: { nodes: Array<{ ' $fragmentRefs'?: { 'NodeFragment': NodeFragment } }>, tags: Array<{ id: number, name: string, master: boolean, parent_id?: number | null }> } };
 
 export type TagsUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type TagsUpdatedSubscription = { __typename?: 'Subscription', tagsUpdated: boolean };
+export type TagsUpdatedSubscription = { tagsUpdated: boolean };
 
 export type GetTagsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetTagsQuery = { __typename?: 'Query', getTags: Array<{ __typename?: 'Tag', id: number, parent_id?: number | null, name: string, master: boolean }> };
+export type GetTagsQuery = { getTags: Array<{ id: number, parent_id?: number | null, name: string, master: boolean }> };
 
 export type InsertTagMutationVariables = Exact<{
   data: InsertTag;
 }>;
 
 
-export type InsertTagMutation = { __typename?: 'Mutation', insertTag: { __typename?: 'Tag', id: number, name: string, parent_id?: number | null, master: boolean } };
+export type InsertTagMutation = { insertTag: { id: number, name: string, parent_id?: number | null, master: boolean } };
 
 export type UpdateTagMutationVariables = Exact<{
   data: ChangeTagInput;
 }>;
 
 
-export type UpdateTagMutation = { __typename?: 'Mutation', updateTag: boolean };
+export type UpdateTagMutation = { updateTag: boolean };
 
 export type DeleteTagByIdMutationVariables = Exact<{
   id: Scalars['Int']['input'];
 }>;
 
 
-export type DeleteTagByIdMutation = { __typename?: 'Mutation', deleteTagById: boolean };
+export type DeleteTagByIdMutation = { deleteTagById: boolean };
 
-export type NodeFragment = { __typename?: 'Node', id: number, name: string, order: number, type: NodeType, tag_id: number, parent_id?: number | null } & { ' $fragmentName'?: 'NodeFragment' };
+export type NodeFragment = { id: number, name: string, order: number, type: NodeType, tag_id: number, parent_id?: number | null } & { ' $fragmentName'?: 'NodeFragment' };
 
 export type NodesUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type NodesUpdatedSubscription = { __typename?: 'Subscription', nodesUpdated: boolean };
+export type NodesUpdatedSubscription = { nodesUpdated: boolean };
 
 export type GetNodesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetNodesQuery = { __typename?: 'Query', getNodes: Array<(
-    { __typename?: 'Node' }
-    & { ' $fragmentRefs'?: { 'NodeFragment': NodeFragment } }
-  )> };
+export type GetNodesQuery = { getNodes: Array<{ ' $fragmentRefs'?: { 'NodeFragment': NodeFragment } }> };
 
 export type InsertNodeMutationVariables = Exact<{
   data: InsertNode;
 }>;
 
 
-export type InsertNodeMutation = { __typename?: 'Mutation', insertNode: { __typename?: 'Node', id: number } };
+export type InsertNodeMutation = { insertNode: { id: number } };
 
 export type UpdateNodeMutationVariables = Exact<{
   data: ChangeNodeInput;
 }>;
 
 
-export type UpdateNodeMutation = { __typename?: 'Mutation', updateNode: boolean };
+export type UpdateNodeMutation = { updateNode: boolean };
 
 export type DeleteNodeByIdMutationVariables = Exact<{
   order: Scalars['Int']['input'];
@@ -249,31 +235,31 @@ export type DeleteNodeByIdMutationVariables = Exact<{
 }>;
 
 
-export type DeleteNodeByIdMutation = { __typename?: 'Mutation', deleteNodeById: boolean };
+export type DeleteNodeByIdMutation = { deleteNodeById: boolean };
 
 export type RegisterMutationVariables = Exact<{
   data: Registration;
 }>;
 
 
-export type RegisterMutation = { __typename?: 'Mutation', register: boolean };
+export type RegisterMutation = { register: boolean };
 
 export type WhoAmIQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type WhoAmIQuery = { __typename?: 'Query', whoami?: { __typename?: 'LoggedInUser', id: number, email: string, name: string } | null };
+export type WhoAmIQuery = { whoami?: { id: number, email: string, name: string } | null };
 
 export type LoginMutationVariables = Exact<{
   data: Login;
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'Token', token: string, expiresDate: any } };
+export type LoginMutation = { login: { token: string, expiresDate: any } };
 
 export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
+export type LogoutMutation = { logout: boolean };
 
 export class TypedDocumentString<TResult, TVariables>
   extends String

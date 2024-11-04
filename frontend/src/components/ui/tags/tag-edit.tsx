@@ -14,7 +14,7 @@ import { EditorType } from '@shared/enums'
 import { evolveAlt } from '@shared/utils/evolve-alt'
 import { debug } from '@shared/utils/ramda'
 import { T, equals, pipe, reduce, reject } from 'ramda'
-import { type TypeOf, number, strictObject } from 'zod'
+import { type TypeOf, number, object } from 'zod'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
 import { asSelectField, nonEmptyString } from '../zod-form/utils'
@@ -32,7 +32,7 @@ const close = () => setSignal($editDialogOpen, false)
 
 // not static because $tags change
 const editTagSchema = () =>
-	strictObject({
+	object({
 		name: nonEmptyString('Name', EditorType.Input).default('New tag'),
 		parent_id: number()
 			.describe(

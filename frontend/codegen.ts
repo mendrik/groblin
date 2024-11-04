@@ -8,7 +8,9 @@ const config: CodegenConfig = {
 		'./src/gql/': {
 			preset: 'client',
 			config: {
-				documentMode: 'string'
+				useTypeImports: true,
+				documentMode: 'string',
+				skipTypename: true
 			}
 		}
 	}
