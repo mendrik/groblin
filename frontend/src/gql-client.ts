@@ -15,8 +15,6 @@ export const query = async <D extends TypedDocumentString<any, any>>(
 	variables?: VariablesOf<D>
 ): Promise<ResultOf<D>> =>
 	new Promise((res, rej) => {
-		console.dir(queryDoc)
-
 		const unsub = gql.subscribe(
 			{ query: queryDoc.toString(), variables },
 			{

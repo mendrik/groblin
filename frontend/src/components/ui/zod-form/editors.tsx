@@ -1,4 +1,4 @@
-import { T as _, apply, pipe } from 'ramda'
+import { T as _, always, apply, isNil, pipe, unless, when } from 'ramda'
 import type { FC, ReactNode } from 'react'
 import type { ControllerRenderProps } from 'react-hook-form'
 import { FormControl } from '../form'
@@ -11,10 +11,12 @@ import {
 	SelectValue
 } from '../select'
 
+import { stopPropagation } from '@/lib/dom-events'
 import { caseOf, match } from '@/lib/match'
 import { EditorType } from '@shared/enums'
+import { findKeysByValue } from '@shared/utils/ramda'
 import type { Fn } from '@tp/functions.ts'
-import { toNumber } from 'ramda-adjunct'
+import { isNilOrEmpty, toNumber } from 'ramda-adjunct'
 import { ZodNumber, ZodOptional, type ZodTypeAny } from 'zod'
 import { Input } from '../input'
 import { Switch } from '../switch'
@@ -37,21 +39,36 @@ type Args = readonly [ZodFormField, ZodTypeAny, ControllerRenderProps]
 const matcher = match<Args, ReactNode>(
 	caseOf([isSelectField, _, _], (desc, type, { onChange, value, ...field }) => {
 		const onValueChange = isZodType(ZodNumber)(type)
-			? pipe(toNumber, onChange)
+			? pipe(unless(isNil, toNumber), onChange)
 			: onChange
+		const currentKey = findKeysByValue(`${value}`)(desc.options)
 		const isOptional = isZodType(ZodOptional)(type)
 		return (
 			<Select
-				onValueChange={onValueChange}
+				onValueChange={pipe(
+					when(isNilOrEmpty, always(undefined)),
+					onValueChange
+				)}
+				{...field}
 				defaultValue={value}
-				required={!isOptional}
 			>
 				<FormControl>
-					<SelectTrigger {...field}>
-						<SelectValue placeholder={desc.placeholder} />
+					<SelectTrigger>
+						<SelectValue placeholder={desc.placeholder}>
+							{currentKey[0]}
+						</SelectValue>
 					</SelectTrigger>
 				</FormControl>
 				<SelectContent>
+					{isOptional && (
+						<SelectItem
+							value={undefined as unknown as string}
+							key="null"
+							onSelect={pipe(stopPropagation, () => onChange(null))}
+						>
+							{desc.placeholder ?? 'Reset'}
+						</SelectItem>
+					)}
 					{Object.entries(desc.options).map(([key, value]) => (
 						<SelectItem key={key} value={value}>
 							{key}

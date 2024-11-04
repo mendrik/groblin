@@ -1,4 +1,4 @@
-import { tap } from 'ramda'
+import { equals, keys, pickBy, tap } from 'ramda'
 
 type Last<Type extends any[]> = Type extends [...any[], infer R] ? R : never
 
@@ -27,3 +27,19 @@ export const debug = tap(console.log)
 
 export const idS = (s: string): string => s
 export const idN = (s: number): number => s
+
+/**
+ * Finds the first key in a record that matches the given value.
+ *
+ * @template V - The type of the value to find.
+ * @template K - The type of the keys in the record.
+ * @param {V} value - The value to search for in the record.
+ * @param {Record<K, V>} record - The record to search within.
+ * @returns {K} - The first key that matches the given value.
+ */
+export const findKeysByValue =
+	<V, K extends string>(value: V) =>
+	(record: Record<K, V>): K[] => {
+		const matchingKeyObj: Record<K, V> = pickBy(equals(value))(record)
+		return keys(matchingKeyObj)
+	}

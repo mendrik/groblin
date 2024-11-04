@@ -12,7 +12,6 @@ import { $tags, updateTag } from '@/state/tag'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
 import { evolveAlt } from '@shared/utils/evolve-alt'
-import { debug } from '@shared/utils/ramda'
 import { T, equals, pipe, reduce, reject } from 'ramda'
 import { type TypeOf, number, object } from 'zod'
 import { Button } from '../button'
@@ -53,9 +52,7 @@ const editTagSchema = () =>
 export type EditTagSchema = TypeOf<ReturnType<typeof editTagSchema>>
 
 const updateTagCommand: (data: EditTagSchema) => Promise<boolean> = pipe(
-	debug,
 	evolveAlt({ id: () => notNil($editedTag).id }),
-	debug,
 	updateTag
 )
 
