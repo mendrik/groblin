@@ -7,7 +7,7 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { nonEmptyString } from '@/components/ui/zod-form/utils'
+import { stringField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { EditorType } from '@shared/enums'
 import { pipeAsync } from '@shared/utils/pipe-async'
@@ -17,7 +17,7 @@ import { Link } from 'react-router-dom'
 import { type TypeOf, strictObject } from 'zod'
 
 const forgotPasswordSchema = strictObject({
-	email: nonEmptyString('Email', EditorType.Email, 'username')
+	email: stringField('Email', EditorType.Email, 'username')
 })
 
 type ForgotPassword = TypeOf<typeof forgotPasswordSchema>

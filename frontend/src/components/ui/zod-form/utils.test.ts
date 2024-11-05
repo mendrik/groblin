@@ -1,8 +1,22 @@
+import { EditorType } from '@shared/enums'
 import { describe, expect, it } from 'vitest'
 import * as z from 'zod'
-import { generateDefaults, isZodType, objectHandler } from './utils'
+import {
+	generateDefaults,
+	isEnhanced,
+	isZodType,
+	objectHandler,
+	stringField
+} from './utils'
 
 describe('utils', () => {
+	describe('zod form', () => {
+		it('should detect enhanced fields', () => {
+			const schema = stringField('Name', EditorType.Input)
+			expect(isEnhanced(schema)).toBe(true)
+		})
+	})
+
 	describe('objectHandler', () => {
 		it('should generate defaults for a ZodObject', () => {
 			const schema = z.object({

@@ -7,7 +7,7 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { nonEmptyString } from '@/components/ui/zod-form/utils'
+import { stringField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { setSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
@@ -19,8 +19,8 @@ import { toast } from 'sonner'
 import { type TypeOf, strictObject } from 'zod'
 
 const resetPasswordSchema = strictObject({
-	password: nonEmptyString('Password', EditorType.Password, 'new-password'),
-	repeatPassword: nonEmptyString(
+	password: stringField('Password', EditorType.Password, 'new-password'),
+	repeatPassword: stringField(
 		'Repeat password',
 		EditorType.Password,
 		'new-password'

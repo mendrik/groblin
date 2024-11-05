@@ -1,60 +1,49 @@
-import { CheckIcon } from '@radix-ui/react-icons'
-import { SelectItemIndicator, SelectItemText } from '@radix-ui/react-select'
-import { always, pipe, when } from 'ramda'
-import { isNilOrEmpty } from 'ramda-adjunct'
+import { SelectItemText } from '@radix-ui/react-select'
+import {} from 'ramda'
+import { DropdownMenuItem } from '../dropdown-menu'
 import { FormControl } from '../form'
 import {
-	Select as RadixSelect,
+	Select as Root,
 	SelectContent,
-	SelectItem,
 	SelectTrigger,
 	SelectValue
 } from '../select'
 
-type OwnProps = {
-	record: Record<string, string>
+type OwnProps<T> = {
+	options: Map<T, string>
 	placeholder?: string
 	optional: boolean
-	defaultValue: string
-	nullValue?: string | undefined | null
-	onChange: <T>(value: T) => void
+	defaultValue: T
+	onChange: (value: T) => void
 }
 
-export const SimpleSelect = ({
-	record,
+export const SimpleSelect = <T,>({
+	options,
 	optional,
 	placeholder,
 	onChange,
-	defaultValue,
-	nullValue
-}: OwnProps) => {
-	console.dir(record)
-
+	defaultValue
+}: OwnProps<T>) => {
+	const currentItem = options.get(defaultValue)
 	return (
-		<RadixSelect
-			onValueChange={pipe(when(isNilOrEmpty, always(undefined)), onChange)}
-			defaultValue={defaultValue}
-		>
+		<Root onValueChange={console.log}>
 			<FormControl>
 				<SelectTrigger>
-					<SelectValue placeholder={placeholder} />
+					<SelectValue placeholder={placeholder}>{currentItem}</SelectValue>
 				</SelectTrigger>
 			</FormControl>
 			<SelectContent>
 				{optional && (
-					<SelectItem value={nullValue as string}>
-						{placeholder ?? 'Reset'}
-					</SelectItem>
+					<div>
+						<SelectItemText>{placeholder ?? 'Reset'}</SelectItemText>
+					</div>
 				)}
-				{Object.entries(record).map(([key, value]) => (
-					<SelectItem value={`${value}`} key={value}>
-						<SelectItemText>{key}</SelectItemText>
-						<SelectItemIndicator>
-							<CheckIcon />
-						</SelectItemIndicator>
-					</SelectItem>
+				{Array.from(options.entries()).map(([key, value]) => (
+					<DropdownMenuItem onSelect={console.log} key={value}>
+						{value}
+					</DropdownMenuItem>
 				))}
 			</SelectContent>
-		</RadixSelect>
+		</Root>
 	)
 }

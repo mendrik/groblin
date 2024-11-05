@@ -25,11 +25,11 @@ import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
 import { evolveAlt } from '@shared/utils/evolve-alt'
 import { pipeAsync } from '@shared/utils/pipe-async'
-import { F, T, equals as eq, omit, pipe } from 'ramda'
+import { F, T, equals as eq, pipe } from 'ramda'
 import { type TypeOf, nativeEnum, strictObject } from 'zod'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
-import { asSelectField, nonEmptyString } from '../zod-form/utils'
+import { asField, enumToMap, stringField } from '../zod-form/utils'
 import { ZodForm } from '../zod-form/zod-form'
 
 type NodeCreatePosition =
@@ -48,17 +48,13 @@ const close = pipe(F, setSignal($createDialogOpen))
 
 const newNodeSchema = () =>
 	strictObject({
-		name: nonEmptyString('Name', EditorType.Input).default('New node'),
-		type: nativeEnum(NodeType)
-			.default(NodeType.Object)
-			.describe(
-				asSelectField({
-					label: 'Type',
-					description: 'The type of node you want to create.',
-					editor: EditorType.Select,
-					options: omit(['Root'], NodeType)
-				})
-			)
+		name: stringField('Name', EditorType.Input).default('New node'),
+		type: asField(nativeEnum(NodeType).default(NodeType.Object), {
+			label: 'Type',
+			description: 'The type of node you want to create.',
+			editor: EditorType.Select,
+			options: enumToMap(NodeType)
+		})
 	})
 
 export type NewNodeSchema = TypeOf<ReturnType<typeof newNodeSchema>>

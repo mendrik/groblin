@@ -1,7 +1,6 @@
 import { caseOf, match } from '@/lib/match'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { assertExists } from '@shared/asserts'
-import { T as _, equals as eq } from 'ramda'
+import { equals as eq } from 'ramda'
 import {
 	type ForwardedRef,
 	type PropsWithChildren,
@@ -31,16 +30,16 @@ import {
 	FormLabel,
 	FormMessage
 } from '../form'
-import { ZodFormField, ZodFormSelectField } from '../tree/types'
 import { Editor } from './editors'
 import {
 	type RendererProps,
 	generateDefaults,
 	innerType,
-	isSelectField
+	isEnhanced
 } from './utils'
 
 import './zod-form.css'
+import { assertExists } from '@shared/asserts'
 
 type AllowedTypes<T extends ZodRawShape> =
 	| ZodObject<T>
@@ -59,15 +58,12 @@ const colSpan = match<[number], string>(
 	caseOf([eq(3)], () => 'sm:col-span-3')
 )
 
-const fieldSchema = match<[string], ZodFormField>(
-	caseOf([isSelectField], ZodFormSelectField.parse),
-	caseOf([_], ZodFormField.parse)
-)
-
 function* schemaIterator<T extends ZodRawShape>(schema: AllowedTypes<T>) {
 	for (const [name, zodSchema] of Object.entries(innerType(schema).shape)) {
-		assertExists(zodSchema.description, `Missing description for field ${name}`)
-		const fieldData = fieldSchema(JSON.parse(zodSchema.description))
+		console.log('name', isEnhanced(zodSchema))
+
+		const fieldData = isEnhanced(zodSchema) ? zodSchema.meta : undefined
+		assertExists(fieldData, 'Field meta data is missing')
 		yield {
 			name,
 			renderer: ({ field }: RendererProps<any>) => (

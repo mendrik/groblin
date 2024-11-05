@@ -16,7 +16,7 @@ import { pipe } from 'ramda'
 import { type TypeOf, strictObject } from 'zod'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
-import { nonEmptyString } from '../zod-form/utils'
+import { stringField } from '../zod-form/utils'
 import { ZodForm } from '../zod-form/zod-form'
 
 export const $createDialogOpen = signal(false)
@@ -24,7 +24,7 @@ export const openTagCreate = () => setSignal($createDialogOpen, true)
 const close = () => setSignal($createDialogOpen, false)
 
 const newTagSchema = strictObject({
-	name: nonEmptyString('Name', EditorType.Input).default('New tag')
+	name: stringField('Name', EditorType.Input).default('New tag')
 })
 
 export type NewTagSchema = TypeOf<typeof newTagSchema>
