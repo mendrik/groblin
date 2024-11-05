@@ -1,13 +1,5 @@
 import { EditorType } from '@shared/enums'
-import {
-	type TypeOf,
-	any,
-	array,
-	nativeEnum,
-	number,
-	object,
-	string
-} from 'zod'
+import { type TypeOf, array, nativeEnum, number, object, string } from 'zod'
 
 export const FieldMeta = object({
 	label: string(),
@@ -19,7 +11,7 @@ export const FieldMeta = object({
 })
 
 export const FieldSelectMeta = FieldMeta.extend({
-	options: array(any())
+	options: array(object({ id: number(), name: string() }))
 })
 
 export type FieldMeta = TypeOf<typeof FieldMeta>

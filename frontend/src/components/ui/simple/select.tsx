@@ -13,7 +13,7 @@ type OwnProps<T> = {
 	render: (item: T) => ReactNode
 	placeholder?: string
 	optional?: boolean
-	value: T
+	value: T | undefined
 	onChange: (value: T | undefined) => void
 }
 
