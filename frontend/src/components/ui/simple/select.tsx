@@ -43,12 +43,10 @@ export const SimpleSelect = <T,>({
 	render
 }: OwnProps<T>) => {
 	const [open, setOpen] = useState(false)
-	const currentItem = render(value)
+	const currentItem = value && render(value)
 	return (
 		<Select onOpenChange={setOpen} open={open}>
-			<SelectTrigger>
-				<div>{currentItem ?? placeholder}</div>
-			</SelectTrigger>
+			<SelectTrigger>{currentItem ?? placeholder}</SelectTrigger>
 			<SelectContent>
 				{optional && (
 					<SelectItem
@@ -63,7 +61,7 @@ export const SimpleSelect = <T,>({
 				)}
 				{options.map((value, idx) => (
 					<SelectItem
-						key={`${idx}-${value}`}
+						key={`${idx}-${render(value)}`}
 						onClick={() => {
 							onChange(value)
 							setOpen(false)

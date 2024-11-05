@@ -39,10 +39,11 @@ const matcher = match<Args, ReactNode>(
 				<SimpleSelect<Tag>
 					options={desc.options}
 					render={t => t.name}
-					value={value}
-					optional={type.isOptional()}
-					onChange={t => onChange(t?.id)}
+					value={desc.options.find(t => t.id === value)}
+					optional={type.isNullable()}
+					onChange={t => onChange(t?.id ?? null)}
 					placeholder={desc.placeholder}
+					{...field}
 				/>
 			)
 		}

@@ -33,7 +33,7 @@ const close = () => setSignal($editDialogOpen, false)
 const editTagSchema = () =>
 	object({
 		name: stringField('Name', EditorType.Input, 'off', 'Name of the tag'),
-		parent_id: asField(number().optional(), {
+		parent_id: asField(number().nullable(), {
 			label: 'Parent',
 			placeholder: 'No parent',
 			description: 'From which tag should values be inherited from?',
