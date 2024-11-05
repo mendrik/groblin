@@ -32,7 +32,7 @@ const close = () => setSignal($editDialogOpen, false)
 // not static because $tags change
 const editTagSchema = () =>
 	object({
-		name: stringField('Name', EditorType.Input).default('New tag'),
+		name: stringField('Name', EditorType.Input, 'off', 'Name of the tag'),
 		parent_id: asField(number().optional(), {
 			label: 'Parent',
 			placeholder: 'No parent',

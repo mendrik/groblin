@@ -97,7 +97,6 @@ type UnwrapZod<T extends z.ZodTypeAny> = T extends z.ZodNullable<infer U>
 
 // Runtime function
 export function innerType<T extends z.ZodTypeAny>(schema: T): UnwrapZod<T> {
-	console.log('isEnhanced', schema)
 	if (isEnhanced(schema)) {
 		return innerType(schema.original) as UnwrapZod<T>
 	} else if (schema instanceof z.ZodDefault) {
@@ -121,13 +120,14 @@ export type RendererProps<
 export const stringField = (
 	label: string,
 	editor: EditorType,
-	autofill?: string
+	autofill?: string,
+	placeholder?: string
 ) =>
 	asField(
 		string()
 			.refine(pipe(trim, isNotEmpty), { message: `${label} is required` })
 			.default(''),
-		{ label, editor, autofill }
+		{ label, editor, autofill, placeholder }
 	)
 
 export const enumToMap = <T extends Record<string, string>>(enumRef: T) =>

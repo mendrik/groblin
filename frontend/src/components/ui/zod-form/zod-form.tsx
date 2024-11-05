@@ -60,10 +60,8 @@ const colSpan = match<[number], string>(
 
 function* schemaIterator<T extends ZodRawShape>(schema: AllowedTypes<T>) {
 	for (const [name, zodSchema] of Object.entries(innerType(schema).shape)) {
-		console.log('name', isEnhanced(zodSchema))
-
 		const fieldData = isEnhanced(zodSchema) ? zodSchema.meta : undefined
-		assertExists(fieldData, 'Field meta data is missing')
+		assertExists(fieldData, `Field meta data is missing in ${name}`)
 		yield {
 			name,
 			renderer: ({ field }: RendererProps<any>) => (
