@@ -1,49 +1,78 @@
-import { SelectItemText } from '@radix-ui/react-select'
+import { cn } from '@/lib/utils'
 import {} from 'ramda'
-import { DropdownMenuItem } from '../dropdown-menu'
-import { FormControl } from '../form'
 import {
-	Select as Root,
-	SelectContent,
-	SelectTrigger,
-	SelectValue
-} from '../select'
+	type ButtonHTMLAttributes,
+	type ReactNode,
+	forwardRef,
+	useState
+} from 'react'
+import { Select, SelectContent, SelectTrigger } from '../select'
 
 type OwnProps<T> = {
-	options: Map<T, string>
+	options: T[]
+	render: (item: T) => ReactNode
 	placeholder?: string
-	optional: boolean
-	defaultValue: T
-	onChange: (value: T) => void
+	optional?: boolean
+	value: T
+	onChange: (value: T | undefined) => void
 }
+
+const SelectItem = forwardRef<
+	HTMLButtonElement,
+	ButtonHTMLAttributes<HTMLButtonElement>
+>(({ className, children, ...props }, ref) => (
+	<button
+		{...props}
+		type="button"
+		ref={ref}
+		className={cn(
+			className,
+			'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none focus:bg-accent focus:text-accent-foreground hover:bg-accent'
+		)}
+	>
+		{children}
+	</button>
+))
 
 export const SimpleSelect = <T,>({
 	options,
-	optional,
+	optional = false,
 	placeholder,
 	onChange,
-	defaultValue
+	value,
+	render
 }: OwnProps<T>) => {
-	const currentItem = options.get(defaultValue)
+	const [open, setOpen] = useState(false)
+	const currentItem = render(value)
 	return (
-		<Root onValueChange={console.log}>
-			<FormControl>
-				<SelectTrigger>
-					<SelectValue placeholder={placeholder}>{currentItem}</SelectValue>
-				</SelectTrigger>
-			</FormControl>
+		<Select onOpenChange={setOpen} open={open}>
+			<SelectTrigger>
+				<div>{currentItem ?? placeholder}</div>
+			</SelectTrigger>
 			<SelectContent>
 				{optional && (
-					<div>
-						<SelectItemText>{placeholder ?? 'Reset'}</SelectItemText>
-					</div>
+					<SelectItem
+						key="null"
+						onClick={() => {
+							onChange(undefined)
+							setOpen(false)
+						}}
+					>
+						{placeholder}
+					</SelectItem>
 				)}
-				{Array.from(options.entries()).map(([key, value]) => (
-					<DropdownMenuItem onSelect={console.log} key={value}>
-						{value}
-					</DropdownMenuItem>
+				{options.map((value, idx) => (
+					<SelectItem
+						key={`${idx}-${value}`}
+						onClick={() => {
+							onChange(value)
+							setOpen(false)
+						}}
+					>
+						{render(value)}
+					</SelectItem>
 				))}
 			</SelectContent>
-		</Root>
+		</Select>
 	)
 }

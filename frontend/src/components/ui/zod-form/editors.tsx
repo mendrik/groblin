@@ -3,6 +3,7 @@ import type { FC, ReactNode } from 'react'
 import type { ControllerRenderProps } from 'react-hook-form'
 import { FormControl } from '../form'
 
+import type { Tag } from '@/gql/graphql'
 import { caseOf, match } from '@/lib/match'
 import { EditorType } from '@shared/enums'
 import type { Fn } from '@tp/functions.ts'
@@ -35,11 +36,12 @@ const matcher = match<Args, ReactNode>(
 		[hasOptions, isZodType(ZodNumber), _],
 		(desc, type, { onChange, value, ...field }) => {
 			return (
-				<SimpleSelect<number>
+				<SimpleSelect<Tag>
 					options={desc.options}
-					defaultValue={value}
-					onChange={onChange}
+					render={t => t.name}
+					value={value}
 					optional={type.isOptional()}
+					onChange={t => onChange(t?.id)}
 					placeholder={desc.placeholder}
 				/>
 			)

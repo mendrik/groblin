@@ -12,7 +12,7 @@ import { $tags, updateTag } from '@/state/tag'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
 import { evolveAlt } from '@shared/utils/evolve-alt'
-import { T, equals, pipe, reduce, reject } from 'ramda'
+import { T, equals, pipe, reject } from 'ramda'
 import { type TypeOf, number, object } from 'zod'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
@@ -38,10 +38,7 @@ const editTagSchema = () =>
 			placeholder: 'No parent',
 			description: 'From which tag should values be inherited from?',
 			editor: EditorType.Select,
-			options: pipe(
-				reject(equals($editedTag.value)),
-				reduce((acc, t: Tag) => acc.set(t.id, t.name), new Map())
-			)(notNil($tags))
+			options: pipe(notNil, reject(equals($editedTag.value)))($tags)
 		})
 	})
 
