@@ -48,12 +48,12 @@ const close = pipe(F, setSignal($createDialogOpen))
 
 const newNodeSchema = () =>
 	strictObject({
-		name: stringField('Name', EditorType.Input).default('New node'),
+		name: stringField('Name', EditorType.Input, 'off', 'Name of the node'),
 		type: asField(nativeEnum(NodeType).default(NodeType.Object), {
 			label: 'Type',
 			description: 'The type of node you want to create.',
 			editor: EditorType.Select,
-			options: enumToMap(NodeType)
+			options: enumToMap(NodeType).filter(([_, v]) => v !== NodeType.Root)
 		})
 	})
 

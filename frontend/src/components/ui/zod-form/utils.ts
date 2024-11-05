@@ -82,7 +82,7 @@ export type IsZodType<T extends ZodType<any, any>> = T extends ZodType<
 export const isZodType =
 	<T extends ZodType<any, any>>(type: new (...args: any[]) => T) =>
 	(checkType: ZodType<any, any>): checkType is T =>
-		checkType instanceof type || innerType(checkType) instanceof type
+		innerType(checkType) instanceof type
 
 // Type-level unwrapping
 type UnwrapZod<T extends z.ZodTypeAny> = T extends z.ZodNullable<infer U>
@@ -131,4 +131,4 @@ export const stringField = (
 	)
 
 export const enumToMap = <T extends Record<string, string>>(enumRef: T) =>
-	new Map(Object.entries(enumRef))
+	Object.entries(enumRef)
