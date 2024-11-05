@@ -1,24 +1,17 @@
-import { T as _, always, apply, isNil, pipe, unless, when } from 'ramda'
-import type { FC, ReactNode } from 'react'
+import { T as _, apply, isNil, pipe, unless } from 'ramda'
+import { type FC, type ReactNode } from 'react'
 import type { ControllerRenderProps } from 'react-hook-form'
 import { FormControl } from '../form'
 
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue
-} from '../select'
-
-import { stopPropagation } from '@/lib/dom-events'
 import { caseOf, match } from '@/lib/match'
 import { EditorType } from '@shared/enums'
 import { findKeysByValue } from '@shared/utils/ramda'
 import type { Fn } from '@tp/functions.ts'
-import { isNilOrEmpty, toNumber } from 'ramda-adjunct'
+import { toNumber } from 'ramda-adjunct'
 import { ZodNumber, ZodOptional, type ZodTypeAny } from 'zod'
 import { Input } from '../input'
+import {} from '../select'
+import { SimpleSelect } from '../simple/select'
 import { Switch } from '../switch'
 import type { ZodFormField } from '../tree/types'
 import { isSelectField, isZodType } from './utils'
@@ -44,38 +37,13 @@ const matcher = match<Args, ReactNode>(
 		const currentKey = findKeysByValue(`${value}`)(desc.options)
 		const isOptional = isZodType(ZodOptional)(type)
 		return (
-			<Select
-				onValueChange={pipe(
-					when(isNilOrEmpty, always(undefined)),
-					onValueChange
-				)}
-				{...field}
+			<SimpleSelect
 				defaultValue={value}
-			>
-				<FormControl>
-					<SelectTrigger>
-						<SelectValue placeholder={desc.placeholder}>
-							{currentKey[0]}
-						</SelectValue>
-					</SelectTrigger>
-				</FormControl>
-				<SelectContent>
-					{isOptional && (
-						<SelectItem
-							value={undefined as unknown as string}
-							key="null"
-							onSelect={pipe(stopPropagation, () => onChange(null))}
-						>
-							{desc.placeholder ?? 'Reset'}
-						</SelectItem>
-					)}
-					{Object.entries(desc.options).map(([key, value]) => (
-						<SelectItem key={key} value={value}>
-							{key}
-						</SelectItem>
-					))}
-				</SelectContent>
-			</Select>
+				record={desc.options}
+				onChange={onValueChange}
+				optional={isOptional}
+				placeholder={desc.placeholder}
+			/>
 		)
 	}),
 	caseOf([isOfType(EditorType.Input), _, _], (desc, _, field) => (
