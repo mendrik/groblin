@@ -1,60 +1,76 @@
-import { CheckIcon } from '@radix-ui/react-icons'
-import { SelectItemIndicator, SelectItemText } from '@radix-ui/react-select'
-import { always, pipe, when } from 'ramda'
-import { isNilOrEmpty } from 'ramda-adjunct'
-import { FormControl } from '../form'
+import { cn } from '@/lib/utils'
+import {} from 'ramda'
 import {
-	Select as RadixSelect,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue
-} from '../select'
+	type ButtonHTMLAttributes,
+	type ReactNode,
+	forwardRef,
+	useState
+} from 'react'
+import { Select, SelectContent, SelectTrigger } from '../select'
 
-type OwnProps = {
-	record: Record<string, string>
+type OwnProps<T> = {
+	options: T[]
+	render: (item: T) => ReactNode
 	placeholder?: string
-	optional: boolean
-	defaultValue: string
-	nullValue?: string | undefined | null
-	onChange: <T>(value: T) => void
+	optional?: boolean
+	value: T
+	onChange: (value: T | undefined) => void
 }
 
-export const SimpleSelect = ({
-	record,
-	optional,
+const SelectItem = forwardRef<
+	HTMLButtonElement,
+	ButtonHTMLAttributes<HTMLButtonElement>
+>(({ className, children, ...props }, ref) => (
+	<button
+		{...props}
+		type="button"
+		ref={ref}
+		className={cn(
+			className,
+			'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none focus:bg-accent focus:text-accent-foreground hover:bg-accent'
+		)}
+	>
+		{children}
+	</button>
+))
+
+export const SimpleSelect = <T,>({
+	options,
+	optional = false,
 	placeholder,
 	onChange,
-	defaultValue,
-	nullValue
-}: OwnProps) => {
-	console.dir(record)
-
+	value,
+	render
+}: OwnProps<T>) => {
+	const [open, setOpen] = useState(false)
+	const currentItem = value && render(value)
 	return (
-		<RadixSelect
-			onValueChange={pipe(when(isNilOrEmpty, always(undefined)), onChange)}
-			defaultValue={defaultValue}
-		>
-			<FormControl>
-				<SelectTrigger>
-					<SelectValue placeholder={placeholder} />
-				</SelectTrigger>
-			</FormControl>
+		<Select onOpenChange={setOpen} open={open}>
+			<SelectTrigger>{currentItem ?? placeholder}</SelectTrigger>
 			<SelectContent>
 				{optional && (
-					<SelectItem value={nullValue as string}>
-						{placeholder ?? 'Reset'}
+					<SelectItem
+						key="null"
+						onClick={() => {
+							onChange(undefined)
+							setOpen(false)
+						}}
+					>
+						{placeholder}
 					</SelectItem>
 				)}
-				{Object.entries(record).map(([key, value]) => (
-					<SelectItem value={`${value}`} key={value}>
-						<SelectItemText>{key}</SelectItemText>
-						<SelectItemIndicator>
-							<CheckIcon />
-						</SelectItemIndicator>
+				{options.map((value, idx) => (
+					<SelectItem
+						key={`${idx}-${render(value)}`}
+						onClick={() => {
+							onChange(value)
+							setOpen(false)
+						}}
+					>
+						{render(value)}
 					</SelectItem>
 				))}
 			</SelectContent>
-		</RadixSelect>
+		</Select>
 	)
 }

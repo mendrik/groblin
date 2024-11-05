@@ -1,51 +1,53 @@
-import { T as _, apply, isNil, pipe, unless } from 'ramda'
-import { type FC, type ReactNode } from 'react'
+import { T as _, apply, pipe } from 'ramda'
+import type { FC, ReactNode } from 'react'
 import type { ControllerRenderProps } from 'react-hook-form'
 import { FormControl } from '../form'
 
+import type { Tag } from '@/gql/graphql'
 import { caseOf, match } from '@/lib/match'
 import { EditorType } from '@shared/enums'
-import { findKeysByValue } from '@shared/utils/ramda'
 import type { Fn } from '@tp/functions.ts'
-import { toNumber } from 'ramda-adjunct'
-import { ZodNumber, ZodOptional, type ZodTypeAny } from 'zod'
+import { ZodNumber, type ZodTypeAny } from 'zod'
 import { Input } from '../input'
 import {} from '../select'
 import { SimpleSelect } from '../simple/select'
 import { Switch } from '../switch'
-import type { ZodFormField } from '../tree/types'
-import { isSelectField, isZodType } from './utils'
+import type { FieldMeta, FieldSelectMeta } from './types'
+import { isZodType } from './utils'
 
 const isOfType =
 	(type: EditorType) =>
-	(obj: ZodFormField): boolean =>
+	(obj: FieldMeta): boolean =>
 		obj.editor === type
 
+const hasOptions = (obj: FieldMeta): obj is FieldSelectMeta =>
+	'options' in obj && obj.options !== undefined
+
 type OwnProps = {
-	desc: ZodFormField
+	desc: FieldMeta
 	type: ZodTypeAny
 	field: ControllerRenderProps
 }
 
-type Args = readonly [ZodFormField, ZodTypeAny, ControllerRenderProps]
+type Args = readonly [FieldMeta, ZodTypeAny, ControllerRenderProps]
 
 const matcher = match<Args, ReactNode>(
-	caseOf([isSelectField, _, _], (desc, type, { onChange, value, ...field }) => {
-		const onValueChange = isZodType(ZodNumber)(type)
-			? pipe(unless(isNil, toNumber), onChange)
-			: onChange
-		const currentKey = findKeysByValue(`${value}`)(desc.options)
-		const isOptional = isZodType(ZodOptional)(type)
-		return (
-			<SimpleSelect
-				defaultValue={value}
-				record={desc.options}
-				onChange={onValueChange}
-				optional={isOptional}
-				placeholder={desc.placeholder}
-			/>
-		)
-	}),
+	caseOf(
+		[hasOptions, isZodType(ZodNumber), _],
+		(desc, type, { onChange, value, ...field }) => {
+			return (
+				<SimpleSelect<Tag>
+					options={desc.options}
+					render={t => t.name}
+					value={desc.options.find(t => t.id === value)}
+					optional={type.isNullable()}
+					onChange={t => onChange(t?.id ?? null)}
+					placeholder={desc.placeholder}
+					{...field}
+				/>
+			)
+		}
+	),
 	caseOf([isOfType(EditorType.Input), _, _], (desc, _, field) => (
 		<FormControl>
 			<Input

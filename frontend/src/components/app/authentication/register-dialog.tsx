@@ -7,7 +7,7 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { nonEmptyString } from '@/components/ui/zod-form/utils'
+import { stringField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { setSignal } from '@/lib/utils'
 import { register } from '@/state/user'
@@ -21,16 +21,16 @@ import { toast } from 'sonner'
 import { type TypeOf, strictObject } from 'zod'
 
 const registrationSchema = strictObject({
-	name: nonEmptyString('Name', EditorType.Input).default('Andreas Herd'),
-	email: nonEmptyString('Email', EditorType.Email, 'username').default(
+	name: stringField('Name', EditorType.Input).default('Andreas Herd'),
+	email: stringField('Email', EditorType.Email, 'username').default(
 		'mendrik76@gmail.com'
 	),
-	password: nonEmptyString(
+	password: stringField(
 		'Password',
 		EditorType.Password,
 		'new-password'
 	).default('bla'),
-	repeatPassword: nonEmptyString(
+	repeatPassword: stringField(
 		'Repeat password',
 		EditorType.Password,
 		'new-password'

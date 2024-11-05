@@ -1,16 +1,48 @@
 import type { EditorType } from '@shared/enums'
 import { isNotEmpty, mergeAll, pipe, trim } from 'ramda'
 import type { ControllerProps, FieldPath, FieldValues } from 'react-hook-form'
-import { type AnyZodObject, type ZodType, string } from 'zod'
+import { type AnyZodObject, type ZodType, type ZodTypeDef, string } from 'zod'
 import * as z from 'zod'
-import { type ZodFormField, ZodFormSelectField } from '../tree/types'
-export const asField = (meta: ZodFormField): string => JSON.stringify(meta)
-export const asSelectField = (meta: ZodFormSelectField): string =>
-	JSON.stringify(meta)
+import type { FieldMeta } from './types'
 
-export const isSelectField = (obj: ZodFormField): obj is ZodFormSelectField => {
-	const validationResult = ZodFormSelectField.safeParse(obj)
-	return validationResult.success
+type ZodTypeEnhanced<
+	O = any,
+	D extends ZodTypeDef = ZodTypeDef,
+	I = O
+> = ZodType<O, D, I> & {
+	meta: FieldMeta
+	original: ZodType<O, D, I>
+}
+
+export const isEnhanced = <O, D extends ZodTypeDef, I>(
+	type: any
+): type is ZodTypeEnhanced<O, D, I> =>
+	type._def !== undefined && type.meta !== undefined
+
+// Create a proxy to delegate method calls
+export const asField = <
+	M extends FieldMeta,
+	O = any,
+	D extends ZodTypeDef = ZodTypeDef,
+	I = O
+>(
+	schema: ZodType<O, D, I>,
+	meta: M
+): ZodTypeEnhanced<O, D, I> => {
+	return new Proxy(schema, {
+		get(target: any, prop: string) {
+			if (prop === 'meta') {
+				return meta
+			}
+			if (prop === 'original') {
+				return schema
+			}
+			if (typeof target[prop] === 'function') {
+				return (...args: any[]) => target[prop](...args)
+			}
+			return target[prop]
+		}
+	})
 }
 
 export const objectHandler = (
@@ -65,10 +97,12 @@ type UnwrapZod<T extends z.ZodTypeAny> = T extends z.ZodNullable<infer U>
 
 // Runtime function
 export function innerType<T extends z.ZodTypeAny>(schema: T): UnwrapZod<T> {
-	if (schema instanceof z.ZodNullable) {
-		return innerType(schema.unwrap()) as UnwrapZod<T>
+	if (isEnhanced(schema)) {
+		return innerType(schema.original) as UnwrapZod<T>
 	} else if (schema instanceof z.ZodDefault) {
 		return innerType(schema.removeDefault()) as UnwrapZod<T>
+	} else if (schema instanceof z.ZodNullable) {
+		return innerType(schema.unwrap()) as UnwrapZod<T>
 	} else if (schema instanceof z.ZodOptional) {
 		return innerType(schema.unwrap()) as UnwrapZod<T>
 	} else if (schema instanceof z.ZodEffects) {
@@ -83,12 +117,18 @@ export type RendererProps<
 	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
 > = Parameters<ControllerProps<TFieldValues, TName>['render']>[0]
 
-export const nonEmptyString = (
+export const stringField = (
 	label: string,
 	editor: EditorType,
-	autofill?: string
+	autofill?: string,
+	placeholder?: string
 ) =>
-	string()
-		.refine(pipe(trim, isNotEmpty), { message: `${label} is required` })
-		.describe(asField({ label, editor, autofill }))
-		.default('')
+	asField(
+		string()
+			.refine(pipe(trim, isNotEmpty), { message: `${label} is required` })
+			.default(''),
+		{ label, editor, autofill, placeholder }
+	)
+
+export const enumToMap = <T extends Record<string, string>>(enumRef: T) =>
+	new Map(Object.entries(enumRef))

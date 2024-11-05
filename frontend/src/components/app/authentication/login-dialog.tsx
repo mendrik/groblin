@@ -7,7 +7,7 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { asField, nonEmptyString } from '@/components/ui/zod-form/utils'
+import { asField, stringField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { login } from '@/state/user'
 import { EditorType } from '@shared/enums'
@@ -17,16 +17,12 @@ import { toast } from 'sonner'
 import { type TypeOf, boolean, strictObject } from 'zod'
 
 const loginSchema = strictObject({
-	email: nonEmptyString('Email', EditorType.Email, 'username'),
-	password: nonEmptyString('Password', EditorType.Password, 'current-password'),
-	rememberMe: boolean()
-		.describe(
-			asField({
-				label: 'Remember me',
-				editor: EditorType.Switch
-			})
-		)
-		.default(false)
+	email: stringField('Email', EditorType.Email, 'username'),
+	password: stringField('Password', EditorType.Password, 'current-password'),
+	rememberMe: asField(boolean().default(false), {
+		label: 'Remember me',
+		editor: EditorType.Switch
+	})
 })
 
 const failed = (e: Error) =>
