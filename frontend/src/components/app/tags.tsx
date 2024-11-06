@@ -10,14 +10,11 @@ import {
 } from '../ui/dropdown-menu'
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs'
 import { TagCreate, openTagCreate } from '../ui/tags/tag-create'
+import { TagDelete, openTagDelete } from '../ui/tags/tag-delete'
 import { TagEdit, openTagEdit } from '../ui/tags/tag-edit'
 import { IconButton } from '../utils/icon-button'
 
 type ActiveTabProps = { tag: Tag }
-
-const deleteCommand = () => {
-	console.log('delete tag')
-}
 
 const ActiveTab = ({ tag }: ActiveTabProps) => {
 	return (
@@ -32,7 +29,9 @@ const ActiveTab = ({ tag }: ActiveTabProps) => {
 				<DropdownMenuItem onSelect={() => openTagEdit(tag)}>
 					Settings
 				</DropdownMenuItem>
-				<DropdownMenuItem onSelect={deleteCommand}>Delete</DropdownMenuItem>
+				<DropdownMenuItem onSelect={() => openTagDelete(tag)}>
+					Delete
+				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	)
@@ -78,6 +77,7 @@ export const Tags = () => {
 			</IconButton>
 			<TagCreate />
 			<TagEdit />
+			<TagDelete />
 		</div>
 	)
 }

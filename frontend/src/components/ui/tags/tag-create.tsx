@@ -24,7 +24,7 @@ export const openTagCreate = () => setSignal($createDialogOpen, true)
 const close = () => setSignal($createDialogOpen, false)
 
 const newTagSchema = strictObject({
-	name: stringField('Name', EditorType.Input).default('New tag')
+	name: stringField('Name', EditorType.Input, 'off', 'New tag')
 })
 
 export type NewTagSchema = TypeOf<typeof newTagSchema>
