@@ -38,7 +38,7 @@ const getFocusableElements = (selector: string) => (el: HTMLElement | null) =>
 
 const rowOrColumn = (dir: Direction, active: Element | null) =>
 	reject<HTMLElement>(el => {
-		if (active === null) return false
+		if (active === null) return true
 		const r = el.getBoundingClientRect()
 		const a = active.getBoundingClientRect()
 		return dir === Direction.Right || dir === Direction.Left
@@ -67,7 +67,7 @@ const focusNext = (dir: Direction, active = document.activeElement) =>
 		rowOrColumn(dir, active),
 		sortFocusable(dir),
 		converge(clampIndex, [o(inc, findIndex(equals(active))), identity]),
-		(el: HTMLElement) => el.focus()
+		(el: HTMLElement | null) => el?.focus()
 	)
 
 const FocusTravel = ({
@@ -77,11 +77,9 @@ const FocusTravel = ({
 	const ref = useRef<HTMLDivElement>(null)
 
 	const focus = (dir: Direction) => (ev: Event) => {
-		if (ref.current) {
-			ev.preventDefault() // Prevent default scrolling behavior
-			ev.stopImmediatePropagation()
-			focusNext(dir)(ref.current)
-		}
+		ev.preventDefault() // Prevent default scrolling behavior
+		ev.stopImmediatePropagation()
+		focusNext(dir)(ref.current)
 	}
 
 	useEffect(() => {
