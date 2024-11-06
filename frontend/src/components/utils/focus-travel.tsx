@@ -61,9 +61,13 @@ const sortFocusable = (dir: Direction) =>
 		sorters[dir](a.getBoundingClientRect(), b.getBoundingClientRect())
 	)
 
-const focusNext = (dir: Direction, active = document.activeElement) =>
+const focusNext = (
+	dir: Direction,
+	focusables: string,
+	active: Element | null
+) =>
 	pipe(
-		getFocusableElements(defaultFocusable),
+		getFocusableElements(focusables),
 		rowOrColumn(dir, active),
 		sortFocusable(dir),
 		converge(clampIndex, [o(inc, findIndex(equals(active))), identity]),
@@ -79,7 +83,7 @@ const FocusTravel = ({
 	const focus = (dir: Direction) => (ev: Event) => {
 		ev.preventDefault() // Prevent default scrolling behavior
 		ev.stopImmediatePropagation()
-		focusNext(dir)(ref.current)
+		focusNext(dir, focusableSelector, document.activeElement)(ref.current)
 	}
 
 	useEffect(() => {
