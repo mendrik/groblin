@@ -54,7 +54,7 @@ export const SimpleSelect = <T,>({
 		<Select onOpenChange={pipeTap(setOpen)} open={open}>
 			<SelectTrigger>{currentItem ?? placeholder}</SelectTrigger>
 			<SelectContent>
-				<FocusTravel vertical>
+				<FocusTravel>
 					{optional && (
 						<SelectItem
 							key="null"
