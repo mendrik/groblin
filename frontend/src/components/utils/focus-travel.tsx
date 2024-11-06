@@ -1,6 +1,16 @@
 import {} from '@/lib/match'
 import { hasMethod } from '@/lib/utils'
-import { converge, findIndex, identity, inc, o, pipe, sort } from 'ramda'
+import {
+	converge,
+	equals,
+	findIndex,
+	identity,
+	inc,
+	o,
+	pipe,
+	reject,
+	sort
+} from 'ramda'
 import { type PropsWithChildren, useEffect, useRef } from 'react'
 import KeyListener from './key-listener'
 
@@ -26,19 +36,21 @@ const focusFirst = (focusableSelector: string) => (el: HTMLElement | null) => {
 const getFocusableElements = (selector: string) => (el: HTMLElement | null) =>
 	Array.from(el?.querySelectorAll(selector) ?? []) as HTMLElement[]
 
+const rowOrColumn = (dir: Direction, active: Element | null) =>
+	reject<HTMLElement>(el => {
+		if (active === null) return false
+		const r = el.getBoundingClientRect()
+		const a = active.getBoundingClientRect()
+		return dir === Direction.Right || dir === Direction.Left
+			? Math.abs(r.top - a.top) > 10
+			: Math.abs(r.left - a.left) > 10
+	})
+
 const sorters = {
-	[Direction.Right]: (a: DOMRect, b: DOMRect) => {
-		return a.top - b.top || a.left - b.left
-	},
-	[Direction.Left]: (a: DOMRect, b: DOMRect) => {
-		return b.top - a.top || b.left - a.left
-	},
-	[Direction.Up]: (a: DOMRect, b: DOMRect) => {
-		return b.top - a.top || a.left - b.left
-	},
-	[Direction.Down]: (a: DOMRect, b: DOMRect) => {
-		return a.top - b.top || b.left - a.left
-	}
+	[Direction.Right]: (a: DOMRect, b: DOMRect) => a.left - b.left,
+	[Direction.Left]: (a: DOMRect, b: DOMRect) => b.left - a.left,
+	[Direction.Up]: (a: DOMRect, b: DOMRect) => b.top - a.top,
+	[Direction.Down]: (a: DOMRect, b: DOMRect) => a.top - b.top
 }
 
 const clampIndex = (idx: number, xs: HTMLElement[]) =>
@@ -49,17 +61,12 @@ const sortFocusable = (dir: Direction) =>
 		sorters[dir](a.getBoundingClientRect(), b.getBoundingClientRect())
 	)
 
-const focusNext = (dir: Direction) =>
+const focusNext = (dir: Direction, active = document.activeElement) =>
 	pipe(
 		getFocusableElements(defaultFocusable),
+		rowOrColumn(dir, active),
 		sortFocusable(dir),
-		converge(clampIndex, [
-			o(
-				inc,
-				findIndex(e => e === document.activeElement)
-			),
-			identity
-		]),
+		converge(clampIndex, [o(inc, findIndex(equals(active))), identity]),
 		(el: HTMLElement) => el.focus()
 	)
 
