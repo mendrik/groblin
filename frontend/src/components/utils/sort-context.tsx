@@ -8,7 +8,7 @@ import {
 	useSensor,
 	useSensors
 } from '@dnd-kit/core'
-import {} from '@dnd-kit/modifiers'
+import { restrictToHorizontalAxis } from '@dnd-kit/modifiers'
 import {
 	SortableContext,
 	type SortingStrategy,
@@ -36,8 +36,9 @@ export const SortContext = ({ strategy, children }: Ownprops) => {
 	return (
 		<DndContext
 			sensors={sensors}
+			modifiers={[restrictToHorizontalAxis]}
 			collisionDetection={closestCenter}
-			onDragEnd={console.log}
+			onDragEnd={console.dir}
 		>
 			<SortableContext items={$tags.value} strategy={strategy}>
 				{children}

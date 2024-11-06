@@ -6,7 +6,8 @@ type OwnProps = PropsWithChildren<{
 }>
 
 export const SortableItem = ({ children, id }: OwnProps) => {
-	const { attributes, listeners, transform, transition } = useSortable({ id })
+	const { attributes, listeners, transform, transition, setNodeRef } =
+		useSortable({ id })
 
 	const style = {
 		transform: CSS.Transform.toString(transform),
@@ -14,7 +15,7 @@ export const SortableItem = ({ children, id }: OwnProps) => {
 	}
 
 	return (
-		<div style={style} {...attributes} {...listeners}>
+		<div style={style} {...attributes} {...listeners} ref={setNodeRef}>
 			{children}
 		</div>
 	)
