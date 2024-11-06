@@ -32,7 +32,7 @@ type Args = readonly [FieldMeta, ZodTypeAny, ControllerRenderProps]
 const matcher = match<Args, ReactNode>(
 	caseOf(
 		[hasOptions, isZodType(ZodNativeEnum), _],
-		(desc, type, { onChange, value, ...field }) => {
+		(desc, type, { onChange, value, ref, ...field }) => {
 			return (
 				<SimpleSelect<[string, string]>
 					options={desc.options}
@@ -48,7 +48,7 @@ const matcher = match<Args, ReactNode>(
 	),
 	caseOf(
 		[hasOptions, isZodType(ZodNumber), _],
-		(desc, type, { onChange, value, ...field }) => {
+		(desc, type, { onChange, value, ref, ...field }) => {
 			return (
 				<SimpleSelect<{ id: number; name: string }>
 					options={desc.options}

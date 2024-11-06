@@ -41,5 +41,7 @@ export const focusOn =
 	<EL extends HTMLElement>(ref: ForwardedRef<EL>) =>
 	(): Promise<void> =>
 		delayP(20).then(() => {
+			console.log(ref)
+
 			if (ref && 'current' in ref && ref.current) ref.current.focus()
 		})

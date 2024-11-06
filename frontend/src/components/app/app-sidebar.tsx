@@ -22,7 +22,7 @@ type OwnProps = {
 } & ButtonHTMLAttributes<HTMLButtonElement>
 
 export const logoutCommand = pipeAsync(
-	() => removeItems('token', 'tokenExpiresDate'),
+	() => removeItems(['token', 'tokenExpiresDate']),
 	logout
 )
 

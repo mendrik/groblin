@@ -1,9 +1,11 @@
+import FocusTravel from '@/components/utils/focus-travel'
 import { cn } from '@/lib/utils'
-import {} from 'ramda'
+import { pipeTap } from '@shared/utils/ramda'
 import {
 	type ButtonHTMLAttributes,
 	type ReactNode,
 	forwardRef,
+	useRef,
 	useState
 } from 'react'
 import { Select, SelectContent, SelectTrigger } from '../select'
@@ -27,12 +29,14 @@ const SelectItem = forwardRef<
 		ref={ref}
 		className={cn(
 			className,
-			'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none focus:bg-accent focus:text-accent-foreground hover:bg-accent'
+			'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8',
+			'text-sm outline-none focus:bg-accent focus:text-accent-foreground hover:bg-accent'
 		)}
 	>
 		{children}
 	</button>
 ))
+SelectItem.displayName = 'SelectItem'
 
 export const SimpleSelect = <T,>({
 	options,
@@ -43,33 +47,38 @@ export const SimpleSelect = <T,>({
 	render
 }: OwnProps<T>) => {
 	const [open, setOpen] = useState(false)
+	const selectables = useRef(new Array(options.length).fill(null))
 	const currentItem = value && render(value)
+
 	return (
-		<Select onOpenChange={setOpen} open={open}>
+		<Select onOpenChange={pipeTap(setOpen)} open={open}>
 			<SelectTrigger>{currentItem ?? placeholder}</SelectTrigger>
 			<SelectContent>
-				{optional && (
-					<SelectItem
-						key="null"
-						onClick={() => {
-							onChange(undefined)
-							setOpen(false)
-						}}
-					>
-						{placeholder}
-					</SelectItem>
-				)}
-				{options.map((value, idx) => (
-					<SelectItem
-						key={`${idx}-${render(value)}`}
-						onClick={() => {
-							onChange(value)
-							setOpen(false)
-						}}
-					>
-						{render(value)}
-					</SelectItem>
-				))}
+				<FocusTravel vertical>
+					{optional && (
+						<SelectItem
+							key="null"
+							onClick={() => {
+								onChange(undefined)
+								setOpen(false)
+							}}
+						>
+							{placeholder}
+						</SelectItem>
+					)}
+					{options.map((value, idx) => (
+						<SelectItem
+							key={`${idx}-${render(value)}`}
+							ref={el => (selectables.current[idx] = el)}
+							onClick={() => {
+								onChange(value)
+								setOpen(false)
+							}}
+						>
+							{render(value)}
+						</SelectItem>
+					))}
+				</FocusTravel>
 			</SelectContent>
 		</Select>
 	)

@@ -53,3 +53,14 @@ export const computeSignal = <T, R>(
 	signal: Signal<T>,
 	fn: (v: T) => R
 ): ReadonlySignal<R> => computed(() => fn(signal.value))
+
+export function hasMethod<T extends object>(
+	obj: T | null | undefined,
+	methodName: string
+): obj is T & { [K in typeof methodName]: (...args: any[]) => any } {
+	return (
+		obj != null &&
+		methodName in obj &&
+		typeof (obj as any)[methodName] === 'function'
+	)
+}
