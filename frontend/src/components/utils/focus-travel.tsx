@@ -1,15 +1,6 @@
-import { caseOf, match } from '@/lib/match'
+import {} from '@/lib/match'
 import { hasMethod } from '@/lib/utils'
-import {
-	always,
-	converge,
-	dec,
-	findIndex,
-	identity,
-	inc,
-	pipe,
-	sort
-} from 'ramda'
+import { converge, dec, findIndex, identity, inc, pipe, sort } from 'ramda'
 import { type PropsWithChildren, useEffect, useRef } from 'react'
 import KeyListener from './key-listener'
 
@@ -18,10 +9,10 @@ type OwnProps = PropsWithChildren<{
 }>
 
 enum Direction {
-	Right = 0,
-	Left = 1,
-	Up = 2,
-	Down = 3
+	Right = 'Right',
+	Left = 'Left',
+	Up = 'Up',
+	Down = 'Down'
 }
 
 const defaultFocusable =
@@ -43,10 +34,7 @@ const sorters = {
 }
 
 const isLeftOrUp = (dir: Direction) =>
-	always(dir === Direction.Left || dir === Direction.Up)
-
-const isRightOrDown = (dir: Direction) =>
-	always(dir === Direction.Right || dir === Direction.Down)
+	dir === Direction.Left || dir === Direction.Up
 
 const clampIndex = (idx: number, xs: HTMLElement[]) =>
 	xs[(idx + xs.length) % xs.length]
@@ -63,7 +51,7 @@ const focusNext = (dir: Direction) =>
 			pipe(
 				sortFocusable(dir),
 				findIndex(e => e === document.activeElement),
-				match(caseOf([isLeftOrUp(dir)], dec), caseOf([isRightOrDown(dir)], inc))
+				isLeftOrUp(dir) ? dec : inc
 			),
 			identity
 		]),
@@ -91,7 +79,6 @@ const FocusTravel = ({
 	return (
 		<KeyListener
 			onArrowDown={focus(Direction.Down)}
-			onArrowUp={focus(Direction.Up)}
 			onArrowLeft={focus(Direction.Left)}
 			onArrowRight={focus(Direction.Right)}
 			ref={ref}
