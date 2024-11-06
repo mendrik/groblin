@@ -1,6 +1,6 @@
 import {} from '@/lib/match'
 import { hasMethod } from '@/lib/utils'
-import { converge, dec, findIndex, identity, inc, pipe, sort } from 'ramda'
+import { converge, findIndex, identity, inc, o, pipe, sort } from 'ramda'
 import { type PropsWithChildren, useEffect, useRef } from 'react'
 import KeyListener from './key-listener'
 
@@ -27,14 +27,19 @@ const getFocusableElements = (selector: string) => (el: HTMLElement | null) =>
 	Array.from(el?.querySelectorAll(selector) ?? []) as HTMLElement[]
 
 const sorters = {
-	[Direction.Right]: (a: DOMRect, b: DOMRect) => a.left - b.left,
-	[Direction.Left]: (a: DOMRect, b: DOMRect) => a.left - b.left,
-	[Direction.Up]: (a: DOMRect, b: DOMRect) => a.top - b.top,
-	[Direction.Down]: (a: DOMRect, b: DOMRect) => a.top - b.top
+	[Direction.Right]: (a: DOMRect, b: DOMRect) => {
+		return a.top - b.top || a.left - b.left
+	},
+	[Direction.Left]: (a: DOMRect, b: DOMRect) => {
+		return b.top - a.top || b.left - a.left
+	},
+	[Direction.Up]: (a: DOMRect, b: DOMRect) => {
+		return b.top - a.top || a.left - b.left
+	},
+	[Direction.Down]: (a: DOMRect, b: DOMRect) => {
+		return a.top - b.top || b.left - a.left
+	}
 }
-
-const isLeftOrUp = (dir: Direction) =>
-	dir === Direction.Left || dir === Direction.Up
 
 const clampIndex = (idx: number, xs: HTMLElement[]) =>
 	xs[(idx + xs.length) % xs.length]
@@ -47,11 +52,11 @@ const sortFocusable = (dir: Direction) =>
 const focusNext = (dir: Direction) =>
 	pipe(
 		getFocusableElements(defaultFocusable),
+		sortFocusable(dir),
 		converge(clampIndex, [
-			pipe(
-				sortFocusable(dir),
-				findIndex(e => e === document.activeElement),
-				isLeftOrUp(dir) ? dec : inc
+			o(
+				inc,
+				findIndex(e => e === document.activeElement)
 			),
 			identity
 		]),
