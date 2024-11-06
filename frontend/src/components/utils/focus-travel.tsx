@@ -28,8 +28,8 @@ const getFocusableElements = (selector: string) => (el: HTMLElement | null) =>
 
 const sorters = {
 	[Direction.Right]: (a: DOMRect, b: DOMRect) => a.left - b.left,
-	[Direction.Left]: (a: DOMRect, b: DOMRect) => b.left - a.left,
-	[Direction.Up]: (a: DOMRect, b: DOMRect) => b.top - a.top,
+	[Direction.Left]: (a: DOMRect, b: DOMRect) => a.left - b.left,
+	[Direction.Up]: (a: DOMRect, b: DOMRect) => a.top - b.top,
 	[Direction.Down]: (a: DOMRect, b: DOMRect) => a.top - b.top
 }
 
@@ -78,6 +78,7 @@ const FocusTravel = ({
 
 	return (
 		<KeyListener
+			onArrowUp={focus(Direction.Up)}
 			onArrowDown={focus(Direction.Down)}
 			onArrowLeft={focus(Direction.Left)}
 			onArrowRight={focus(Direction.Right)}
