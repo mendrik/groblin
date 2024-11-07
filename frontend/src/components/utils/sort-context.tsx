@@ -1,14 +1,17 @@
 import {} from '@/lib/utils'
-import { $tags } from '@/state/tag'
 import {
 	DndContext,
 	KeyboardSensor,
 	PointerSensor,
+	type UniqueIdentifier,
 	closestCenter,
 	useSensor,
 	useSensors
 } from '@dnd-kit/core'
-import { restrictToHorizontalAxis } from '@dnd-kit/modifiers'
+import {
+	restrictToHorizontalAxis,
+	restrictToParentElement
+} from '@dnd-kit/modifiers'
 import {
 	SortableContext,
 	type SortingStrategy,
@@ -21,13 +24,26 @@ import {} from '../ui/tags/tag-create'
 import {} from '../ui/tags/tag-delete'
 import {} from '../ui/tags/tag-edit'
 
-type Ownprops = PropsWithChildren<{
+type Identifyable = {
+	id: UniqueIdentifier
+}
+
+type Ownprops<T extends Identifyable> = PropsWithChildren<{
 	strategy?: SortingStrategy
+	values: T[]
 }>
 
-export const SortContext = ({ strategy, children }: Ownprops) => {
+export const SortContext = <T extends Identifyable>({
+	strategy,
+	values,
+	children
+}: Ownprops<T>) => {
 	const sensors = useSensors(
-		useSensor(PointerSensor),
+		useSensor(PointerSensor, {
+			activationConstraint: {
+				distance: 3
+			}
+		}),
 		useSensor(KeyboardSensor, {
 			coordinateGetter: sortableKeyboardCoordinates
 		})
@@ -36,11 +52,11 @@ export const SortContext = ({ strategy, children }: Ownprops) => {
 	return (
 		<DndContext
 			sensors={sensors}
-			modifiers={[restrictToHorizontalAxis]}
+			modifiers={[restrictToHorizontalAxis, restrictToParentElement]}
 			collisionDetection={closestCenter}
 			onDragEnd={console.dir}
 		>
-			<SortableContext items={$tags.value} strategy={strategy}>
+			<SortableContext items={values} strategy={strategy}>
 				{children}
 			</SortableContext>
 		</DndContext>

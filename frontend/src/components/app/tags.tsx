@@ -53,7 +53,10 @@ export const Tags = () => {
 
 	return (
 		<div className="flex flex-row gap-1 items-center">
-			<SortContext strategy={horizontalListSortingStrategy}>
+			<SortContext
+				strategy={horizontalListSortingStrategy}
+				values={$tags.value}
+			>
 				<Tabs
 					value={`${notNil($tag).id}`}
 					className="w-fit"
@@ -61,7 +64,7 @@ export const Tags = () => {
 				>
 					<TabsList className="h-8 select-none" id="tags">
 						{$tags.value.map(tag => (
-							<SortableItem key={`${tag.id}`} id={tag.id}>
+							<SortableItem key={`${tag.id}`} id={tag.id} className="h-7">
 								{tag.id === notNil($tag).id ? (
 									<ActiveTab tag={tag} key={tag.id} />
 								) : (

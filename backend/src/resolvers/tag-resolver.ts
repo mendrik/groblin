@@ -1,6 +1,7 @@
 import { Role } from '@shared/enums.ts'
 import { failOn } from '@shared/utils/guards.ts'
 import { injectable } from 'inversify'
+import { sql } from 'kysely'
 import { T, isNil } from 'ramda'
 import type { Context } from 'src/context.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
@@ -75,7 +76,7 @@ export class TagResolver {
 			.selectFrom('tag')
 			.selectAll()
 			.where('project_id', '=', user.lastProjectId)
-			.orderBy('id', 'asc')
+			.orderBy('order', 'asc')
 			.execute()
 	}
 
@@ -84,11 +85,18 @@ export class TagResolver {
 		@Arg('data', () => InsertTag) data: InsertTag,
 		@Ctx() { db, pubSub, extra: user }: Context
 	): Promise<Tag> {
+		const { max_order } = (await db
+			.selectFrom('tag')
+			.select(sql`max("order")`.as('max_order'))
+			.where('project_id', '=', user.lastProjectId)
+			.executeTakeFirstOrThrow()) as { max_order: number }
+
 		const { id } = await db
 			.insertInto('tag')
 			.values({
 				...data,
-				project_id: user.lastProjectId
+				project_id: user.lastProjectId,
+				order: max_order + 1
 			})
 			.returning('id')
 			.executeTakeFirstOrThrow()

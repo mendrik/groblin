@@ -34,6 +34,7 @@ export interface Tag {
   id: Generated<number>;
   master: Generated<boolean>;
   name: string;
+  order: Generated<number>;
   parent_id: number | null;
   project_id: number;
 }
