@@ -21,20 +21,14 @@ import { toast } from 'sonner'
 import { type TypeOf, strictObject } from 'zod'
 
 const registrationSchema = strictObject({
-	name: stringField('Name', EditorType.Input).default('Andreas Herd'),
-	email: stringField('Email', EditorType.Email, 'username').default(
-		'mendrik76@gmail.com'
-	),
-	password: stringField(
-		'Password',
-		EditorType.Password,
-		'new-password'
-	).default('bla'),
+	name: stringField('Name', EditorType.Input, 'name', 'Full name'),
+	email: stringField('Email', EditorType.Email, 'username', 'your@email.com'),
+	password: stringField('Password', EditorType.Password, 'new-password'),
 	repeatPassword: stringField(
 		'Repeat password',
 		EditorType.Password,
 		'new-password'
-	).default('bla')
+	)
 }).refine(data => data.password === data.repeatPassword, {
 	message: 'Passwords must match',
 	path: ['repeatPassword']
@@ -71,7 +65,8 @@ export const RegistrationDialog = () => {
 				<DialogHeader>
 					<DialogTitle>Register an account</DialogTitle>
 					<DialogDescription>
-						Sign up to Groblin and create your first project.
+						Sign up to Groblin and create your first project. We will send you a
+						registration email to confirm your account.
 					</DialogDescription>
 				</DialogHeader>
 				<ZodForm
@@ -92,7 +87,7 @@ export const RegistrationDialog = () => {
 							</Link>
 							?
 						</div>
-						<Button type="submit">Send email</Button>
+						<Button type="submit">Register</Button>
 					</DialogFooter>
 				</ZodForm>
 			</DialogContent>

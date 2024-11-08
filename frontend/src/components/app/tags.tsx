@@ -1,8 +1,6 @@
 import type { Tag } from '@/gql/graphql'
 import { notNil, setSignal } from '@/lib/utils'
 import { $tag, $tags } from '@/state/tag'
-import {} from '@dnd-kit/core'
-import {} from '@dnd-kit/modifiers'
 import { horizontalListSortingStrategy } from '@dnd-kit/sortable'
 import { IconTag } from '@tabler/icons-react'
 import {
@@ -24,12 +22,11 @@ type ActiveTabProps = { tag: Tag }
 const ActiveTab = ({ tag }: ActiveTabProps) => {
 	return (
 		<DropdownMenu>
-			<DropdownMenuTrigger
-				asChild
-				className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-background text-foreground shadow text-xs"
-			>
-				<div className="truncate w-full overflow-hidden">{tag.name}</div>
-			</DropdownMenuTrigger>
+			<SortableItem key={`${tag.id}`} id={tag.id} className="h-7">
+				<DropdownMenuTrigger className="inline-flex items-center justify-center h-7 whitespace-nowrap rounded-md px-3 py-1 font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-background text-foreground shadow text-xs">
+					<div className="truncate w-full overflow-hidden">{tag.name}</div>
+				</DropdownMenuTrigger>
+			</SortableItem>
 			<DropdownMenuContent className="w-56" sideOffset={6} align="start">
 				<DropdownMenuItem onSelect={() => openTagEdit(tag)}>
 					Settings
@@ -63,11 +60,11 @@ export const Tags = () => {
 					onValueChange={selectTag}
 				>
 					<TabsList className="h-8 select-none" id="tags">
-						{$tags.value.map(tag => (
-							<SortableItem key={`${tag.id}`} id={tag.id} className="h-7">
-								{tag.id === notNil($tag).id ? (
-									<ActiveTab tag={tag} key={tag.id} />
-								) : (
+						{$tags.value.map(tag =>
+							tag.id === notNil($tag).id ? (
+								<ActiveTab tag={tag} key={tag.id} />
+							) : (
+								<SortableItem key={`${tag.id}`} id={tag.id} className="h-7">
 									<TabsTrigger
 										key={tag.id}
 										value={`${tag.id}`}
@@ -77,9 +74,9 @@ export const Tags = () => {
 											{tag.name}
 										</div>
 									</TabsTrigger>
-								)}
-							</SortableItem>
-						))}
+								</SortableItem>
+							)
+						)}
 					</TabsList>
 				</Tabs>
 			</SortContext>
