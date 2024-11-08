@@ -28,7 +28,8 @@ gql`
     whoami {
 		id
 		email
-		name		
+		name	
+		lastProjectId	
 	}
   }
 `

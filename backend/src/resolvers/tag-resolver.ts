@@ -20,7 +20,6 @@ import {
 	Subscription,
 	UseMiddleware
 } from 'type-graphql'
-import type { LoggedInUser } from './auth-resolver.ts'
 
 @ObjectType()
 export class Tag {
@@ -57,9 +56,9 @@ export class ChangeTagInput {
 	@Field(type => Int, { nullable: true })
 	parent_id?: number
 }
-type Payload = { user: Required<LoggedInUser> }
 
-type Filter = { payload: Payload; context: Context }
+type TagsUpdatedArgs = { lastProjectId: number }
+type TopicSubscription = { args: TagsUpdatedArgs; context: Context }
 
 @injectable()
 @UseMiddleware(LogAccess)
@@ -68,11 +67,11 @@ type Filter = { payload: Payload; context: Context }
 export class TagResolver {
 	@Subscription(returns => Boolean, {
 		topics: Topic.TagsUpdated,
-		filter: ({ payload, context }: Filter) => {
-			return context.extra.lastProjectId === payload.user.lastProjectId
+		filter: ({ args, context }: TopicSubscription) => {
+			return args.lastProjectId === context.extra.lastProjectId
 		}
 	})
-	tagsUpdated() {
+	tagsUpdated(@Arg('lastProjectId', () => Int) _: number) {
 		return true
 	}
 
@@ -107,7 +106,7 @@ export class TagResolver {
 			.returning('id')
 			.executeTakeFirstOrThrow()
 
-		pubSub.publish(Topic.TagsUpdated, { user })
+		pubSub.publish(Topic.TagsUpdated, true)
 		return await this.getTag(db, id)
 	}
 
@@ -131,7 +130,7 @@ export class TagResolver {
 			.where('id', '=', data.id)
 			.where('project_id', '=', user.lastProjectId)
 			.executeTakeFirst()
-		pubSub.publish(Topic.TagsUpdated, { user })
+		pubSub.publish(Topic.TagsUpdated, true)
 		return numUpdatedRows > 0 // Returns true if at least one row was updated
 	}
 
@@ -145,7 +144,7 @@ export class TagResolver {
 			.where('id', '=', id)
 			.where('project_id', '=', user.lastProjectId)
 			.executeTakeFirst()
-		pubSub.publish(Topic.TagsUpdated, { user })
+		pubSub.publish(Topic.TagsUpdated, true)
 		return numDeletedRows > 0
 	}
 }

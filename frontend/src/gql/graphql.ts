@@ -154,6 +154,11 @@ export type Subscription = {
   tagsUpdated: Scalars['Boolean']['output'];
 };
 
+
+export type SubscriptionTagsUpdatedArgs = {
+  lastProjectId: Scalars['Int']['input'];
+};
+
 export type Tag = {
   id: Scalars['Int']['output'];
   master: Scalars['Boolean']['output'];
@@ -171,7 +176,9 @@ export type GetProjectQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type GetProjectQuery = { getProject: { nodes: Array<{ ' $fragmentRefs'?: { 'NodeFragment': NodeFragment } }>, tags: Array<{ id: number, name: string, master: boolean, parent_id?: number | null }> } };
 
-export type TagsUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+export type TagsUpdatedSubscriptionVariables = Exact<{
+  lastProjectId: Scalars['Int']['input'];
+}>;
 
 
 export type TagsUpdatedSubscription = { tagsUpdated: boolean };
@@ -247,7 +254,7 @@ export type RegisterMutation = { register: boolean };
 export type WhoAmIQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type WhoAmIQuery = { whoami?: { id: number, email: string, name: string } | null };
+export type WhoAmIQuery = { whoami?: { id: number, email: string, name: string, lastProjectId: number } | null };
 
 export type LoginMutationVariables = Exact<{
   data: Login;
@@ -308,8 +315,8 @@ export const GetProjectDocument = new TypedDocumentString(`
   parent_id
 }`) as unknown as TypedDocumentString<GetProjectQuery, GetProjectQueryVariables>;
 export const TagsUpdatedDocument = new TypedDocumentString(`
-    subscription TagsUpdated {
-  tagsUpdated
+    subscription TagsUpdated($lastProjectId: Int!) {
+  tagsUpdated(lastProjectId: $lastProjectId)
 }
     `) as unknown as TypedDocumentString<TagsUpdatedSubscription, TagsUpdatedSubscriptionVariables>;
 export const GetTagsDocument = new TypedDocumentString(`
@@ -389,6 +396,7 @@ export const WhoAmIDocument = new TypedDocumentString(`
     id
     email
     name
+    lastProjectId
   }
 }
     `) as unknown as TypedDocumentString<WhoAmIQuery, WhoAmIQueryVariables>;

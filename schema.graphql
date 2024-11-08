@@ -106,5 +106,5 @@ input ChangeTagInput {
 
 type Subscription {
   nodesUpdated: Boolean!
-  tagsUpdated: Boolean!
+  tagsUpdated(lastProjectId: Int!): Boolean!
 }

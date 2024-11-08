@@ -8,11 +8,19 @@ export enum Topic {
 	TagsUpdated = 'tagsUpdated'
 }
 
+type ProjectId = number
+
+type PubSubTopics = {
+	PROJECT_TAGS: [Topic.TagsUpdated, ProjectId]
+	PROJECT_NODES: [Topic.NodesUpdated, ProjectId]
+	USER_REGISTERED: [Topic.UserRegistered]
+}
+
 class LoggingPubSub implements PubSub {
 	private pubSub: PubSub
 
 	constructor() {
-		this.pubSub = createPubSub()
+		this.pubSub = createPubSub<PubSubTopics>()
 	}
 
 	publish(routingKey: string, ...args: unknown[]): void {

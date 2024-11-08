@@ -9,16 +9,17 @@ import {
 	TagsUpdatedDocument,
 	UpdateTagDocument
 } from '@/gql/graphql'
-import { setSignal } from '@/lib/utils'
+import { notNil, setSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import { failOn } from '@shared/utils/guards'
 import gql from 'graphql-tag'
-import { isNil, prop } from 'ramda'
+import { isEmpty, isNil, prop, unless } from 'ramda'
+import { $user } from './user'
 
 /** ---- queries ---- **/
 gql`
-  subscription TagsUpdated {
-	tagsUpdated
+  subscription TagsUpdated($lastProjectId: Int!) {
+	tagsUpdated(lastProjectId: $lastProjectId)
   }
 `
 
@@ -59,9 +60,14 @@ gql`
 export const $tags = signal<Tag[]>([])
 export const $tag = signal<Tag>()
 
-subscribe(TagsUpdatedDocument, () =>
-	query(GetTagsDocument).then(prop('getTags')).then(setSignal($tags))
-)
+const tagSubscribe = () =>
+	subscribe(
+		TagsUpdatedDocument,
+		() => query(GetTagsDocument).then(prop('getTags')).then(setSignal($tags)),
+		{ lastProjectId: notNil($user).lastProjectId }
+	)
+
+$tags.subscribe(unless(isEmpty, tagSubscribe))
 
 export const insertTag = (data: InsertTag): Promise<Tag> =>
 	query(InsertTagDocument, {
