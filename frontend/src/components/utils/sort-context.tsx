@@ -2,7 +2,7 @@ import {} from '@/lib/utils'
 import {
 	DndContext,
 	KeyboardSensor,
-	PointerSensor,
+	MouseSensor,
 	type UniqueIdentifier,
 	closestCenter,
 	useSensor,
@@ -39,7 +39,7 @@ export const SortContext = <T extends Identifyable>({
 	children
 }: Ownprops<T>) => {
 	const sensors = useSensors(
-		useSensor(PointerSensor, {
+		useSensor(MouseSensor, {
 			activationConstraint: {
 				distance: 3
 			}
