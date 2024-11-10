@@ -40,9 +40,7 @@ export const SortContext = <T extends Identifyable>({
 }: Ownprops<T>) => {
 	const sensors = useSensors(
 		useSensor(MouseSensor, {
-			activationConstraint: {
-				distance: 3
-			}
+			activationConstraint: { distance: 3 }
 		}),
 		useSensor(KeyboardSensor, {
 			coordinateGetter: sortableKeyboardCoordinates
