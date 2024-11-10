@@ -27,9 +27,10 @@ const ActiveTab = ({ tag }: ActiveTabProps) => {
 				key={`${tag.id}`}
 				id={tag.id}
 				className="h-7 z-10"
-				renderer={({ listeners, setActivatorNodeRef }) => (
+				renderer={({ listeners, setActivatorNodeRef, isSorting }) => (
 					<DropdownMenuTrigger
 						className={cn(
+							{ 'cursor-grabbing': isSorting },
 							'inline-flex items-center justify-center h-7 whitespace-nowrap rounded-md p-1',
 							'ring-offset-background transition-all gap-1 text-foreground shadow',
 							'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
@@ -42,7 +43,9 @@ const ActiveTab = ({ tag }: ActiveTabProps) => {
 							onPointerDownCapture={stopPropagation}
 						>
 							<IconGripVertical
-								className="w-4 h-4 text-muted-foreground"
+								className={cn('w-4 h-4 text-muted-foreground', {
+									'cursor-grab': !isSorting
+								})}
 								stroke={1}
 							/>
 						</div>
