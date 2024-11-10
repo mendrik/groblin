@@ -1,8 +1,9 @@
 import type { Tag } from '@/gql/graphql'
-import { notNil, setSignal } from '@/lib/utils'
+import { stopPropagation } from '@/lib/dom-events'
+import { cn, notNil, setSignal } from '@/lib/utils'
 import { $tag, $tags } from '@/state/tag'
 import { horizontalListSortingStrategy } from '@dnd-kit/sortable'
-import { IconTag } from '@tabler/icons-react'
+import { IconGripVertical, IconTag } from '@tabler/icons-react'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -25,14 +26,27 @@ const ActiveTab = ({ tag }: ActiveTabProps) => {
 			<SortableItem
 				key={`${tag.id}`}
 				id={tag.id}
-				className="h-7"
+				className="h-7 z-10"
 				renderer={({ listeners, setActivatorNodeRef }) => (
 					<DropdownMenuTrigger
-						className="inline-flex items-center justify-center h-7 whitespace-nowrap rounded-md px-3 py-1 font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-background text-foreground shadow"
-						ref={setActivatorNodeRef}
-						{...listeners}
+						className={cn(
+							'inline-flex items-center justify-center h-7 whitespace-nowrap rounded-md p-1',
+							'ring-offset-background transition-all gap-1 text-foreground shadow',
+							'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+							'disabled:pointer-events-none bg-background'
+						)}
 					>
-						<div className="truncate w-full overflow-hidden text-xs">
+						<div
+							ref={setActivatorNodeRef}
+							{...listeners}
+							onPointerDownCapture={stopPropagation}
+						>
+							<IconGripVertical
+								className="w-4 h-4 text-muted-foreground"
+								stroke={1}
+							/>
+						</div>
+						<div className="truncate w-full overflow-hidden text-xs pr-2">
 							{tag.name}
 						</div>
 					</DropdownMenuTrigger>
@@ -79,13 +93,8 @@ export const Tags = () => {
 									key={`${tag.id}`}
 									id={tag.id}
 									className="h-7"
-									renderer={({ listeners, setActivatorNodeRef }) => (
-										<TabsTrigger
-											key={tag.id}
-											value={`${tag.id}`}
-											ref={setActivatorNodeRef}
-											{...listeners}
-										>
+									renderer={() => (
+										<TabsTrigger key={tag.id} value={`${tag.id}`}>
 											<div className="truncate w-full overflow-hidden text-xs">
 												{tag.name}
 											</div>
