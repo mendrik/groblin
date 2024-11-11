@@ -1,11 +1,16 @@
 import { forEach, tryCatch } from 'ramda'
 
-export const setItem =
+export const setItemAsync =
 	(key: string) =>
 	<T>(value: T) =>
 		void setTimeout(() => {
 			localStorage.setItem(key, JSON.stringify(value))
 		}, 20)
+
+export const setItem =
+	(key: string) =>
+	<T>(value: T) =>
+		localStorage.setItem(key, JSON.stringify(value))
 
 const safeParse = tryCatch(JSON.parse, console.error)
 

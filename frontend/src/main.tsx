@@ -1,14 +1,15 @@
-import { createRoot } from 'react-dom/client'
-import './index.css'
 import { Maybe } from 'purify-ts'
 import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { ThemeProvider } from './components/theme-provider'
 import { Toaster } from './components/ui/sonner'
+import './index.css'
 import { LoggedIn } from './routing/logged-in'
 import { LoggedOut } from './routing/logged-out'
-import { $user, whoAmI } from './state/user'
 import './state/project'
+import { loadProject } from './state/project'
+import { $user } from './state/user'
 
 const Main = () => (
 	<StrictMode>
@@ -31,7 +32,7 @@ const Main = () => (
 	</StrictMode>
 )
 
-whoAmI().finally(() =>
+loadProject().finally(() =>
 	Maybe.fromNullable(document.getElementById('app'))
 		.map(createRoot)
 		.map(r => r.render(<Main />))

@@ -1,15 +1,7 @@
 type Query {
-  whoami: LoggedInUser
   getNodes: [Node!]!
   getTags: [Tag!]!
-  getProject: Project!
-}
-
-type LoggedInUser {
-  id: Int!
-  name: String!
-  email: String!
-  lastProjectId: Int!
+  getProject: ProjectData!
 }
 
 type Node {
@@ -39,9 +31,23 @@ type Tag {
   parent_id: Int
 }
 
-type Project {
+type ProjectData {
+  project: Project!
+  user: LoggedInUser!
   nodes: [Node!]!
   tags: [Tag!]!
+}
+
+type Project {
+  id: Int!
+  name: String!
+}
+
+type LoggedInUser {
+  id: Int!
+  name: String!
+  email: String!
+  lastProjectId: Int!
 }
 
 type Mutation {

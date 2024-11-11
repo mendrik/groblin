@@ -132,15 +132,21 @@ export enum NodeType {
 }
 
 export type Project = {
+  id: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
+};
+
+export type ProjectData = {
   nodes: Array<Node>;
+  project: Project;
   tags: Array<Tag>;
+  user: LoggedInUser;
 };
 
 export type Query = {
   getNodes: Array<Node>;
-  getProject: Project;
+  getProject: ProjectData;
   getTags: Array<Tag>;
-  whoami?: Maybe<LoggedInUser>;
 };
 
 export type Registration = {
@@ -174,7 +180,7 @@ export type Token = {
 export type GetProjectQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetProjectQuery = { getProject: { nodes: Array<{ ' $fragmentRefs'?: { 'NodeFragment': NodeFragment } }>, tags: Array<{ id: number, name: string, master: boolean, parent_id?: number | null }> } };
+export type GetProjectQuery = { getProject: { user: { id: number, email: string, name: string, lastProjectId: number }, project: { name: string }, nodes: Array<{ ' $fragmentRefs'?: { 'NodeFragment': NodeFragment } }>, tags: Array<{ id: number, name: string, master: boolean, parent_id?: number | null }> } };
 
 export type TagsUpdatedSubscriptionVariables = Exact<{
   lastProjectId: Scalars['Int']['input'];
@@ -251,11 +257,6 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { register: boolean };
 
-export type WhoAmIQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type WhoAmIQuery = { whoami?: { id: number, email: string, name: string, lastProjectId: number } | null };
-
 export type LoginMutationVariables = Exact<{
   data: Login;
 }>;
@@ -295,6 +296,15 @@ export const NodeFragmentDoc = new TypedDocumentString(`
 export const GetProjectDocument = new TypedDocumentString(`
     query GetProject {
   getProject {
+    user {
+      id
+      email
+      name
+      lastProjectId
+    }
+    project {
+      name
+    }
     nodes {
       ...Node
     }
@@ -390,16 +400,6 @@ export const RegisterDocument = new TypedDocumentString(`
   register(data: $data)
 }
     `) as unknown as TypedDocumentString<RegisterMutation, RegisterMutationVariables>;
-export const WhoAmIDocument = new TypedDocumentString(`
-    query WhoAmI {
-  whoami {
-    id
-    email
-    name
-    lastProjectId
-  }
-}
-    `) as unknown as TypedDocumentString<WhoAmIQuery, WhoAmIQueryVariables>;
 export const LoginDocument = new TypedDocumentString(`
     mutation Login($data: Login!) {
   login(data: $data) {

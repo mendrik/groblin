@@ -9,8 +9,9 @@ import {
 	ResizablePanelGroup
 } from './components/ui/resizable'
 import { ScrollArea } from './components/ui/scroll-area'
-import { setSignal } from './lib/utils'
+import { notNil, setSignal } from './lib/utils'
 import { $panelSizes } from './state/panels'
+import { $project } from './state/project'
 
 export function App() {
 	return (
@@ -24,7 +25,7 @@ export function App() {
 					<ResizablePanel defaultSize={$panelSizes.value[0]}>
 						<div className="w-full h-11 shrink-0">
 							<h1 className="px-2 py-1 text-xl font-normal text-muted-foreground tracking-tight transition-colors truncate  w-full overflow-hidden">
-								My Test project
+								{notNil($project).name}
 							</h1>
 						</div>
 						<DocumentTree />

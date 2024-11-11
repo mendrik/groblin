@@ -15,7 +15,7 @@ import * as types from './graphql';
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 const documents = {
-    "\n  query GetProject {\n    getProject {\n\t\tnodes {\n            ...Node\n        }\n\t\ttags {\n\t\t\tid\n\t\t\tname\n\t\t\tmaster\n\t\t\tparent_id\t\n\t\t}\n    }\n  }\n": types.GetProjectDocument,
+    "\n  query GetProject {\n    getProject {\n\t\tuser {\n\t\t\tid\n\t\t\temail\n\t\t\tname\t\n\t\t\tlastProjectId\n\t\t}\n\t\tproject {\n\t\t\tname\n\t\t}\n\t\tnodes {\n            ...Node\n        }\n\t\ttags {\n\t\t\tid\n\t\t\tname\n\t\t\tmaster\n\t\t\tparent_id\t\n\t\t}\n    }\n  }\n": types.GetProjectDocument,
     "\n  subscription TagsUpdated($lastProjectId: Int!) {\n\ttagsUpdated(lastProjectId: $lastProjectId)\n  }\n": types.TagsUpdatedDocument,
     "\n  query GetTags {\n    getTags {\n\t\tid\n        parent_id\n        name\n\t\tmaster\n    }\n  }\n": types.GetTagsDocument,
     "\n  mutation InsertTag($data: InsertTag!) {\n    insertTag(data: $data) {\n\t\tid\n\t\tname\n\t\tparent_id\n\t\tmaster\n\t}\n  }\n": types.InsertTagDocument,
@@ -28,7 +28,6 @@ const documents = {
     "\n  mutation UpdateNode($data: ChangeNodeInput!) {\n    updateNode(data: $data)\n  }\n": types.UpdateNodeDocument,
     "\n  mutation DeleteNodeById($order: Int!, $parent_id: Int!, $id: Int!) {\n    deleteNodeById(order: $order, parent_id: $parent_id, id: $id)\n  }\n": types.DeleteNodeByIdDocument,
     "\n  mutation Register($data: Registration!) {\n    register(data: $data)\n  }\n": types.RegisterDocument,
-    "\n  query WhoAmI {\n    whoami {\n\t\tid\n\t\temail\n\t\tname\t\n\t\tlastProjectId\t\n\t}\n  }\n": types.WhoAmIDocument,
     "\n  mutation Login($data: Login!) {\n    login(data: $data) {\n\t\ttoken\n\t\texpiresDate\n\t}\n  }\n": types.LoginDocument,
     "\n  mutation Logout {\n    logout\n  }\n": types.LogoutDocument,
 };
@@ -36,7 +35,7 @@ const documents = {
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query GetProject {\n    getProject {\n\t\tnodes {\n            ...Node\n        }\n\t\ttags {\n\t\t\tid\n\t\t\tname\n\t\t\tmaster\n\t\t\tparent_id\t\n\t\t}\n    }\n  }\n"): typeof import('./graphql').GetProjectDocument;
+export function graphql(source: "\n  query GetProject {\n    getProject {\n\t\tuser {\n\t\t\tid\n\t\t\temail\n\t\t\tname\t\n\t\t\tlastProjectId\n\t\t}\n\t\tproject {\n\t\t\tname\n\t\t}\n\t\tnodes {\n            ...Node\n        }\n\t\ttags {\n\t\t\tid\n\t\t\tname\n\t\t\tmaster\n\t\t\tparent_id\t\n\t\t}\n    }\n  }\n"): typeof import('./graphql').GetProjectDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -85,10 +84,6 @@ export function graphql(source: "\n  mutation DeleteNodeById($order: Int!, $pare
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation Register($data: Registration!) {\n    register(data: $data)\n  }\n"): typeof import('./graphql').RegisterDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  query WhoAmI {\n    whoami {\n\t\tid\n\t\temail\n\t\tname\t\n\t\tlastProjectId\t\n\t}\n  }\n"): typeof import('./graphql').WhoAmIDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

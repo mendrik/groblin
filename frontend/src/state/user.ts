@@ -5,32 +5,21 @@ import {
 	LoginDocument,
 	LogoutDocument,
 	RegisterDocument,
-	type Registration,
-	WhoAmIDocument
+	type Registration
 } from '@/gql/graphql'
-import { removeItems, setItem } from '@/lib/local-storage'
+import { getItem, removeItems, setItem } from '@/lib/local-storage'
 import { setSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import { evolveAlt } from '@shared/utils/evolve-alt'
 import gql from 'graphql-tag'
 import { pipe, prop } from 'ramda'
+import { loadProject } from './project'
 
 export const $user = signal<LoggedInUser>()
 
 gql`
   mutation Register($data: Registration!) {
     register(data: $data)
-  }
-`
-
-gql`
-  query WhoAmI {
-    whoami {
-		id
-		email
-		name	
-		lastProjectId	
-	}
   }
 `
 
@@ -52,18 +41,14 @@ gql`
 export const register = (data: Registration): Promise<boolean> =>
 	query(RegisterDocument, { data }).then(prop('register'))
 
-export const whoAmI = () =>
-	query(WhoAmIDocument)
-		.then(prop('whoami'))
-		.then(setSignal($user))
-		.catch(logoutClient)
-
-export const logout = () => query(LogoutDocument).then(whoAmI)
+export const logout = () => query(LogoutDocument).then(logoutClient)
 
 export const logoutClient = () => {
 	removeItems(['token', 'tokenExpiresDate'])
 	setSignal($user, null)
 }
+
+export const loggedIn = () => getItem('token') != null
 
 export const login = (data: Login) =>
 	query(LoginDocument, { data })
@@ -74,4 +59,4 @@ export const login = (data: Login) =>
 				date: pipe(prop('expiresDate'), setItem('tokenExpiresDate'))
 			})
 		)
-		.then(whoAmI)
+		.then(loadProject)

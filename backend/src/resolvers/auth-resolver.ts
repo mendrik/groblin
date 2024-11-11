@@ -21,7 +21,6 @@ import {
 	Int,
 	Mutation,
 	ObjectType,
-	Query,
 	Resolver,
 	UseMiddleware
 } from 'type-graphql'
@@ -161,11 +160,6 @@ export class AuthResolver {
 			token: jwt.sign(ctx.extra, jwtSecret, { expiresIn: ms(expiresIn) }),
 			expiresDate: new Date(Date.now() + ms(expiresIn))
 		}
-	}
-
-	@Query(returns => LoggedInUser, { nullable: true })
-	async whoami(@Ctx() ctx: Context) {
-		return ctx.extra
 	}
 
 	@Mutation(returns => Boolean)
