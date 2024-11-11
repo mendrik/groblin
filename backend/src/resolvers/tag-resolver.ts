@@ -142,8 +142,10 @@ export class TagResolver {
 		const { numDeletedRows } = await db
 			.deleteFrom('tag')
 			.where('id', '=', id)
+			.where('master', '=', false)
 			.where('project_id', '=', user.lastProjectId)
 			.executeTakeFirst()
+
 		pubSub.publish(Topic.TagsUpdated, true)
 		return numDeletedRows > 0
 	}

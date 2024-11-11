@@ -11,7 +11,7 @@ import {
 import type { Tag } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
 import { notNil, setSignal } from '@/lib/utils'
-import { deleteTag } from '@/state/tag'
+import { defaultTag, deleteTag, selectTag } from '@/state/tag'
 import { signal } from '@preact/signals-react'
 import { F, T, pipe } from 'ramda'
 
@@ -20,6 +20,7 @@ export const $deleteDialogOpen = signal(false)
 const close = pipe(F, setSignal($deleteDialogOpen))
 export const openTagDelete = pipe(
 	setSignal($editedTag),
+	pipe(defaultTag, selectTag),
 	T,
 	setSignal($deleteDialogOpen)
 )

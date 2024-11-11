@@ -13,7 +13,7 @@ import { notNil, setSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import { failOn } from '@shared/utils/guards'
 import gql from 'graphql-tag'
-import { isEmpty, isNil, prop, unless } from 'ramda'
+import { find, isEmpty, isNil, pipe, prop, unless } from 'ramda'
 import { $user } from './user'
 
 /** ---- queries ---- **/
@@ -83,5 +83,11 @@ export const deleteTag = (id: number) =>
 
 export const updateTag = (data: ChangeTagInput): Promise<boolean> =>
 	query(UpdateTagDocument, { data }).then(x => x.updateTag)
+
+export const defaultTag = (): Tag =>
+	pipe(
+		find<Tag>(t => t.master),
+		failOn(isNil, 'No default tag')
+	)($tags.value)
 
 export const selectTag = setSignal($tag)
