@@ -1,9 +1,8 @@
 import type { Tag } from '@/gql/graphql'
-import { stopPropagation } from '@/lib/dom-events'
 import { cn, notNil, setSignal } from '@/lib/utils'
 import { $tag, $tags } from '@/state/tag'
 import { horizontalListSortingStrategy } from '@dnd-kit/sortable'
-import { IconGripVertical, IconTag } from '@tabler/icons-react'
+import { IconTag } from '@tabler/icons-react'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -18,40 +17,26 @@ import { IconButton } from '../utils/icon-button'
 import { SortContext } from '../utils/sort-context'
 import { SortableItem } from '../utils/sortable-item'
 
-type ActiveTabProps = { tag: Tag }
+type TabProps = { tag: Tag }
 
-const ActiveTab = ({ tag }: ActiveTabProps) => {
+const ActiveTab = ({ tag }: TabProps) => {
 	return (
 		<DropdownMenu>
 			<SortableItem
 				key={`${tag.id}`}
 				id={tag.id}
-				className="h-7 z-10"
-				renderer={({ listeners, setActivatorNodeRef, isSorting }) => (
+				className="h-7 z-1"
+				renderer={({ listeners }) => (
 					<DropdownMenuTrigger
 						className={cn(
-							{ 'cursor-grabbing': isSorting },
-							'inline-flex items-center justify-center h-7 whitespace-nowrap rounded-md p-1',
-							'ring-offset-background transition-all gap-1 text-foreground shadow',
-							'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+							'h-7 whitespace-nowrap rounded-md',
+							'ring-offset-background transition-all text-foreground shadow',
+							'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1',
 							'disabled:pointer-events-none bg-background'
 						)}
+						{...listeners}
 					>
-						<div
-							ref={setActivatorNodeRef}
-							{...listeners}
-							onPointerDownCapture={stopPropagation}
-						>
-							<IconGripVertical
-								className={cn('w-4 h-4 text-muted-foreground', {
-									'cursor-grab': !isSorting
-								})}
-								stroke={1}
-							/>
-						</div>
-						<div className="truncate w-full overflow-hidden text-xs pr-2">
-							{tag.name}
-						</div>
+						<TagName tag={tag} />
 					</DropdownMenuTrigger>
 				)}
 			/>
@@ -72,6 +57,10 @@ const selectTag = (tagIdStr: string) =>
 		$tag,
 		$tags.value.find(t => `${t.id}` === tagIdStr)
 	)
+
+const TagName = ({ tag }: TabProps) => (
+	<div className="truncate w-full overflow-hidden text-xs px-3">{tag.name}</div>
+)
 
 export const Tags = () => {
 	if (!$tag.value) return null
@@ -96,11 +85,14 @@ export const Tags = () => {
 									key={`${tag.id}`}
 									id={tag.id}
 									className="h-7"
-									renderer={() => (
-										<TabsTrigger key={tag.id} value={`${tag.id}`}>
-											<div className="truncate w-full overflow-hidden text-xs">
-												{tag.name}
-											</div>
+									renderer={({ listeners }) => (
+										<TabsTrigger
+											key={tag.id}
+											value={`${tag.id}`}
+											className="p-0"
+											{...listeners}
+										>
+											<TagName tag={tag} />
 										</TabsTrigger>
 									)}
 								/>
@@ -112,7 +104,7 @@ export const Tags = () => {
 			<IconButton
 				icon={IconTag}
 				size="sm"
-				variant="secondary"
+				variant="ghost"
 				onClick={openTagCreate}
 			>
 				new tag

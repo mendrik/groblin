@@ -1,7 +1,6 @@
 import {} from '@/lib/utils'
 import {
 	DndContext,
-	KeyboardSensor,
 	MouseSensor,
 	type UniqueIdentifier,
 	closestCenter,
@@ -12,11 +11,7 @@ import {
 	restrictToHorizontalAxis,
 	restrictToParentElement
 } from '@dnd-kit/modifiers'
-import {
-	SortableContext,
-	type SortingStrategy,
-	sortableKeyboardCoordinates
-} from '@dnd-kit/sortable'
+import { SortableContext, type SortingStrategy } from '@dnd-kit/sortable'
 import type { PropsWithChildren } from 'react'
 import {} from '../ui/dropdown-menu'
 import {} from '../ui/tabs'
@@ -41,9 +36,6 @@ export const SortContext = <T extends Identifyable>({
 	const sensors = useSensors(
 		useSensor(MouseSensor, {
 			activationConstraint: { distance: 3 }
-		}),
-		useSensor(KeyboardSensor, {
-			coordinateGetter: sortableKeyboardCoordinates
 		})
 	)
 
