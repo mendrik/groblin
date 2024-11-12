@@ -3,11 +3,11 @@ import { cn, notNil, setSignal } from '@/lib/utils'
 import { $tag, $tags } from '@/state/tag'
 import { horizontalListSortingStrategy } from '@dnd-kit/sortable'
 import { IconTag } from '@tabler/icons-react'
+import { useState } from 'react'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger
+	DropdownMenuItem
 } from '../ui/dropdown-menu'
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs'
 import { TagCreate, openTagCreate } from '../ui/tags/tag-create'
@@ -20,24 +20,27 @@ import { SortableItem } from '../utils/sortable-item'
 type TabProps = { tag: Tag }
 
 const ActiveTab = ({ tag }: TabProps) => {
+	const [open, setOpen] = useState(false)
 	return (
-		<DropdownMenu>
+		<DropdownMenu open={open}>
 			<SortableItem
 				key={`${tag.id}`}
 				id={tag.id}
-				className="h-7 z-1"
+				className="h-7 z-10"
 				renderer={({ listeners }) => (
-					<DropdownMenuTrigger
+					<button
+						type="button"
 						className={cn(
 							'h-7 whitespace-nowrap rounded-md',
 							'ring-offset-background transition-all text-foreground shadow',
 							'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1',
 							'disabled:pointer-events-none bg-background'
 						)}
+						onClick={() => setOpen(!open)}
 						{...listeners}
 					>
 						<TagName tag={tag} />
-					</DropdownMenuTrigger>
+					</button>
 				)}
 			/>
 			<DropdownMenuContent className="w-56" sideOffset={6} align="start">
@@ -85,11 +88,12 @@ export const Tags = () => {
 									key={`${tag.id}`}
 									id={tag.id}
 									className="h-7"
-									renderer={({ listeners }) => (
+									renderer={({ listeners, setActivatorNodeRef }) => (
 										<TabsTrigger
 											key={tag.id}
 											value={`${tag.id}`}
 											className="p-0"
+											ref={setActivatorNodeRef}
 											{...listeners}
 										>
 											<TagName tag={tag} />
