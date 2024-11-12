@@ -2,6 +2,7 @@ import type { Tag } from '@/gql/graphql'
 import { cn, notNil, setSignal } from '@/lib/utils'
 import { $tag, $tags } from '@/state/tag'
 import { horizontalListSortingStrategy } from '@dnd-kit/sortable'
+import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
 import { IconTag } from '@tabler/icons-react'
 import { useState } from 'react'
 import {
@@ -22,16 +23,15 @@ type TabProps = { tag: Tag }
 const ActiveTab = ({ tag }: TabProps) => {
 	const [open, setOpen] = useState(false)
 	return (
-		<DropdownMenu open={open}>
+		<DropdownMenu open={open} onOpenChange={setOpen}>
 			<SortableItem
 				key={`${tag.id}`}
 				id={tag.id}
 				className="h-7 z-10"
 				renderer={({ listeners }) => (
-					<button
-						type="button"
+					<div
 						className={cn(
-							'h-7 whitespace-nowrap rounded-md',
+							'h-7 whitespace-nowrap rounded-md border border-red relative flex items-center justify-center',
 							'ring-offset-background transition-all text-foreground shadow',
 							'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1',
 							'disabled:pointer-events-none bg-background'
@@ -39,8 +39,9 @@ const ActiveTab = ({ tag }: TabProps) => {
 						onClick={() => setOpen(!open)}
 						{...listeners}
 					>
+						<DropdownMenuTrigger className="pointer-events-none opacity-0 w-full absolute inset-0" />
 						<TagName tag={tag} />
-					</button>
+					</div>
 				)}
 			/>
 			<DropdownMenuContent className="w-56" sideOffset={6} align="start">
