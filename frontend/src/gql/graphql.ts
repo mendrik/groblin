@@ -65,6 +65,7 @@ export type Mutation = {
   login: Token;
   logout: Scalars['Boolean']['output'];
   register: Scalars['Boolean']['output'];
+  reorderTag: Array<Tag>;
   updateNode: Scalars['Boolean']['output'];
   updateTag: Scalars['Boolean']['output'];
 };
@@ -99,6 +100,11 @@ export type MutationLoginArgs = {
 
 export type MutationRegisterArgs = {
   data: Registration;
+};
+
+
+export type MutationReorderTagArgs = {
+  data: ReorderTagInput;
 };
 
 
@@ -153,6 +159,11 @@ export type Registration = {
   email: Scalars['String']['input'];
   name: Scalars['String']['input'];
   password: Scalars['String']['input'];
+};
+
+export type ReorderTagInput = {
+  id: Scalars['Int']['input'];
+  overId: Scalars['Int']['input'];
 };
 
 export type Subscription = {
@@ -214,6 +225,13 @@ export type DeleteTagByIdMutationVariables = Exact<{
 
 
 export type DeleteTagByIdMutation = { deleteTagById: boolean };
+
+export type ReorderTagMutationVariables = Exact<{
+  data: ReorderTagInput;
+}>;
+
+
+export type ReorderTagMutation = { reorderTag: Array<{ id: number, name: string, parent_id?: number | null, master: boolean }> };
 
 export type NodeFragment = { id: number, name: string, order: number, type: NodeType, tag_id: number, parent_id?: number | null } & { ' $fragmentName'?: 'NodeFragment' };
 
@@ -359,6 +377,16 @@ export const DeleteTagByIdDocument = new TypedDocumentString(`
   deleteTagById(id: $id)
 }
     `) as unknown as TypedDocumentString<DeleteTagByIdMutation, DeleteTagByIdMutationVariables>;
+export const ReorderTagDocument = new TypedDocumentString(`
+    mutation ReorderTag($data: ReorderTagInput!) {
+  reorderTag(data: $data) {
+    id
+    name
+    parent_id
+    master
+  }
+}
+    `) as unknown as TypedDocumentString<ReorderTagMutation, ReorderTagMutationVariables>;
 export const NodesUpdatedDocument = new TypedDocumentString(`
     subscription NodesUpdated {
   nodesUpdated

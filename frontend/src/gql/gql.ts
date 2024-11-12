@@ -21,6 +21,7 @@ const documents = {
     "\n  mutation InsertTag($data: InsertTag!) {\n    insertTag(data: $data) {\n\t\tid\n\t\tname\n\t\tparent_id\n\t\tmaster\n\t}\n  }\n": types.InsertTagDocument,
     "\n  mutation UpdateTag($data: ChangeTagInput!) {\n    updateTag(data: $data)\n  }\n": types.UpdateTagDocument,
     "\n  mutation DeleteTagById($id: Int!) {\n    deleteTagById(id: $id)\n  }\n": types.DeleteTagByIdDocument,
+    "\n  mutation ReorderTag($data: ReorderTagInput!) {\n    reorderTag(data: $data) {\n\t\tid\n\t\tname\n\t\tparent_id\n\t\tmaster\n\t}\n  }\n": types.ReorderTagDocument,
     "\n  fragment Node on Node {\n\tid\n\tname\n\torder\n\ttype\n\ttag_id\n\tparent_id\n  }\n": types.NodeFragmentDoc,
     "\n  subscription NodesUpdated {\n\tnodesUpdated\n  }\n": types.NodesUpdatedDocument,
     "\n  query GetNodes {\n    getNodes {\n\t\t...Node\n    }\n  }\n": types.GetNodesDocument,
@@ -56,6 +57,10 @@ export function graphql(source: "\n  mutation UpdateTag($data: ChangeTagInput!) 
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation DeleteTagById($id: Int!) {\n    deleteTagById(id: $id)\n  }\n"): typeof import('./graphql').DeleteTagByIdDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation ReorderTag($data: ReorderTagInput!) {\n    reorderTag(data: $data) {\n\t\tid\n\t\tname\n\t\tparent_id\n\t\tmaster\n\t}\n  }\n"): typeof import('./graphql').ReorderTagDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

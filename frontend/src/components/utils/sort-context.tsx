@@ -1,6 +1,7 @@
 import {} from '@/lib/utils'
 import {
 	DndContext,
+	type DragEndEvent,
 	PointerSensor,
 	type UniqueIdentifier,
 	closestCenter,
@@ -25,12 +26,14 @@ type Identifyable = {
 
 type Ownprops<T extends Identifyable> = PropsWithChildren<{
 	strategy?: SortingStrategy
+	onDragEnd: (event: DragEndEvent) => void
 	values: T[]
 }>
 
 export const SortContext = <T extends Identifyable>({
 	strategy,
 	values,
+	onDragEnd,
 	children
 }: Ownprops<T>) => {
 	const sensors = useSensors(
@@ -44,7 +47,7 @@ export const SortContext = <T extends Identifyable>({
 			sensors={sensors}
 			modifiers={[restrictToHorizontalAxis, restrictToParentElement]}
 			collisionDetection={closestCenter}
-			onDragEnd={console.dir}
+			onDragEnd={onDragEnd}
 		>
 			<SortableContext items={values} strategy={strategy}>
 				{children}

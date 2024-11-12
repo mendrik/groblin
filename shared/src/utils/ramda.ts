@@ -1,4 +1,4 @@
-import { equals, keys, pickBy, tap } from 'ramda'
+import { assoc, equals, keys, pickBy, range, tap, zipWith } from 'ramda'
 
 type Last<Type extends any[]> = Type extends [...any[], infer R] ? R : never
 
@@ -43,3 +43,8 @@ export const findKeysByValue =
 		const matchingKeyObj: Record<K, V> = pickBy(equals(value))(record)
 		return keys(matchingKeyObj)
 	}
+
+export const addOrder =
+	<T extends object>(prop: keyof T) =>
+	(t: T[]): T[] =>
+		zipWith(assoc(prop), range(0, t.length), t) as T[]

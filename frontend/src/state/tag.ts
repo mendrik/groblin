@@ -5,6 +5,8 @@ import {
 	GetTagsDocument,
 	type InsertTag,
 	InsertTagDocument,
+	ReorderTagDocument,
+	type ReorderTagInput,
 	type Tag,
 	TagsUpdatedDocument,
 	UpdateTagDocument
@@ -57,6 +59,17 @@ gql`
   }
 `
 
+gql`
+  mutation ReorderTag($data: ReorderTagInput!) {
+    reorderTag(data: $data) {
+		id
+		name
+		parent_id
+		master
+	}
+  }
+`
+
 export const $tags = signal<Tag[]>([])
 export const $tag = signal<Tag>()
 
@@ -83,6 +96,11 @@ export const deleteTag = (id: number) =>
 
 export const updateTag = (data: ChangeTagInput): Promise<boolean> =>
 	query(UpdateTagDocument, { data }).then(x => x.updateTag)
+
+export const reorderTag = (data: ReorderTagInput): Promise<Tag[]> =>
+	query(ReorderTagDocument, { data })
+		.then(x => x.reorderTag)
+		.then(setSignal($tags))
 
 export const defaultTag = (): Tag =>
 	pipe(

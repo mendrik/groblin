@@ -1,6 +1,7 @@
 import type { Tag } from '@/gql/graphql'
 import { cn, notNil, setSignal } from '@/lib/utils'
-import { $tag, $tags } from '@/state/tag'
+import { $tag, $tags, reorderTag } from '@/state/tag'
+import type { DragEndEvent } from '@dnd-kit/core'
 import { horizontalListSortingStrategy } from '@dnd-kit/sortable'
 import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
 import { IconTag } from '@tabler/icons-react'
@@ -71,6 +72,14 @@ const TagName = ({ tag }: TabProps) => (
 	<div className="truncate w-full overflow-hidden text-xs px-3">{tag.name}</div>
 )
 
+const reorderCommand = ({ active, over }: DragEndEvent) => {
+	if (!over) return
+	reorderTag({
+		id: active.id as number,
+		overId: over.id as number
+	})
+}
+
 export const Tags = () => {
 	if (!$tag.value) return null
 
@@ -78,6 +87,7 @@ export const Tags = () => {
 		<div className="flex flex-row gap-1 items-center">
 			<SortContext
 				strategy={horizontalListSortingStrategy}
+				onDragEnd={reorderCommand}
 				values={$tags.value}
 			>
 				<Tabs
