@@ -44,7 +44,12 @@ const ActiveTab = ({ tag }: TabProps) => {
 					</div>
 				)}
 			/>
-			<DropdownMenuContent className="w-56" sideOffset={6} align="start">
+			<DropdownMenuContent
+				className="w-56"
+				sideOffset={4}
+				alignOffset={-2}
+				align="start"
+			>
 				<DropdownMenuItem onSelect={() => openTagEdit(tag)}>
 					Settings
 				</DropdownMenuItem>
