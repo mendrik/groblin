@@ -23,15 +23,11 @@ export const subscribe = async <S extends TypedDocumentString<any, any>>(
 	callback: (data: ResultOf<S>) => void,
 	variables?: VariablesOf<S>
 ) => {
-	try {
-		const subs = gql.iterate({
-			query: subscriptionDoc.toString(),
-			variables
-		})
-		for await (const { data } of subs) {
-			if (data) callback(data as ResultOf<S>)
-		}
-	} catch (e: any) {
-		console.error(e)
+	const subs = gql.iterate({
+		query: subscriptionDoc.toString(),
+		variables
+	})
+	for await (const { data } of subs) {
+		if (data) callback(data as ResultOf<S>)
 	}
 }

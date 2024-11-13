@@ -3,8 +3,10 @@ import { cn, notNil, setSignal } from '@/lib/utils'
 import { $tag, $tags, reorderTag } from '@/state/tag'
 import type { DragEndEvent } from '@dnd-kit/core'
 import { horizontalListSortingStrategy } from '@dnd-kit/sortable'
+import { batch } from '@preact/signals-react'
 import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
 import { IconTag } from '@tabler/icons-react'
+import { move, propEq } from 'ramda'
 import { useState } from 'react'
 import {
 	DropdownMenu,
@@ -54,9 +56,11 @@ const ActiveTab = ({ tag }: TabProps) => {
 				<DropdownMenuItem onSelect={() => openTagEdit(tag)}>
 					Settings
 				</DropdownMenuItem>
-				<DropdownMenuItem onSelect={() => openTagDelete(tag)}>
-					Delete
-				</DropdownMenuItem>
+				{!tag.master && (
+					<DropdownMenuItem onSelect={() => openTagDelete(tag)}>
+						Delete
+					</DropdownMenuItem>
+				)}
 			</DropdownMenuContent>
 		</DropdownMenu>
 	)
@@ -74,6 +78,12 @@ const TagName = ({ tag }: TabProps) => (
 
 const reorderCommand = ({ active, over }: DragEndEvent) => {
 	if (!over) return
+	// optimistic server response to avoid jitter
+	batch(() => {
+		const from = $tags.value.findIndex(propEq(active.id, 'id'))
+		const to = $tags.value.findIndex(propEq(over.id, 'id'))
+		$tags.value = move(from, to, $tags.value)
+	})
 	reorderTag({
 		id: active.id as number,
 		overId: over.id as number
