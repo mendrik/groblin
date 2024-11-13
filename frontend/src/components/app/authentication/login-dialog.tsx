@@ -11,7 +11,6 @@ import { asField, stringField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { login } from '@/state/user'
 import { EditorType } from '@shared/enums'
-import { pipeAsync } from '@shared/utils/pipe-async'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { type TypeOf, boolean, strictObject } from 'zod'
@@ -34,7 +33,7 @@ const failed = (e: Error) =>
 type LoginForm = TypeOf<typeof loginSchema>
 
 const loginCommand = ({ rememberMe, ...credentials }: LoginForm) =>
-	pipeAsync(login, () => toast.success('Successfully logged in'))(credentials)
+	login(credentials).then(() => toast.success('Successfully logged in'))
 
 export const LoginDialog = () => {
 	return (

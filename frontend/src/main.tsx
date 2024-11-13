@@ -14,19 +14,21 @@ import { $user } from './state/user'
 const Main = () => (
 	<StrictMode>
 		<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+			<Toaster
+				richColors
+				theme="system"
+				duration={5000}
+				toastOptions={{
+					classNames: {
+						error: 'bg-red-400',
+						success: 'text-green-400',
+						warning: 'text-yellow-400',
+						info: 'bg-blue-400'
+					}
+				}}
+			/>
 			<BrowserRouter basename="/">
 				{$user.value ? <LoggedIn /> : <LoggedOut />}
-				<Toaster
-					richColors
-					theme="system"
-					duration={5000}
-					toastOptions={{
-						classNames: {
-							toast:
-								'group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg group-[.toaster]:pointer-events-auto'
-						}
-					}}
-				/>
 			</BrowserRouter>
 		</ThemeProvider>
 	</StrictMode>
