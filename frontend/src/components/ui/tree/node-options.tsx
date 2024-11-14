@@ -21,11 +21,39 @@ import { not } from 'ramda'
 import type { RefObject } from 'react'
 import { openNodeCreate } from './node-create'
 import { $deleteDialogOpen } from './node-delete'
+import { canHaveChildren } from './utils'
 
 type OwnProps = {
 	node: TreeNode
 	editor: RefObject<HTMLInputElement>
 }
+
+const CreateOptions = () => (
+	<>
+		<DropdownMenuItem
+			className="flex gap-2 items-center"
+			onClick={() => openNodeCreate('child')}
+		>
+			<IconCopyPlus className="w-4 h-4" />
+			<span>Add child...</span>
+		</DropdownMenuItem>
+		<DropdownMenuItem
+			className="flex gap-2 items-center"
+			onClick={() => openNodeCreate('sibling-above')}
+		>
+			<IconRowInsertTop className="w-4 h-4" />
+			<span>Insert above...</span>
+		</DropdownMenuItem>
+		<DropdownMenuItem
+			className="flex gap-2 items-center"
+			onClick={() => openNodeCreate('sibling-below')}
+		>
+			<IconRowInsertBottom className="w-4 h-4" />
+			<span>Insert below...</span>
+		</DropdownMenuItem>
+		<DropdownMenuSeparator />
+	</>
+)
 
 export const NodeOptions = ({ node, editor }: OwnProps) => {
 	return $focusedNode.value === node.id ? (
@@ -42,28 +70,7 @@ export const NodeOptions = ({ node, editor }: OwnProps) => {
 				onCloseAutoFocus={preventDefault}
 				onKeyDown={stopPropagation}
 			>
-				<DropdownMenuItem
-					className="flex gap-2 items-center"
-					onClick={() => openNodeCreate('child')}
-				>
-					<IconCopyPlus className="w-4 h-4" />
-					<span>Add child...</span>
-				</DropdownMenuItem>
-				<DropdownMenuItem
-					className="flex gap-2 items-center"
-					onClick={() => openNodeCreate('sibling-above')}
-				>
-					<IconRowInsertTop className="w-4 h-4" />
-					<span>Insert above...</span>
-				</DropdownMenuItem>
-				<DropdownMenuItem
-					className="flex gap-2 items-center"
-					onClick={() => openNodeCreate('sibling-below')}
-				>
-					<IconRowInsertBottom className="w-4 h-4" />
-					<span>Insert below...</span>
-				</DropdownMenuItem>
-				<DropdownMenuSeparator />
+				{canHaveChildren(node) && <CreateOptions />}
 				<DropdownMenuItem
 					className="flex gap-2 items-center"
 					onClick={pipeTap(startEditing, focusOn(editor))}

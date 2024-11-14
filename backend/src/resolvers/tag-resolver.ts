@@ -1,10 +1,10 @@
-import { Role } from '@shared/enums.ts'
 import { failOn } from '@shared/utils/guards.ts'
 import { addOrder } from '@shared/utils/ramda.ts'
 import { injectable } from 'inversify'
 import { sql } from 'kysely'
 import { isNil, move, pipe, propEq } from 'ramda'
 import type { Context } from 'src/context.ts'
+import { Role } from 'src/enums.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import { Topic } from 'src/pubsub.ts'
 import {

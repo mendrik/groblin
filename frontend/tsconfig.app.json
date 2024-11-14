@@ -19,6 +19,7 @@
 		"src",
 		"../shared/src",
 		"../type-patches",
-		"../backend/src/resolvers/models"
+		"../backend/src/resolvers/models",
+		"../backend/src/enums.ts"
 	]
 }

@@ -1,8 +1,8 @@
-import { Role } from '@shared/enums.ts'
 import { failOn } from '@shared/utils/guards.ts'
 import { inject, injectable } from 'inversify'
 import { isNil } from 'ramda'
 import type { Context } from 'src/context.ts'
+import { Role } from 'src/enums.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import {
 	Authorized,
