@@ -142,7 +142,15 @@ export const ZodForm = forwardRef(
 			<Form {...form}>
 				<form
 					onSubmit={e =>
-						form.handleSubmit(onSubmit, console.error)(e).catch(onError)
+						form
+							.handleSubmit(
+								onSubmit,
+								console.error
+							)(e)
+							.catch(e => {
+								console.error(e)
+								onError(e)
+							})
 					}
 					className="flex flex-col gap-6 relative"
 					data-disabled={disabled ? true : undefined}

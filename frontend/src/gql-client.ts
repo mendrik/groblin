@@ -31,10 +31,8 @@ export const Api = new Proxy(getSdk(query), {
 	get: (target, property: keyof NewSdk) => {
 		const original = target[property]
 		if (original && 'apply' in original) {
-			return async (...args: Parameters<typeof original>) => {
-				const res = await (original as Function).apply(target, args)
-				return res.data
-			}
+			return async (...args: Parameters<typeof original>) =>
+				await (original as Function).apply(target, args)
 		}
 		return original
 	}
@@ -44,7 +42,12 @@ export const subscribe = async <V, E>(
 	subscription: () => AsyncIterable<ExecutionResult<V, E>>,
 	callback: (data: V) => void
 ) => {
-	for await (const { data } of subscription()) {
+	const iterator = await subscription()
+	console.log(iterator)
+
+	for await (const { data } of iterator) {
+		console.log(data)
+
 		if (data) callback(data as V)
 	}
 }
