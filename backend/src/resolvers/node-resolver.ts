@@ -4,7 +4,7 @@ import { injectable } from 'inversify'
 import { sql } from 'kysely'
 import { T, isNil } from 'ramda'
 import type { Context } from 'src/context.ts'
-import { EditorType, NodeType, Role } from 'src/enums.ts'
+import { NodeType, Role } from 'src/enums.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import { Topic } from 'src/pubsub.ts'
 import {
@@ -25,10 +25,6 @@ import {
 
 registerEnumType(NodeType, {
 	name: 'NodeType'
-})
-
-registerEnumType(EditorType, {
-	name: 'EditorType'
 })
 
 @ObjectType()
