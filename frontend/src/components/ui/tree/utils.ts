@@ -7,5 +7,6 @@ const isType = (type: NodeType) => (node: TreeNode) => node.type === type
 
 export const canHaveChildren: Pred<[TreeNode]> = match(
 	caseOf([isType(NodeType.Object)], T),
+	caseOf([isType(NodeType.List)], T),
 	caseOf([_], F)
 )
