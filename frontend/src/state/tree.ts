@@ -1,4 +1,4 @@
-import { Api } from '@/gql-client'
+import { Api, Subscribe } from '@/gql-client'
 import type { InsertNode, Node } from '@/gql/graphql.ts'
 import { getItem, setItem } from '@/lib/local-storage'
 import { computeSignal, notNil, setSignal } from '@/lib/utils'
@@ -49,16 +49,14 @@ export const $parentNode = signal<number>()
 export const $editingNode = signal<number | undefined>()
 
 /** ---- subscriptions ---- **/
-const subscribeToNodes = () =>
-	Api.NodesUpdated(
-		{},
-		{
-			callback: () =>
-				Api.GetNodes()
-					.then(r => r.getNodes)
-					.then(setSignal($nodes))
-		}
+const subscribeToNodes = () => {
+	const onData = Subscribe.NodesUpdated()
+	onData(() =>
+		Api.GetNodes()
+			.then(r => r.getNodes)
+			.then(setSignal($nodes))
 	)
+}
 
 $root.subscribe(
 	when(isNotNil, node => {

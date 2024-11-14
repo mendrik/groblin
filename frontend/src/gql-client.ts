@@ -13,18 +13,12 @@ type Options = {
 	callback?: <V>(data: V) => void
 }
 
-const query: Requester = async (queryDoc, variables, options?: Options) => {
+const query: Requester = async (queryDoc, variables) => {
 	const query = gql.iterate({
-		query: queryDoc.toString(),
+		query: queryDoc,
 		variables: variables ?? {}
 	})
-	if (options?.callback) {
-		for await (const { data } of query) {
-			if (data) options.callback(data)
-		}
-	} else {
-		return query.next().then(({ value }) => value.data)
-	}
+	return query.next().then(({ value }) => value.data)
 }
 
 type Result<T> = T extends Promise<ExecutionResult<infer R, any>>
@@ -37,4 +31,35 @@ type NewSdk = {
 	) => Result<ReturnType<Sdk[key]>>
 }
 
+type SubResult<T> = T extends AsyncIterable<ExecutionResult<infer R, any>>
+	? R
+	: never
+
+type SubscribeSdk = {
+	[key in keyof Sdk]: (
+		...args: Parameters<Sdk[key]>
+	) => <T>(callback: (data: SubResult<ReturnType<Sdk[key]>>) => T) => void
+}
+
 export const Api = getSdk(query) as NewSdk
+
+// Subscription SDK with proxy for subscription methods
+export const Subscribe = new Proxy<any>(
+	getSdk((queryDoc, variables) => {
+		return gql.iterate({
+			query: queryDoc,
+			variables: variables ?? {}
+		}) as AsyncIterable<ExecutionResult<any, any>>
+	}),
+	{
+		get: (target, key) => {
+			return (...args: any[]) =>
+				async <T>(callback: (data: any) => T) => {
+					const asyncIter: AsyncIterable<any> = target[key](...args)
+					for await (const { data } of asyncIter) {
+						callback(data)
+					}
+				}
+		}
+	}
+) as SubscribeSdk

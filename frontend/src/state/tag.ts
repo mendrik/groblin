@@ -1,4 +1,4 @@
-import { Api } from '@/gql-client'
+import { Api, Subscribe } from '@/gql-client'
 import type {
 	ChangeTagInput,
 	InsertTag,
@@ -8,19 +8,22 @@ import type {
 import { notNil, setSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import { failOn } from '@shared/utils/guards'
-import { find, isEmpty, isNil, pipe, prop, unless } from 'ramda'
+import { find, isEmpty, isNil, pipe, unless } from 'ramda'
 import { $user } from './user'
 
 export const $tags = signal<Tag[]>([])
 export const $tag = signal<Tag>()
 
-const subscribeToTags = () =>
-	Api.TagsUpdated(
-		{ lastProjectId: notNil($user).lastProjectId },
-		{
-			callback: () => Api.GetTags().then(prop('getTags')).then(setSignal($tags))
-		}
+const subscribeToTags = () => {
+	const onData = Subscribe.TagsUpdated({
+		lastProjectId: notNil($user).lastProjectId
+	})
+	onData(() =>
+		Api.GetTags()
+			.then(x => x.getTags)
+			.then(setSignal($tags))
 	)
+}
 
 $tags.subscribe(unless(isEmpty, subscribeToTags))
 
