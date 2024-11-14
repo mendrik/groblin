@@ -14,16 +14,12 @@ import { $user } from './user'
 export const $tags = signal<Tag[]>([])
 export const $tag = signal<Tag>()
 
-const subscribeToTags = () => {
-	const onData = Subscribe.TagsUpdated({
-		lastProjectId: notNil($user).lastProjectId
-	})
-	onData(() =>
+const subscribeToTags = () =>
+	Subscribe.TagsUpdated({ lastProjectId: notNil($user).lastProjectId }, () =>
 		Api.GetTags()
 			.then(x => x.getTags)
 			.then(setSignal($tags))
 	)
-}
 
 $tags.subscribe(unless(isEmpty, subscribeToTags))
 

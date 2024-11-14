@@ -31,14 +31,17 @@ type NewSdk = {
 	) => Result<ReturnType<Sdk[key]>>
 }
 
-type SubResult<T> = T extends AsyncIterable<ExecutionResult<infer R, any>>
+type SubResult<K extends keyof Sdk> = ReturnType<Sdk[K]> extends AsyncIterable<
+	ExecutionResult<infer R, any>
+>
 	? R
 	: never
 
 type SubscribeSdk = {
 	[key in keyof Sdk]: (
-		...args: Parameters<Sdk[key]>
-	) => <T>(callback: (data: SubResult<ReturnType<Sdk[key]>>) => T) => void
+		vars: Parameters<Sdk[key]>[0],
+		callback: (data: SubResult<key>) => any
+	) => SubResult<key>
 }
 
 export const Api = getSdk(query) as NewSdk
@@ -53,13 +56,12 @@ export const Subscribe = new Proxy<any>(
 	}),
 	{
 		get: (target, key) => {
-			return (...args: any[]) =>
-				async <T>(callback: (data: any) => T) => {
-					const asyncIter: AsyncIterable<any> = target[key](...args)
-					for await (const { data } of asyncIter) {
-						callback(data)
-					}
+			return async (vars: any, callback: Function) => {
+				const asyncIter: AsyncIterable<any> = target[key](vars)
+				for await (const { data } of asyncIter) {
+					callback(data)
 				}
+			}
 		}
 	}
 ) as SubscribeSdk

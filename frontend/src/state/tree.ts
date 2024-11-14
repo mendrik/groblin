@@ -49,14 +49,12 @@ export const $parentNode = signal<number>()
 export const $editingNode = signal<number | undefined>()
 
 /** ---- subscriptions ---- **/
-const subscribeToNodes = () => {
-	const onData = Subscribe.NodesUpdated()
-	onData(() =>
+const subscribeToNodes = () =>
+	Subscribe.NodesUpdated({}, () =>
 		Api.GetNodes()
 			.then(r => r.getNodes)
 			.then(setSignal($nodes))
 	)
-}
 
 $root.subscribe(
 	when(isNotNil, node => {
