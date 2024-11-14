@@ -13,19 +13,13 @@ export const $project = signal<Project>()
 
 export const loadProject = async () =>
 	loggedIn()
-		? Api.GetProject()
-				.then(x => x.getProject)
-				.then(
-					evolveAlt({
-						user: setSignal($user),
-						project: setSignal($project),
-						nodes: setSignal($nodes),
-						tags: setSignal($tags),
-						tag: pipe(
-							prop('tags'),
-							find(propEq(true, 'master')),
-							setSignal($tag)
-						)
-					})
-				)
+		? Api.GetProject().then(
+				evolveAlt({
+					user: setSignal($user),
+					project: setSignal($project),
+					nodes: setSignal($nodes),
+					tags: setSignal($tags),
+					tag: pipe(prop('tags'), find(propEq(true, 'master')), setSignal($tag))
+				})
+			)
 		: rejectP('Not logged in')

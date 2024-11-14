@@ -16,27 +16,21 @@ export const $tag = signal<Tag>()
 
 const subscribeToTags = () =>
 	Subscribe.TagsUpdated({ lastProjectId: notNil($user).lastProjectId }, () =>
-		Api.GetTags()
-			.then(x => x.getTags)
-			.then(setSignal($tags))
+		Api.GetTags().then(setSignal($tags))
 	)
 
 $tags.subscribe(unless(isEmpty, subscribeToTags))
 
 export const insertTag = (data: InsertTag): Promise<Tag> =>
 	Api.InsertTag({ data })
-		.then(x => x.insertTag)
-		.then(failOn(isNil, 'Failed to insert tag'))
 
 export const deleteTag = (id: number) => Api.DeleteTagById({ id })
 
 export const updateTag = (data: ChangeTagInput): Promise<boolean> =>
-	Api.UpdateTag({ data }).then(x => x.updateTag)
+	Api.UpdateTag({ data })
 
 export const reorderTag = (data: ReorderTagInput): Promise<Tag[]> =>
-	Api.ReorderTag({ data })
-		.then(x => x.reorderTag)
-		.then(setSignal($tags))
+	Api.ReorderTag({ data }).then(setSignal($tags))
 
 export const defaultTag = (): Tag =>
 	pipe(

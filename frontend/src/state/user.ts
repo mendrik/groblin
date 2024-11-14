@@ -10,7 +10,7 @@ import { loadProject } from './project'
 export const $user = signal<LoggedInUser>()
 
 export const register = (data: Registration): Promise<boolean> =>
-	Api.Register({ data }).then(x => x.register)
+	Api.Register({ data })
 
 export const logout = () => Api.Logout().then(logoutClient)
 
@@ -23,7 +23,6 @@ export const loggedIn = () => getItem('token') != null
 
 export const login = (data: Login) =>
 	Api.Login({ data })
-		.then(x => x.login)
 		.then(
 			evolveAlt({
 				token: setItem('token'),

@@ -5,7 +5,6 @@ import { computeSignal, notNil, setSignal } from '@/lib/utils'
 import { waitForId } from '@/lib/wait-for-id'
 import { computed, signal } from '@preact/signals-react'
 import { assertExists } from '@shared/asserts'
-import { failOn } from '@shared/utils/guards'
 import { type TreeOf, listToTree } from '@shared/utils/list-to-tree'
 import { Maybe, MaybeAsync } from 'purify-ts'
 import {
@@ -14,7 +13,6 @@ import {
 	toString as asStr,
 	find,
 	head,
-	isNil,
 	isNotEmpty,
 	isNotNil,
 	last,
@@ -52,9 +50,7 @@ export const $editingNode = signal<number | undefined>()
 /** ---- subscriptions ---- **/
 const subscribeToNodes = () =>
 	Subscribe.NodesUpdated({ lastProjectId: notNil($user).lastProjectId }, () =>
-		Api.GetNodes()
-			.then(r => r.getNodes)
-			.then(setSignal($nodes))
+		Api.GetNodes().then(setSignal($nodes))
 	)
 
 $root.subscribe(
@@ -191,13 +187,10 @@ export const deleteNode = (id: number) =>
 		order: asNode(id).order
 	})
 
-export const insertNode = (data: InsertNode): Promise<number> => {
+export const insertNode = (data: InsertNode): Promise<{ id: number }> => {
 	assertExists(data.parent_id, 'insertNode needs a valid node_id')
 	assertExists(data.order, 'insertNode needs a valid order')
-
 	return Api.InsertNode({ data })
-		.then(x => x.insertNode.id)
-		.then(failOn(isNil, 'Failed to insert node'))
 }
 
 function* iterateNodes(root: TreeNode): Generator<TreeNode> {

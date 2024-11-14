@@ -1,5 +1,6 @@
 import { type ExecutionResult, createClient } from 'graphql-ws'
-import { type Requester, type Sdk, getSdk } from './gql/graphql'
+import { head, pipe, toPairs } from 'ramda'
+import { type Sdk, getSdk } from './gql/graphql'
 import { getItem } from './lib/local-storage'
 
 const gql = createClient({
@@ -9,27 +10,36 @@ const gql = createClient({
 	})
 })
 
-type Options = {
-	callback?: <V>(data: V) => void
-}
+type FirstProperty<T> = T extends { [K in keyof T]: infer U } ? U : never
 
-const query: Requester = async (queryDoc, variables) => {
-	const query = gql.iterate({
-		query: queryDoc,
-		variables: variables ?? {}
-	})
-	return query.next().then(({ value }) => value.data)
-}
-
-type Result<T> = T extends Promise<ExecutionResult<infer R, any>>
-	? Promise<R>
-	: never
-
-type NewSdk = {
+type ApiSdk = {
 	[K in keyof Sdk as ReturnType<Sdk[K]> extends Promise<any> ? K : never]: (
 		...args: Parameters<Sdk[K]>
-	) => Result<ReturnType<Sdk[K]>>
+	) => ReturnType<Sdk[K]> extends Promise<ExecutionResult<infer R, any>>
+		? Promise<FirstProperty<R>>
+		: never
 }
+
+const firstProperty = pipe(toPairs, head, ([, value]) => value)
+
+// Subscription SDK with proxy for subscription methods
+export const Api = new Proxy<any>(
+	getSdk((queryDoc, variables) => {
+		const query = gql.iterate({
+			query: queryDoc,
+			variables: variables ?? {}
+		})
+		return query.next().then(({ value }) => value.data)
+	}),
+	{
+		get:
+			(target, key) =>
+			async (...args: any[]) => {
+				const res = await target[key](...args)
+				return firstProperty(res)
+			}
+	}
+) as ApiSdk
 
 type SubResult<K extends keyof Sdk> = ReturnType<Sdk[K]> extends AsyncIterable<
 	ExecutionResult<infer R, any>
@@ -46,8 +56,6 @@ type SubscribeSdk = {
 	) => SubResult<K>
 }
 
-export const Api = getSdk(query) as unknown as NewSdk
-
 // Subscription SDK with proxy for subscription methods
 export const Subscribe = new Proxy<any>(
 	getSdk((queryDoc, variables) => {
@@ -57,12 +65,10 @@ export const Subscribe = new Proxy<any>(
 		}) as AsyncIterable<ExecutionResult<any, any>>
 	}),
 	{
-		get: (target, key) => {
-			return async (vars: any, callback: Function) => {
-				const asyncIter: AsyncIterable<any> = target[key](vars)
-				for await (const { data } of asyncIter) {
-					callback(data)
-				}
+		get: (target, key) => async (vars: any, callback: Function) => {
+			const asyncIter: AsyncIterable<any> = target[key](vars)
+			for await (const { data } of asyncIter) {
+				callback(data)
 			}
 		}
 	}
