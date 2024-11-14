@@ -141,7 +141,7 @@ export const parentNode = (): number => {
 }
 
 export const focusNode = (nodeId: number) => {
-	const node = document.getElementById(`node-${asStr(nodeId)}`)
+	const node = document.getElementById(`node-${nodeId}`)
 	assertExists(node, `Node with id ${nodeId} not found`)
 	setTimeout(() => node.focus(), 40)
 }

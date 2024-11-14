@@ -28,33 +28,6 @@ type OwnProps = {
 	editor: RefObject<HTMLInputElement>
 }
 
-const CreateOptions = () => (
-	<>
-		<DropdownMenuItem
-			className="flex gap-2 items-center"
-			onClick={() => openNodeCreate('child')}
-		>
-			<IconCopyPlus className="w-4 h-4" />
-			<span>Add child...</span>
-		</DropdownMenuItem>
-		<DropdownMenuItem
-			className="flex gap-2 items-center"
-			onClick={() => openNodeCreate('sibling-above')}
-		>
-			<IconRowInsertTop className="w-4 h-4" />
-			<span>Insert above...</span>
-		</DropdownMenuItem>
-		<DropdownMenuItem
-			className="flex gap-2 items-center"
-			onClick={() => openNodeCreate('sibling-below')}
-		>
-			<IconRowInsertBottom className="w-4 h-4" />
-			<span>Insert below...</span>
-		</DropdownMenuItem>
-		<DropdownMenuSeparator />
-	</>
-)
-
 export const NodeOptions = ({ node, editor }: OwnProps) => {
 	return $focusedNode.value === node.id ? (
 		<DropdownMenu>
@@ -70,7 +43,30 @@ export const NodeOptions = ({ node, editor }: OwnProps) => {
 				onCloseAutoFocus={preventDefault}
 				onKeyDown={stopPropagation}
 			>
-				{canHaveChildren(node) && <CreateOptions />}
+				{canHaveChildren(node) && (
+					<DropdownMenuItem
+						className="flex gap-2 items-center"
+						onClick={() => openNodeCreate('child')}
+					>
+						<IconCopyPlus className="w-4 h-4" />
+						<span>Add child...</span>
+					</DropdownMenuItem>
+				)}
+				<DropdownMenuItem
+					className="flex gap-2 items-center"
+					onClick={() => openNodeCreate('sibling-above')}
+				>
+					<IconRowInsertTop className="w-4 h-4" />
+					<span>Insert above...</span>
+				</DropdownMenuItem>
+				<DropdownMenuItem
+					className="flex gap-2 items-center"
+					onClick={() => openNodeCreate('sibling-below')}
+				>
+					<IconRowInsertBottom className="w-4 h-4" />
+					<span>Insert below...</span>
+				</DropdownMenuItem>
+				<DropdownMenuSeparator />
 				<DropdownMenuItem
 					className="flex gap-2 items-center"
 					onClick={pipeTap(startEditing, focusOn(editor))}

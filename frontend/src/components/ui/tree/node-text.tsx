@@ -1,4 +1,5 @@
 import KeyListener from '@/components/utils/key-listener'
+import { NodeType } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
 import { cn, setSignal } from '@/lib/utils'
 import { type TreeNode, notEditing, startEditing } from '@/state/tree'
@@ -30,7 +31,7 @@ export const NodeText = forwardRef<HTMLButtonElement, OwnProps>(
 					id={`node-${node.id}`}
 					ref={ref}
 				>
-					{hasChildren ? (
+					{hasChildren && node.type === NodeType.Object ? (
 						<IconFolder
 							focusable={false}
 							tabIndex={-1}
