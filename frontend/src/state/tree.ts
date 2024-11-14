@@ -20,6 +20,7 @@ import {
 	mergeDeepLeft,
 	over,
 	pipe,
+	prop,
 	when
 } from 'ramda'
 import { $user } from './user'
@@ -187,10 +188,10 @@ export const deleteNode = (id: number) =>
 		order: asNode(id).order
 	})
 
-export const insertNode = (data: InsertNode): Promise<{ id: number }> => {
+export const insertNode = (data: InsertNode): Promise<number> => {
 	assertExists(data.parent_id, 'insertNode needs a valid node_id')
 	assertExists(data.order, 'insertNode needs a valid order')
-	return Api.InsertNode({ data })
+	return Api.InsertNode({ data }).then(prop('id'))
 }
 
 function* iterateNodes(root: TreeNode): Generator<TreeNode> {
