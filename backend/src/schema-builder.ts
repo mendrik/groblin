@@ -7,12 +7,14 @@ import { AuthResolver } from './resolvers/auth-resolver.ts'
 import { NodeResolver } from './resolvers/node-resolver.ts'
 import { ProjectResolver } from './resolvers/project-resolver.ts'
 import { TagResolver } from './resolvers/tag-resolver.ts'
+import { ValueResolver } from './resolvers/value-resolver.ts'
 
 const resolvers: NonEmptyArray<Function> = [
 	AuthResolver,
 	ProjectResolver,
 	NodeResolver,
-	TagResolver
+	TagResolver,
+	ValueResolver
 ]
 
 export const schema = await buildSchema({

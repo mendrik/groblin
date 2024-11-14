@@ -48,10 +48,18 @@ export interface User {
   password: string;
 }
 
+export interface Value {
+  id: Generated<number>;
+  node_id: number | null;
+  project_id: number | null;
+  tag_id: number | null;
+}
+
 export interface DB {
   node: Node;
   project: Project;
   project_user: ProjectUser;
   tag: Tag;
   user: User;
+  value: Value;
 }

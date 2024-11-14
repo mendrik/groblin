@@ -1,5 +1,6 @@
 import { type ExecutionResult, createClient } from 'graphql-ws'
 import { head, pipe, toPairs } from 'ramda'
+import { isNotNilOrEmpty } from 'ramda-adjunct'
 import { type Sdk, getSdk } from './gql/graphql'
 import { getItem } from './lib/local-storage'
 
@@ -36,7 +37,7 @@ export const Api = new Proxy<any>(
 			(target, key) =>
 			async (...args: any[]) => {
 				const res = await target[key](...args)
-				return firstProperty(res)
+				return isNotNilOrEmpty(res) ? firstProperty(res) : undefined
 			}
 	}
 ) as ApiSdk

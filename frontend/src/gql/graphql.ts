@@ -152,6 +152,12 @@ export type Query = {
   getNodes: Array<Node>;
   getProject: ProjectData;
   getTags: Array<Tag>;
+  getValues: Array<Value>;
+};
+
+
+export type QueryGetValuesArgs = {
+  tagId: Scalars['Int']['input'];
 };
 
 export type Registration = {
@@ -168,6 +174,7 @@ export type ReorderTagInput = {
 export type Subscription = {
   nodesUpdated: Scalars['Boolean']['output'];
   tagsUpdated: Scalars['Boolean']['output'];
+  valuesUpdated: Scalars['Boolean']['output'];
 };
 
 
@@ -177,6 +184,11 @@ export type SubscriptionNodesUpdatedArgs = {
 
 
 export type SubscriptionTagsUpdatedArgs = {
+  lastProjectId: Scalars['Int']['input'];
+};
+
+
+export type SubscriptionValuesUpdatedArgs = {
   lastProjectId: Scalars['Int']['input'];
 };
 
@@ -190,6 +202,13 @@ export type Tag = {
 export type Token = {
   expiresDate: Scalars['DateTimeISO']['output'];
   token: Scalars['String']['output'];
+};
+
+export type Value = {
+  id: Scalars['Int']['output'];
+  node_id: Scalars['Int']['output'];
+  project_id: Scalars['Int']['output'];
+  tag_id: Scalars['Int']['output'];
 };
 
 export type TagsUpdatedSubscriptionVariables = Exact<{
@@ -292,6 +311,20 @@ export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
 
 export type LogoutMutation = { logout: boolean };
+
+export type ValuesUpdatedSubscriptionVariables = Exact<{
+  lastProjectId: Scalars['Int']['input'];
+}>;
+
+
+export type ValuesUpdatedSubscription = { valuesUpdated: boolean };
+
+export type GetValuesQueryVariables = Exact<{
+  tagId: Scalars['Int']['input'];
+}>;
+
+
+export type GetValuesQuery = { getValues: Array<{ id: number, node_id: number }> };
 
 export const NodeFragmentDoc = `
     fragment Node on Node {
@@ -419,6 +452,19 @@ export const LogoutDocument = `
   logout
 }
     `;
+export const ValuesUpdatedDocument = `
+    subscription ValuesUpdated($lastProjectId: Int!) {
+  valuesUpdated(lastProjectId: $lastProjectId)
+}
+    `;
+export const GetValuesDocument = `
+    query GetValues($tagId: Int!) {
+  getValues(tagId: $tagId) {
+    id
+    node_id
+  }
+}
+    `;
 export type Requester<C = {}, E = unknown> = <R, V>(doc: string, vars?: V, options?: C) => Promise<ExecutionResult<R, E>> | AsyncIterable<ExecutionResult<R, E>>
 export function getSdk<C, E>(requester: Requester<C, E>) {
   return {
@@ -466,6 +512,12 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     },
     Logout(variables?: LogoutMutationVariables, options?: C): Promise<ExecutionResult<LogoutMutation, E>> {
       return requester<LogoutMutation, LogoutMutationVariables>(LogoutDocument, variables, options) as Promise<ExecutionResult<LogoutMutation, E>>;
+    },
+    ValuesUpdated(variables: ValuesUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<ValuesUpdatedSubscription, E>> {
+      return requester<ValuesUpdatedSubscription, ValuesUpdatedSubscriptionVariables>(ValuesUpdatedDocument, variables, options) as AsyncIterable<ExecutionResult<ValuesUpdatedSubscription, E>>;
+    },
+    GetValues(variables: GetValuesQueryVariables, options?: C): Promise<ExecutionResult<GetValuesQuery, E>> {
+      return requester<GetValuesQuery, GetValuesQueryVariables>(GetValuesDocument, variables, options) as Promise<ExecutionResult<GetValuesQuery, E>>;
     }
   };
 }

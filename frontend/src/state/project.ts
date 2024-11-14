@@ -8,6 +8,7 @@ import { rejectP } from 'ramda-adjunct'
 import { $tag, $tags } from './tag'
 import { $nodes } from './tree'
 import { $user, loggedIn } from './user'
+import { $values } from './value'
 
 export const $project = signal<Project>()
 
@@ -18,6 +19,7 @@ export const loadProject = async () =>
 					user: setSignal($user),
 					project: setSignal($project),
 					nodes: setSignal($nodes),
+					values: setSignal($values),
 					tags: setSignal($tags),
 					tag: pipe(prop('tags'), find(propEq(true, 'master')), setSignal($tag))
 				})

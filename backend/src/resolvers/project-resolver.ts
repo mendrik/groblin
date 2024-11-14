@@ -1,3 +1,4 @@
+import { assertExists } from '@shared/asserts.ts'
 import { failOn } from '@shared/utils/guards.ts'
 import { inject, injectable } from 'inversify'
 import { isNil } from 'ramda'
@@ -17,6 +18,8 @@ import {
 import { AuthResolver, LoggedInUser } from './auth-resolver.ts'
 import { Node, NodeResolver } from './node-resolver.ts'
 import { Tag, TagResolver } from './tag-resolver.ts'
+import { masterTag } from './utils.ts'
+import { Value, ValueResolver } from './value-resolver.ts'
 
 @ObjectType()
 export class Project {
@@ -38,6 +41,9 @@ export class ProjectData {
 	@Field(type => [Node])
 	nodes: Node[]
 
+	@Field(type => [Value])
+	values: Value[]
+
 	@Field(type => [Tag])
 	tags: Tag[]
 }
@@ -53,6 +59,9 @@ export class ProjectResolver {
 	@inject(TagResolver)
 	private readonly tagResolver: TagResolver
 
+	@inject(ValueResolver)
+	private readonly valueResolver: ValueResolver
+
 	@inject(AuthResolver)
 	private readonly authResolver: AuthResolver
 
@@ -60,6 +69,10 @@ export class ProjectResolver {
 	async getProject(@Ctx() ctx: Context) {
 		const nodes = await this.nodeResolver.getNodes(ctx)
 		const tags = await this.tagResolver.getTags(ctx)
+		const tag = tags.find(masterTag)
+
+		assertExists(tag, 'Master tag not found')
+		const values = await this.valueResolver.getValues(tag.id, ctx)
 
 		const project = await ctx.db
 			.selectFrom('project')
@@ -71,6 +84,7 @@ export class ProjectResolver {
 		return {
 			project,
 			nodes,
+			values,
 			user: ctx.extra,
 			tags
 		}

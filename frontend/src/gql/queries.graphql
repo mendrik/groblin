@@ -107,3 +107,14 @@ mutation Login($data: Login!) {
 mutation Logout {
   logout
 }
+
+subscription ValuesUpdated($lastProjectId: Int!) {
+  valuesUpdated(lastProjectId: $lastProjectId)
+}
+
+query GetValues($tagId: Int!) {
+  getValues(tagId: $tagId) {
+    id
+    node_id
+  }
+}

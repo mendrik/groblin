@@ -2,6 +2,7 @@ type Query {
   getNodes: [Node!]!
   getTags: [Tag!]!
   getProject: ProjectData!
+  getValues(tagId: Int!): [Value!]!
 }
 
 type Node {
@@ -48,6 +49,13 @@ type LoggedInUser {
   name: String!
   email: String!
   lastProjectId: Int!
+}
+
+type Value {
+  id: Int!
+  node_id: Int!
+  tag_id: Int!
+  project_id: Int!
 }
 
 type Mutation {
@@ -119,4 +127,5 @@ input ReorderTagInput {
 type Subscription {
   nodesUpdated(lastProjectId: Int!): Boolean!
   tagsUpdated(lastProjectId: Int!): Boolean!
+  valuesUpdated(lastProjectId: Int!): Boolean!
 }
