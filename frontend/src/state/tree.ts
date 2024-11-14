@@ -1,4 +1,4 @@
-import { Api, subscribe } from '@/gql-client'
+import { Api } from '@/gql-client'
 import type { InsertNode, Node } from '@/gql/graphql.ts'
 import { getItem, setItem } from '@/lib/local-storage'
 import { computeSignal, notNil, setSignal } from '@/lib/utils'
@@ -49,14 +49,22 @@ export const $parentNode = signal<number>()
 export const $editingNode = signal<number | undefined>()
 
 /** ---- subscriptions ---- **/
-subscribe(Api.NodesUpdated, () =>
-	Api.GetNodes()
-		.then(r => r.getNodes)
-		.then(setSignal($nodes))
-)
+const subscribeToNodes = () =>
+	Api.NodesUpdated(
+		{},
+		{
+			callback: () =>
+				Api.GetNodes()
+					.then(r => r.getNodes)
+					.then(setSignal($nodes))
+		}
+	)
 
 $root.subscribe(
-	when(isNotNil, node => updateNodeState({ open: true })(node.id))
+	when(isNotNil, node => {
+		updateNodeState({ open: true })(node.id)
+		subscribeToNodes()
+	})
 )
 $nodeStates.subscribe(setItem('tree-state'))
 

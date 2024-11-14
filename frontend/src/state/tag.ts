@@ -1,4 +1,4 @@
-import { Api, subscribe } from '@/gql-client'
+import { Api } from '@/gql-client'
 import type {
 	ChangeTagInput,
 	InsertTag,
@@ -14,13 +14,15 @@ import { $user } from './user'
 export const $tags = signal<Tag[]>([])
 export const $tag = signal<Tag>()
 
-const tagSubscribe = () =>
-	subscribe(
-		() => Api.TagsUpdated({ lastProjectId: notNil($user).lastProjectId }),
-		() => Api.GetTags().then(prop('getTags')).then(setSignal($tags))
+const subscribeToTags = () =>
+	Api.TagsUpdated(
+		{ lastProjectId: notNil($user).lastProjectId },
+		{
+			callback: () => Api.GetTags().then(prop('getTags')).then(setSignal($tags))
+		}
 	)
 
-$tags.subscribe(unless(isEmpty, tagSubscribe))
+$tags.subscribe(unless(isEmpty, subscribeToTags))
 
 export const insertTag = (data: InsertTag): Promise<Tag> =>
 	Api.InsertTag({ data })

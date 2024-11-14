@@ -9,12 +9,22 @@ const gql = createClient({
 	})
 })
 
-const query: Requester = async (queryDoc, variables) => {
+type Options = {
+	callback?: <V>(data: V) => void
+}
+
+const query: Requester = async (queryDoc, variables, options?: Options) => {
 	const query = gql.iterate({
 		query: queryDoc.toString(),
 		variables: variables ?? {}
 	})
-	return query.next().then(({ value }) => value.data)
+	if (options?.callback) {
+		for await (const { data } of query) {
+			if (data) options.callback(data)
+		}
+	} else {
+		return query.next().then(({ value }) => value.data)
+	}
 }
 
 type Result<T> = T extends Promise<ExecutionResult<infer R, any>>
@@ -27,27 +37,4 @@ type NewSdk = {
 	) => Result<ReturnType<Sdk[key]>>
 }
 
-export const Api = new Proxy(getSdk(query), {
-	get: (target, property: keyof NewSdk) => {
-		const original = target[property]
-		if (original && 'apply' in original) {
-			return async (...args: Parameters<typeof original>) =>
-				await (original as Function).apply(target, args)
-		}
-		return original
-	}
-}) as NewSdk
-
-export const subscribe = async <V, E>(
-	subscription: () => AsyncIterable<ExecutionResult<V, E>>,
-	callback: (data: V) => void
-) => {
-	const iterator = await subscription()
-	console.log(iterator)
-
-	for await (const { data } of iterator) {
-		console.log(data)
-
-		if (data) callback(data as V)
-	}
-}
+export const Api = getSdk(query) as NewSdk
