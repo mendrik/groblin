@@ -1,12 +1,8 @@
-import { query, subscribe } from '@/gql-client'
+import { GQL, subscribe } from '@/gql-client'
 import {
-	DeleteNodeByIdDocument,
-	GetNodesDocument,
 	type InsertNode,
-	InsertNodeDocument,
 	type Node,
-	NodesUpdatedDocument,
-	UpdateNodeDocument
+	NodesUpdatedDocument
 } from '@/gql/graphql.ts'
 import { getItem, setItem } from '@/lib/local-storage'
 import { computeSignal, notNil, setSignal } from '@/lib/utils'
@@ -15,7 +11,6 @@ import { computed, signal } from '@preact/signals-react'
 import { assertExists } from '@shared/asserts'
 import { failOn } from '@shared/utils/guards'
 import { type TreeOf, listToTree } from '@shared/utils/list-to-tree'
-import gql from 'graphql-tag'
 import { Maybe, MaybeAsync } from 'purify-ts'
 import {
 	type NonEmptyArray,
@@ -34,54 +29,6 @@ import {
 	prop,
 	when
 } from 'ramda'
-
-/** ---- queries ---- **/
-gql`
-  fragment Node on Node {
-	id
-	name
-	order
-	type
-	tag_id
-	parent_id
-  }
-`
-gql`
-  subscription NodesUpdated {
-	nodesUpdated
-  }
-`
-
-gql`
-  query GetNodes {
-    getNodes {
-		...Node
-    }
-  }
-`
-
-// Mutation to insert a new node
-gql`
-  mutation InsertNode($data: InsertNode!) {
-    insertNode(data: $data) {
-		id
-	}
-  }
-`
-
-// Mutation to update an existing node
-gql`
-  mutation UpdateNode($data: ChangeNodeInput!) {
-    updateNode(data: $data)
-  }
-`
-
-// Mutation to delete a node by ID
-gql`
-  mutation DeleteNodeById($order: Int!, $parent_id: Int!, $id: Int!) {
-    deleteNodeById(order: $order, parent_id: $parent_id, id: $id)
-  }
-`
 
 /** ---- types ---- **/
 export type TreeNode = TreeOf<Node, 'nodes'>
@@ -232,11 +179,11 @@ export const openParent = <T extends Pick<TreeNode, 'parent_id'>>(
 export const confirmNodeName = (value: string) =>
 	MaybeAsync.liftMaybe(Maybe.fromNullable($editingNode.value))
 		.filter(isNotEmpty)
-		.map(id => query(UpdateNodeDocument, { data: { id, name: value } }))
+		.map(id => GQL.UpdateNode({ data: { id, name: value } }))
 		.run()
 
 export const deleteNode = (id: number) =>
-	query(DeleteNodeByIdDocument, {
+	GQL.DeleteNodeById({
 		id,
 		parent_id: parentOf(id),
 		order: asNode(id).order
@@ -246,9 +193,7 @@ export const insertNode = (data: InsertNode): Promise<number> => {
 	assertExists(data.parent_id, 'insertNode needs a valid node_id')
 	assertExists(data.order, 'insertNode needs a valid order')
 
-	return query(InsertNodeDocument, {
-		data
-	})
+	return GQL.InsertNode({ data })
 		.then(x => x.insertNode.id)
 		.then(failOn(isNil, 'Failed to insert node'))
 }

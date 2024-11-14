@@ -1,5 +1,4 @@
-/* eslint-disable */
-import type { DocumentTypeDecoration } from '@graphql-typed-document-node/core';
+import type { ExecutionResult } from 'graphql';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -191,7 +190,7 @@ export type Token = {
 export type GetProjectQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetProjectQuery = { getProject: { user: { id: number, email: string, name: string, lastProjectId: number }, project: { name: string }, nodes: Array<{ ' $fragmentRefs'?: { 'NodeFragment': NodeFragment } }>, tags: Array<{ id: number, name: string, master: boolean, parent_id?: number | null }> } };
+export type GetProjectQuery = { getProject: { user: { id: number, email: string, name: string, lastProjectId: number }, project: { name: string }, nodes: Array<{ id: number, name: string, order: number, type: NodeType, tag_id: number, parent_id?: number | null }>, tags: Array<{ id: number, name: string, master: boolean, parent_id?: number | null }> } };
 
 export type TagsUpdatedSubscriptionVariables = Exact<{
   lastProjectId: Scalars['Int']['input'];
@@ -233,17 +232,12 @@ export type ReorderTagMutationVariables = Exact<{
 
 export type ReorderTagMutation = { reorderTag: Array<{ id: number, name: string, parent_id?: number | null, master: boolean }> };
 
-export type NodeFragment = { id: number, name: string, order: number, type: NodeType, tag_id: number, parent_id?: number | null } & { ' $fragmentName'?: 'NodeFragment' };
+export type NodeFragment = { id: number, name: string, order: number, type: NodeType, tag_id: number, parent_id?: number | null };
 
 export type NodesUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
 export type NodesUpdatedSubscription = { nodesUpdated: boolean };
-
-export type GetNodesQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetNodesQuery = { getNodes: Array<{ ' $fragmentRefs'?: { 'NodeFragment': NodeFragment } }> };
 
 export type InsertNodeMutationVariables = Exact<{
   data: InsertNode;
@@ -287,21 +281,7 @@ export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
 export type LogoutMutation = { logout: boolean };
 
-export class TypedDocumentString<TResult, TVariables>
-  extends String
-  implements DocumentTypeDecoration<TResult, TVariables>
-{
-  __apiType?: DocumentTypeDecoration<TResult, TVariables>['__apiType'];
-
-  constructor(private value: string, public __meta__?: Record<string, any> | undefined) {
-    super(value);
-  }
-
-  toString(): string & DocumentTypeDecoration<TResult, TVariables> {
-    return this.value;
-  }
-}
-export const NodeFragmentDoc = new TypedDocumentString(`
+export const NodeFragmentDoc = `
     fragment Node on Node {
   id
   name
@@ -310,8 +290,8 @@ export const NodeFragmentDoc = new TypedDocumentString(`
   tag_id
   parent_id
 }
-    `, {"fragmentName":"Node"}) as unknown as TypedDocumentString<NodeFragment, unknown>;
-export const GetProjectDocument = new TypedDocumentString(`
+    `;
+export const GetProjectDocument = `
     query GetProject {
   getProject {
     user {
@@ -334,20 +314,13 @@ export const GetProjectDocument = new TypedDocumentString(`
     }
   }
 }
-    fragment Node on Node {
-  id
-  name
-  order
-  type
-  tag_id
-  parent_id
-}`) as unknown as TypedDocumentString<GetProjectQuery, GetProjectQueryVariables>;
-export const TagsUpdatedDocument = new TypedDocumentString(`
+    ${NodeFragmentDoc}`;
+export const TagsUpdatedDocument = `
     subscription TagsUpdated($lastProjectId: Int!) {
   tagsUpdated(lastProjectId: $lastProjectId)
 }
-    `) as unknown as TypedDocumentString<TagsUpdatedSubscription, TagsUpdatedSubscriptionVariables>;
-export const GetTagsDocument = new TypedDocumentString(`
+    `;
+export const GetTagsDocument = `
     query GetTags {
   getTags {
     id
@@ -356,8 +329,8 @@ export const GetTagsDocument = new TypedDocumentString(`
     master
   }
 }
-    `) as unknown as TypedDocumentString<GetTagsQuery, GetTagsQueryVariables>;
-export const InsertTagDocument = new TypedDocumentString(`
+    `;
+export const InsertTagDocument = `
     mutation InsertTag($data: InsertTag!) {
   insertTag(data: $data) {
     id
@@ -366,18 +339,18 @@ export const InsertTagDocument = new TypedDocumentString(`
     master
   }
 }
-    `) as unknown as TypedDocumentString<InsertTagMutation, InsertTagMutationVariables>;
-export const UpdateTagDocument = new TypedDocumentString(`
+    `;
+export const UpdateTagDocument = `
     mutation UpdateTag($data: ChangeTagInput!) {
   updateTag(data: $data)
 }
-    `) as unknown as TypedDocumentString<UpdateTagMutation, UpdateTagMutationVariables>;
-export const DeleteTagByIdDocument = new TypedDocumentString(`
+    `;
+export const DeleteTagByIdDocument = `
     mutation DeleteTagById($id: Int!) {
   deleteTagById(id: $id)
 }
-    `) as unknown as TypedDocumentString<DeleteTagByIdMutation, DeleteTagByIdMutationVariables>;
-export const ReorderTagDocument = new TypedDocumentString(`
+    `;
+export const ReorderTagDocument = `
     mutation ReorderTag($data: ReorderTagInput!) {
   reorderTag(data: $data) {
     id
@@ -386,58 +359,92 @@ export const ReorderTagDocument = new TypedDocumentString(`
     master
   }
 }
-    `) as unknown as TypedDocumentString<ReorderTagMutation, ReorderTagMutationVariables>;
-export const NodesUpdatedDocument = new TypedDocumentString(`
+    `;
+export const NodesUpdatedDocument = `
     subscription NodesUpdated {
   nodesUpdated
 }
-    `) as unknown as TypedDocumentString<NodesUpdatedSubscription, NodesUpdatedSubscriptionVariables>;
-export const GetNodesDocument = new TypedDocumentString(`
-    query GetNodes {
-  getNodes {
-    ...Node
-  }
-}
-    fragment Node on Node {
-  id
-  name
-  order
-  type
-  tag_id
-  parent_id
-}`) as unknown as TypedDocumentString<GetNodesQuery, GetNodesQueryVariables>;
-export const InsertNodeDocument = new TypedDocumentString(`
+    `;
+export const InsertNodeDocument = `
     mutation InsertNode($data: InsertNode!) {
   insertNode(data: $data) {
     id
   }
 }
-    `) as unknown as TypedDocumentString<InsertNodeMutation, InsertNodeMutationVariables>;
-export const UpdateNodeDocument = new TypedDocumentString(`
+    `;
+export const UpdateNodeDocument = `
     mutation UpdateNode($data: ChangeNodeInput!) {
   updateNode(data: $data)
 }
-    `) as unknown as TypedDocumentString<UpdateNodeMutation, UpdateNodeMutationVariables>;
-export const DeleteNodeByIdDocument = new TypedDocumentString(`
+    `;
+export const DeleteNodeByIdDocument = `
     mutation DeleteNodeById($order: Int!, $parent_id: Int!, $id: Int!) {
   deleteNodeById(order: $order, parent_id: $parent_id, id: $id)
 }
-    `) as unknown as TypedDocumentString<DeleteNodeByIdMutation, DeleteNodeByIdMutationVariables>;
-export const RegisterDocument = new TypedDocumentString(`
+    `;
+export const RegisterDocument = `
     mutation Register($data: Registration!) {
   register(data: $data)
 }
-    `) as unknown as TypedDocumentString<RegisterMutation, RegisterMutationVariables>;
-export const LoginDocument = new TypedDocumentString(`
+    `;
+export const LoginDocument = `
     mutation Login($data: Login!) {
   login(data: $data) {
     token
     expiresDate
   }
 }
-    `) as unknown as TypedDocumentString<LoginMutation, LoginMutationVariables>;
-export const LogoutDocument = new TypedDocumentString(`
+    `;
+export const LogoutDocument = `
     mutation Logout {
   logout
 }
-    `) as unknown as TypedDocumentString<LogoutMutation, LogoutMutationVariables>;
+    `;
+export type Requester<C = {}, E = unknown> = <R, V>(doc: string, vars?: V, options?: C) => Promise<ExecutionResult<R, E>> | AsyncIterable<ExecutionResult<R, E>>
+export function getSdk<C, E>(requester: Requester<C, E>) {
+  return {
+    GetProject(variables?: GetProjectQueryVariables, options?: C): Promise<ExecutionResult<GetProjectQuery, E>> {
+      return requester<GetProjectQuery, GetProjectQueryVariables>(GetProjectDocument, variables, options) as Promise<ExecutionResult<GetProjectQuery, E>>;
+    },
+    TagsUpdated(variables: TagsUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<TagsUpdatedSubscription, E>> {
+      return requester<TagsUpdatedSubscription, TagsUpdatedSubscriptionVariables>(TagsUpdatedDocument, variables, options) as AsyncIterable<ExecutionResult<TagsUpdatedSubscription, E>>;
+    },
+    GetTags(variables?: GetTagsQueryVariables, options?: C): Promise<ExecutionResult<GetTagsQuery, E>> {
+      return requester<GetTagsQuery, GetTagsQueryVariables>(GetTagsDocument, variables, options) as Promise<ExecutionResult<GetTagsQuery, E>>;
+    },
+    InsertTag(variables: InsertTagMutationVariables, options?: C): Promise<ExecutionResult<InsertTagMutation, E>> {
+      return requester<InsertTagMutation, InsertTagMutationVariables>(InsertTagDocument, variables, options) as Promise<ExecutionResult<InsertTagMutation, E>>;
+    },
+    UpdateTag(variables: UpdateTagMutationVariables, options?: C): Promise<ExecutionResult<UpdateTagMutation, E>> {
+      return requester<UpdateTagMutation, UpdateTagMutationVariables>(UpdateTagDocument, variables, options) as Promise<ExecutionResult<UpdateTagMutation, E>>;
+    },
+    DeleteTagById(variables: DeleteTagByIdMutationVariables, options?: C): Promise<ExecutionResult<DeleteTagByIdMutation, E>> {
+      return requester<DeleteTagByIdMutation, DeleteTagByIdMutationVariables>(DeleteTagByIdDocument, variables, options) as Promise<ExecutionResult<DeleteTagByIdMutation, E>>;
+    },
+    ReorderTag(variables: ReorderTagMutationVariables, options?: C): Promise<ExecutionResult<ReorderTagMutation, E>> {
+      return requester<ReorderTagMutation, ReorderTagMutationVariables>(ReorderTagDocument, variables, options) as Promise<ExecutionResult<ReorderTagMutation, E>>;
+    },
+    NodesUpdated(variables?: NodesUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<NodesUpdatedSubscription, E>> {
+      return requester<NodesUpdatedSubscription, NodesUpdatedSubscriptionVariables>(NodesUpdatedDocument, variables, options) as AsyncIterable<ExecutionResult<NodesUpdatedSubscription, E>>;
+    },
+    InsertNode(variables: InsertNodeMutationVariables, options?: C): Promise<ExecutionResult<InsertNodeMutation, E>> {
+      return requester<InsertNodeMutation, InsertNodeMutationVariables>(InsertNodeDocument, variables, options) as Promise<ExecutionResult<InsertNodeMutation, E>>;
+    },
+    UpdateNode(variables: UpdateNodeMutationVariables, options?: C): Promise<ExecutionResult<UpdateNodeMutation, E>> {
+      return requester<UpdateNodeMutation, UpdateNodeMutationVariables>(UpdateNodeDocument, variables, options) as Promise<ExecutionResult<UpdateNodeMutation, E>>;
+    },
+    DeleteNodeById(variables: DeleteNodeByIdMutationVariables, options?: C): Promise<ExecutionResult<DeleteNodeByIdMutation, E>> {
+      return requester<DeleteNodeByIdMutation, DeleteNodeByIdMutationVariables>(DeleteNodeByIdDocument, variables, options) as Promise<ExecutionResult<DeleteNodeByIdMutation, E>>;
+    },
+    Register(variables: RegisterMutationVariables, options?: C): Promise<ExecutionResult<RegisterMutation, E>> {
+      return requester<RegisterMutation, RegisterMutationVariables>(RegisterDocument, variables, options) as Promise<ExecutionResult<RegisterMutation, E>>;
+    },
+    Login(variables: LoginMutationVariables, options?: C): Promise<ExecutionResult<LoginMutation, E>> {
+      return requester<LoginMutation, LoginMutationVariables>(LoginDocument, variables, options) as Promise<ExecutionResult<LoginMutation, E>>;
+    },
+    Logout(variables?: LogoutMutationVariables, options?: C): Promise<ExecutionResult<LogoutMutation, E>> {
+      return requester<LogoutMutation, LogoutMutationVariables>(LogoutDocument, variables, options) as Promise<ExecutionResult<LogoutMutation, E>>;
+    }
+  };
+}
+export type Sdk = ReturnType<typeof getSdk>;

@@ -1,6 +1,6 @@
-import { NodeType, Role } from '@shared/enums.ts'
 import { injectable } from 'inversify'
 import type { Context } from 'src/context.ts'
+import { NodeType, Role } from 'src/enums.ts'
 import type { LoggedInUser } from 'src/resolvers/auth-resolver.ts'
 
 type LastProjectId = number
