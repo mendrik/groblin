@@ -2,7 +2,7 @@ import { assertExists } from '@shared/asserts.ts'
 import { failOn } from '@shared/utils/guards.ts'
 import { injectable } from 'inversify'
 import { sql } from 'kysely'
-import { T, isNil } from 'ramda'
+import { isNil } from 'ramda'
 import type { Context } from 'src/context.ts'
 import { NodeType, Role } from 'src/enums.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
@@ -22,6 +22,7 @@ import {
 	UseMiddleware,
 	registerEnumType
 } from 'type-graphql'
+import { matchesLastProject } from './utils.ts'
 
 registerEnumType(NodeType, {
 	name: 'NodeType'
@@ -88,9 +89,9 @@ export class ChangeNodeInput {
 export class NodeResolver {
 	@Subscription(returns => Boolean, {
 		topics: Topic.NodesUpdated,
-		filter: T
+		filter: matchesLastProject
 	})
-	nodesUpdated() {
+	nodesUpdated(@Arg('lastProjectId', () => Int) _: number) {
 		return true
 	}
 

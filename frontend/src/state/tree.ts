@@ -24,6 +24,7 @@ import {
 	pipe,
 	when
 } from 'ramda'
+import { $user } from './user'
 
 /** ---- types ---- **/
 export type TreeNode = TreeOf<Node, 'nodes'>
@@ -50,7 +51,7 @@ export const $editingNode = signal<number | undefined>()
 
 /** ---- subscriptions ---- **/
 const subscribeToNodes = () =>
-	Subscribe.NodesUpdated({}, () =>
+	Subscribe.NodesUpdated({ lastProjectId: notNil($user).lastProjectId }, () =>
 		Api.GetNodes()
 			.then(r => r.getNodes)
 			.then(setSignal($nodes))

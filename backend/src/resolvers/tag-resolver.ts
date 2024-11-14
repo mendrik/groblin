@@ -21,6 +21,7 @@ import {
 	Subscription,
 	UseMiddleware
 } from 'type-graphql'
+import { matchesLastProject } from './utils.ts'
 
 @ObjectType()
 export class Tag {
@@ -68,7 +69,6 @@ export class ReorderTagInput {
 }
 
 type TagsUpdatedArgs = { lastProjectId: number }
-type TopicSubscription = { args: TagsUpdatedArgs; context: Context }
 
 const moveAndOrder = <T extends { order: number }>(
 	from: number,
@@ -83,9 +83,7 @@ const moveAndOrder = <T extends { order: number }>(
 export class TagResolver {
 	@Subscription(returns => Boolean, {
 		topics: Topic.TagsUpdated,
-		filter: ({ args, context }: TopicSubscription) => {
-			return args.lastProjectId === context.extra.lastProjectId
-		}
+		filter: matchesLastProject
 	})
 	tagsUpdated(@Arg('lastProjectId', () => Int) _: number) {
 		return true

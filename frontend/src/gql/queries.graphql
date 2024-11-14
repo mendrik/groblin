@@ -69,8 +69,8 @@ fragment Node on Node {
   parent_id
 }
 
-subscription NodesUpdated {
-  nodesUpdated
+subscription NodesUpdated($lastProjectId: Int!) {
+  nodesUpdated(lastProjectId: $lastProjectId)
 }
 
 query GetNodes {

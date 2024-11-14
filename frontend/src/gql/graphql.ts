@@ -171,6 +171,11 @@ export type Subscription = {
 };
 
 
+export type SubscriptionNodesUpdatedArgs = {
+  lastProjectId: Scalars['Int']['input'];
+};
+
+
 export type SubscriptionTagsUpdatedArgs = {
   lastProjectId: Scalars['Int']['input'];
 };
@@ -234,7 +239,9 @@ export type GetProjectQuery = { getProject: { user: { id: number, email: string,
 
 export type NodeFragment = { id: number, name: string, order: number, type: NodeType, tag_id: number, parent_id?: number | null };
 
-export type NodesUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+export type NodesUpdatedSubscriptionVariables = Exact<{
+  lastProjectId: Scalars['Int']['input'];
+}>;
 
 
 export type NodesUpdatedSubscription = { nodesUpdated: boolean };
@@ -366,8 +373,8 @@ export const GetProjectDocument = `
 }
     ${NodeFragmentDoc}`;
 export const NodesUpdatedDocument = `
-    subscription NodesUpdated {
-  nodesUpdated
+    subscription NodesUpdated($lastProjectId: Int!) {
+  nodesUpdated(lastProjectId: $lastProjectId)
 }
     `;
 export const GetNodesDocument = `
@@ -436,7 +443,7 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     GetProject(variables?: GetProjectQueryVariables, options?: C): Promise<ExecutionResult<GetProjectQuery, E>> {
       return requester<GetProjectQuery, GetProjectQueryVariables>(GetProjectDocument, variables, options) as Promise<ExecutionResult<GetProjectQuery, E>>;
     },
-    NodesUpdated(variables?: NodesUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<NodesUpdatedSubscription, E>> {
+    NodesUpdated(variables: NodesUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<NodesUpdatedSubscription, E>> {
       return requester<NodesUpdatedSubscription, NodesUpdatedSubscriptionVariables>(NodesUpdatedDocument, variables, options) as AsyncIterable<ExecutionResult<NodesUpdatedSubscription, E>>;
     },
     GetNodes(variables?: GetNodesQueryVariables, options?: C): Promise<ExecutionResult<GetNodesQuery, E>> {
