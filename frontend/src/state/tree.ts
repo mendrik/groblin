@@ -1,9 +1,5 @@
-import { GQL, subscribe } from '@/gql-client'
-import {
-	type InsertNode,
-	type Node,
-	NodesUpdatedDocument
-} from '@/gql/graphql.ts'
+import { Api, subscribe } from '@/gql-client'
+import type { InsertNode, Node } from '@/gql/graphql.ts'
 import { getItem, setItem } from '@/lib/local-storage'
 import { computeSignal, notNil, setSignal } from '@/lib/utils'
 import { waitForId } from '@/lib/wait-for-id'
@@ -26,7 +22,6 @@ import {
 	mergeDeepLeft,
 	over,
 	pipe,
-	prop,
 	when
 } from 'ramda'
 
@@ -54,8 +49,10 @@ export const $parentNode = signal<number>()
 export const $editingNode = signal<number | undefined>()
 
 /** ---- subscriptions ---- **/
-subscribe(NodesUpdatedDocument, () =>
-	query(GetNodesDocument).then(prop('getNodes')).then(setSignal($nodes))
+subscribe(Api.NodesUpdated, () =>
+	Api.GetNodes()
+		.then(r => r.getNodes)
+		.then(setSignal($nodes))
 )
 
 $root.subscribe(
@@ -179,11 +176,11 @@ export const openParent = <T extends Pick<TreeNode, 'parent_id'>>(
 export const confirmNodeName = (value: string) =>
 	MaybeAsync.liftMaybe(Maybe.fromNullable($editingNode.value))
 		.filter(isNotEmpty)
-		.map(id => GQL.UpdateNode({ data: { id, name: value } }))
+		.map(id => Api.UpdateNode({ data: { id, name: value } }))
 		.run()
 
 export const deleteNode = (id: number) =>
-	GQL.DeleteNodeById({
+	Api.DeleteNodeById({
 		id,
 		parent_id: parentOf(id),
 		order: asNode(id).order
@@ -193,7 +190,7 @@ export const insertNode = (data: InsertNode): Promise<number> => {
 	assertExists(data.parent_id, 'insertNode needs a valid node_id')
 	assertExists(data.order, 'insertNode needs a valid order')
 
-	return GQL.InsertNode({ data })
+	return Api.InsertNode({ data })
 		.then(x => x.insertNode.id)
 		.then(failOn(isNil, 'Failed to insert node'))
 }

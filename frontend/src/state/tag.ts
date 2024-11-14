@@ -1,11 +1,9 @@
-import { GQL, subscribe } from '@/gql-client'
-import {
-	type ChangeTagInput,
-	GetTagsDocument,
-	type InsertTag,
-	type ReorderTagInput,
-	type Tag,
-	TagsUpdatedDocument,
+import { Api, subscribe } from '@/gql-client'
+import type {
+	ChangeTagInput,
+	InsertTag,
+	ReorderTagInput,
+	Tag
 } from '@/gql/graphql'
 import { notNil, setSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
@@ -18,26 +16,24 @@ export const $tag = signal<Tag>()
 
 const tagSubscribe = () =>
 	subscribe(
-		TagsUpdatedDocument,
-		{ lastProjectId: notNil($user).lastProjectId }
-		{callback: () => query(GetTagsDocument).then(prop('getTags')).then(setSignal($tags))}
+		() => Api.TagsUpdated({ lastProjectId: notNil($user).lastProjectId }),
+		() => Api.GetTags().then(prop('getTags')).then(setSignal($tags))
 	)
 
 $tags.subscribe(unless(isEmpty, tagSubscribe))
 
 export const insertTag = (data: InsertTag): Promise<Tag> =>
-	GQL.InsertTag({ data })
+	Api.InsertTag({ data })
 		.then(x => x.insertTag)
 		.then(failOn(isNil, 'Failed to insert tag'))
 
-export const deleteTag = (id: number) =>
-	GQL.DeleteTagById({	id })
+export const deleteTag = (id: number) => Api.DeleteTagById({ id })
 
 export const updateTag = (data: ChangeTagInput): Promise<boolean> =>
-	GQL.UpdateTag({ data }).then(x => x.updateTag)
+	Api.UpdateTag({ data }).then(x => x.updateTag)
 
 export const reorderTag = (data: ReorderTagInput): Promise<Tag[]> =>
-	GQL.ReorderTag({ data })
+	Api.ReorderTag({ data })
 		.then(x => x.reorderTag)
 		.then(setSignal($tags))
 

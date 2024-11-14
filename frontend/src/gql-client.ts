@@ -27,8 +27,8 @@ type NewSdk = {
 	) => Result<ReturnType<Sdk[key]>>
 }
 
-export const GQL = new Proxy(getSdk(query), {
-	get: (target, property: keyof Sdk) => {
+export const Api = new Proxy(getSdk(query), {
+	get: (target, property: keyof NewSdk) => {
 		const original = target[property]
 		if (original && 'apply' in original) {
 			return async (...args: Parameters<typeof original>) => {
@@ -40,15 +40,11 @@ export const GQL = new Proxy(getSdk(query), {
 	}
 }) as NewSdk
 
-export const subscribe: Requester<
-	{ callback: (data: any) => void },
-	object
-> = async (subscriptionDoc, variables, options): unknown => {
-	const subs = gql.iterate({
-		query: subscriptionDoc.toString(),
-		variables: variables ?? {}
-	})
-	for await (const { data } of subs) {
-		if (data) options?.callback(data)
+export const subscribe = async <V, E>(
+	subscription: () => AsyncIterable<ExecutionResult<V, E>>,
+	callback: (data: V) => void
+) => {
+	for await (const { data } of subscription()) {
+		if (data) callback(data as V)
 	}
 }

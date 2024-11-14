@@ -1,5 +1,5 @@
-import { GQL, GQL, } from '@/gql-client'
-import { type Project } from '@/gql/graphql'
+import { Api } from '@/gql-client'
+import type { Project } from '@/gql/graphql'
 import { setSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import { evolveAlt } from '@shared/utils/evolve-alt'
@@ -13,7 +13,7 @@ export const $project = signal<Project>()
 
 export const loadProject = async () =>
 	loggedIn()
-		? GQL.GetProject()
+		? Api.GetProject()
 				.then(x => x.getProject)
 				.then(
 					evolveAlt({

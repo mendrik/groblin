@@ -187,11 +187,6 @@ export type Token = {
   token: Scalars['String']['output'];
 };
 
-export type GetProjectQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetProjectQuery = { getProject: { user: { id: number, email: string, name: string, lastProjectId: number }, project: { name: string }, nodes: Array<{ id: number, name: string, order: number, type: NodeType, tag_id: number, parent_id?: number | null }>, tags: Array<{ id: number, name: string, master: boolean, parent_id?: number | null }> } };
-
 export type TagsUpdatedSubscriptionVariables = Exact<{
   lastProjectId: Scalars['Int']['input'];
 }>;
@@ -232,12 +227,22 @@ export type ReorderTagMutationVariables = Exact<{
 
 export type ReorderTagMutation = { reorderTag: Array<{ id: number, name: string, parent_id?: number | null, master: boolean }> };
 
+export type GetProjectQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetProjectQuery = { getProject: { user: { id: number, email: string, name: string, lastProjectId: number }, project: { name: string }, nodes: Array<{ id: number, name: string, order: number, type: NodeType, tag_id: number, parent_id?: number | null }>, tags: Array<{ id: number, name: string, master: boolean, parent_id?: number | null }> } };
+
 export type NodeFragment = { id: number, name: string, order: number, type: NodeType, tag_id: number, parent_id?: number | null };
 
 export type NodesUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
 export type NodesUpdatedSubscription = { nodesUpdated: boolean };
+
+export type GetNodesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetNodesQuery = { getNodes: Array<{ id: number, name: string, order: number, type: NodeType, tag_id: number, parent_id?: number | null }> };
 
 export type InsertNodeMutationVariables = Exact<{
   data: InsertNode;
@@ -291,30 +296,6 @@ export const NodeFragmentDoc = `
   parent_id
 }
     `;
-export const GetProjectDocument = `
-    query GetProject {
-  getProject {
-    user {
-      id
-      email
-      name
-      lastProjectId
-    }
-    project {
-      name
-    }
-    nodes {
-      ...Node
-    }
-    tags {
-      id
-      name
-      master
-      parent_id
-    }
-  }
-}
-    ${NodeFragmentDoc}`;
 export const TagsUpdatedDocument = `
     subscription TagsUpdated($lastProjectId: Int!) {
   tagsUpdated(lastProjectId: $lastProjectId)
@@ -360,11 +341,42 @@ export const ReorderTagDocument = `
   }
 }
     `;
+export const GetProjectDocument = `
+    query GetProject {
+  getProject {
+    user {
+      id
+      email
+      name
+      lastProjectId
+    }
+    project {
+      name
+    }
+    nodes {
+      ...Node
+    }
+    tags {
+      id
+      name
+      master
+      parent_id
+    }
+  }
+}
+    ${NodeFragmentDoc}`;
 export const NodesUpdatedDocument = `
     subscription NodesUpdated {
   nodesUpdated
 }
     `;
+export const GetNodesDocument = `
+    query GetNodes {
+  getNodes {
+    ...Node
+  }
+}
+    ${NodeFragmentDoc}`;
 export const InsertNodeDocument = `
     mutation InsertNode($data: InsertNode!) {
   insertNode(data: $data) {
@@ -403,9 +415,6 @@ export const LogoutDocument = `
 export type Requester<C = {}, E = unknown> = <R, V>(doc: string, vars?: V, options?: C) => Promise<ExecutionResult<R, E>> | AsyncIterable<ExecutionResult<R, E>>
 export function getSdk<C, E>(requester: Requester<C, E>) {
   return {
-    GetProject(variables?: GetProjectQueryVariables, options?: C): Promise<ExecutionResult<GetProjectQuery, E>> {
-      return requester<GetProjectQuery, GetProjectQueryVariables>(GetProjectDocument, variables, options) as Promise<ExecutionResult<GetProjectQuery, E>>;
-    },
     TagsUpdated(variables: TagsUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<TagsUpdatedSubscription, E>> {
       return requester<TagsUpdatedSubscription, TagsUpdatedSubscriptionVariables>(TagsUpdatedDocument, variables, options) as AsyncIterable<ExecutionResult<TagsUpdatedSubscription, E>>;
     },
@@ -424,8 +433,14 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     ReorderTag(variables: ReorderTagMutationVariables, options?: C): Promise<ExecutionResult<ReorderTagMutation, E>> {
       return requester<ReorderTagMutation, ReorderTagMutationVariables>(ReorderTagDocument, variables, options) as Promise<ExecutionResult<ReorderTagMutation, E>>;
     },
+    GetProject(variables?: GetProjectQueryVariables, options?: C): Promise<ExecutionResult<GetProjectQuery, E>> {
+      return requester<GetProjectQuery, GetProjectQueryVariables>(GetProjectDocument, variables, options) as Promise<ExecutionResult<GetProjectQuery, E>>;
+    },
     NodesUpdated(variables?: NodesUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<NodesUpdatedSubscription, E>> {
       return requester<NodesUpdatedSubscription, NodesUpdatedSubscriptionVariables>(NodesUpdatedDocument, variables, options) as AsyncIterable<ExecutionResult<NodesUpdatedSubscription, E>>;
+    },
+    GetNodes(variables?: GetNodesQueryVariables, options?: C): Promise<ExecutionResult<GetNodesQuery, E>> {
+      return requester<GetNodesQuery, GetNodesQueryVariables>(GetNodesDocument, variables, options) as Promise<ExecutionResult<GetNodesQuery, E>>;
     },
     InsertNode(variables: InsertNodeMutationVariables, options?: C): Promise<ExecutionResult<InsertNodeMutation, E>> {
       return requester<InsertNodeMutation, InsertNodeMutationVariables>(InsertNodeDocument, variables, options) as Promise<ExecutionResult<InsertNodeMutation, E>>;

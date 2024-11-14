@@ -99,7 +99,7 @@ export class NodeResolver {
 	}
 
 	@Query(returns => [Node])
-	getNodes(@Ctx() { db, extra: user }: Context) {
+	async getNodes(@Ctx() { db, extra: user }: Context) {
 		return db
 			.selectFrom('node')
 			.where('project_id', '=', user.lastProjectId)

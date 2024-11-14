@@ -1,0 +1,109 @@
+subscription TagsUpdated($lastProjectId: Int!) {
+  tagsUpdated(lastProjectId: $lastProjectId)
+}
+
+query GetTags {
+  getTags {
+    id
+    parent_id
+    name
+    master
+  }
+}
+
+mutation InsertTag($data: InsertTag!) {
+  insertTag(data: $data) {
+    id
+    name
+    parent_id
+    master
+  }
+}
+
+mutation UpdateTag($data: ChangeTagInput!) {
+  updateTag(data: $data)
+}
+
+mutation DeleteTagById($id: Int!) {
+  deleteTagById(id: $id)
+}
+
+mutation ReorderTag($data: ReorderTagInput!) {
+  reorderTag(data: $data) {
+    id
+    name
+    parent_id
+    master
+  }
+}
+
+query GetProject {
+  getProject {
+    user {
+      id
+      email
+      name
+      lastProjectId
+    }
+    project {
+      name
+    }
+    nodes {
+      ...Node
+    }
+    tags {
+      id
+      name
+      master
+      parent_id
+    }
+  }
+}
+
+fragment Node on Node {
+  id
+  name
+  order
+  type
+  tag_id
+  parent_id
+}
+
+subscription NodesUpdated {
+  nodesUpdated
+}
+
+query GetNodes {
+  getNodes {
+    ...Node
+  }
+}
+
+mutation InsertNode($data: InsertNode!) {
+  insertNode(data: $data) {
+    id
+  }
+}
+
+mutation UpdateNode($data: ChangeNodeInput!) {
+  updateNode(data: $data)
+}
+
+mutation DeleteNodeById($order: Int!, $parent_id: Int!, $id: Int!) {
+  deleteNodeById(order: $order, parent_id: $parent_id, id: $id)
+}
+
+mutation Register($data: Registration!) {
+  register(data: $data)
+}
+
+mutation Login($data: Login!) {
+  login(data: $data) {
+    token
+    expiresDate
+  }
+}
+
+mutation Logout {
+  logout
+}
