@@ -1,8 +1,11 @@
 import { Node } from '@/components/ui/tree/node'
 import { EmptyList } from '@/components/utils/empty-list'
 import { dataInt, safeDataInt } from '@/lib/dom-events'
+import { notNil } from '@/lib/utils'
 import {
+	$focusedNode,
 	type TreeNode,
+	asNode,
 	closeNode,
 	focusNode,
 	nextNode,
@@ -57,7 +60,9 @@ export const Tree = ({ root }: OwnProps) => {
 			</KeyListener>
 			<NodeDelete />
 			<NodeCreate />
-			<NodeProperties />
+			{$focusedNode.value != null && (
+				<NodeProperties node={asNode(notNil($focusedNode))} />
+			)}
 		</>
 	)
 }

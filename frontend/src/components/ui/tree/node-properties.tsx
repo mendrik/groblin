@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dialog'
 import { NodeType } from '@/gql/graphql'
 import { setSignal } from '@/lib/utils'
-import { refocus } from '@/state/tree'
+import { type TreeNode, refocus } from '@/state/tree'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
 import { pipeAsync } from '@shared/utils/pipe-async'
@@ -24,7 +24,7 @@ export const $settingsDialogOpen = signal(false)
 export const openNodeSettings = () => setSignal($settingsDialogOpen, true)
 const close = () => setSignal($settingsDialogOpen, false)
 
-const nodeSettingsSchema = () =>
+const nodeSettingsSchema = (_node: TreeNode) =>
 	strictObject({
 		name: stringField('Name', EditorType.Input, 'off', 'Name of the node'),
 		type: asField(nativeEnum(NodeType).default(NodeType.Object), {
@@ -40,7 +40,11 @@ export type NodeSettingsSchema = TypeOf<ReturnType<typeof nodeSettingsSchema>>
 const saveNodeSettingsCommand: (data: NodeSettingsSchema) => Promise<void> =
 	pipeAsync(tap(console.log))
 
-export const NodeProperties = () => {
+type OwnProps = {
+	node: TreeNode
+}
+
+export const NodeProperties = ({ node }: OwnProps) => {
 	const [formApi, ref] = useFormState<NodeSettingsSchema>()
 	const dialogClose = pipe(close, refocus)
 
@@ -54,7 +58,7 @@ export const NodeProperties = () => {
 					</DialogDescription>
 				</DialogHeader>
 				<ZodForm
-					schema={nodeSettingsSchema()}
+					schema={nodeSettingsSchema(node)}
 					columns={2}
 					onSubmit={pipe(saveNodeSettingsCommand, dialogClose)}
 					onError={console.error}

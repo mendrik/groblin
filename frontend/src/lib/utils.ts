@@ -22,8 +22,6 @@ export const updateSignal = curry(<T>(signal: Signal<T>, fn: Fn<T, T>) => {
 	signal.value = fn(signal.value)
 })
 
-const waitPromise = new Promise(() => {})
-
 export const notNil = <T>(signal: Signal<T>): NonNullable<T> => {
 	assertExists(signal.value, 'Signal value is nil')
 	return signal.value as NonNullable<T>

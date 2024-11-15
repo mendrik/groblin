@@ -6,7 +6,6 @@ import {
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { focusOn, preventDefault, stopPropagation } from '@/lib/dom-events'
-import { updateSignal } from '@/lib/utils'
 import { $focusedNode, type TreeNode, startEditing } from '@/state/tree'
 import { pipeTap } from '@shared/utils/ramda'
 import {
@@ -17,10 +16,9 @@ import {
 	IconRowInsertTop,
 	IconTrash
 } from '@tabler/icons-react'
-import { not } from 'ramda'
 import type { RefObject } from 'react'
 import { openNodeCreate } from './node-create'
-import { $deleteDialogOpen } from './node-delete'
+import { openNodeDelete } from './node-delete'
 import { openNodeSettings } from './node-properties'
 import { canHaveChildren } from './utils'
 
@@ -77,7 +75,7 @@ export const NodeActions = ({ node, editor }: OwnProps) => {
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					className="flex gap-2 items-center"
-					onSelect={() => updateSignal($deleteDialogOpen)(not)}
+					onSelect={openNodeDelete}
 				>
 					<IconTrash className="w-4 h-4" />
 					<span>Delete…</span>
