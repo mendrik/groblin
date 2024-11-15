@@ -25,9 +25,6 @@ export const pipeTapAsync =
 
 export const debug = tap(console.log)
 
-export const idS = (s: string): string => s
-export const idN = (s: number): number => s
-
 export const addOrder =
 	<T extends object>(prop: keyof T) =>
 	(t: T[]): T[] =>
