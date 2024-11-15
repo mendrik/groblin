@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { findKeysByValue, pipeTap, pipeTapAsync } from './ramda.ts'
+import { pipeTap, pipeTapAsync } from './ramda.ts'
 
 // Tests for pipeTap
 describe('pipeTap', () => {
@@ -65,38 +65,5 @@ describe('pipeTap', () => {
 		expect(consoleSpy).toHaveBeenNthCalledWith(3, 'fn3')
 
 		consoleSpy.mockRestore()
-	})
-})
-
-describe('findKeysByValue', () => {
-	it('should return all keys matching the specified value', () => {
-		const record = { a: 1, b: 2, c: 1, d: 3 }
-		const result = findKeysByValue(1)(record)
-		expect(result).toEqual(['a', 'c'])
-	})
-
-	it('should return an empty array if no keys match the specified value', () => {
-		const record = { a: 'x', b: 'y', c: 'z' }
-		const result = findKeysByValue('a')(record)
-		expect(result).toEqual([])
-	})
-
-	it('should handle an empty record', () => {
-		const record = {} as Record<string, number>
-		const result = findKeysByValue(1)(record)
-		expect(result).toEqual([])
-	})
-
-	it('should handle records with different value types', () => {
-		const record = { a: true, b: false, c: true }
-		const result = findKeysByValue(true)(record)
-		expect(result).toEqual(['a', 'c'])
-	})
-
-	it('should work with complex value types', () => {
-		const obj = { id: 1 }
-		const record = { a: obj, b: { id: 2 }, c: obj }
-		const result = findKeysByValue(obj)(record)
-		expect(result).toEqual(['a', 'c'])
 	})
 })

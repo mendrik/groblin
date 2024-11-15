@@ -89,7 +89,7 @@ const order = match<[NodeCreatePosition], number>(
 	)
 )
 
-const createNodeCommand: (data: NewNodeSchema) => Promise<void> = pipeAsync(
+const createNodeCommand: (data: NewNodeSchema) => Promise<number> = pipeAsync(
 	evolveAlt({
 		parent_id: () => parent($createNodePosition.value),
 		order: () => order($createNodePosition.value)
