@@ -9,6 +9,7 @@ import { type TreeOf, listToTree } from '@shared/utils/list-to-tree'
 import { Maybe, MaybeAsync } from 'purify-ts'
 import {
 	type NonEmptyArray,
+	type Tuple,
 	aperture,
 	toString as asStr,
 	find,
@@ -94,8 +95,8 @@ export const updateNodeContext = (nodeId: number): number => {
 	)
 
 	const findFocused = pipe(
-		aperture(3) as (a: number[]) => [number, number, number][],
-		find<[number, number, number]>(([_p, curr, _n]) => curr === nodeId)
+		aperture(3) as (a: number[]) => Tuple<number, 3>[],
+		find(([_p, curr, _n]) => curr === nodeId)
 	)
 	const res = findFocused(clampedList)
 	if (res != null) {
