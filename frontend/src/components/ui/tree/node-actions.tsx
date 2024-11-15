@@ -28,7 +28,7 @@ type OwnProps = {
 	editor: RefObject<HTMLInputElement>
 }
 
-export const NodeOptions = ({ node, editor }: OwnProps) => {
+export const NodeActions = ({ node, editor }: OwnProps) => {
 	return $focusedNode.value === node.id ? (
 		<DropdownMenu>
 			<DropdownMenuTrigger className="no-focus" onKeyDown={stopPropagation}>

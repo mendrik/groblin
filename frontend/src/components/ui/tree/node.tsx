@@ -2,9 +2,9 @@ import { cn } from '@/lib/utils'
 import { $editingNode, type TreeNode, isOpen } from '@/state/tree'
 import { always } from 'ramda'
 import { useRef } from 'react'
+import { NodeActions } from './node-actions'
 import { NodeChevron } from './node-chevron'
 import { NodeEditor } from './node-editor'
-import { NodeOptions } from './node-options'
 import { NodeText } from './node-text'
 
 type OwnProps = {
@@ -27,7 +27,7 @@ export const Node = ({ node, depth }: OwnProps) => {
 					) : (
 						<NodeText node={node} ref={textBtn} />
 					)}
-					<NodeOptions node={node} editor={editor} />
+					<NodeActions node={node} editor={editor} />
 				</div>
 				{node.nodes.filter(always(open)).map(child => (
 					<Node node={child} key={child.id} depth={depth + 1} />
