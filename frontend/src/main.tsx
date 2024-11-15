@@ -27,7 +27,10 @@ const Main = () => (
 					}
 				}}
 			/>
-			<BrowserRouter basename="/">
+			<BrowserRouter
+				basename="/"
+				future={{ v7_relativeSplatPath: true, v7_startTransition: true }}
+			>
 				{$user.value ? <LoggedIn /> : <LoggedOut />}
 			</BrowserRouter>
 		</ThemeProvider>

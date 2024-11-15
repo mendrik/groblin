@@ -54,7 +54,7 @@ type SubscribeSdk = {
 		: never]: (
 		vars: Parameters<Sdk[K]>[0],
 		callback: (data: SubResult<K>) => any
-	) => SubResult<K>
+	) => AbortController
 }
 
 // Subscription SDK with proxy for subscription methods
@@ -66,11 +66,21 @@ export const Subscribe = new Proxy<any>(
 		}) as AsyncIterable<ExecutionResult<any, any>>
 	}),
 	{
-		get: (target, key) => async (vars: any, callback: Function) => {
-			const asyncIter: AsyncIterable<any> = target[key](vars)
-			for await (const { data } of asyncIter) {
-				callback(data)
+		get: (target, key: string) => (vars: any, callback: Function) => {
+			const controller = new AbortController()
+			const subscribe = async (
+				asyncIter: AsyncIterable<any>,
+				signal: AbortSignal
+			) => {
+				for await (const { data } of asyncIter) {
+					if (signal.aborted) {
+						break
+					}
+					callback(data)
+				}
 			}
+			void subscribe(target[key](vars), controller.signal)
+			return controller
 		}
 	}
 ) as SubscribeSdk

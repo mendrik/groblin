@@ -8,18 +8,22 @@ import type {
 import { notNil, setSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import { failOn } from '@shared/utils/guards'
-import { find, isEmpty, isNil, pipe, unless } from 'ramda'
+import { find, isNil, pipe, unless } from 'ramda'
 import { $user } from './user'
 
 export const $tags = signal<Tag[]>([])
 export const $tag = signal<Tag>()
+const $subscription = signal<AbortController>()
 
-const subscribeToTags = () =>
-	Subscribe.TagsUpdated({ lastProjectId: notNil($user).lastProjectId }, () =>
-		Api.GetTags().then(setSignal($tags))
+const subscribeToTags = async () => {
+	$subscription.value?.abort()
+	$subscription.value = Subscribe.TagsUpdated(
+		{ lastProjectId: notNil($user).lastProjectId },
+		() => Api.GetTags().then(setSignal($tags))
 	)
+}
 
-$tags.subscribe(unless(isEmpty, subscribeToTags))
+$tag.subscribe(unless(isNil, subscribeToTags))
 
 export const insertTag = (data: InsertTag): Promise<Tag> =>
 	Api.InsertTag({ data })

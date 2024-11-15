@@ -47,12 +47,16 @@ export const $focusedNode = signal<number>()
 export const $nextNode = signal<number>()
 export const $parentNode = signal<number>()
 export const $editingNode = signal<number | undefined>()
+const $subscription = signal<AbortController>()
 
 /** ---- subscriptions ---- **/
-const subscribeToNodes = () =>
-	Subscribe.NodesUpdated({ lastProjectId: notNil($user).lastProjectId }, () =>
-		Api.GetNodes().then(setSignal($nodes))
+const subscribeToNodes = () => {
+	$subscription.value?.abort()
+	$subscription.value = Subscribe.NodesUpdated(
+		{ lastProjectId: notNil($user).lastProjectId },
+		() => Api.GetNodes().then(setSignal($nodes))
 	)
+}
 
 $root.subscribe(
 	when(isNotNil, node => {
