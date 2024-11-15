@@ -13,15 +13,15 @@ import {
 	toString as asStr,
 	find,
 	head,
+	isNil,
 	isNotEmpty,
-	isNotNil,
 	last,
 	lensProp,
 	mergeDeepLeft,
 	over,
 	pipe,
 	prop,
-	when
+	unless
 } from 'ramda'
 import { $user } from './user'
 
@@ -59,7 +59,7 @@ const subscribeToNodes = () => {
 }
 
 $root.subscribe(
-	when(isNotNil, node => {
+	unless(isNil, node => {
 		updateNodeState({ open: true })(node.id)
 		subscribeToNodes()
 	})
