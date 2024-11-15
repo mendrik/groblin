@@ -16,6 +16,7 @@ import KeyListener from '../../utils/key-listener'
 import { Button } from '../button'
 import { NodeCreate, openNodeCreate } from './node-create'
 import { NodeDelete } from './node-delete'
+import { NodeProperties } from './node-properties'
 
 type OwnProps = {
 	root: TreeNode
@@ -48,7 +49,7 @@ export const Tree = ({ root }: OwnProps) => {
 								onClick={() => openNodeCreate('root-child')}
 								variant="outline"
 							>
-								Add node...
+								Add node…
 							</Button>
 						</div>
 					</EmptyList>
@@ -56,6 +57,7 @@ export const Tree = ({ root }: OwnProps) => {
 			</KeyListener>
 			<NodeDelete />
 			<NodeCreate />
+			<NodeProperties />
 		</>
 	)
 }

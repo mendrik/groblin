@@ -146,6 +146,7 @@ export type ProjectData = {
   project: Project;
   tags: Array<Tag>;
   user: LoggedInUser;
+  values: Array<Value>;
 };
 
 export type Query = {

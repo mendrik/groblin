@@ -21,6 +21,7 @@ import { not } from 'ramda'
 import type { RefObject } from 'react'
 import { openNodeCreate } from './node-create'
 import { $deleteDialogOpen } from './node-delete'
+import { openNodeSettings } from './node-properties'
 import { canHaveChildren } from './utils'
 
 type OwnProps = {
@@ -49,7 +50,7 @@ export const NodeActions = ({ node, editor }: OwnProps) => {
 						onClick={() => openNodeCreate('child')}
 					>
 						<IconCopyPlus className="w-4 h-4" />
-						<span>Add child...</span>
+						<span>Add child…</span>
 					</DropdownMenuItem>
 				)}
 				<DropdownMenuItem
@@ -57,14 +58,14 @@ export const NodeActions = ({ node, editor }: OwnProps) => {
 					onClick={() => openNodeCreate('sibling-above')}
 				>
 					<IconRowInsertTop className="w-4 h-4" />
-					<span>Insert above...</span>
+					<span>Insert above…</span>
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					className="flex gap-2 items-center"
 					onClick={() => openNodeCreate('sibling-below')}
 				>
 					<IconRowInsertBottom className="w-4 h-4" />
-					<span>Insert below...</span>
+					<span>Insert below…</span>
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem
@@ -79,7 +80,15 @@ export const NodeActions = ({ node, editor }: OwnProps) => {
 					onSelect={() => updateSignal($deleteDialogOpen)(not)}
 				>
 					<IconTrash className="w-4 h-4" />
-					<span>Delete...</span>
+					<span>Delete…</span>
+				</DropdownMenuItem>
+				<DropdownMenuSeparator />
+				<DropdownMenuItem
+					className="flex gap-2 items-center"
+					onSelect={openNodeSettings}
+				>
+					<IconTrash className="w-4 h-4" />
+					<span>Properties…</span>
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

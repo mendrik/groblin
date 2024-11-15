@@ -1,8 +1,8 @@
 type Query {
   getNodes: [Node!]!
   getTags: [Tag!]!
-  getProject: ProjectData!
   getValues(tagId: Int!): [Value!]!
+  getProject: ProjectData!
 }
 
 type Node {
@@ -32,10 +32,18 @@ type Tag {
   parent_id: Int
 }
 
+type Value {
+  id: Int!
+  node_id: Int!
+  tag_id: Int!
+  project_id: Int!
+}
+
 type ProjectData {
   project: Project!
   user: LoggedInUser!
   nodes: [Node!]!
+  values: [Value!]!
   tags: [Tag!]!
 }
 
@@ -49,13 +57,6 @@ type LoggedInUser {
   name: String!
   email: String!
   lastProjectId: Int!
-}
-
-type Value {
-  id: Int!
-  node_id: Int!
-  tag_id: Int!
-  project_id: Int!
 }
 
 type Mutation {

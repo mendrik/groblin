@@ -9,6 +9,23 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
+export type Json = JsonValue;
+
+export type JsonArray = JsonValue[];
+
+export type JsonObject = {
+  [x: string]: JsonValue | undefined;
+};
+
+export type JsonPrimitive = boolean | number | string | null;
+
+export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
+
+export interface Container {
+  id: Generated<number>;
+  name: string;
+}
+
 export interface Node {
   id: Generated<number>;
   name: string;
@@ -17,6 +34,12 @@ export interface Node {
   project_id: number;
   tag_id: number;
   type: string;
+}
+
+export interface NodeSettings {
+  id: Generated<number>;
+  node_id: number | null;
+  settings: Json | null;
 }
 
 export interface Project {
@@ -49,6 +72,7 @@ export interface User {
 }
 
 export interface Value {
+  data: Json | null;
   id: Generated<number>;
   node_id: number | null;
   project_id: number | null;
@@ -56,7 +80,9 @@ export interface Value {
 }
 
 export interface DB {
+  container: Container;
   node: Node;
+  node_settings: NodeSettings;
   project: Project;
   project_user: ProjectUser;
   tag: Tag;

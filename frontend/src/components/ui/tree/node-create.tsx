@@ -120,7 +120,7 @@ export const NodeCreate = () => {
 				<ZodForm
 					schema={newNodeSchema()}
 					columns={2}
-					onSubmit={pipe(createNodeCommand, close)}
+					onSubmit={pipe(createNodeCommand, dialogClose)}
 					onError={console.error}
 					ref={ref}
 				>
