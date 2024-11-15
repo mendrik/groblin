@@ -145,10 +145,11 @@ export const parentNode = (): number => {
 	return $parentNode.value
 }
 
-export const focusNode = (nodeId: number) => {
+export const focusNode = (nodeId: number): number => {
 	const node = document.getElementById(`node-${nodeId}`)
 	assertExists(node, `Node with id ${nodeId} not found`)
 	setTimeout(() => node.focus(), 40)
+	return nodeId
 }
 
 export const refocus = () => {

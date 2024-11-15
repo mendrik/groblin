@@ -19,7 +19,7 @@ import {
 } from '@/state/tree'
 import { signal } from '@preact/signals-react'
 import { pipeAsync } from '@shared/utils/pipe-async'
-import { F, T, pipe, tap } from 'ramda'
+import { F, T, pipe } from 'ramda'
 
 export const $deleteDialogOpen = signal(false)
 export const openNodeDelete = pipe(T, setSignal($deleteDialogOpen))
@@ -30,7 +30,7 @@ export const deleteNodeCommand = pipeAsync(
 	focusedNode,
 	deleteNode,
 	previousNode,
-	tap(focusNode),
+	focusNode,
 	updateNodeContext
 )
 
