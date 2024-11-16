@@ -25,7 +25,7 @@ import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
 import { evolveAlt } from '@shared/utils/evolve-alt'
 import { pipeAsync } from '@shared/utils/pipe-async'
-import { F, T, equals as eq, pipe } from 'ramda'
+import { F, T, pipe } from 'ramda'
 import { type TypeOf, nativeEnum, strictObject } from 'zod'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
@@ -60,31 +60,31 @@ const newNodeSchema = () =>
 export type NewNodeSchema = TypeOf<ReturnType<typeof newNodeSchema>>
 
 const position = match<[NodeCreatePosition], string>(
-	caseOf([eq('root-child')], _ => 'as a root child'),
-	caseOf([eq('child')], _ => 'as a child'),
-	caseOf([eq('sibling-above')], _ => 'as a sibling above'),
-	caseOf([eq('sibling-below')], _ => 'as a sibling below')
+	caseOf(['root-child'], _ => 'as a root child'),
+	caseOf(['child'], _ => 'as a child'),
+	caseOf(['sibling-above'], _ => 'as a sibling above'),
+	caseOf(['sibling-below'], _ => 'as a sibling below')
 )
 
 const parent = match<[NodeCreatePosition], number>(
-	caseOf([eq('root-child')], () => notNil($root).id),
-	caseOf([eq('child')], focusedNode),
-	caseOf([eq('sibling-above')], parentNode),
-	caseOf([eq('sibling-below')], parentNode)
+	caseOf(['root-child'], () => notNil($root).id),
+	caseOf(['child'], focusedNode),
+	caseOf(['sibling-above'], parentNode),
+	caseOf(['sibling-below'], parentNode)
 )
 
 const order = match<[NodeCreatePosition], number>(
-	caseOf([eq('root-child')], () => 0),
+	caseOf(['root-child'], () => 0),
 	caseOf(
-		[eq('child')],
+		['child'],
 		pipe(focusedNode, asNode, n => n.nodes.length)
 	),
 	caseOf(
-		[eq('sibling-above')],
+		['sibling-above'],
 		pipe(focusedNode, asNode, n => n.order)
 	),
 	caseOf(
-		[eq('sibling-below')],
+		['sibling-below'],
 		pipe(focusedNode, asNode, n => n.order + 1)
 	)
 )

@@ -106,6 +106,14 @@ const userByEmail = (db: Kysely<DB>, email: string) =>
 		.where('email', '=', email)
 		.executeTakeFirst()
 
+const regToUser = pipe(
+	evolveAlt({
+		password: hashPassword,
+		confirmed: F
+	}),
+	resolveObj
+)
+
 @injectable()
 @UseMiddleware(LogAccess)
 @Resolver()
@@ -120,14 +128,6 @@ export class AuthResolver {
 	) {
 		const existingUser = await userByEmail(db, data.email)
 		assertThat(isNil, existingUser, 'User already exists')
-
-		const regToUser = pipe(
-			evolveAlt({
-				password: hashPassword,
-				confirmed: F
-			}),
-			resolveObj
-		)
 
 		const user = await regToUser(data)
 		const res = await db.insertInto('user').values(user).execute()

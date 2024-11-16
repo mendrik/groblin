@@ -13,11 +13,6 @@ import { Switch } from '../switch'
 import type { FieldMeta, FieldSelectMeta } from './types'
 import { innerType, isZodType } from './utils'
 
-const isOfType =
-	(type: EditorType) =>
-	(obj: FieldMeta): boolean =>
-		obj.editor === type
-
 const hasOptions = (obj: FieldMeta): obj is FieldSelectMeta =>
 	'options' in obj && obj.options !== undefined
 
@@ -62,7 +57,7 @@ const matcher = match<Args, ReactNode>(
 			)
 		}
 	),
-	caseOf([isOfType(EditorType.Input), _, _], (desc, _, field) => (
+	caseOf([{ editor: EditorType.Input }, _, _], (desc, _, field) => (
 		<FormControl>
 			<Input
 				{...field}
@@ -71,7 +66,7 @@ const matcher = match<Args, ReactNode>(
 			/>
 		</FormControl>
 	)),
-	caseOf([isOfType(EditorType.Email), _, _], (desc, _, field) => (
+	caseOf([{ editor: EditorType.Email }, _, _], (desc, _, field) => (
 		<FormControl>
 			<Input
 				{...field}
@@ -81,7 +76,7 @@ const matcher = match<Args, ReactNode>(
 			/>
 		</FormControl>
 	)),
-	caseOf([isOfType(EditorType.Password), _, _], (desc, _, field) => (
+	caseOf([{ editor: EditorType.Password }, _, _], (desc, _, field) => (
 		<FormControl>
 			<Input
 				{...field}
@@ -91,7 +86,7 @@ const matcher = match<Args, ReactNode>(
 			/>
 		</FormControl>
 	)),
-	caseOf([isOfType(EditorType.Switch), _, _], (_desc, _, field) => (
+	caseOf([{ editor: EditorType.Switch }, _, _], (_desc, _, field) => (
 		<FormControl className="block">
 			<Switch {...field} onCheckedChange={field.onChange} />
 		</FormControl>

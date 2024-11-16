@@ -20,18 +20,15 @@ type OwnProps = {
 	node: TreeNode
 } & Icon
 
-const isType =
-	(type: NodeType) =>
-	(node: TreeNode): boolean =>
-		node.type === type
-
 export const NodeIcon = ({ node, ...props }: OwnProps) =>
 	match<[TreeNode, Icon], ReactNode>(
-		caseOf([isType(NodeType.Object), _], (_, p) => <IconSitemap {...p} />),
-		caseOf([isType(NodeType.Boolean), _], (_, p) => <IconToggleLeft {...p} />),
-		caseOf([isType(NodeType.Date), _], (_, p) => <IconCalendar {...p} />),
-		caseOf([isType(NodeType.List), _], (_, p) => <IconDatabase {...p} />),
-		caseOf([isType(NodeType.Number), _], (_, p) => <IconNumber123 {...p} />),
-		caseOf([isType(NodeType.String), _], (_, p) => <IconLetterCase {...p} />),
-		caseOf([isType(NodeType.Schema), _], (_, p) => <IconBox {...p} />)
+		caseOf([{ type: NodeType.Object }, _], (_, p) => <IconSitemap {...p} />),
+		caseOf([{ type: NodeType.Boolean }, _], (_, p) => (
+			<IconToggleLeft {...p} />
+		)),
+		caseOf([{ type: NodeType.Date }, _], (_, p) => <IconCalendar {...p} />),
+		caseOf([{ type: NodeType.List }, _], (_, p) => <IconDatabase {...p} />),
+		caseOf([{ type: NodeType.Number }, _], (_, p) => <IconNumber123 {...p} />),
+		caseOf([{ type: NodeType.String }, _], (_, p) => <IconLetterCase {...p} />),
+		caseOf([{ type: NodeType.Schema }, _], (_, p) => <IconBox {...p} />)
 	)(node, props)

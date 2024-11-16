@@ -1,4 +1,4 @@
-import { equals, gt, is, values } from 'ramda'
+import { T as _, equals, gt, is, values } from 'ramda'
 import { isNumber, isString } from 'ramda-adjunct'
 import { describe, expect, it } from 'vitest'
 import { ZodNativeEnum, type ZodTypeAny, nativeEnum } from 'zod'
@@ -36,5 +36,42 @@ describe('pattern', () => {
 			caseOf([is(ZodNativeEnum)], r1 => `enum: ${values(r1.enum)}`)
 		)
 		expect(matcher(nativeEnum(Test))).toBe('enum: a,b')
+	})
+
+	it('should match number types', () => {
+		const matcher = match<[number, number], string>(
+			caseOf([3, _], () => `match`),
+			caseOf([_, _], () => `no match`)
+		)
+		expect(matcher(3, 5)).toBe('match')
+		expect(matcher(4, 5)).toBe('no match')
+	})
+
+	it('should match number types', () => {
+		const matcher = match<[string, string], string>(
+			caseOf(['a', 'b'], () => `match`),
+			caseOf(['c', 'd'], () => `match`),
+			caseOf(['e', 'f'], () => `match`),
+			caseOf([_, _], () => `no match`)
+		)
+		expect(matcher('a', 'b')).toBe('match')
+		expect(matcher('c', 'd')).toBe('match')
+		expect(matcher('e', 'f')).toBe('match')
+		expect(matcher('e', 'g')).toBe('no match')
+	})
+
+	it('should match object types', () => {
+		const matcher = match<[object], string>(
+			caseOf([{ a: 4, b: 2 }], () => `match`),
+			caseOf([{ a: 1 }], () => `match`),
+			caseOf([{ b: 2 }], () => `match`),
+			caseOf([_], () => `no match`)
+		)
+
+		expect(matcher({ a: 1 })).toBe('match')
+		expect(matcher({ e: 'a', b: 2 })).toBe('match')
+		expect(matcher({ a: 4, b: 2 })).toBe('match')
+		expect(matcher({ b: 3 })).toBe('no match')
+		expect(matcher({ a: 2, c: 3 })).toBe('no match')
 	})
 })
