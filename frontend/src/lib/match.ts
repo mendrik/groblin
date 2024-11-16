@@ -65,7 +65,7 @@ export function match<Args extends readonly unknown[], R>(
 		for (const [predicates, handler] of cases) {
 			if (predicates.length !== values.length) continue
 			const allMatch = predicates.every((pred, index) =>
-				matchValue(values[index], pred as any)
+				matchValue(values[index], pred as Matcher<unknown>)
 			)
 			if (allMatch) {
 				return handler(...(values as HandlerArgs<typeof predicates, Args>))
