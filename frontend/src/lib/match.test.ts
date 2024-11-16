@@ -74,12 +74,4 @@ describe('pattern', () => {
 		expect(matcher({ b: 3 })).toBe('no match')
 		expect(matcher({ a: 2, c: 3 })).toBe('no match')
 	})
-
-	it('should match object types', () => {
-		const matcher = match<[{ a: number }], string>(
-			caseOf([{ a: 'a' }], () => `match`),
-			caseOf([_], () => `no match`)
-		)
-		expect(matcher({ a: 1 })).toBe('no match')
-	})
 })

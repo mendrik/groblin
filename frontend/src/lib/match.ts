@@ -4,11 +4,11 @@ import { isPrimitive } from 'ramda-adjunct'
 type Guard<T> = (value: any) => value is T
 
 // 2. Define a non-generic GuardOrPredicate type
-type Matcher =
+type Matcher<T = any> =
 	| ((value: any) => boolean)
 	| Guard<any>
 	| PrimitiveMatcher
-	| ObjectMatcher
+	| ObjectMatcher<T>
 
 // 3. Utility type to infer the type from a predicate
 type InferPredicate<P, A> = P extends Guard<infer T> ? T : A
@@ -17,12 +17,9 @@ type InferPredicate<P, A> = P extends Guard<infer T> ? T : A
 type PrimitiveMatcher = string | number | boolean | null | undefined
 
 // 5. Define ObjectMatcher for matching partial objects
-type ObjectMatcher = Record<string, any>
-
-// 6. Utility type to check if a value is a primitive
-type IsPrimitive<T> = T extends string | number | boolean | null | undefined
-	? true
-	: false
+type ObjectMatcher<T = any> = T extends object
+	? { [P in keyof T]?: T[P] }
+	: never
 
 // 7. Define HandlerArgs as a tuple mapping Preds to Args
 type HandlerArgs<
@@ -53,37 +50,34 @@ export function caseOf<
 	return [predicates, handler]
 }
 
-// 10. Function to handle the matching logic (check primitive or object match)
-function matchValue(value: any, matcher: Matcher): boolean {
+// 10. Function to handle the matching logic
+function matchValue<T>(value: T, matcher: Matcher<T>): boolean {
 	if (typeof matcher === 'function') {
 		return matcher(value)
 	}
-
 	if (isPrimitive(matcher)) {
 		return value === matcher
 	}
-
-	if (isObject(matcher)) {
+	if (isObject(matcher) && isObject(value)) {
 		return Object.entries(matcher).every(([key, val]) => value[key] === val)
 	}
-
 	return false
 }
 
 // Utility to check if the value is an object
-function isObject(value: any): value is ObjectMatcher {
+function isObject(value: any): value is Record<string, any> {
 	return typeof value === 'object' && value !== null
 }
 
 // 11. Function to create a matcher with multiple MatchCases
 export function match<Args extends readonly unknown[], R>(
-	...cases: MatchCase<readonly Matcher[], Args, R>[]
+	...cases: MatchCase<readonly Matcher<Args[number]>[], Args, R>[]
 ) {
 	return (...values: Args): R => {
 		for (const [predicates, handler] of cases) {
 			if (predicates.length !== values.length) continue
 			const allMatch = predicates.every((pred, index) =>
-				matchValue(values[index], pred)
+				matchValue(values[index], pred as any)
 			)
 			if (allMatch) {
 				return handler(...(values as HandlerArgs<typeof predicates, Args>))
