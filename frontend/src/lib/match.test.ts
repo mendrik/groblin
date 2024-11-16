@@ -60,7 +60,7 @@ describe('pattern', () => {
 		expect(matcher('e', 'g')).toBe('no match')
 	})
 
-	it('should match object types', () => {
+	it('should match object', () => {
 		const matcher = match<[object], string>(
 			caseOf([{ a: 4, b: 2 }], () => `match`),
 			caseOf([{ a: 1 }], () => `match`),
@@ -73,5 +73,13 @@ describe('pattern', () => {
 		expect(matcher({ a: 4, b: 2 })).toBe('match')
 		expect(matcher({ b: 3 })).toBe('no match')
 		expect(matcher({ a: 2, c: 3 })).toBe('no match')
+	})
+
+	it('should match object types', () => {
+		const matcher = match<[{ a: number }], string>(
+			caseOf([{ a: 'a' }], () => `match`),
+			caseOf([_], () => `no match`)
+		)
+		expect(matcher({ a: 1 })).toBe('no match')
 	})
 })
