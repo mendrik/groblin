@@ -26,9 +26,6 @@ export class Value {
 	node_id: number
 
 	@Field(type => Int)
-	tag_id: number
-
-	@Field(type => Int)
 	project_id: number
 }
 
@@ -46,14 +43,10 @@ export class ValueResolver {
 	}
 
 	@Query(returns => [Value])
-	async getValues(
-		@Arg('tagId', () => Int) tagId: number,
-		@Ctx() { db, extra: user }: Context
-	) {
+	async getValues(@Ctx() { db, extra: user }: Context) {
 		return db
 			.selectFrom('value')
 			.where('project_id', '=', user.lastProjectId)
-			.where('tag_id', '=', tagId)
 			.selectAll()
 			.execute()
 	}

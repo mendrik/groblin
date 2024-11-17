@@ -5,14 +5,12 @@ import type { PubSub } from 'type-graphql'
 export enum Topic {
 	UserRegistered = 'userRegistered',
 	NodesUpdated = 'nodesUpdated',
-	ValuesUpdated = 'valuesUpdated',
-	TagsUpdated = 'tagsUpdated'
+	ValuesUpdated = 'valuesUpdated'
 }
 
 type ProjectId = number
 
 type PubSubTopics = {
-	PROJECT_TAGS: [Topic.TagsUpdated, ProjectId]
 	PROJECT_NODES: [Topic.NodesUpdated, ProjectId]
 	USER_REGISTERED: [Topic.UserRegistered]
 }

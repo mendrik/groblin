@@ -3,9 +3,8 @@ import type { Project } from '@/gql/graphql'
 import { setSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import { evolveAlt } from '@shared/utils/evolve-alt'
-import { find, pipe, prop, propEq } from 'ramda'
+import {} from 'ramda'
 import { rejectP } from 'ramda-adjunct'
-import { $tag, $tags } from './tag'
 import { $nodes } from './tree'
 import { $user, loggedIn } from './user'
 import { $values } from './value'
@@ -19,9 +18,7 @@ export const loadProject = async () =>
 					user: setSignal($user),
 					project: setSignal($project),
 					nodes: setSignal($nodes),
-					values: setSignal($values),
-					tags: setSignal($tags),
-					tag: pipe(prop('tags'), find(propEq(true, 'master')), setSignal($tag))
+					values: setSignal($values)
 				})
 			)
 		: rejectP('Not logged in')

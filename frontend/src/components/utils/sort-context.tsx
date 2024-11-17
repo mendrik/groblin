@@ -14,11 +14,6 @@ import {
 } from '@dnd-kit/modifiers'
 import { SortableContext, type SortingStrategy } from '@dnd-kit/sortable'
 import type { PropsWithChildren } from 'react'
-import {} from '../ui/dropdown-menu'
-import {} from '../ui/tabs'
-import {} from '../ui/tags/tag-create'
-import {} from '../ui/tags/tag-delete'
-import {} from '../ui/tags/tag-edit'
 
 type Identifyable = {
 	id: UniqueIdentifier

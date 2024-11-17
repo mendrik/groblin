@@ -1,7 +1,6 @@
 type Query {
   getNodes: [Node!]!
-  getTags: [Tag!]!
-  getValues(tagId: Int!): [Value!]!
+  getValues: [Value!]!
   getProject: ProjectData!
 }
 
@@ -11,7 +10,6 @@ type Node {
   order: Int!
   type: NodeType!
   parent_id: Int
-  tag_id: Int!
 }
 
 enum NodeType {
@@ -25,17 +23,9 @@ enum NodeType {
   schema
 }
 
-type Tag {
-  id: Int!
-  name: String!
-  master: Boolean!
-  parent_id: Int
-}
-
 type Value {
   id: Int!
   node_id: Int!
-  tag_id: Int!
   project_id: Int!
 }
 
@@ -44,7 +34,6 @@ type ProjectData {
   user: LoggedInUser!
   nodes: [Node!]!
   values: [Value!]!
-  tags: [Tag!]!
 }
 
 type Project {
@@ -66,10 +55,6 @@ type Mutation {
   insertNode(data: InsertNode!): Node!
   updateNode(data: ChangeNodeInput!): Boolean!
   deleteNodeById(order: Int!, parent_id: Int!, id: Int!): Boolean!
-  insertTag(data: InsertTag!): Tag!
-  updateTag(data: ChangeTagInput!): Boolean!
-  reorderTag(data: ReorderTagInput!): [Tag!]!
-  deleteTagById(id: Int!): Boolean!
 }
 
 input Registration {
@@ -109,24 +94,7 @@ input ChangeNodeInput {
   parent_id: Int
 }
 
-input InsertTag {
-  name: String!
-  parent_id: Int
-}
-
-input ChangeTagInput {
-  id: Int!
-  name: String!
-  parent_id: Int
-}
-
-input ReorderTagInput {
-  id: Int!
-  overId: Int!
-}
-
 type Subscription {
   nodesUpdated(lastProjectId: Int!): Boolean!
-  tagsUpdated(lastProjectId: Int!): Boolean!
   valuesUpdated(lastProjectId: Int!): Boolean!
 }

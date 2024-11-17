@@ -1,42 +1,3 @@
-subscription TagsUpdated($lastProjectId: Int!) {
-  tagsUpdated(lastProjectId: $lastProjectId)
-}
-
-query GetTags {
-  getTags {
-    id
-    parent_id
-    name
-    master
-  }
-}
-
-mutation InsertTag($data: InsertTag!) {
-  insertTag(data: $data) {
-    id
-    name
-    parent_id
-    master
-  }
-}
-
-mutation UpdateTag($data: ChangeTagInput!) {
-  updateTag(data: $data)
-}
-
-mutation DeleteTagById($id: Int!) {
-  deleteTagById(id: $id)
-}
-
-mutation ReorderTag($data: ReorderTagInput!) {
-  reorderTag(data: $data) {
-    id
-    name
-    parent_id
-    master
-  }
-}
-
 query GetProject {
   getProject {
     user {
@@ -51,12 +12,6 @@ query GetProject {
     nodes {
       ...Node
     }
-    tags {
-      id
-      name
-      master
-      parent_id
-    }
   }
 }
 
@@ -65,7 +20,6 @@ fragment Node on Node {
   name
   order
   type
-  tag_id
   parent_id
 }
 
@@ -112,8 +66,8 @@ subscription ValuesUpdated($lastProjectId: Int!) {
   valuesUpdated(lastProjectId: $lastProjectId)
 }
 
-query GetValues($tagId: Int!) {
-  getValues(tagId: $tagId) {
+query GetValues {
+  getValues {
     id
     node_id
   }
