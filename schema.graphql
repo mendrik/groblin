@@ -1,6 +1,6 @@
 type Query {
   getNodes: [Node!]!
-  getValues: [Value!]!
+  getValues(listItems: [SelectedListItem!]!): [Value!]!
   getProject: ProjectData!
 }
 
@@ -27,6 +27,10 @@ type Value {
   id: Int!
   node_id: Int!
   project_id: Int!
+}
+
+input SelectedListItem {
+  id: Int!
 }
 
 type ProjectData {

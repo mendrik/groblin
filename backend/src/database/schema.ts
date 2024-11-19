@@ -56,11 +56,13 @@ export interface User {
   password: string;
 }
 
-export interface Value {
-  data: Json | null;
+export interface Values {
   id: Generated<number>;
-  node_id: number | null;
+  list_item_id: number | null;
+  node_id: number;
+  parent_list_id: number | null;
   project_id: number | null;
+  value: Json | null;
 }
 
 export interface DB {
@@ -69,5 +71,5 @@ export interface DB {
   project: Project;
   project_user: ProjectUser;
   user: User;
-  value: Value;
+  values: Values;
 }

@@ -70,6 +70,7 @@ export class ProjectResolver {
 		return {
 			project,
 			nodes,
+			values: [],
 			user: ctx.extra
 		}
 	}

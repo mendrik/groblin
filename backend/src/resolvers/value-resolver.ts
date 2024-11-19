@@ -1,4 +1,5 @@
 import { injectable } from 'inversify'
+import { pluck } from 'ramda'
 import type { Context } from 'src/context.ts'
 import { Role } from 'src/enums.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
@@ -8,6 +9,7 @@ import {
 	Authorized,
 	Ctx,
 	Field,
+	InputType,
 	Int,
 	ObjectType,
 	Query,
@@ -29,6 +31,12 @@ export class Value {
 	project_id: number
 }
 
+@InputType()
+export class SelectedListItem {
+	@Field(type => Int)
+	id: number
+}
+
 @injectable()
 @UseMiddleware(LogAccess)
 @Authorized(Role.Admin, Role.Viewer)
@@ -43,10 +51,14 @@ export class ValueResolver {
 	}
 
 	@Query(returns => [Value])
-	async getValues(@Ctx() { db, extra: user }: Context) {
+	async getValues(
+		@Arg('listItems', () => [SelectedListItem]) items: SelectedListItem[],
+		@Ctx() { db, extra: user }: Context
+	) {
 		return db
-			.selectFrom('value')
+			.selectFrom('values')
 			.where('project_id', '=', user.lastProjectId)
+			.where('list_item_id', 'in', pluck('id', items))
 			.selectAll()
 			.execute()
 	}

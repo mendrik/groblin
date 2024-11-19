@@ -66,8 +66,8 @@ subscription ValuesUpdated($lastProjectId: Int!) {
   valuesUpdated(lastProjectId: $lastProjectId)
 }
 
-query GetValues {
-  getValues {
+query GetValues($listItems: [SelectedListItem!]!) {
+  getValues(listItems: $listItems) {
     id
     node_id
   }
