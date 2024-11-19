@@ -97,9 +97,6 @@ importers:
       ansicolor:
         specifier: ^2.0.3
         version: 2.0.3
-      dotenv-cli:
-        specifier: ^7.4.2
-        version: 7.4.2
       kysely-codegen:
         specifier: ^0.17.0
         version: 0.17.0(better-sqlite3@11.5.0)(kysely@0.27.4)(pg@8.13.1)
@@ -2559,14 +2556,6 @@ packages:
 
   dot-case@3.0.4:
     resolution: {integrity: sha512-Kv5nKlh6yRrdrGvxeJ2e5y2eRUpkUosIW4A2AS38zwSz27zu7ufDwQPi5Jhs3XAlGNetl3bmnGhQsMtkKJnj3w==}
-
-  dotenv-cli@7.4.2:
-    resolution: {integrity: sha512-SbUj8l61zIbzyhIbg0FwPJq6+wjbzdn9oEtozQpZ6kW2ihCcapKVZj49oCT3oPM+mgQm+itgvUQcG5szxVrZTA==}
-    hasBin: true
-
-  dotenv-expand@10.0.0:
-    resolution: {integrity: sha512-GopVGCpVS1UKH75VKHGuQFqS1Gusej0z4FyQkPdwjil2gNIv+LNsqBlboOzpJFZKVT95GkCyWJbBSdFEFUWI2A==}
-    engines: {node: '>=12'}
 
   dotenv-expand@11.0.6:
     resolution: {integrity: sha512-8NHi73otpWsZGBSZwwknTXS5pqMOrk9+Ssrna8xCaxkzEpU9OTf9R5ArQGVw03//Zmk9MOwLPng9WwndvpAJ5g==}
@@ -6959,15 +6948,6 @@ snapshots:
     dependencies:
       no-case: 3.0.4
       tslib: 2.8.0
-
-  dotenv-cli@7.4.2:
-    dependencies:
-      cross-spawn: 7.0.3
-      dotenv: 16.4.5
-      dotenv-expand: 10.0.0
-      minimist: 1.2.8
-
-  dotenv-expand@10.0.0: {}
 
   dotenv-expand@11.0.6:
     dependencies:
