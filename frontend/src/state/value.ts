@@ -2,7 +2,7 @@ import { Api, Subscribe } from '@/gql-client'
 import type { InsertListItem, Value } from '@/gql/graphql'
 import { notNil, setSignal, updateSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
-import { assoc, groupBy, pipe, pluck, propOr } from 'ramda'
+import { assoc, groupBy, pipe, pluck, propOr, values } from 'ramda'
 import { $project } from './project'
 
 type NodeId = number
@@ -14,7 +14,7 @@ export const $activeItems = signal<Record<NodeId, Value>>({})
 $values.subscribe(pipe(groupBy(propOr(0, 'node_id')), setSignal($valueMap)))
 
 const fetchValues = () =>
-	Api.GetValues({ ids: pluck('id', notNil($activeItems)) }).then(
+	Api.GetValues({ ids: pipe(notNil, values, pluck('id'))($activeItems) }).then(
 		setSignal($values)
 	)
 
