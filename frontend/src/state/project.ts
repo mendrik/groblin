@@ -3,7 +3,8 @@ import type { Project } from '@/gql/graphql'
 import { setSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import { evolveAlt } from '@shared/utils/evolve-alt'
-import { debug } from '@shared/utils/ramda'
+import { failOn } from '@shared/utils/guards'
+import { isNil } from 'ramda'
 import { rejectP } from 'ramda-adjunct'
 import { $nodes, subscribeToNodes } from './tree'
 import { $user, loggedIn } from './user'
@@ -14,7 +15,7 @@ export const $project = signal<Project>()
 export const loadProject = async () =>
 	loggedIn()
 		? Api.GetProject()
-				.then(debug)
+				.then(failOn(isNil, 'Failed to load project'))
 				.then(
 					evolveAlt({
 						user: setSignal($user),

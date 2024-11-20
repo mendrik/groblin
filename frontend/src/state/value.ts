@@ -7,6 +7,7 @@ import { $project } from './project'
 
 export const $values = signal<Value[]>([])
 export const $valueMap = signal<Record<string, Value[]>>({})
+export const $activeItems = signal<Record<string, Value>>({})
 
 $values.subscribe(pipe(groupBy(propOr(0, 'node_id')), setSignal($valueMap)))
 
