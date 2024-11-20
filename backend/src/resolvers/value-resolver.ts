@@ -2,7 +2,7 @@ import { GraphQLObjectType, GraphQLString } from 'graphql'
 import { injectable } from 'inversify'
 import { isEmpty, pluck } from 'ramda'
 import type { Context } from 'src/context.ts'
-import type { JsonObject } from 'src/database/schema.ts'
+import type { JsonValue } from 'src/database/schema.ts'
 import { Role } from 'src/enums.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import { Topic } from 'src/pubsub.ts'
@@ -44,7 +44,7 @@ export class Value {
 	parent_value_id: number | null
 
 	@Field(type => ValueType)
-	value: JsonObject
+	value: JsonValue
 }
 
 @InputType()

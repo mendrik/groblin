@@ -79,8 +79,7 @@ subscription ValuesUpdated($projectId: Int!) {
 
 query GetValues($listItems: [SelectedListItem!]!) {
   getValues(listItems: $listItems) {
-    id
-    node_id
+    ...Value
   }
 }
 
