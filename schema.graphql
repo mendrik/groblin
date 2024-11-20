@@ -1,6 +1,7 @@
 type Query {
   getNodes: [Node!]!
   getValues(listItems: [SelectedListItem!]!): [Value!]!
+  createListItem(data: [Boolean!]!): [Value!]!
   getProject: ProjectData!
 }
 

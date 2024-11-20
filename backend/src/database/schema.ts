@@ -58,9 +58,8 @@ export interface User {
 
 export interface Values {
   id: Generated<number>;
-  list_item_id: number | null;
   node_id: number;
-  parent_list_id: number | null;
+  parent_value_id: number | null;
   project_id: number | null;
   value: Json | null;
 }

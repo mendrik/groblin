@@ -37,6 +37,18 @@ export class SelectedListItem {
 	id: number
 }
 
+@InputType()
+export class CreateListItem {
+	@Field(type => String)
+	name: string
+
+	@Field(type => Int)
+	node_id: number
+
+	@Field(type => Int)
+	parent_value_id: number
+}
+
 @injectable()
 @UseMiddleware(LogAccess)
 @Authorized(Role.Admin, Role.Viewer)
@@ -58,8 +70,28 @@ export class ValueResolver {
 		return db
 			.selectFrom('values')
 			.where('project_id', '=', user.lastProjectId)
-			.where('list_item_id', 'in', pluck('id', items))
+			.where('parent_value_id', 'in', pluck('id', items))
 			.selectAll()
 			.execute()
+	}
+
+	@Query(returns => [Value])
+	async createListItem(
+		@Arg('data', () => [Boolean]) data: CreateListItem,
+		@Ctx() { db, extra: user, pubSub }: Context
+	) {
+		const res = await db
+			.insertInto('values')
+			.values({
+				node_id: data.node_id,
+				project_id: user.lastProjectId,
+				value: { name: data.name },
+				parent_value_id: data.parent_value_id
+			})
+			.returning('id as id')
+			.execute()
+
+		pubSub.publish(Topic.ValuesUpdated, true)
+		return res
 	}
 }

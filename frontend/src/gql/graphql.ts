@@ -113,9 +113,15 @@ export type ProjectData = {
 };
 
 export type Query = {
+  createListItem: Array<Value>;
   getNodes: Array<Node>;
   getProject: ProjectData;
   getValues: Array<Value>;
+};
+
+
+export type QueryCreateListItemArgs = {
+  data: Array<Scalars['Boolean']['input']>;
 };
 
 
