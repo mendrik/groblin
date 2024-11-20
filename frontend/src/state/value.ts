@@ -1,24 +1,30 @@
 import { Api, Subscribe } from '@/gql-client'
-import type { InsertListItem, SelectedListItem, Value } from '@/gql/graphql'
-import { notNil, setSignal } from '@/lib/utils'
+import type { InsertListItem, Value } from '@/gql/graphql'
+import { notNil, setSignal, updateSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
-import { groupBy, pipe, propOr } from 'ramda'
+import { assoc, groupBy, pipe, pluck, propOr } from 'ramda'
 import { $project } from './project'
 
+type NodeId = number
+
 export const $values = signal<Value[]>([])
-export const $valueMap = signal<Record<string, Value[]>>({})
-export const $activeItems = signal<Record<string, Value>>({})
+export const $valueMap = signal<Record<NodeId, Value[]>>({})
+export const $activeItems = signal<Record<NodeId, Value>>({})
 
 $values.subscribe(pipe(groupBy(propOr(0, 'node_id')), setSignal($valueMap)))
 
-export const $selectedListItems = signal<SelectedListItem[]>([])
+const fetchValues = () =>
+	Api.GetValues({ ids: pluck('id', notNil($activeItems)) }).then(
+		setSignal($values)
+	)
 
 export const subscribeToValues = () =>
-	Subscribe.ValuesUpdated({ projectId: notNil($project).id }, () =>
-		Api.GetValues({ listItems: notNil($selectedListItems) }).then(
-			setSignal($values)
-		)
-	)
+	Subscribe.ValuesUpdated({ projectId: notNil($project).id }, fetchValues)
+
+export const activateListItem = (item: Value) => {
+	updateSignal($activeItems, assoc(item.node_id, item))
+	fetchValues()
+}
 
 export const insertListItem = (listItem: InsertListItem) =>
 	Api.InsertListItem({ listItem })

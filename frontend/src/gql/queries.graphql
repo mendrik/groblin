@@ -77,8 +77,8 @@ subscription ValuesUpdated($projectId: Int!) {
   valuesUpdated(projectId: $projectId)
 }
 
-query GetValues($listItems: [SelectedListItem!]!) {
-  getValues(listItems: $listItems) {
+query GetValues($ids: [Int!]!) {
+  getValues(ids: $ids) {
     ...Value
   }
 }

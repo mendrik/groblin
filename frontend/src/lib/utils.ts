@@ -6,7 +6,7 @@ import {
 import { assertExists } from '@shared/asserts'
 import type { Fn } from '@tp/functions'
 import { type ClassValue, clsx } from 'clsx'
-import { curry } from 'purify-ts'
+import { curry } from 'ramda'
 import { twMerge } from 'tailwind-merge'
 
 export function cn(...inputs: ClassValue[]) {
@@ -18,7 +18,10 @@ export const setSignal = curry(<T>(signal: Signal<T>, value: T): T => {
 	return value
 })
 
-export const updateSignal = curry(<T>(signal: Signal<T>, fn: Fn<T, T>) => {
+export const updateSignal: {
+	<T>(signal: Signal<T>, fn: Fn<T, T>): void
+	<T>(signal: Signal<T>): <T2 extends T>(fn: Fn<T2, T2>) => void
+} = curry(<T>(signal: Signal<T>, fn: Fn<T, T>) => {
 	signal.value = fn(signal.value)
 })
 

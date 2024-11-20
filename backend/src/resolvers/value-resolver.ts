@@ -1,7 +1,7 @@
 import {} from 'graphql'
 import { GraphQLJSONObject } from 'graphql-scalars'
 import { injectable } from 'inversify'
-import { isEmpty, pluck } from 'ramda'
+import { isEmpty } from 'ramda'
 import type { Context } from 'src/context.ts'
 import type { JsonValue } from 'src/database/schema.ts'
 import { Role } from 'src/enums.ts'
@@ -42,12 +42,6 @@ export class Value {
 }
 
 @InputType()
-export class SelectedListItem {
-	@Field(type => Int)
-	id: number
-}
-
-@InputType()
 export class InsertListItem {
 	@Field(type => String)
 	name: string
@@ -74,23 +68,23 @@ export class ValueResolver {
 
 	@Query(returns => [Value])
 	async getValues(
-		@Arg('listItems', () => [SelectedListItem])
-		items: SelectedListItem[],
+		@Arg('ids', () => [Int])
+		ids: number[],
 		@Ctx() { db, extra: user }: Context
 	): Promise<Value[]> {
-		return isEmpty(items)
-			? db
-					.selectFrom('values')
-					.where('project_id', '=', user.lastProjectId)
-					.orderBy(['node_id', 'order'])
-					.selectAll()
-					.execute()
-			: db
-					.selectFrom('values')
-					.where('project_id', '=', user.lastProjectId)
-					.where('parent_value_id', 'in', pluck('id', items))
-					.selectAll()
-					.execute()
+		const query = db
+			.selectFrom('values')
+			.where('project_id', '=', user.lastProjectId)
+			.orderBy(['node_id', 'order'])
+			.selectAll()
+
+		console.log(ids)
+
+		isEmpty(ids)
+			? query.distinctOn('node_id')
+			: query.where('parent_value_id', 'in', ids)
+
+		return query.execute()
 	}
 
 	@Mutation(returns => Int)

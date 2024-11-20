@@ -134,17 +134,13 @@ export type Query = {
 
 
 export type QueryGetValuesArgs = {
-  listItems: Array<SelectedListItem>;
+  ids: Array<Scalars['Int']['input']>;
 };
 
 export type Registration = {
   email: Scalars['String']['input'];
   name: Scalars['String']['input'];
   password: Scalars['String']['input'];
-};
-
-export type SelectedListItem = {
-  id: Scalars['Int']['input'];
 };
 
 export type Subscription = {
@@ -246,7 +242,7 @@ export type ValuesUpdatedSubscriptionVariables = Exact<{
 export type ValuesUpdatedSubscription = { valuesUpdated: boolean };
 
 export type GetValuesQueryVariables = Exact<{
-  listItems: Array<SelectedListItem> | SelectedListItem;
+  ids: Array<Scalars['Int']['input']> | Scalars['Int']['input'];
 }>;
 
 
@@ -352,8 +348,8 @@ export const ValuesUpdatedDocument = `
 }
     `;
 export const GetValuesDocument = `
-    query GetValues($listItems: [SelectedListItem!]!) {
-  getValues(listItems: $listItems) {
+    query GetValues($ids: [Int!]!) {
+  getValues(ids: $ids) {
     ...Value
   }
 }
