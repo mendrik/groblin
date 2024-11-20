@@ -78,8 +78,6 @@ export class ValueResolver {
 			.orderBy(['node_id', 'order'])
 			.selectAll()
 
-		console.log(ids)
-
 		isEmpty(ids)
 			? query.distinctOn('node_id')
 			: query.where('parent_value_id', 'in', ids)
