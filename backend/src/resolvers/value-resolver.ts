@@ -79,7 +79,7 @@ export class ValueResolver {
 			.selectAll()
 
 		isEmpty(ids)
-			? query.distinctOn('node_id')
+			? query.distinctOn('node_id').where('parent_value_id', 'is', null)
 			: query.where('parent_value_id', 'in', ids)
 
 		return query.execute()

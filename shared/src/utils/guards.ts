@@ -6,6 +6,6 @@ export const failOn = <T, G extends T>(
 		if (guard(x)) {
 			throw new Error(message)
 		}
-		return x as Exclude<T, G> // Type assertion to Exclude<T, G>
+		return x as Exclude<T, G>
 	}
 }
