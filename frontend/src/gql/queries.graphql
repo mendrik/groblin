@@ -12,7 +12,18 @@ query GetProject {
     nodes {
       ...Node
     }
+    values {
+      ...Value
+    }
   }
+}
+
+fragment Value on Value {
+      id
+      node_id
+      order
+      value
+      parent_value_id
 }
 
 fragment Node on Node {

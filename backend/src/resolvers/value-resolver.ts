@@ -1,6 +1,8 @@
+import { GraphQLObjectType, GraphQLString } from 'graphql'
 import { injectable } from 'inversify'
-import { pluck } from 'ramda'
+import { isEmpty, pluck } from 'ramda'
 import type { Context } from 'src/context.ts'
+import type { JsonObject } from 'src/database/schema.ts'
 import { Role } from 'src/enums.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import { Topic } from 'src/pubsub.ts'
@@ -20,6 +22,13 @@ import {
 } from 'type-graphql'
 import { matchesLastProject } from './utils.ts'
 
+const ValueType = new GraphQLObjectType({
+	name: 'Value',
+	fields: {
+		name: { type: GraphQLString }
+	}
+})
+
 @ObjectType()
 export class Value {
 	@Field(type => Int)
@@ -29,7 +38,13 @@ export class Value {
 	node_id: number
 
 	@Field(type => Int)
-	project_id: number
+	order: number
+
+	@Field(type => Int, { nullable: true })
+	parent_value_id: number | null
+
+	@Field(type => ValueType)
+	value: JsonObject
 }
 
 @InputType()
@@ -65,15 +80,24 @@ export class ValueResolver {
 
 	@Query(returns => [Value])
 	async getValues(
-		@Arg('listItems', () => [SelectedListItem]) items: SelectedListItem[],
+		@Arg('listItems', () => [SelectedListItem])
+		items: SelectedListItem[],
 		@Ctx() { db, extra: user }: Context
-	) {
-		return db
-			.selectFrom('values')
-			.where('project_id', '=', user.lastProjectId)
-			.where('parent_value_id', 'in', pluck('id', items))
-			.selectAll()
-			.execute()
+	): Promise<Value[]> {
+		return isEmpty(items)
+			? db
+					.selectFrom('values')
+					.distinctOn('node_id')
+					.where('project_id', '=', user.lastProjectId)
+					.orderBy(['node_id', 'order'])
+					.selectAll()
+					.execute()
+			: db
+					.selectFrom('values')
+					.where('project_id', '=', user.lastProjectId)
+					.where('parent_value_id', 'in', pluck('id', items))
+					.selectAll()
+					.execute()
 	}
 
 	@Mutation(returns => Int)

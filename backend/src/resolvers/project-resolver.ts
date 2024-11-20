@@ -57,8 +57,9 @@ export class ProjectResolver {
 	private readonly authResolver: AuthResolver
 
 	@Query(returns => ProjectData)
-	async getProject(@Ctx() ctx: Context) {
+	async getProject(@Ctx() ctx: Context): Promise<ProjectData> {
 		const nodes = await this.nodeResolver.getNodes(ctx)
+		const values = await this.valueResolver.getValues([], ctx)
 
 		const project = await ctx.db
 			.selectFrom('project')
@@ -69,8 +70,8 @@ export class ProjectResolver {
 
 		return {
 			project,
-			nodes,
-			values: [],
+			nodes: nodes as Node[],
+			values,
 			user: ctx.extra
 		}
 	}

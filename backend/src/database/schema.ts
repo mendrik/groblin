@@ -59,6 +59,7 @@ export interface User {
 export interface Values {
   id: Generated<number>;
   node_id: number;
+  order: Generated<number>;
   parent_value_id: number | null;
   project_id: number | null;
   value: Json | null;

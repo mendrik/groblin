@@ -180,24 +180,26 @@ ALTER SEQUENCE public.user_id_seq OWNED BY public."user".id;
 
 
 --
--- Name: value; Type: TABLE; Schema: public; Owner: groblin
+-- Name: values; Type: TABLE; Schema: public; Owner: groblin
 --
 
-CREATE TABLE public.value (
+CREATE TABLE public."values" (
     id integer NOT NULL,
-    node_id integer,
+    node_id integer NOT NULL,
+    value jsonb,
     project_id integer,
-    data jsonb
+    parent_value_id integer,
+    "order" integer
 );
 
 
-ALTER TABLE public.value OWNER TO groblin;
+ALTER TABLE public."values" OWNER TO groblin;
 
 --
--- Name: value_id_seq; Type: SEQUENCE; Schema: public; Owner: groblin
+-- Name: values_id_seq; Type: SEQUENCE; Schema: public; Owner: groblin
 --
 
-CREATE SEQUENCE public.value_id_seq
+CREATE SEQUENCE public.values_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -206,13 +208,13 @@ CREATE SEQUENCE public.value_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.value_id_seq OWNER TO groblin;
+ALTER SEQUENCE public.values_id_seq OWNER TO groblin;
 
 --
--- Name: value_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: groblin
+-- Name: values_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: groblin
 --
 
-ALTER SEQUENCE public.value_id_seq OWNED BY public.value.id;
+ALTER SEQUENCE public.values_id_seq OWNED BY public."values".id;
 
 
 --
@@ -244,10 +246,10 @@ ALTER TABLE ONLY public."user" ALTER COLUMN id SET DEFAULT nextval('public.user_
 
 
 --
--- Name: value id; Type: DEFAULT; Schema: public; Owner: groblin
+-- Name: values id; Type: DEFAULT; Schema: public; Owner: groblin
 --
 
-ALTER TABLE ONLY public.value ALTER COLUMN id SET DEFAULT nextval('public.value_id_seq'::regclass);
+ALTER TABLE ONLY public."values" ALTER COLUMN id SET DEFAULT nextval('public.values_id_seq'::regclass);
 
 
 --
@@ -291,11 +293,25 @@ ALTER TABLE ONLY public."user"
 
 
 --
--- Name: value value_pkey; Type: CONSTRAINT; Schema: public; Owner: groblin
+-- Name: values values_pkey; Type: CONSTRAINT; Schema: public; Owner: groblin
 --
 
-ALTER TABLE ONLY public.value
-    ADD CONSTRAINT value_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public."values"
+    ADD CONSTRAINT values_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: idx_values_node_id; Type: INDEX; Schema: public; Owner: groblin
+--
+
+CREATE INDEX idx_values_node_id ON public."values" USING btree (node_id);
+
+
+--
+-- Name: idx_values_project_id; Type: INDEX; Schema: public; Owner: groblin
+--
+
+CREATE INDEX idx_values_project_id ON public."values" USING btree (project_id);
 
 
 --
@@ -303,6 +319,13 @@ ALTER TABLE ONLY public.value
 --
 
 CREATE INDEX node_id ON public.node USING btree (id);
+
+
+--
+-- Name: parent_value_id_1732089088132_index; Type: INDEX; Schema: public; Owner: groblin
+--
+
+CREATE INDEX parent_value_id_1732089088132_index ON public."values" USING btree (parent_value_id);
 
 
 --
@@ -390,19 +413,27 @@ ALTER TABLE ONLY public."user"
 
 
 --
--- Name: value value_node_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: groblin
+-- Name: values values_node_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: groblin
 --
 
-ALTER TABLE ONLY public.value
-    ADD CONSTRAINT value_node_id_fkey FOREIGN KEY (node_id) REFERENCES public.node(id) ON DELETE CASCADE;
+ALTER TABLE ONLY public."values"
+    ADD CONSTRAINT values_node_id_fkey FOREIGN KEY (node_id) REFERENCES public.node(id) ON DELETE CASCADE;
 
 
 --
--- Name: value value_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: groblin
+-- Name: values values_parent_value_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: groblin
 --
 
-ALTER TABLE ONLY public.value
-    ADD CONSTRAINT value_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.project(id) ON DELETE CASCADE;
+ALTER TABLE ONLY public."values"
+    ADD CONSTRAINT values_parent_value_id_fkey FOREIGN KEY (parent_value_id) REFERENCES public."values"(id) ON DELETE CASCADE;
+
+
+--
+-- Name: values values_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public."values"
+    ADD CONSTRAINT values_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.project(id) ON DELETE CASCADE;
 
 
 --
