@@ -88,7 +88,7 @@ export class NodeResolver {
 		topics: Topic.NodesUpdated,
 		filter: matchesLastProject
 	})
-	nodesUpdated(@Arg('lastProjectId', () => Int) _: number) {
+	nodesUpdated(@Arg('projectId', () => Int) _: number) {
 		return true
 	}
 

@@ -7,11 +7,12 @@ import {
 	DialogTitle
 } from '@/components/ui/dialog'
 import {} from '@/lib/match'
-import { setSignal } from '@/lib/utils'
+import { notNil, setSignal } from '@/lib/utils'
 import type { TreeNode } from '@/state/tree'
 import { focusListItem, insertListItem } from '@/state/value'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
+import { evolveAlt } from '@shared/utils/evolve-alt'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import { pipe } from 'ramda'
 import { type TypeOf, strictObject } from 'zod'
@@ -35,7 +36,13 @@ const newListItemSchema = strictObject({
 export type NewListItemSchema = TypeOf<typeof newListItemSchema>
 
 const createListItemCommand: (data: NewListItemSchema) => Promise<void> =
-	pipeAsync(insertListItem, focusListItem)
+	pipeAsync(
+		evolveAlt({
+			node_id: () => notNil($node).id
+		}),
+		insertListItem,
+		focusListItem
+	)
 
 export const ListItemCreate = () => {
 	const [formApi, ref] = useFormState<NewListItemSchema>()

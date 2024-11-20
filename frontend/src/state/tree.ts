@@ -51,10 +51,10 @@ export const $editingNode = signal<number | undefined>()
 const $subscription = signal<AbortController>()
 
 /** ---- subscriptions ---- **/
-const subscribeToNodes = () => {
+export const subscribeToNodes = () => {
 	$subscription.value?.abort()
 	$subscription.value = Subscribe.NodesUpdated(
-		{ lastProjectId: notNil($user).lastProjectId },
+		{ projectId: notNil($user).lastProjectId },
 		() => Api.GetNodes().then(setSignal($nodes))
 	)
 }
@@ -62,7 +62,6 @@ const subscribeToNodes = () => {
 $root.subscribe(
 	unless(isNil, node => {
 		updateNodeState({ open: true })(node.id)
-		subscribeToNodes()
 	})
 )
 $nodeStates.subscribe(setItem('tree-state'))

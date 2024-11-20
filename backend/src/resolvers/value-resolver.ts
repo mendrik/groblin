@@ -11,6 +11,7 @@ import {
 	Field,
 	InputType,
 	Int,
+	Mutation,
 	ObjectType,
 	Query,
 	Resolver,
@@ -38,15 +39,15 @@ export class SelectedListItem {
 }
 
 @InputType()
-export class CreateListItem {
+export class InsertListItem {
 	@Field(type => String)
 	name: string
 
 	@Field(type => Int)
 	node_id: number
 
-	@Field(type => Int)
-	parent_value_id: number
+	@Field(type => Int, { nullable: true })
+	parent_value_id?: number
 }
 
 @injectable()
@@ -58,7 +59,7 @@ export class ValueResolver {
 		topics: Topic.ValuesUpdated,
 		filter: matchesLastProject
 	})
-	valuesUpdated(@Arg('lastProjectId', () => Int) _: number) {
+	valuesUpdated(@Arg('projectId', () => Int) _: number) {
 		return true
 	}
 
@@ -75,9 +76,9 @@ export class ValueResolver {
 			.execute()
 	}
 
-	@Query(returns => [Value])
-	async createListItem(
-		@Arg('data', () => [Boolean]) data: CreateListItem,
+	@Mutation(returns => Int)
+	async insertListItem(
+		@Arg('listItem', () => InsertListItem) data: InsertListItem,
 		@Ctx() { db, extra: user, pubSub }: Context
 	) {
 		const res = await db
@@ -89,9 +90,9 @@ export class ValueResolver {
 				parent_value_id: data.parent_value_id
 			})
 			.returning('id as id')
-			.execute()
+			.executeTakeFirstOrThrow()
 
 		pubSub.publish(Topic.ValuesUpdated, true)
-		return res
+		return res.id
 	}
 }

@@ -23,8 +23,8 @@ fragment Node on Node {
   parent_id
 }
 
-subscription NodesUpdated($lastProjectId: Int!) {
-  nodesUpdated(lastProjectId: $lastProjectId)
+subscription NodesUpdated($projectId: Int!) {
+  nodesUpdated(projectId: $projectId)
 }
 
 query GetNodes {
@@ -62,8 +62,8 @@ mutation Logout {
   logout
 }
 
-subscription ValuesUpdated($lastProjectId: Int!) {
-  valuesUpdated(lastProjectId: $lastProjectId)
+subscription ValuesUpdated($projectId: Int!) {
+  valuesUpdated(projectId: $projectId)
 }
 
 query GetValues($listItems: [SelectedListItem!]!) {
@@ -71,4 +71,8 @@ query GetValues($listItems: [SelectedListItem!]!) {
     id
     node_id
   }
+}
+
+mutation InsertListItem($listItem: InsertListItem!) {
+  insertListItem(listItem: $listItem)
 }

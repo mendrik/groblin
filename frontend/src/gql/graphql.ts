@@ -25,6 +25,12 @@ export type ChangeNodeInput = {
   type?: InputMaybe<NodeType>;
 };
 
+export type InsertListItem = {
+  name: Scalars['String']['input'];
+  node_id: Scalars['Int']['input'];
+  parent_value_id?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type InsertNode = {
   name: Scalars['String']['input'];
   order: Scalars['Int']['input'];
@@ -47,6 +53,7 @@ export type Login = {
 
 export type Mutation = {
   deleteNodeById: Scalars['Boolean']['output'];
+  insertListItem: Scalars['Int']['output'];
   insertNode: Node;
   login: Token;
   logout: Scalars['Boolean']['output'];
@@ -59,6 +66,11 @@ export type MutationDeleteNodeByIdArgs = {
   id: Scalars['Int']['input'];
   order: Scalars['Int']['input'];
   parent_id: Scalars['Int']['input'];
+};
+
+
+export type MutationInsertListItemArgs = {
+  listItem: InsertListItem;
 };
 
 
@@ -113,15 +125,9 @@ export type ProjectData = {
 };
 
 export type Query = {
-  createListItem: Array<Value>;
   getNodes: Array<Node>;
   getProject: ProjectData;
   getValues: Array<Value>;
-};
-
-
-export type QueryCreateListItemArgs = {
-  data: Array<Scalars['Boolean']['input']>;
 };
 
 
@@ -146,12 +152,12 @@ export type Subscription = {
 
 
 export type SubscriptionNodesUpdatedArgs = {
-  lastProjectId: Scalars['Int']['input'];
+  projectId: Scalars['Int']['input'];
 };
 
 
 export type SubscriptionValuesUpdatedArgs = {
-  lastProjectId: Scalars['Int']['input'];
+  projectId: Scalars['Int']['input'];
 };
 
 export type Token = {
@@ -173,7 +179,7 @@ export type GetProjectQuery = { getProject: { user: { id: number, email: string,
 export type NodeFragment = { id: number, name: string, order: number, type: NodeType, parent_id?: number | null };
 
 export type NodesUpdatedSubscriptionVariables = Exact<{
-  lastProjectId: Scalars['Int']['input'];
+  projectId: Scalars['Int']['input'];
 }>;
 
 
@@ -227,7 +233,7 @@ export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 export type LogoutMutation = { logout: boolean };
 
 export type ValuesUpdatedSubscriptionVariables = Exact<{
-  lastProjectId: Scalars['Int']['input'];
+  projectId: Scalars['Int']['input'];
 }>;
 
 
@@ -239,6 +245,13 @@ export type GetValuesQueryVariables = Exact<{
 
 
 export type GetValuesQuery = { getValues: Array<{ id: number, node_id: number }> };
+
+export type InsertListItemMutationVariables = Exact<{
+  listItem: InsertListItem;
+}>;
+
+
+export type InsertListItemMutation = { insertListItem: number };
 
 export const NodeFragmentDoc = `
     fragment Node on Node {
@@ -268,8 +281,8 @@ export const GetProjectDocument = `
 }
     ${NodeFragmentDoc}`;
 export const NodesUpdatedDocument = `
-    subscription NodesUpdated($lastProjectId: Int!) {
-  nodesUpdated(lastProjectId: $lastProjectId)
+    subscription NodesUpdated($projectId: Int!) {
+  nodesUpdated(projectId: $projectId)
 }
     `;
 export const GetNodesDocument = `
@@ -315,8 +328,8 @@ export const LogoutDocument = `
 }
     `;
 export const ValuesUpdatedDocument = `
-    subscription ValuesUpdated($lastProjectId: Int!) {
-  valuesUpdated(lastProjectId: $lastProjectId)
+    subscription ValuesUpdated($projectId: Int!) {
+  valuesUpdated(projectId: $projectId)
 }
     `;
 export const GetValuesDocument = `
@@ -325,6 +338,11 @@ export const GetValuesDocument = `
     id
     node_id
   }
+}
+    `;
+export const InsertListItemDocument = `
+    mutation InsertListItem($listItem: InsertListItem!) {
+  insertListItem(listItem: $listItem)
 }
     `;
 export type Requester<C = {}, E = unknown> = <R, V>(doc: string, vars?: V, options?: C) => Promise<ExecutionResult<R, E>> | AsyncIterable<ExecutionResult<R, E>>
@@ -362,6 +380,9 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     },
     GetValues(variables: GetValuesQueryVariables, options?: C): Promise<ExecutionResult<GetValuesQuery, E>> {
       return requester<GetValuesQuery, GetValuesQueryVariables>(GetValuesDocument, variables, options) as Promise<ExecutionResult<GetValuesQuery, E>>;
+    },
+    InsertListItem(variables: InsertListItemMutationVariables, options?: C): Promise<ExecutionResult<InsertListItemMutation, E>> {
+      return requester<InsertListItemMutation, InsertListItemMutationVariables>(InsertListItemDocument, variables, options) as Promise<ExecutionResult<InsertListItemMutation, E>>;
     }
   };
 }

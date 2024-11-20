@@ -1,7 +1,7 @@
 import type { Context } from 'src/context.ts'
 
-type TopicSubscription = { args: { lastProjectId: number }; context: Context }
+type TopicSubscription = { args: { projectId: number }; context: Context }
 
 export const matchesLastProject = ({ args, context }: TopicSubscription) => {
-	return args.lastProjectId === context.extra.lastProjectId
+	return args.projectId === context.extra.lastProjectId
 }

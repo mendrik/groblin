@@ -1,7 +1,6 @@
 type Query {
   getNodes: [Node!]!
   getValues(listItems: [SelectedListItem!]!): [Value!]!
-  createListItem(data: [Boolean!]!): [Value!]!
   getProject: ProjectData!
 }
 
@@ -60,6 +59,7 @@ type Mutation {
   insertNode(data: InsertNode!): Node!
   updateNode(data: ChangeNodeInput!): Boolean!
   deleteNodeById(order: Int!, parent_id: Int!, id: Int!): Boolean!
+  insertListItem(listItem: InsertListItem!): Int!
 }
 
 input Registration {
@@ -99,7 +99,13 @@ input ChangeNodeInput {
   parent_id: Int
 }
 
+input InsertListItem {
+  name: String!
+  node_id: Int!
+  parent_value_id: Int
+}
+
 type Subscription {
-  nodesUpdated(lastProjectId: Int!): Boolean!
-  valuesUpdated(lastProjectId: Int!): Boolean!
+  nodesUpdated(projectId: Int!): Boolean!
+  valuesUpdated(projectId: Int!): Boolean!
 }
