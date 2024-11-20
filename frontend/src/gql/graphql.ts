@@ -15,6 +15,8 @@ export type Scalars = {
   Float: { input: number; output: number; }
   /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.This scalar is serialized to a string in ISO 8601 format and parsed from a string in ISO 8601 format. */
   DateTimeISO: { input: any; output: any; }
+  /** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
+  JSONObject: { input: any; output: any; }
 };
 
 export type ChangeNodeInput = {
@@ -168,13 +170,17 @@ export type Token = {
 export type Value = {
   id: Scalars['Int']['output'];
   node_id: Scalars['Int']['output'];
-  project_id: Scalars['Int']['output'];
+  order: Scalars['Int']['output'];
+  parent_value_id?: Maybe<Scalars['Int']['output']>;
+  value: Scalars['JSONObject']['output'];
 };
 
 export type GetProjectQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetProjectQuery = { getProject: { user: { id: number, email: string, name: string, lastProjectId: number }, project: { name: string }, nodes: Array<{ id: number, name: string, order: number, type: NodeType, parent_id?: number | null }> } };
+export type GetProjectQuery = { getProject: { user: { id: number, email: string, name: string, lastProjectId: number }, project: { name: string }, nodes: Array<{ id: number, name: string, order: number, type: NodeType, parent_id?: number | null }>, values: Array<{ id: number, node_id: number, order: number, value: any, parent_value_id?: number | null }> } };
+
+export type ValueFragment = { id: number, node_id: number, order: number, value: any, parent_value_id?: number | null };
 
 export type NodeFragment = { id: number, name: string, order: number, type: NodeType, parent_id?: number | null };
 
@@ -244,7 +250,7 @@ export type GetValuesQueryVariables = Exact<{
 }>;
 
 
-export type GetValuesQuery = { getValues: Array<{ id: number, node_id: number }> };
+export type GetValuesQuery = { getValues: Array<{ id: number, node_id: number, order: number, value: any, parent_value_id?: number | null }> };
 
 export type InsertListItemMutationVariables = Exact<{
   listItem: InsertListItem;
@@ -253,6 +259,15 @@ export type InsertListItemMutationVariables = Exact<{
 
 export type InsertListItemMutation = { insertListItem: number };
 
+export const ValueFragmentDoc = `
+    fragment Value on Value {
+  id
+  node_id
+  order
+  value
+  parent_value_id
+}
+    `;
 export const NodeFragmentDoc = `
     fragment Node on Node {
   id
@@ -277,9 +292,13 @@ export const GetProjectDocument = `
     nodes {
       ...Node
     }
+    values {
+      ...Value
+    }
   }
 }
-    ${NodeFragmentDoc}`;
+    ${NodeFragmentDoc}
+${ValueFragmentDoc}`;
 export const NodesUpdatedDocument = `
     subscription NodesUpdated($projectId: Int!) {
   nodesUpdated(projectId: $projectId)
@@ -335,11 +354,10 @@ export const ValuesUpdatedDocument = `
 export const GetValuesDocument = `
     query GetValues($listItems: [SelectedListItem!]!) {
   getValues(listItems: $listItems) {
-    id
-    node_id
+    ...Value
   }
 }
-    `;
+    ${ValueFragmentDoc}`;
 export const InsertListItemDocument = `
     mutation InsertListItem($listItem: InsertListItem!) {
   insertListItem(listItem: $listItem)

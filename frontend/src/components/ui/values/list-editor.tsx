@@ -1,6 +1,7 @@
+import { notNil } from '@/lib/utils'
 import type { TreeNode } from '@/state/tree'
+import { $valueMap } from '@/state/value'
 import { IconSquareRoundedPlus } from '@tabler/icons-react'
-import { range } from 'ramda'
 import { Button } from '../button'
 import { openListItemCreate } from './list-item-create'
 
@@ -9,8 +10,21 @@ type OwnProps = {
 }
 
 export const ListEditor = ({ node }: OwnProps) => {
+	const items = notNil($valueMap)[node.id] ?? []
 	return (
-		<div className="flex flex-row w-full h-7 -ml-1">
+		<div className="flex flex-row w-full h-7">
+			<ol className="flex flex-row items-center -ml-1">
+				{items.map(item => (
+					<Button
+						key={`${item.id}`}
+						size="sm"
+						variant="ghost"
+						className="py-0 px-2 h-6 text-md font-normal"
+					>
+						{item.value.name}
+					</Button>
+				))}
+			</ol>
 			<Button
 				size="icon"
 				variant="ghost"
@@ -22,18 +36,6 @@ export const ListEditor = ({ node }: OwnProps) => {
 					stroke={1}
 				/>
 			</Button>
-			<ol className="flex flex-row gap-1 items-center">
-				{range(0, 5).map(i => (
-					<Button
-						key={`${i}`}
-						size="sm"
-						variant="ghost"
-						className="py-0 px-2 h-6"
-					>
-						Item 1
-					</Button>
-				))}
-			</ol>
 		</div>
 	)
 }

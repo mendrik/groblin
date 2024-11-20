@@ -1,4 +1,5 @@
-import { GraphQLObjectType, GraphQLString } from 'graphql'
+import {} from 'graphql'
+import { GraphQLJSONObject } from 'graphql-scalars'
 import { injectable } from 'inversify'
 import { isEmpty, pluck } from 'ramda'
 import type { Context } from 'src/context.ts'
@@ -22,13 +23,6 @@ import {
 } from 'type-graphql'
 import { matchesLastProject } from './utils.ts'
 
-const ValueType = new GraphQLObjectType({
-	name: 'Value',
-	fields: {
-		name: { type: GraphQLString }
-	}
-})
-
 @ObjectType()
 export class Value {
 	@Field(type => Int)
@@ -43,7 +37,7 @@ export class Value {
 	@Field(type => Int, { nullable: true })
 	parent_value_id: number | null
 
-	@Field(type => ValueType)
+	@Field(type => GraphQLJSONObject)
 	value: JsonValue
 }
 
@@ -87,7 +81,6 @@ export class ValueResolver {
 		return isEmpty(items)
 			? db
 					.selectFrom('values')
-					.distinctOn('node_id')
 					.where('project_id', '=', user.lastProjectId)
 					.orderBy(['node_id', 'order'])
 					.selectAll()

@@ -17,7 +17,7 @@ type Args = readonly [TreeNode, Value | undefined]
 
 const matcher = match<Args, ReactNode>(
 	caseOf([{ type: NodeType.List }, _], node => <ListEditor node={node} />),
-	caseOf([_, _], node => node.name)
+	caseOf([_, _], node => <div className="ml-1">{node.name}</div>)
 )
 
 const propsToArgs = ({ node, value }: OwnProps) => [node, value] as Args
