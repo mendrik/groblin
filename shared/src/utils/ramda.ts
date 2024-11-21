@@ -16,7 +16,9 @@ export const pipeTap =
 		fns.reduce((_, fn) => fn(arg), undefined) as ReturnType<Last<FUNCTIONS>>
 
 export const pipeTapAsync =
-	<T, FUNCTIONS extends Array<(arg: T) => any>>(...fns: FUNCTIONS) =>
+	<T, FUNCTIONS extends Array<(arg: T) => PromiseLike<any>>>(
+		...fns: FUNCTIONS
+	) =>
 	(arg: T) =>
 		fns.reduce(
 			(pc, fn) => pc.then(() => fn(arg)),
@@ -26,6 +28,6 @@ export const pipeTapAsync =
 export const debug = tap(console.log)
 
 export const addOrder =
-	<T extends object>(prop: keyof T) =>
-	(t: T[]): T[] =>
-		zipWith(assoc(prop), range(0, t.length), t) as T[]
+	<T, P extends string>(prop: P) =>
+	<T2 extends T & { [key in P]: number }>(t: T[]): T2[] =>
+		zipWith(assoc(prop), range(0, t.length), t) as T2[]

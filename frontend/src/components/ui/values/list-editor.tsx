@@ -2,12 +2,13 @@ import { cn, notNil } from '@/lib/utils'
 import type { TreeNode } from '@/state/tree'
 import { $activeItems, $valueMap, activateListItem } from '@/state/value'
 import {
-	IconSquareRoundedPlus as Minus,
-	IconSquareRoundedMinus as Plus
+	IconSquareRoundedMinus as Minus,
+	IconSquareRoundedPlus as Plus
 } from '@tabler/icons-react'
 import { Button } from '../button'
 import { MicroIcon } from '../random/micro-icon'
 import { openListItemCreate } from './list-item-create'
+import { openListItemDelete } from './list-item-delete'
 
 type OwnProps = {
 	node: TreeNode
@@ -37,7 +38,9 @@ export const ListEditor = ({ node }: OwnProps) => {
 			</ol>
 			<div className="flex content-center">
 				<MicroIcon icon={Plus} onClick={() => openListItemCreate(node)} />
-				<MicroIcon icon={Minus} onClick={() => void 0} />
+				{$activeItem && (
+					<MicroIcon icon={Minus} onClick={() => openListItemDelete(node)} />
+				)}
 			</div>
 		</div>
 	)

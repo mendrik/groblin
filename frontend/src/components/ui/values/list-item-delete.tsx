@@ -11,8 +11,9 @@ import {
 import { stopPropagation } from '@/lib/dom-events'
 import { notNil, setSignal } from '@/lib/utils'
 import type { TreeNode } from '@/state/tree'
-import { deleteListItem } from '@/state/value'
+import { deleteListItem, selectAnyListItem } from '@/state/value'
 import { signal } from '@preact/signals-react'
+import { pipeTapAsync } from '@shared/utils/ramda'
 import { pipe } from 'ramda'
 
 export const $deleteListItemOpen = signal(false)
@@ -23,7 +24,10 @@ export const openListItemDelete = (node: TreeNode) => {
 }
 const close = () => setSignal($deleteListItemOpen, false)
 
-export const deleteTagCommand = () => deleteListItem(notNil($node))
+export const deleteTagCommand = () => {
+	const x = notNil($node)
+	pipeTapAsync(deleteListItem, selectAnyListItem)(x)
+}
 
 export const ListItemDelete = () => (
 	<AlertDialog open={$deleteListItemOpen.value}>

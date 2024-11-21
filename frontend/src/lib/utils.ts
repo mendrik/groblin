@@ -44,7 +44,7 @@ export const notNil: {
 			? `Signal value (${pathOrProp as string}) is nil`
 			: 'Signal value is nil'
 	)
-	return res as any
+	return res
 }
 
 export const computeSignal = <T, R>(

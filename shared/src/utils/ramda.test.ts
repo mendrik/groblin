@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { pipeTap, pipeTapAsync } from './ramda.ts'
+import { addOrder, pipeTap, pipeTapAsync } from './ramda.ts'
 
 // Tests for pipeTap
 describe('pipeTap', () => {
@@ -65,5 +65,48 @@ describe('pipeTap', () => {
 		expect(consoleSpy).toHaveBeenNthCalledWith(3, 'fn3')
 
 		consoleSpy.mockRestore()
+	})
+})
+
+describe('pipeTapAsync', () => {
+	it('should pass the correct argument to each function', async () => {
+		const fn1 = vi.fn().mockResolvedValue(undefined)
+		const fn2 = vi.fn().mockResolvedValue(undefined)
+		const fn3 = vi.fn().mockResolvedValue(undefined)
+
+		const result = await pipeTapAsync(fn1, fn2, fn3)('test')
+
+		expect(fn1).toHaveBeenCalledWith('test')
+		expect(fn2).toHaveBeenCalledWith('test')
+		expect(fn3).toHaveBeenCalledWith('test')
+
+		expect(result).toBeUndefined()
+	})
+})
+
+describe('addOrder', () => {
+	it('should add an order property to each object in the array', () => {
+		const input = [{ name: 'Alice' }, { name: 'Bob' }, { name: 'Charlie' }]
+		const result = addOrder('order')(input)
+		expect(result).toEqual([
+			{ name: 'Alice', order: 0 },
+			{ name: 'Bob', order: 1 },
+			{ name: 'Charlie', order: 2 }
+		])
+	})
+
+	it('should return an empty array when given an empty array', () => {
+		const input: { name: string }[] = []
+		const result = addOrder('order')(input)
+		expect(result).toEqual([])
+	})
+
+	it('should add different property names correctly', () => {
+		const input = [{ name: 'Alice' }, { name: 'Bob' }]
+		const result = addOrder('index')(input)
+		expect(result).toEqual([
+			{ name: 'Alice', index: 0 },
+			{ name: 'Bob', index: 1 }
+		])
 	})
 })
