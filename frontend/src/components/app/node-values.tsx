@@ -1,5 +1,6 @@
 import { $openNodes } from '@/state/tree'
 import { ListItemCreate } from '../ui/values/list-item-create'
+import { ListItemDelete } from '../ui/values/list-item-delete'
 import { ValueEditor } from '../ui/values/value-editor'
 
 export const NodeValues = () => {
@@ -13,6 +14,7 @@ export const NodeValues = () => {
 				))}
 			</ol>
 			<ListItemCreate />
+			<ListItemDelete />
 		</>
 	)
 }
