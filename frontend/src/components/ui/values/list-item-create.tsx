@@ -38,7 +38,7 @@ export type NewListItemSchema = TypeOf<typeof newListItemSchema>
 const createListItemCommand: (data: NewListItemSchema) => Promise<void> =
 	pipeAsync(
 		evolveAlt({
-			node_id: () => notNil($node).id
+			node_id: () => notNil($node, 'id')
 		}),
 		insertListItem,
 		focusListItem

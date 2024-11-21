@@ -9,7 +9,7 @@ import {
 	AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import { stopPropagation } from '@/lib/dom-events'
-import { setSignal } from '@/lib/utils'
+import { notNil, setSignal } from '@/lib/utils'
 import type { TreeNode } from '@/state/tree'
 import { deleteListItem } from '@/state/value'
 import { signal } from '@preact/signals-react'
@@ -23,7 +23,7 @@ export const openListItemDelete = (node: TreeNode) => {
 }
 const close = () => setSignal($deleteListItemOpen, false)
 
-export const deleteTagCommand = () => deleteListItem($node)
+export const deleteTagCommand = () => deleteListItem(notNil($node))
 
 export const ListItemDelete = () => (
 	<AlertDialog open={$deleteListItemOpen.value}>
@@ -38,7 +38,7 @@ export const ListItemDelete = () => (
 			<AlertDialogFooter>
 				<AlertDialogCancel onClick={close}>Cancel</AlertDialogCancel>
 				<AlertDialogAction onClick={pipe(deleteTagCommand, close)} autoFocus>
-					Continue
+					Delete
 				</AlertDialogAction>
 			</AlertDialogFooter>
 		</AlertDialogContent>

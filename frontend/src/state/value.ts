@@ -15,12 +15,12 @@ export const $activeItems = signal<Record<NodeId, Value>>({})
 $values.subscribe(pipe(groupBy(propOr(0, 'node_id')), setSignal($valueMap)))
 
 const fetchValues = () =>
-	Api.GetValues({ ids: pipe(notNil, values, pluck('id'))($activeItems) }).then(
+	Api.GetValues({ ids: pipe(values, pluck('id'))(notNil($activeItems)) }).then(
 		setSignal($values)
 	)
 
 export const subscribeToValues = () =>
-	Subscribe.ValuesUpdated({ projectId: notNil($project).id }, fetchValues)
+	Subscribe.ValuesUpdated({ projectId: notNil($project, 'id') }, fetchValues)
 
 export const activateListItem = (item: Value) => {
 	updateSignal($activeItems, assoc(item.node_id, item))

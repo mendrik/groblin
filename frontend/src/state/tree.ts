@@ -54,7 +54,7 @@ const $subscription = signal<AbortController>()
 export const subscribeToNodes = () => {
 	$subscription.value?.abort()
 	$subscription.value = Subscribe.NodesUpdated(
-		{ projectId: notNil($user).lastProjectId },
+		{ projectId: notNil($user, 'lastProjectId') },
 		() => Api.GetNodes().then(setSignal($nodes))
 	)
 }
@@ -207,7 +207,7 @@ function* iterateNodes(root: TreeNode): Generator<TreeNode> {
 }
 
 export function* iterateOpenNodes(root: TreeNode): Generator<TreeNode> {
-	if (root.id !== notNil($root).id) {
+	if (root.id !== notNil($root, 'id')) {
 		yield root
 	}
 	if ($nodeStates.value[root.id]?.open === true) {

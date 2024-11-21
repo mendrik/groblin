@@ -20,18 +20,6 @@ describe('notNil', () => {
 		expect(result).toEqual({ nested: 'test' })
 	})
 
-	it('should throw an error when the nested property does not exist', () => {
-		const s = signal({ root: { nested: 'test' } })
-		expect(notNil(s, ['root', 'nested'])).toEqual('test')
-	})
-
-	it('should throw an error when the nested property does not exist', () => {
-		const s = signal({ root: { nested: 'test' } })
-		expect(() => notNil(s, ['root', 'fails' as any])).toThrow(
-			'Signal value (root,fails) is nil'
-		)
-	})
-
 	it('should work with arrays', () => {
 		const s = signal(['a', 'b', 'c'])
 		expect(notNil(s, 1)).toEqual('b')
