@@ -5,8 +5,8 @@ export function pipeTapAsync<A extends Array<(arg: any) => any>>(
 ) => A extends [...any, infer LAST]
 	? LAST extends (arg: any) => infer R
 		? R extends Promise<infer P>
-			? P
-			: R
+			? Promise<P>
+			: Promise<R>
 		: never
 	: never {
 	return arg =>

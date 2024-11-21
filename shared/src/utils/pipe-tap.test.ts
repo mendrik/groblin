@@ -25,8 +25,8 @@ describe('pipeTap', () => {
 			(x: number) => x * 10
 		)(3)
 
-		expect(consoleSpy).toHaveBeenCalledWith('Fn1:', 3)
-		expect(consoleSpy).toHaveBeenCalledWith('Fn2:', 3)
+		expect(consoleSpy).toHaveBeenCalledWith('Fn1:', [3])
+		expect(consoleSpy).toHaveBeenCalledWith('Fn2:', [3])
 		expect(result).toBe(30) // Last function returns 3 * 10
 
 		consoleSpy.mockRestore()

@@ -31,10 +31,8 @@ export const notNil: {
 		signal: Signal<T>,
 		props: P
 	): NonNullable<T>[P]
-} = <T, P extends keyof NonNullable<T>>(signal: Signal<T>, pathOrProp?: P) => {
-	const res = pathOrProp
-		? prop(pathOrProp as keyof T, signal.value)
-		: signal.value
+} = (signal: Signal<any>, pathOrProp?: string) => {
+	const res = pathOrProp ? prop(pathOrProp, signal.value) : signal.value
 
 	pathOrProp && !res && console.log(signal.value, res, pathOrProp)
 

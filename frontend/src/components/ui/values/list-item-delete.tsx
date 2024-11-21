@@ -25,7 +25,7 @@ export const openListItemDelete = (node: TreeNode) => {
 const close = () => setSignal($deleteListItemOpen, false)
 
 export const deleteTagCommand = () =>
-	pipeTapAsync(deleteListItem, selectAnyListItem)(notNil($node))
+	pipeTapAsync(notNil, deleteListItem, selectAnyListItem)($node)
 
 export const ListItemDelete = () => (
 	<AlertDialog open={$deleteListItemOpen.value}>

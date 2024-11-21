@@ -25,11 +25,10 @@ export const $valueMap = signal<Record<NodeId, Value[]>>({})
 export const $activeItems = signal<Record<NodeId, Value>>({})
 
 $values.subscribe(pipe(groupBy(propOr(0, 'node_id')), setSignal($valueMap)))
-
 const fetchValues = () =>
-	Api.GetValues({ ids: pipe(values, pluck('id'))(notNil($activeItems)) }).then(
-		setSignal($values)
-	)
+	Api.GetValues({
+		ids: pipe(values, pluck('id'))(notNil($activeItems))
+	}).then(setSignal($values))
 
 export const subscribeToValues = () =>
 	Subscribe.ValuesUpdated({ projectId: notNil($project, 'id') }, fetchValues)
@@ -51,7 +50,7 @@ export const deleteListItem = (node: TreeNode): Promise<boolean> => {
 	return Api.DeleteListItem({ id: selected.id })
 }
 
-export const selectAnyListItem = (node: TreeNode): boolean => {
+export const selectAnyListItem = (node: TreeNode) => {
 	const values = notNil($valueMap, node.id)
 	if (isNotEmpty(values)) {
 		activateListItem(last(values))
@@ -59,6 +58,4 @@ export const selectAnyListItem = (node: TreeNode): boolean => {
 		updateSignal($activeItems, omit([node.id]))
 	}
 	fetchValues()
-
-	return true
 }
