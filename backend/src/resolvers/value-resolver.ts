@@ -104,4 +104,18 @@ export class ValueResolver {
 		pubSub.publish(Topic.ValuesUpdated, true)
 		return res.id
 	}
+
+	@Mutation(returns => Boolean)
+	async deleteListItem(
+		@Arg('id', () => Int) id: number,
+		@Ctx() { db, extra: user, pubSub }: Context
+	) {
+		const { numDeletedRows } = await db
+			.deleteFrom('values')
+			.where('id', '=', id)
+			.executeTakeFirstOrThrow()
+
+		pubSub.publish(Topic.ValuesUpdated, true)
+		return numDeletedRows > 0
+	}
 }

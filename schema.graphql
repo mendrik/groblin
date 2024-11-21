@@ -63,6 +63,7 @@ type Mutation {
   updateNode(data: ChangeNodeInput!): Boolean!
   deleteNodeById(order: Int!, parent_id: Int!, id: Int!): Boolean!
   insertListItem(listItem: InsertListItem!): Int!
+  deleteListItem(id: Int!): Boolean!
 }
 
 input Registration {

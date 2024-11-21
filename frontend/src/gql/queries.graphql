@@ -86,3 +86,7 @@ query GetValues($ids: [Int!]!) {
 mutation InsertListItem($listItem: InsertListItem!) {
   insertListItem(listItem: $listItem)
 }
+
+mutation DeleteListItem($id: Int!) {
+  deleteListItem(id: $id)
+}

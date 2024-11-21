@@ -5,8 +5,9 @@ import {
 } from '@preact/signals-react'
 import { assertExists } from '@shared/asserts'
 import type { Fn } from '@tp/functions'
+import type { Path } from '@tp/toolbelt'
 import { type ClassValue, clsx } from 'clsx'
-import { curry } from 'ramda'
+import { path, curry, prop } from 'ramda'
 import { twMerge } from 'tailwind-merge'
 
 export function cn(...inputs: ClassValue[]) {
@@ -25,9 +26,20 @@ export const updateSignal: {
 	signal.value = fn(signal.value)
 })
 
-export const notNil = <T>(signal: Signal<T>): NonNullable<T> => {
-	assertExists(signal.value, 'Signal value is nil')
-	return signal.value as NonNullable<T>
+export const notNil = <T>(
+	signal: Signal<T>,
+	pathOrProp?: (keyof T & (string | number)) | Path<T>
+): NonNullable<T> => {
+	const res = pathOrProp
+		? Array.isArray(pathOrProp)
+			? path(pathOrProp as Array<string | number>, signal.value)
+			: prop(pathOrProp, signal.value)
+		: signal.value
+	assertExists(
+		res,
+		pathOrProp ? `Signal value (${pathOrProp}) is nil` : 'Signal value is nil'
+	)
+	return res as NonNullable<T>
 }
 
 export const computeSignal = <T, R>(

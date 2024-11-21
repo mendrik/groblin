@@ -54,6 +54,7 @@ export type Login = {
 };
 
 export type Mutation = {
+  deleteListItem: Scalars['Boolean']['output'];
   deleteNodeById: Scalars['Boolean']['output'];
   insertListItem: Scalars['Int']['output'];
   insertNode: Node;
@@ -61,6 +62,11 @@ export type Mutation = {
   logout: Scalars['Boolean']['output'];
   register: Scalars['Boolean']['output'];
   updateNode: Scalars['Boolean']['output'];
+};
+
+
+export type MutationDeleteListItemArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
@@ -255,6 +261,13 @@ export type InsertListItemMutationVariables = Exact<{
 
 export type InsertListItemMutation = { insertListItem: number };
 
+export type DeleteListItemMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteListItemMutation = { deleteListItem: boolean };
+
 export const ValueFragmentDoc = `
     fragment Value on Value {
   id
@@ -359,6 +372,11 @@ export const InsertListItemDocument = `
   insertListItem(listItem: $listItem)
 }
     `;
+export const DeleteListItemDocument = `
+    mutation DeleteListItem($id: Int!) {
+  deleteListItem(id: $id)
+}
+    `;
 export type Requester<C = {}, E = unknown> = <R, V>(doc: string, vars?: V, options?: C) => Promise<ExecutionResult<R, E>> | AsyncIterable<ExecutionResult<R, E>>
 export function getSdk<C, E>(requester: Requester<C, E>) {
   return {
@@ -397,6 +415,9 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     },
     InsertListItem(variables: InsertListItemMutationVariables, options?: C): Promise<ExecutionResult<InsertListItemMutation, E>> {
       return requester<InsertListItemMutation, InsertListItemMutationVariables>(InsertListItemDocument, variables, options) as Promise<ExecutionResult<InsertListItemMutation, E>>;
+    },
+    DeleteListItem(variables: DeleteListItemMutationVariables, options?: C): Promise<ExecutionResult<DeleteListItemMutation, E>> {
+      return requester<DeleteListItemMutation, DeleteListItemMutationVariables>(DeleteListItemDocument, variables, options) as Promise<ExecutionResult<DeleteListItemMutation, E>>;
     }
   };
 }

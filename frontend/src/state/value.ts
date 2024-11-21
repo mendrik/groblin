@@ -4,6 +4,7 @@ import { notNil, setSignal, updateSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import { assoc, groupBy, pipe, pluck, propOr, values } from 'ramda'
 import { $project } from './project'
+import type { TreeNode } from './tree'
 
 type NodeId = number
 
@@ -31,4 +32,7 @@ export const insertListItem = (listItem: InsertListItem) =>
 
 export const focusListItem = (params: any) => {}
 
-export const deleteListItem = (params: any) => {}
+export const deleteListItem = (node: TreeNode) => {
+	const selected = notNil($activeItems)[node.id]
+	return Api.DeleteListItem({ id: selected.id })
+}
