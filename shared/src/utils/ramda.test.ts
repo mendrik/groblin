@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
-import { addOrder, pipeTap, pipeTapAsync } from './ramda.ts'
+import { pipeTapAsync } from './pipe-tap-async.ts'
+import { pipeTap } from './pipe-tap.ts'
+import { addOrder } from './ramda.ts'
 
 // Tests for pipeTap
 describe('pipeTap', () => {
@@ -8,7 +10,7 @@ describe('pipeTap', () => {
 		const fn2 = vi.fn((x: number) => x * 2)
 		const fn3 = vi.fn((x: number) => x - 3)
 
-		const result = pipeTap<number, any[]>(fn1, fn2, fn3)(5)
+		const result = pipeTap(fn1, fn2, fn3)(5)
 
 		expect(fn1).toHaveBeenCalledWith(5)
 		expect(fn2).toHaveBeenCalledWith(5)
@@ -19,7 +21,7 @@ describe('pipeTap', () => {
 	it('side effects like console.log and still return the last value', () => {
 		const consoleSpy = vi.spyOn(console, 'log')
 
-		const result = pipeTap<number, any[]>(
+		const result = pipeTap(
 			(x: number) => console.log('Fn1:', x),
 			(x: number) => console.log('Fn2:', x),
 			(x: number) => x * 10
@@ -37,7 +39,7 @@ describe('pipeTap', () => {
 		const fn2 = vi.fn(() => new Promise(res => setTimeout(res, 50)))
 		const fn3 = vi.fn((x: number) => x - 3)
 
-		const result = await pipeTapAsync<number, any[]>(fn1, fn2, fn3)(5)
+		const result = await pipeTapAsync(fn1, fn2, fn3)(5)
 
 		expect(fn1).toHaveBeenCalledWith(5)
 		expect(fn2).toHaveBeenCalledWith(5)
@@ -47,13 +49,13 @@ describe('pipeTap', () => {
 
 	it('should handle mixed functions and await promises', async () => {
 		const consoleSpy = vi.spyOn(console, 'log')
-		const fn1 = vi.fn(() => console.log('fn1'))
+		const fn1 = vi.fn((a: number) => console.log('fn1'))
 		const fn2 = vi.fn(() =>
 			new Promise(res => setTimeout(res, 10)).then(() => console.log('fn2'))
 		)
 		const fn3 = vi.fn(() => console.log('fn3'))
 
-		const result = await pipeTapAsync<number, any[]>(fn1, fn2, fn3)(5)
+		const result = await pipeTapAsync(fn1, fn2, fn3)(5)
 
 		expect(fn1).toHaveBeenCalledWith(5)
 		expect(fn2).toHaveBeenCalledWith(5)
@@ -65,22 +67,6 @@ describe('pipeTap', () => {
 		expect(consoleSpy).toHaveBeenNthCalledWith(3, 'fn3')
 
 		consoleSpy.mockRestore()
-	})
-})
-
-describe('pipeTapAsync', () => {
-	it('should pass the correct argument to each function', async () => {
-		const fn1 = vi.fn().mockResolvedValue(undefined)
-		const fn2 = vi.fn().mockResolvedValue(undefined)
-		const fn3 = vi.fn().mockResolvedValue(undefined)
-
-		const result = await pipeTapAsync(fn1, fn2, fn3)('test')
-
-		expect(fn1).toHaveBeenCalledWith('test')
-		expect(fn2).toHaveBeenCalledWith('test')
-		expect(fn3).toHaveBeenCalledWith('test')
-
-		expect(result).toBeUndefined()
 	})
 })
 

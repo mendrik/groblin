@@ -51,7 +51,7 @@ export const deleteListItem = (node: TreeNode): Promise<boolean> => {
 	return Api.DeleteListItem({ id: selected.id })
 }
 
-export const selectAnyListItem = (node: TreeNode) => {
+export const selectAnyListItem = (node: TreeNode): boolean => {
 	const values = notNil($valueMap, node.id)
 	if (isNotEmpty(values)) {
 		activateListItem(last(values))
@@ -59,4 +59,6 @@ export const selectAnyListItem = (node: TreeNode) => {
 		updateSignal($activeItems, omit([node.id]))
 	}
 	fetchValues()
+
+	return true
 }
