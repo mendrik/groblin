@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { focusOn, preventDefault, stopPropagation } from '@/lib/dom-events'
 import { $focusedNode, type TreeNode, startEditing } from '@/state/tree'
-import { pipeTap } from '@shared/utils/ramda'
+import { pipeTap } from '@shared/utils/pipe-tap'
 import {
 	IconCopyPlus,
 	IconCursorText,

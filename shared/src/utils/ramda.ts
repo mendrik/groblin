@@ -1,9 +1,5 @@
 import { assoc, range, tap, zipWith } from 'ramda'
 
-export type Last<Type extends any[]> = Type extends [...any[], infer R]
-	? R
-	: never
-
 export const debug = tap(console.log)
 
 export const addOrder =
