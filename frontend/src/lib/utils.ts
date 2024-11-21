@@ -35,6 +35,9 @@ export const notNil: {
 	const res = pathOrProp
 		? prop(pathOrProp as keyof T, signal.value)
 		: signal.value
+
+	pathOrProp && !res && console.log(signal.value, res, pathOrProp)
+
 	assertExists(
 		res,
 		pathOrProp

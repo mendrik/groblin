@@ -33,6 +33,6 @@ export const insertListItem = (listItem: InsertListItem) =>
 export const focusListItem = (params: any) => {}
 
 export const deleteListItem = (node: TreeNode) => {
-	const selected = notNil($activeItems)[node.id]
+	const selected = notNil($activeItems, node.id)
 	return Api.DeleteListItem({ id: selected.id })
 }

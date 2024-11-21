@@ -180,7 +180,7 @@ export type Value = {
 export type GetProjectQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetProjectQuery = { getProject: { user: { id: number, email: string, name: string, lastProjectId: number }, project: { name: string }, nodes: Array<{ id: number, name: string, order: number, type: NodeType, parent_id?: number | null }>, values: Array<{ id: number, node_id: number, order: number, value: any, parent_value_id?: number | null }> } };
+export type GetProjectQuery = { getProject: { user: { id: number, email: string, name: string, lastProjectId: number }, project: { id: number, name: string }, nodes: Array<{ id: number, name: string, order: number, type: NodeType, parent_id?: number | null }>, values: Array<{ id: number, node_id: number, order: number, value: any, parent_value_id?: number | null }> } };
 
 export type ValueFragment = { id: number, node_id: number, order: number, value: any, parent_value_id?: number | null };
 
@@ -296,6 +296,7 @@ export const GetProjectDocument = `
       lastProjectId
     }
     project {
+      id
       name
     }
     nodes {
