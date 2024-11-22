@@ -62,6 +62,7 @@ export type Mutation = {
   logout: Scalars['Boolean']['output'];
   register: Scalars['Boolean']['output'];
   updateNode: Scalars['Boolean']['output'];
+  upsertValue: Scalars['Int']['output'];
 };
 
 
@@ -99,6 +100,11 @@ export type MutationRegisterArgs = {
 
 export type MutationUpdateNodeArgs = {
   data: ChangeNodeInput;
+};
+
+
+export type MutationUpsertValueArgs = {
+  data: UpsertValue;
 };
 
 export type Node = {
@@ -167,6 +173,13 @@ export type SubscriptionValuesUpdatedArgs = {
 export type Token = {
   expiresDate: Scalars['DateTimeISO']['output'];
   token: Scalars['String']['output'];
+};
+
+export type UpsertValue = {
+  id?: InputMaybe<Scalars['Int']['input']>;
+  node_id: Scalars['Int']['input'];
+  parent_value_id?: InputMaybe<Scalars['Int']['input']>;
+  value: Scalars['JSONObject']['input'];
 };
 
 export type Value = {
@@ -267,6 +280,13 @@ export type DeleteListItemMutationVariables = Exact<{
 
 
 export type DeleteListItemMutation = { deleteListItem: boolean };
+
+export type UpsertValueMutationVariables = Exact<{
+  data: UpsertValue;
+}>;
+
+
+export type UpsertValueMutation = { upsertValue: number };
 
 export const ValueFragmentDoc = `
     fragment Value on Value {
@@ -378,6 +398,11 @@ export const DeleteListItemDocument = `
   deleteListItem(id: $id)
 }
     `;
+export const UpsertValueDocument = `
+    mutation UpsertValue($data: UpsertValue!) {
+  upsertValue(data: $data)
+}
+    `;
 export type Requester<C = {}, E = unknown> = <R, V>(doc: string, vars?: V, options?: C) => Promise<ExecutionResult<R, E>> | AsyncIterable<ExecutionResult<R, E>>
 export function getSdk<C, E>(requester: Requester<C, E>) {
   return {
@@ -419,6 +444,9 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     },
     DeleteListItem(variables: DeleteListItemMutationVariables, options?: C): Promise<ExecutionResult<DeleteListItemMutation, E>> {
       return requester<DeleteListItemMutation, DeleteListItemMutationVariables>(DeleteListItemDocument, variables, options) as Promise<ExecutionResult<DeleteListItemMutation, E>>;
+    },
+    UpsertValue(variables: UpsertValueMutationVariables, options?: C): Promise<ExecutionResult<UpsertValueMutation, E>> {
+      return requester<UpsertValueMutation, UpsertValueMutationVariables>(UpsertValueDocument, variables, options) as Promise<ExecutionResult<UpsertValueMutation, E>>;
     }
   };
 }

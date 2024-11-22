@@ -91,3 +91,7 @@ mutation InsertListItem($listItem: InsertListItem!) {
 mutation DeleteListItem($id: Int!) {
   deleteListItem(id: $id)
 }
+
+mutation UpsertValue($data: UpsertValue!) {
+  upsertValue(data: $data)
+}

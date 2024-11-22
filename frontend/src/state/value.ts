@@ -1,5 +1,10 @@
 import { Api, Subscribe } from '@/gql-client'
-import { type InsertListItem, NodeType, type Value } from '@/gql/graphql'
+import {
+	type InsertListItem,
+	NodeType,
+	type UpsertValue,
+	type Value
+} from '@/gql/graphql'
 import { notNil, setSignal, updateSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import { assertThat } from '@shared/asserts'
@@ -64,3 +69,5 @@ export const selectAnyListItem = (node: TreeNode) => {
 	}
 	fetchValues()
 }
+
+export const saveValue = (data: UpsertValue) => Api.UpsertValue({ data })

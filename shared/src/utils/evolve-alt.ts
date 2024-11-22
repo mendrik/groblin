@@ -1,3 +1,5 @@
+import { isFunction, isObject } from 'ramda-adjunct'
+
 // Utility types
 type RequiredKeys<T> = {
 	[K in keyof T]-?: undefined extends T[K] ? never : K
@@ -51,13 +53,15 @@ export function evolveAlt(transformations: any, object?: any): any {
 	if (object === undefined) {
 		return (obj: any) => evolveAlt(transformations, obj)
 	} else {
-		const result: any = { ...object }
+		const result: any = isObject(object) ? { ...object } : {}
 		for (const key in transformations) {
 			const transformFn = transformations[key]
 			if (Object.prototype.hasOwnProperty.call(object, key)) {
 				result[key] = transformFn(object[key])
-			} else {
+			} else if (isFunction(transformFn)) {
 				result[key] = transformFn(object)
+			} else {
+				result[key] = transformations[key]
 			}
 		}
 		return result

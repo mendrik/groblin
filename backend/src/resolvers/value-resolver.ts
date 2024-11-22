@@ -42,6 +42,21 @@ export class Value {
 }
 
 @InputType()
+export class UpsertValue {
+	@Field(type => Int, { nullable: true })
+	id?: number
+
+	@Field(type => Int)
+	node_id: number
+
+	@Field(type => Int, { nullable: true })
+	parent_value_id?: number
+
+	@Field(type => GraphQLJSONObject)
+	value: JsonValue
+}
+
+@InputType()
 export class InsertListItem {
 	@Field(type => String)
 	name: string
@@ -117,5 +132,30 @@ export class ValueResolver {
 
 		pubSub.publish(Topic.ValuesUpdated, true)
 		return numDeletedRows > 0
+	}
+
+	@Mutation(returns => Int)
+	async upsertValue(
+		@Arg('data', () => UpsertValue) data: UpsertValue,
+		@Ctx() { db, extra: user, pubSub }: Context
+	) {
+		const { id } = await db
+			.insertInto('values')
+			.values({
+				id: data.id,
+				node_id: data.node_id,
+				project_id: user.lastProjectId,
+				value: data.value,
+				parent_value_id: data.parent_value_id
+			})
+			.onConflict(c =>
+				c.column('id').doUpdateSet(e => ({
+					value: e.ref('excluded.value')
+				}))
+			)
+			.returning('id as id')
+			.executeTakeFirstOrThrow()
+		pubSub.publish(Topic.ValuesUpdated, true)
+		return id
 	}
 }

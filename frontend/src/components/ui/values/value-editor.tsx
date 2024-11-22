@@ -6,6 +6,7 @@ import type { Fn } from '@tp/functions'
 import { type Pred, T as _, any, apply, dropLast, filter, pipe } from 'ramda'
 import type { FC, ReactNode } from 'react'
 import { ListEditor } from './list-editor'
+import { StringEditor } from './string-editor'
 
 type OwnProps = {
 	node: TreeNode
@@ -29,6 +30,9 @@ const isBlank: Pred<[TreeNode]> = pipe(
 const matcher = match<Args, ReactNode>(
 	caseOf([isBlank, _], () => null),
 	caseOf([{ type: NodeType.List }, _], node => <ListEditor node={node} />),
+	caseOf([{ type: NodeType.String }, _], (node, value) => (
+		<StringEditor node={node} value={value} />
+	)),
 	caseOf([_, _], node => <div className="ml-1">{node.name}</div>)
 )
 
