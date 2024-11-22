@@ -58,4 +58,6 @@ export const selectAnyListItem = (node: TreeNode) => {
 		updateSignal($activeItems, omit([node.id]))
 	}
 	fetchValues()
+
+	return 1
 }

@@ -13,7 +13,7 @@ import { notNil, setSignal } from '@/lib/utils'
 import type { TreeNode } from '@/state/tree'
 import { deleteListItem, selectAnyListItem } from '@/state/value'
 import { signal } from '@preact/signals-react'
-import { pipeTapAsync } from '@shared/utils/pipe-tap-async'
+import { pipeTap } from '@shared/utils/pipe-tap'
 import { pipe } from 'ramda'
 
 export const $deleteListItemOpen = signal(false)
@@ -25,7 +25,7 @@ export const openListItemDelete = (node: TreeNode) => {
 const close = () => setSignal($deleteListItemOpen, false)
 
 export const deleteTagCommand = () =>
-	pipeTapAsync(notNil, deleteListItem, selectAnyListItem)($node)
+	pipeTap(deleteListItem, selectAnyListItem)(notNil($node))
 
 export const ListItemDelete = () => (
 	<AlertDialog open={$deleteListItemOpen.value}>

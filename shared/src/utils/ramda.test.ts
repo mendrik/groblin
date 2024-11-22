@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { pipeTapAsync } from './pipe-tap-async.ts'
+import { pipeTapAsync } from './pipe-tap.ts'
 import { pipeTap } from './pipe-tap.ts'
 import { addOrder } from './ramda.ts'
 
