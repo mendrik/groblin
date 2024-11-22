@@ -22,6 +22,7 @@ import {
 	over,
 	pipe,
 	prop,
+	reverse,
 	unless
 } from 'ramda'
 import { $user } from './user'
@@ -216,6 +217,18 @@ export function* iterateOpenNodes(root: TreeNode): Generator<TreeNode> {
 		}
 	}
 }
+
+export function* pathFrom(
+	target: TreeNode
+): Generator<TreeNode, void, unknown> {
+	yield target
+	if (target.parent_id != null) {
+		yield* pathFrom(asNode(target.parent_id)) // Recursively yield the parent's path
+	}
+}
+
+export const pathTo = (target: TreeNode): TreeNode[] =>
+	reverse([...pathFrom(target)])
 
 export const parentInTree = (
 	tree: TreeNode,

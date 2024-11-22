@@ -18,11 +18,12 @@ import {
 import { $project } from './project'
 import { type TreeNode, asNode } from './tree'
 
-type NodeId = number
+export type NodeId = number
+export type ActiveLists = Record<NodeId, Value>
 
 export const $values = signal<Value[]>([])
 export const $valueMap = signal<Record<NodeId, Value[]>>({})
-export const $activeItems = signal<Record<NodeId, Value>>({})
+export const $activeItems = signal<ActiveLists>({})
 
 $values.subscribe(pipe(groupBy(propOr(0, 'node_id')), setSignal($valueMap)))
 const fetchValues = () =>

@@ -56,4 +56,8 @@ declare module 'ramda' {
 		from: number,
 		to: number
 	): <T2 extends T>(list: readonly T2[]) => T2[]
+
+	export function any<T>(
+		fn: (a: T) => boolean
+	): <T2 extends T>(list: readonly T2[]) => boolean
 }
