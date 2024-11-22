@@ -30,7 +30,7 @@ export const StringEditor = ({ node, value }: OwnProps) => {
 	return (
 		<input
 			className="h-7 bg-transparent border-none appearance-none outline-none ring-0 ml-1"
-			value={value?.value.content}
+			defaultValue={value?.value.content}
 			onBlur={save(node, value)}
 		/>
 	)
