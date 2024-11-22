@@ -13,11 +13,13 @@ import {
 	groupBy,
 	head,
 	isNotEmpty,
+	map,
 	omit,
 	pipe,
 	pluck,
 	propEq,
 	propOr,
+	sortBy,
 	values
 } from 'ramda'
 import { $project } from './project'
@@ -30,7 +32,13 @@ export const $values = signal<Value[]>([])
 export const $valueMap = signal<Record<NodeId, Value[]>>({})
 export const $activeItems = signal<ActiveLists>({})
 
-$values.subscribe(pipe(groupBy(propOr(0, 'node_id')), setSignal($valueMap)))
+$values.subscribe(
+	pipe(
+		groupBy(propOr(0, 'node_id')),
+		map(sortBy<Value>(propOr(0, 'order'))),
+		setSignal($valueMap)
+	)
+)
 const fetchValues = () =>
 	Api.GetValues({
 		ids: pipe(values, pluck('id'))(notNil($activeItems))

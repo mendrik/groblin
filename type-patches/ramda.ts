@@ -60,4 +60,8 @@ declare module 'ramda' {
 	export function any<T>(
 		fn: (a: T) => boolean
 	): <T2 extends T>(list: readonly T2[]) => boolean
+
+	export function map<A, B>(
+		fn: (x: A) => B
+	): <U extends object>(dict: U) => Record<keyof U, B>
 }
