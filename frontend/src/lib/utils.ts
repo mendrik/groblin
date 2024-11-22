@@ -6,7 +6,7 @@ import {
 import { assertExists } from '@shared/asserts'
 import type { Fn } from '@tp/functions'
 import { type ClassValue, clsx } from 'clsx'
-import { curry } from 'purify-ts'
+import { curry, prop } from 'ramda'
 import { twMerge } from 'tailwind-merge'
 
 export function cn(...inputs: ClassValue[]) {
@@ -18,13 +18,31 @@ export const setSignal = curry(<T>(signal: Signal<T>, value: T): T => {
 	return value
 })
 
-export const updateSignal = curry(<T>(signal: Signal<T>, fn: Fn<T, T>) => {
+export const updateSignal: {
+	<T>(signal: Signal<T>, fn: Fn<T, T>): void
+	<T>(signal: Signal<T>): <T2 extends T>(fn: Fn<T2, T2>) => void
+} = curry(<T>(signal: Signal<T>, fn: Fn<T, T>) => {
 	signal.value = fn(signal.value)
 })
 
-export const notNil = <T>(signal: Signal<T>): NonNullable<T> => {
-	assertExists(signal.value, 'Signal value is nil')
-	return signal.value as NonNullable<T>
+export const notNil: {
+	<T>(signal: Signal<T>): NonNullable<T>
+	<T, P extends keyof NonNullable<T>>(
+		signal: Signal<T>,
+		props: P
+	): NonNullable<T>[P]
+} = (signal: Signal<any>, pathOrProp?: string) => {
+	const res = pathOrProp ? prop(pathOrProp, signal.value) : signal.value
+
+	pathOrProp && !res && console.log(signal.value, res, pathOrProp)
+
+	assertExists(
+		res,
+		pathOrProp
+			? `Signal value (${pathOrProp as string}) is nil`
+			: 'Signal value is nil'
+	)
+	return res
 }
 
 export const computeSignal = <T, R>(

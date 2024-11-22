@@ -12,7 +12,7 @@ import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { setSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
-import { pipeAsync } from '@shared/utils/pipe-async'
+import { pipeTap } from '@shared/utils/pipe-tap'
 import type { Fn } from '@tp/functions.ts'
 import { pipe } from 'ramda'
 import { toast } from 'sonner'
@@ -41,7 +41,7 @@ const success = () =>
 		closeButton: true
 	})
 
-const resetPasswordCommand: Fn<Partial<ResetPassword>, void> = pipeAsync(
+const resetPasswordCommand: Fn<Partial<ResetPassword>, void> = pipeTap(
 	console.log // todo,
 )
 

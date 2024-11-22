@@ -1,7 +1,6 @@
 type Query {
   getNodes: [Node!]!
-  getTags: [Tag!]!
-  getValues(tagId: Int!): [Value!]!
+  getValues(ids: [Int!]!): [Value!]!
   getProject: ProjectData!
 }
 
@@ -11,7 +10,6 @@ type Node {
   order: Int!
   type: NodeType!
   parent_id: Int
-  tag_id: Int!
 }
 
 enum NodeType {
@@ -25,26 +23,24 @@ enum NodeType {
   schema
 }
 
-type Tag {
-  id: Int!
-  name: String!
-  master: Boolean!
-  parent_id: Int
-}
-
 type Value {
   id: Int!
   node_id: Int!
-  tag_id: Int!
-  project_id: Int!
+  order: Int!
+  parent_value_id: Int
+  value: JSONObject!
 }
+
+"""
+The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSONObject @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
 type ProjectData {
   project: Project!
   user: LoggedInUser!
   nodes: [Node!]!
   values: [Value!]!
-  tags: [Tag!]!
 }
 
 type Project {
@@ -66,10 +62,9 @@ type Mutation {
   insertNode(data: InsertNode!): Node!
   updateNode(data: ChangeNodeInput!): Boolean!
   deleteNodeById(order: Int!, parent_id: Int!, id: Int!): Boolean!
-  insertTag(data: InsertTag!): Tag!
-  updateTag(data: ChangeTagInput!): Boolean!
-  reorderTag(data: ReorderTagInput!): [Tag!]!
-  deleteTagById(id: Int!): Boolean!
+  insertListItem(listItem: InsertListItem!): Int!
+  deleteListItem(id: Int!): Boolean!
+  upsertValue(data: UpsertValue!): Int!
 }
 
 input Registration {
@@ -109,24 +104,20 @@ input ChangeNodeInput {
   parent_id: Int
 }
 
-input InsertTag {
+input InsertListItem {
   name: String!
-  parent_id: Int
+  node_id: Int!
+  parent_value_id: Int
 }
 
-input ChangeTagInput {
-  id: Int!
-  name: String!
-  parent_id: Int
-}
-
-input ReorderTagInput {
-  id: Int!
-  overId: Int!
+input UpsertValue {
+  id: Int
+  node_id: Int!
+  parent_value_id: Int
+  value: JSONObject!
 }
 
 type Subscription {
-  nodesUpdated(lastProjectId: Int!): Boolean!
-  tagsUpdated(lastProjectId: Int!): Boolean!
-  valuesUpdated(lastProjectId: Int!): Boolean!
+  nodesUpdated(projectId: Int!): Boolean!
+  valuesUpdated(projectId: Int!): Boolean!
 }

@@ -15,6 +15,8 @@ export type Scalars = {
   Float: { input: number; output: number; }
   /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.This scalar is serialized to a string in ISO 8601 format and parsed from a string in ISO 8601 format. */
   DateTimeISO: { input: any; output: any; }
+  /** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
+  JSONObject: { input: any; output: any; }
 };
 
 export type ChangeNodeInput = {
@@ -25,10 +27,10 @@ export type ChangeNodeInput = {
   type?: InputMaybe<NodeType>;
 };
 
-export type ChangeTagInput = {
-  id: Scalars['Int']['input'];
+export type InsertListItem = {
   name: Scalars['String']['input'];
-  parent_id?: InputMaybe<Scalars['Int']['input']>;
+  node_id: Scalars['Int']['input'];
+  parent_value_id?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type InsertNode = {
@@ -36,11 +38,6 @@ export type InsertNode = {
   order: Scalars['Int']['input'];
   parent_id?: InputMaybe<Scalars['Int']['input']>;
   type: NodeType;
-};
-
-export type InsertTag = {
-  name: Scalars['String']['input'];
-  parent_id?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type LoggedInUser = {
@@ -57,16 +54,20 @@ export type Login = {
 };
 
 export type Mutation = {
+  deleteListItem: Scalars['Boolean']['output'];
   deleteNodeById: Scalars['Boolean']['output'];
-  deleteTagById: Scalars['Boolean']['output'];
+  insertListItem: Scalars['Int']['output'];
   insertNode: Node;
-  insertTag: Tag;
   login: Token;
   logout: Scalars['Boolean']['output'];
   register: Scalars['Boolean']['output'];
-  reorderTag: Array<Tag>;
   updateNode: Scalars['Boolean']['output'];
-  updateTag: Scalars['Boolean']['output'];
+  upsertValue: Scalars['Int']['output'];
+};
+
+
+export type MutationDeleteListItemArgs = {
+  id: Scalars['Int']['input'];
 };
 
 
@@ -77,18 +78,13 @@ export type MutationDeleteNodeByIdArgs = {
 };
 
 
-export type MutationDeleteTagByIdArgs = {
-  id: Scalars['Int']['input'];
+export type MutationInsertListItemArgs = {
+  listItem: InsertListItem;
 };
 
 
 export type MutationInsertNodeArgs = {
   data: InsertNode;
-};
-
-
-export type MutationInsertTagArgs = {
-  data: InsertTag;
 };
 
 
@@ -102,18 +98,13 @@ export type MutationRegisterArgs = {
 };
 
 
-export type MutationReorderTagArgs = {
-  data: ReorderTagInput;
-};
-
-
 export type MutationUpdateNodeArgs = {
   data: ChangeNodeInput;
 };
 
 
-export type MutationUpdateTagArgs = {
-  data: ChangeTagInput;
+export type MutationUpsertValueArgs = {
+  data: UpsertValue;
 };
 
 export type Node = {
@@ -121,7 +112,6 @@ export type Node = {
   name: Scalars['String']['output'];
   order: Scalars['Int']['output'];
   parent_id?: Maybe<Scalars['Int']['output']>;
-  tag_id: Scalars['Int']['output'];
   type: NodeType;
 };
 
@@ -144,7 +134,6 @@ export type Project = {
 export type ProjectData = {
   nodes: Array<Node>;
   project: Project;
-  tags: Array<Tag>;
   user: LoggedInUser;
   values: Array<Value>;
 };
@@ -152,13 +141,12 @@ export type ProjectData = {
 export type Query = {
   getNodes: Array<Node>;
   getProject: ProjectData;
-  getTags: Array<Tag>;
   getValues: Array<Value>;
 };
 
 
 export type QueryGetValuesArgs = {
-  tagId: Scalars['Int']['input'];
+  ids: Array<Scalars['Int']['input']>;
 };
 
 export type Registration = {
@@ -167,37 +155,19 @@ export type Registration = {
   password: Scalars['String']['input'];
 };
 
-export type ReorderTagInput = {
-  id: Scalars['Int']['input'];
-  overId: Scalars['Int']['input'];
-};
-
 export type Subscription = {
   nodesUpdated: Scalars['Boolean']['output'];
-  tagsUpdated: Scalars['Boolean']['output'];
   valuesUpdated: Scalars['Boolean']['output'];
 };
 
 
 export type SubscriptionNodesUpdatedArgs = {
-  lastProjectId: Scalars['Int']['input'];
-};
-
-
-export type SubscriptionTagsUpdatedArgs = {
-  lastProjectId: Scalars['Int']['input'];
+  projectId: Scalars['Int']['input'];
 };
 
 
 export type SubscriptionValuesUpdatedArgs = {
-  lastProjectId: Scalars['Int']['input'];
-};
-
-export type Tag = {
-  id: Scalars['Int']['output'];
-  master: Scalars['Boolean']['output'];
-  name: Scalars['String']['output'];
-  parent_id?: Maybe<Scalars['Int']['output']>;
+  projectId: Scalars['Int']['input'];
 };
 
 export type Token = {
@@ -205,62 +175,32 @@ export type Token = {
   token: Scalars['String']['output'];
 };
 
+export type UpsertValue = {
+  id?: InputMaybe<Scalars['Int']['input']>;
+  node_id: Scalars['Int']['input'];
+  parent_value_id?: InputMaybe<Scalars['Int']['input']>;
+  value: Scalars['JSONObject']['input'];
+};
+
 export type Value = {
   id: Scalars['Int']['output'];
   node_id: Scalars['Int']['output'];
-  project_id: Scalars['Int']['output'];
-  tag_id: Scalars['Int']['output'];
+  order: Scalars['Int']['output'];
+  parent_value_id?: Maybe<Scalars['Int']['output']>;
+  value: Scalars['JSONObject']['output'];
 };
-
-export type TagsUpdatedSubscriptionVariables = Exact<{
-  lastProjectId: Scalars['Int']['input'];
-}>;
-
-
-export type TagsUpdatedSubscription = { tagsUpdated: boolean };
-
-export type GetTagsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetTagsQuery = { getTags: Array<{ id: number, parent_id?: number | null, name: string, master: boolean }> };
-
-export type InsertTagMutationVariables = Exact<{
-  data: InsertTag;
-}>;
-
-
-export type InsertTagMutation = { insertTag: { id: number, name: string, parent_id?: number | null, master: boolean } };
-
-export type UpdateTagMutationVariables = Exact<{
-  data: ChangeTagInput;
-}>;
-
-
-export type UpdateTagMutation = { updateTag: boolean };
-
-export type DeleteTagByIdMutationVariables = Exact<{
-  id: Scalars['Int']['input'];
-}>;
-
-
-export type DeleteTagByIdMutation = { deleteTagById: boolean };
-
-export type ReorderTagMutationVariables = Exact<{
-  data: ReorderTagInput;
-}>;
-
-
-export type ReorderTagMutation = { reorderTag: Array<{ id: number, name: string, parent_id?: number | null, master: boolean }> };
 
 export type GetProjectQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetProjectQuery = { getProject: { user: { id: number, email: string, name: string, lastProjectId: number }, project: { name: string }, nodes: Array<{ id: number, name: string, order: number, type: NodeType, tag_id: number, parent_id?: number | null }>, tags: Array<{ id: number, name: string, master: boolean, parent_id?: number | null }> } };
+export type GetProjectQuery = { getProject: { user: { id: number, email: string, name: string, lastProjectId: number }, project: { id: number, name: string }, nodes: Array<{ id: number, name: string, order: number, type: NodeType, parent_id?: number | null }>, values: Array<{ id: number, node_id: number, order: number, value: any, parent_value_id?: number | null }> } };
 
-export type NodeFragment = { id: number, name: string, order: number, type: NodeType, tag_id: number, parent_id?: number | null };
+export type ValueFragment = { id: number, node_id: number, order: number, value: any, parent_value_id?: number | null };
+
+export type NodeFragment = { id: number, name: string, order: number, type: NodeType, parent_id?: number | null };
 
 export type NodesUpdatedSubscriptionVariables = Exact<{
-  lastProjectId: Scalars['Int']['input'];
+  projectId: Scalars['Int']['input'];
 }>;
 
 
@@ -269,7 +209,7 @@ export type NodesUpdatedSubscription = { nodesUpdated: boolean };
 export type GetNodesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetNodesQuery = { getNodes: Array<{ id: number, name: string, order: number, type: NodeType, tag_id: number, parent_id?: number | null }> };
+export type GetNodesQuery = { getNodes: Array<{ id: number, name: string, order: number, type: NodeType, parent_id?: number | null }> };
 
 export type InsertNodeMutationVariables = Exact<{
   data: InsertNode;
@@ -314,72 +254,56 @@ export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 export type LogoutMutation = { logout: boolean };
 
 export type ValuesUpdatedSubscriptionVariables = Exact<{
-  lastProjectId: Scalars['Int']['input'];
+  projectId: Scalars['Int']['input'];
 }>;
 
 
 export type ValuesUpdatedSubscription = { valuesUpdated: boolean };
 
 export type GetValuesQueryVariables = Exact<{
-  tagId: Scalars['Int']['input'];
+  ids: Array<Scalars['Int']['input']> | Scalars['Int']['input'];
 }>;
 
 
-export type GetValuesQuery = { getValues: Array<{ id: number, node_id: number }> };
+export type GetValuesQuery = { getValues: Array<{ id: number, node_id: number, order: number, value: any, parent_value_id?: number | null }> };
 
+export type InsertListItemMutationVariables = Exact<{
+  listItem: InsertListItem;
+}>;
+
+
+export type InsertListItemMutation = { insertListItem: number };
+
+export type DeleteListItemMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteListItemMutation = { deleteListItem: boolean };
+
+export type UpsertValueMutationVariables = Exact<{
+  data: UpsertValue;
+}>;
+
+
+export type UpsertValueMutation = { upsertValue: number };
+
+export const ValueFragmentDoc = `
+    fragment Value on Value {
+  id
+  node_id
+  order
+  value
+  parent_value_id
+}
+    `;
 export const NodeFragmentDoc = `
     fragment Node on Node {
   id
   name
   order
   type
-  tag_id
   parent_id
-}
-    `;
-export const TagsUpdatedDocument = `
-    subscription TagsUpdated($lastProjectId: Int!) {
-  tagsUpdated(lastProjectId: $lastProjectId)
-}
-    `;
-export const GetTagsDocument = `
-    query GetTags {
-  getTags {
-    id
-    parent_id
-    name
-    master
-  }
-}
-    `;
-export const InsertTagDocument = `
-    mutation InsertTag($data: InsertTag!) {
-  insertTag(data: $data) {
-    id
-    name
-    parent_id
-    master
-  }
-}
-    `;
-export const UpdateTagDocument = `
-    mutation UpdateTag($data: ChangeTagInput!) {
-  updateTag(data: $data)
-}
-    `;
-export const DeleteTagByIdDocument = `
-    mutation DeleteTagById($id: Int!) {
-  deleteTagById(id: $id)
-}
-    `;
-export const ReorderTagDocument = `
-    mutation ReorderTag($data: ReorderTagInput!) {
-  reorderTag(data: $data) {
-    id
-    name
-    parent_id
-    master
-  }
 }
     `;
 export const GetProjectDocument = `
@@ -392,23 +316,22 @@ export const GetProjectDocument = `
       lastProjectId
     }
     project {
+      id
       name
     }
     nodes {
       ...Node
     }
-    tags {
-      id
-      name
-      master
-      parent_id
+    values {
+      ...Value
     }
   }
 }
-    ${NodeFragmentDoc}`;
+    ${NodeFragmentDoc}
+${ValueFragmentDoc}`;
 export const NodesUpdatedDocument = `
-    subscription NodesUpdated($lastProjectId: Int!) {
-  nodesUpdated(lastProjectId: $lastProjectId)
+    subscription NodesUpdated($projectId: Int!) {
+  nodesUpdated(projectId: $projectId)
 }
     `;
 export const GetNodesDocument = `
@@ -454,39 +377,35 @@ export const LogoutDocument = `
 }
     `;
 export const ValuesUpdatedDocument = `
-    subscription ValuesUpdated($lastProjectId: Int!) {
-  valuesUpdated(lastProjectId: $lastProjectId)
+    subscription ValuesUpdated($projectId: Int!) {
+  valuesUpdated(projectId: $projectId)
 }
     `;
 export const GetValuesDocument = `
-    query GetValues($tagId: Int!) {
-  getValues(tagId: $tagId) {
-    id
-    node_id
+    query GetValues($ids: [Int!]!) {
+  getValues(ids: $ids) {
+    ...Value
   }
+}
+    ${ValueFragmentDoc}`;
+export const InsertListItemDocument = `
+    mutation InsertListItem($listItem: InsertListItem!) {
+  insertListItem(listItem: $listItem)
+}
+    `;
+export const DeleteListItemDocument = `
+    mutation DeleteListItem($id: Int!) {
+  deleteListItem(id: $id)
+}
+    `;
+export const UpsertValueDocument = `
+    mutation UpsertValue($data: UpsertValue!) {
+  upsertValue(data: $data)
 }
     `;
 export type Requester<C = {}, E = unknown> = <R, V>(doc: string, vars?: V, options?: C) => Promise<ExecutionResult<R, E>> | AsyncIterable<ExecutionResult<R, E>>
 export function getSdk<C, E>(requester: Requester<C, E>) {
   return {
-    TagsUpdated(variables: TagsUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<TagsUpdatedSubscription, E>> {
-      return requester<TagsUpdatedSubscription, TagsUpdatedSubscriptionVariables>(TagsUpdatedDocument, variables, options) as AsyncIterable<ExecutionResult<TagsUpdatedSubscription, E>>;
-    },
-    GetTags(variables?: GetTagsQueryVariables, options?: C): Promise<ExecutionResult<GetTagsQuery, E>> {
-      return requester<GetTagsQuery, GetTagsQueryVariables>(GetTagsDocument, variables, options) as Promise<ExecutionResult<GetTagsQuery, E>>;
-    },
-    InsertTag(variables: InsertTagMutationVariables, options?: C): Promise<ExecutionResult<InsertTagMutation, E>> {
-      return requester<InsertTagMutation, InsertTagMutationVariables>(InsertTagDocument, variables, options) as Promise<ExecutionResult<InsertTagMutation, E>>;
-    },
-    UpdateTag(variables: UpdateTagMutationVariables, options?: C): Promise<ExecutionResult<UpdateTagMutation, E>> {
-      return requester<UpdateTagMutation, UpdateTagMutationVariables>(UpdateTagDocument, variables, options) as Promise<ExecutionResult<UpdateTagMutation, E>>;
-    },
-    DeleteTagById(variables: DeleteTagByIdMutationVariables, options?: C): Promise<ExecutionResult<DeleteTagByIdMutation, E>> {
-      return requester<DeleteTagByIdMutation, DeleteTagByIdMutationVariables>(DeleteTagByIdDocument, variables, options) as Promise<ExecutionResult<DeleteTagByIdMutation, E>>;
-    },
-    ReorderTag(variables: ReorderTagMutationVariables, options?: C): Promise<ExecutionResult<ReorderTagMutation, E>> {
-      return requester<ReorderTagMutation, ReorderTagMutationVariables>(ReorderTagDocument, variables, options) as Promise<ExecutionResult<ReorderTagMutation, E>>;
-    },
     GetProject(variables?: GetProjectQueryVariables, options?: C): Promise<ExecutionResult<GetProjectQuery, E>> {
       return requester<GetProjectQuery, GetProjectQueryVariables>(GetProjectDocument, variables, options) as Promise<ExecutionResult<GetProjectQuery, E>>;
     },
@@ -519,6 +438,15 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     },
     GetValues(variables: GetValuesQueryVariables, options?: C): Promise<ExecutionResult<GetValuesQuery, E>> {
       return requester<GetValuesQuery, GetValuesQueryVariables>(GetValuesDocument, variables, options) as Promise<ExecutionResult<GetValuesQuery, E>>;
+    },
+    InsertListItem(variables: InsertListItemMutationVariables, options?: C): Promise<ExecutionResult<InsertListItemMutation, E>> {
+      return requester<InsertListItemMutation, InsertListItemMutationVariables>(InsertListItemDocument, variables, options) as Promise<ExecutionResult<InsertListItemMutation, E>>;
+    },
+    DeleteListItem(variables: DeleteListItemMutationVariables, options?: C): Promise<ExecutionResult<DeleteListItemMutation, E>> {
+      return requester<DeleteListItemMutation, DeleteListItemMutationVariables>(DeleteListItemDocument, variables, options) as Promise<ExecutionResult<DeleteListItemMutation, E>>;
+    },
+    UpsertValue(variables: UpsertValueMutationVariables, options?: C): Promise<ExecutionResult<UpsertValueMutation, E>> {
+      return requester<UpsertValueMutation, UpsertValueMutationVariables>(UpsertValueDocument, variables, options) as Promise<ExecutionResult<UpsertValueMutation, E>>;
     }
   };
 }

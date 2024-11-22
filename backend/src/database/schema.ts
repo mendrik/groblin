@@ -21,18 +21,12 @@ export type JsonPrimitive = boolean | number | string | null;
 
 export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
-export interface Container {
-  id: Generated<number>;
-  name: string;
-}
-
 export interface Node {
   id: Generated<number>;
   name: string;
   order: number;
   parent_id: number | null;
   project_id: number;
-  tag_id: number;
   type: string;
 }
 
@@ -53,15 +47,6 @@ export interface ProjectUser {
   user_id: number;
 }
 
-export interface Tag {
-  id: Generated<number>;
-  master: Generated<boolean>;
-  name: string;
-  order: Generated<number>;
-  parent_id: number | null;
-  project_id: number;
-}
-
 export interface User {
   confirmed: Generated<boolean>;
   email: string;
@@ -71,21 +56,20 @@ export interface User {
   password: string;
 }
 
-export interface Value {
-  data: Json | null;
+export interface Values {
   id: Generated<number>;
-  node_id: number | null;
-  project_id: number | null;
-  tag_id: number | null;
+  node_id: number;
+  order: Generated<number>;
+  parent_value_id: number | null;
+  project_id: number;
+  value: Json | null;
 }
 
 export interface DB {
-  container: Container;
   node: Node;
   node_settings: NodeSettings;
   project: Project;
   project_user: ProjectUser;
-  tag: Tag;
   user: User;
-  value: Value;
+  values: Values;
 }

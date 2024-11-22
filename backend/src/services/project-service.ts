@@ -36,16 +36,6 @@ export class ProjectService {
 				.where('id', '=', user.id)
 				.execute()
 
-			const { id: tag_id } = await trx
-				.insertInto('tag')
-				.values({
-					name: 'Default',
-					project_id,
-					master: true
-				})
-				.returning('id')
-				.executeTakeFirstOrThrow()
-
 			await trx
 				.insertInto('node')
 				.values({
@@ -53,8 +43,7 @@ export class ProjectService {
 					type: NodeType.root,
 					order: 0,
 					parent_id: null,
-					project_id,
-					tag_id
+					project_id
 				})
 				.returning('id')
 				.executeTakeFirstOrThrow()

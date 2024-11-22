@@ -8,39 +8,39 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle
 } from '@/components/ui/alert-dialog'
-import type { Tag } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
 import { notNil, setSignal } from '@/lib/utils'
-import { defaultTag, deleteTag, selectTag } from '@/state/tag'
+import type { TreeNode } from '@/state/tree'
+import { deleteListItem, selectAnyListItem } from '@/state/value'
 import { signal } from '@preact/signals-react'
-import { F, T, pipe } from 'ramda'
+import { pipeTap } from '@shared/utils/pipe-tap'
+import { pipe } from 'ramda'
 
-export const $editedTag = signal<Tag>()
-export const $deleteDialogOpen = signal(false)
-const close = pipe(F, setSignal($deleteDialogOpen))
-export const openTagDelete = pipe(
-	setSignal($editedTag),
-	pipe(defaultTag, selectTag),
-	T,
-	setSignal($deleteDialogOpen)
-)
+export const $deleteListItemOpen = signal(false)
+export const $node = signal<TreeNode>()
+export const openListItemDelete = (node: TreeNode) => {
+	setSignal($node, node)
+	setSignal($deleteListItemOpen, true)
+}
+const close = () => setSignal($deleteListItemOpen, false)
 
-export const deleteTagCommand = () => deleteTag(notNil($editedTag).id)
+export const deleteTagCommand = () =>
+	pipeTap(deleteListItem, selectAnyListItem)(notNil($node))
 
-export const TagDelete = () => (
-	<AlertDialog open={$deleteDialogOpen.value}>
+export const ListItemDelete = () => (
+	<AlertDialog open={$deleteListItemOpen.value}>
 		<AlertDialogContent onEscapeKeyDown={close} onKeyDown={stopPropagation}>
 			<AlertDialogHeader>
 				<AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
 				<AlertDialogDescription>
-					This action cannot be undone. This will permanently delete this tag
+					This action cannot be undone. This will permanently delete this item
 					and remove all data associated with it.
 				</AlertDialogDescription>
 			</AlertDialogHeader>
 			<AlertDialogFooter>
 				<AlertDialogCancel onClick={close}>Cancel</AlertDialogCancel>
 				<AlertDialogAction onClick={pipe(deleteTagCommand, close)} autoFocus>
-					Continue
+					Delete
 				</AlertDialogAction>
 			</AlertDialogFooter>
 		</AlertDialogContent>

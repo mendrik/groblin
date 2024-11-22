@@ -1,75 +1,442 @@
--- Create table for nodes
-CREATE TABLE node (
-    id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
-    type TEXT NOT NULL,
-    "order" INTEGER NOT NULL,
-    parent_id INTEGER REFERENCES node ON DELETE CASCADE
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 17.0 (Debian 17.0-1.pgdg120+1)
+-- Dumped by pg_dump version 17.1 (Ubuntu 17.1-1.pgdg24.10+1)
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: node; Type: TABLE; Schema: public; Owner: groblin
+--
+
+CREATE TABLE public.node (
+    id integer NOT NULL,
+    name text NOT NULL,
+    type text NOT NULL,
+    "order" integer NOT NULL,
+    parent_id integer,
+    project_id integer NOT NULL
 );
 
--- Create index on node id
-CREATE INDEX node_id ON node (id);
 
--- Create table for projects
-CREATE TABLE project (
-    id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL
+ALTER TABLE public.node OWNER TO groblin;
+
+--
+-- Name: node_id_seq; Type: SEQUENCE; Schema: public; Owner: groblin
+--
+
+CREATE SEQUENCE public.node_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.node_id_seq OWNER TO groblin;
+
+--
+-- Name: node_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: groblin
+--
+
+ALTER SEQUENCE public.node_id_seq OWNED BY public.node.id;
+
+
+--
+-- Name: node_settings; Type: TABLE; Schema: public; Owner: groblin
+--
+
+CREATE TABLE public.node_settings (
+    id integer NOT NULL,
+    node_id integer,
+    settings jsonb
 );
 
--- Create index on project id
-CREATE INDEX project_id ON project (id);
 
--- Create table for project-node relationships
-CREATE TABLE project_node (
-    project_id INTEGER NOT NULL REFERENCES project(id) ON DELETE CASCADE,
-    node_id INTEGER NOT NULL REFERENCES node(id) ON DELETE CASCADE,
-    PRIMARY KEY (project_id, node_id)
+ALTER TABLE public.node_settings OWNER TO groblin;
+
+--
+-- Name: node_settings_id_seq; Type: SEQUENCE; Schema: public; Owner: groblin
+--
+
+CREATE SEQUENCE public.node_settings_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.node_settings_id_seq OWNER TO groblin;
+
+--
+-- Name: node_settings_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: groblin
+--
+
+ALTER SEQUENCE public.node_settings_id_seq OWNED BY public.node_settings.id;
+
+
+--
+-- Name: project; Type: TABLE; Schema: public; Owner: groblin
+--
+
+CREATE TABLE public.project (
+    id integer NOT NULL,
+    name text NOT NULL
 );
 
--- Create index on project_node node_id
-CREATE INDEX project_node_node_id ON project_node (node_id);
 
--- Create index on project_node project_id
-CREATE INDEX project_node_project_id ON project_node (project_id);
+ALTER TABLE public.project OWNER TO groblin;
 
--- Create unique index for project_node project_id
-CREATE UNIQUE INDEX sqlite_autoindex_project_node_1 ON project_node (project_id);
+--
+-- Name: project_id_seq; Type: SEQUENCE; Schema: public; Owner: groblin
+--
 
--- Create table for tags
-CREATE TABLE tag (
-    id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
-    parent_id INTEGER REFERENCES tag ON DELETE SET NULL
+CREATE SEQUENCE public.project_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.project_id_seq OWNER TO groblin;
+
+--
+-- Name: project_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: groblin
+--
+
+ALTER SEQUENCE public.project_id_seq OWNED BY public.project.id;
+
+
+--
+-- Name: project_user; Type: TABLE; Schema: public; Owner: groblin
+--
+
+CREATE TABLE public.project_user (
+    project_id integer NOT NULL,
+    user_id integer NOT NULL,
+    role text NOT NULL
 );
 
--- Create index on tag id
-CREATE INDEX tag_id ON tag (id);
 
--- Create table for users
-CREATE TABLE "user" (
-    id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    password TEXT NOT NULL,
-    confirmed BOOLEAN DEFAULT FALSE NOT NULL
+ALTER TABLE public.project_user OWNER TO groblin;
+
+--
+-- Name: user; Type: TABLE; Schema: public; Owner: groblin
+--
+
+CREATE TABLE public."user" (
+    id integer NOT NULL,
+    name text NOT NULL,
+    email text NOT NULL,
+    password text NOT NULL,
+    confirmed boolean DEFAULT false NOT NULL,
+    last_project_id integer
 );
 
--- Create table for project-user relationships
-CREATE TABLE project_user (
-    project_id INTEGER NOT NULL REFERENCES project ON DELETE CASCADE,
-    user_id INTEGER NOT NULL REFERENCES "user" ON DELETE CASCADE,
-    role TEXT NOT NULL,
-    PRIMARY KEY (project_id, user_id)
+
+ALTER TABLE public."user" OWNER TO groblin;
+
+--
+-- Name: user_id_seq; Type: SEQUENCE; Schema: public; Owner: groblin
+--
+
+CREATE SEQUENCE public.user_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.user_id_seq OWNER TO groblin;
+
+--
+-- Name: user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: groblin
+--
+
+ALTER SEQUENCE public.user_id_seq OWNED BY public."user".id;
+
+
+--
+-- Name: values; Type: TABLE; Schema: public; Owner: groblin
+--
+
+CREATE TABLE public."values" (
+    id integer NOT NULL,
+    node_id integer NOT NULL,
+    value jsonb,
+    project_id integer,
+    parent_value_id integer,
+    "order" integer
 );
 
--- Create index on project_user project_id
-CREATE INDEX project_user_project_id ON project_user (project_id);
 
--- Create index on project_user user_id
-CREATE INDEX project_user_user_id ON project_user (user_id);
+ALTER TABLE public."values" OWNER TO groblin;
 
--- Create unique index for project_user project_id
-CREATE UNIQUE INDEX sqlite_autoindex_project_user_1 ON project_user (project_id);
+--
+-- Name: values_id_seq; Type: SEQUENCE; Schema: public; Owner: groblin
+--
 
--- Create index on user id
-CREATE INDEX user_id ON "user" (id);
+CREATE SEQUENCE public.values_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.values_id_seq OWNER TO groblin;
+
+--
+-- Name: values_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: groblin
+--
+
+ALTER SEQUENCE public.values_id_seq OWNED BY public."values".id;
+
+
+--
+-- Name: node id; Type: DEFAULT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public.node ALTER COLUMN id SET DEFAULT nextval('public.node_id_seq'::regclass);
+
+
+--
+-- Name: node_settings id; Type: DEFAULT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public.node_settings ALTER COLUMN id SET DEFAULT nextval('public.node_settings_id_seq'::regclass);
+
+
+--
+-- Name: project id; Type: DEFAULT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public.project ALTER COLUMN id SET DEFAULT nextval('public.project_id_seq'::regclass);
+
+
+--
+-- Name: user id; Type: DEFAULT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public."user" ALTER COLUMN id SET DEFAULT nextval('public.user_id_seq'::regclass);
+
+
+--
+-- Name: values id; Type: DEFAULT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public."values" ALTER COLUMN id SET DEFAULT nextval('public.values_id_seq'::regclass);
+
+
+--
+-- Name: node node_pkey; Type: CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public.node
+    ADD CONSTRAINT node_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: node_settings node_settings_pkey; Type: CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public.node_settings
+    ADD CONSTRAINT node_settings_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: project project_pkey; Type: CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public.project
+    ADD CONSTRAINT project_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: project_user project_user_pkey; Type: CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public.project_user
+    ADD CONSTRAINT project_user_pkey PRIMARY KEY (project_id, user_id);
+
+
+--
+-- Name: user user_pkey; Type: CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public."user"
+    ADD CONSTRAINT user_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: values values_pkey; Type: CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public."values"
+    ADD CONSTRAINT values_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: idx_values_node_id; Type: INDEX; Schema: public; Owner: groblin
+--
+
+CREATE INDEX idx_values_node_id ON public."values" USING btree (node_id);
+
+
+--
+-- Name: idx_values_project_id; Type: INDEX; Schema: public; Owner: groblin
+--
+
+CREATE INDEX idx_values_project_id ON public."values" USING btree (project_id);
+
+
+--
+-- Name: node_id; Type: INDEX; Schema: public; Owner: groblin
+--
+
+CREATE INDEX node_id ON public.node USING btree (id);
+
+
+--
+-- Name: parent_value_id_1732089088132_index; Type: INDEX; Schema: public; Owner: groblin
+--
+
+CREATE INDEX parent_value_id_1732089088132_index ON public."values" USING btree (parent_value_id);
+
+
+--
+-- Name: project_id; Type: INDEX; Schema: public; Owner: groblin
+--
+
+CREATE INDEX project_id ON public.project USING btree (id);
+
+
+--
+-- Name: project_user_project_id; Type: INDEX; Schema: public; Owner: groblin
+--
+
+CREATE INDEX project_user_project_id ON public.project_user USING btree (project_id);
+
+
+--
+-- Name: project_user_user_id; Type: INDEX; Schema: public; Owner: groblin
+--
+
+CREATE INDEX project_user_user_id ON public.project_user USING btree (user_id);
+
+
+--
+-- Name: sqlite_autoindex_project_user_1; Type: INDEX; Schema: public; Owner: groblin
+--
+
+CREATE UNIQUE INDEX sqlite_autoindex_project_user_1 ON public.project_user USING btree (project_id);
+
+
+--
+-- Name: user last_project_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public."user"
+    ADD CONSTRAINT last_project_id_fk FOREIGN KEY (last_project_id) REFERENCES public.project(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: node node_parent_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public.node
+    ADD CONSTRAINT node_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES public.node(id) ON DELETE CASCADE;
+
+
+--
+-- Name: node node_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public.node
+    ADD CONSTRAINT node_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.project(id) ON DELETE CASCADE;
+
+
+--
+-- Name: node_settings node_settings_node_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public.node_settings
+    ADD CONSTRAINT node_settings_node_id_fkey FOREIGN KEY (node_id) REFERENCES public.node(id) ON DELETE CASCADE;
+
+
+--
+-- Name: project_user project_user_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public.project_user
+    ADD CONSTRAINT project_user_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.project(id) ON DELETE CASCADE;
+
+
+--
+-- Name: project_user project_user_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public.project_user
+    ADD CONSTRAINT project_user_user_id_fkey FOREIGN KEY (user_id) REFERENCES public."user"(id) ON DELETE CASCADE;
+
+
+--
+-- Name: user user_last_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public."user"
+    ADD CONSTRAINT user_last_project_id_fkey FOREIGN KEY (last_project_id) REFERENCES public.project(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- Name: values values_node_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public."values"
+    ADD CONSTRAINT values_node_id_fkey FOREIGN KEY (node_id) REFERENCES public.node(id) ON DELETE CASCADE;
+
+
+--
+-- Name: values values_parent_value_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public."values"
+    ADD CONSTRAINT values_parent_value_id_fkey FOREIGN KEY (parent_value_id) REFERENCES public."values"(id) ON DELETE CASCADE;
+
+
+--
+-- Name: values values_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public."values"
+    ADD CONSTRAINT values_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.project(id) ON DELETE CASCADE;
+
+
+--
+-- PostgreSQL database dump complete
+--
+

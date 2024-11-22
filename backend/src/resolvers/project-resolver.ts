@@ -1,4 +1,3 @@
-import { assertExists } from '@shared/asserts.ts'
 import { failOn } from '@shared/utils/guards.ts'
 import { inject, injectable } from 'inversify'
 import { isNil } from 'ramda'
@@ -17,8 +16,6 @@ import {
 } from 'type-graphql'
 import { AuthResolver, LoggedInUser } from './auth-resolver.ts'
 import { Node, NodeResolver } from './node-resolver.ts'
-import { Tag, TagResolver } from './tag-resolver.ts'
-import { masterTag } from './utils.ts'
 import { Value, ValueResolver } from './value-resolver.ts'
 
 @ObjectType()
@@ -43,9 +40,6 @@ export class ProjectData {
 
 	@Field(type => [Value])
 	values: Value[]
-
-	@Field(type => [Tag])
-	tags: Tag[]
 }
 
 @injectable()
@@ -56,9 +50,6 @@ export class ProjectResolver {
 	@inject(NodeResolver)
 	private readonly nodeResolver: NodeResolver
 
-	@inject(TagResolver)
-	private readonly tagResolver: TagResolver
-
 	@inject(ValueResolver)
 	private readonly valueResolver: ValueResolver
 
@@ -66,13 +57,9 @@ export class ProjectResolver {
 	private readonly authResolver: AuthResolver
 
 	@Query(returns => ProjectData)
-	async getProject(@Ctx() ctx: Context) {
+	async getProject(@Ctx() ctx: Context): Promise<ProjectData> {
 		const nodes = await this.nodeResolver.getNodes(ctx)
-		const tags = await this.tagResolver.getTags(ctx)
-		const tag = tags.find(masterTag)
-
-		assertExists(tag, 'Master tag not found')
-		const values = await this.valueResolver.getValues(tag.id, ctx)
+		const values = await this.valueResolver.getValues([], ctx)
 
 		const project = await ctx.db
 			.selectFrom('project')
@@ -83,10 +70,9 @@ export class ProjectResolver {
 
 		return {
 			project,
-			nodes,
+			nodes: nodes as Node[],
 			values,
-			user: ctx.extra,
-			tags
+			user: ctx.extra
 		}
 	}
 }

@@ -1,42 +1,3 @@
-subscription TagsUpdated($lastProjectId: Int!) {
-  tagsUpdated(lastProjectId: $lastProjectId)
-}
-
-query GetTags {
-  getTags {
-    id
-    parent_id
-    name
-    master
-  }
-}
-
-mutation InsertTag($data: InsertTag!) {
-  insertTag(data: $data) {
-    id
-    name
-    parent_id
-    master
-  }
-}
-
-mutation UpdateTag($data: ChangeTagInput!) {
-  updateTag(data: $data)
-}
-
-mutation DeleteTagById($id: Int!) {
-  deleteTagById(id: $id)
-}
-
-mutation ReorderTag($data: ReorderTagInput!) {
-  reorderTag(data: $data) {
-    id
-    name
-    parent_id
-    master
-  }
-}
-
 query GetProject {
   getProject {
     user {
@@ -46,18 +7,24 @@ query GetProject {
       lastProjectId
     }
     project {
+      id
       name
     }
     nodes {
       ...Node
     }
-    tags {
-      id
-      name
-      master
-      parent_id
+    values {
+      ...Value
     }
   }
+}
+
+fragment Value on Value {
+      id
+      node_id
+      order
+      value
+      parent_value_id
 }
 
 fragment Node on Node {
@@ -65,12 +32,11 @@ fragment Node on Node {
   name
   order
   type
-  tag_id
   parent_id
 }
 
-subscription NodesUpdated($lastProjectId: Int!) {
-  nodesUpdated(lastProjectId: $lastProjectId)
+subscription NodesUpdated($projectId: Int!) {
+  nodesUpdated(projectId: $projectId)
 }
 
 query GetNodes {
@@ -108,13 +74,24 @@ mutation Logout {
   logout
 }
 
-subscription ValuesUpdated($lastProjectId: Int!) {
-  valuesUpdated(lastProjectId: $lastProjectId)
+subscription ValuesUpdated($projectId: Int!) {
+  valuesUpdated(projectId: $projectId)
 }
 
-query GetValues($tagId: Int!) {
-  getValues(tagId: $tagId) {
-    id
-    node_id
+query GetValues($ids: [Int!]!) {
+  getValues(ids: $ids) {
+    ...Value
   }
+}
+
+mutation InsertListItem($listItem: InsertListItem!) {
+  insertListItem(listItem: $listItem)
+}
+
+mutation DeleteListItem($id: Int!) {
+  deleteListItem(id: $id)
+}
+
+mutation UpsertValue($data: UpsertValue!) {
+  upsertValue(data: $data)
 }

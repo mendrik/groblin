@@ -22,6 +22,7 @@ import {
 	over,
 	pipe,
 	prop,
+	reverse,
 	unless
 } from 'ramda'
 import { $user } from './user'
@@ -51,10 +52,10 @@ export const $editingNode = signal<number | undefined>()
 const $subscription = signal<AbortController>()
 
 /** ---- subscriptions ---- **/
-const subscribeToNodes = () => {
+export const subscribeToNodes = () => {
 	$subscription.value?.abort()
 	$subscription.value = Subscribe.NodesUpdated(
-		{ lastProjectId: notNil($user).lastProjectId },
+		{ projectId: notNil($user, 'lastProjectId') },
 		() => Api.GetNodes().then(setSignal($nodes))
 	)
 }
@@ -62,7 +63,6 @@ const subscribeToNodes = () => {
 $root.subscribe(
 	unless(isNil, node => {
 		updateNodeState({ open: true })(node.id)
-		subscribeToNodes()
 	})
 )
 $nodeStates.subscribe(setItem('tree-state'))
@@ -208,7 +208,7 @@ function* iterateNodes(root: TreeNode): Generator<TreeNode> {
 }
 
 export function* iterateOpenNodes(root: TreeNode): Generator<TreeNode> {
-	if (root.id !== notNil($root).id) {
+	if (root.id !== notNil($root, 'id')) {
 		yield root
 	}
 	if ($nodeStates.value[root.id]?.open === true) {
@@ -217,6 +217,18 @@ export function* iterateOpenNodes(root: TreeNode): Generator<TreeNode> {
 		}
 	}
 }
+
+export function* pathFrom(
+	target: TreeNode
+): Generator<TreeNode, void, unknown> {
+	yield target
+	if (target.parent_id != null) {
+		yield* pathFrom(asNode(target.parent_id)) // Recursively yield the parent's path
+	}
+}
+
+export const pathTo = (target: TreeNode): TreeNode[] =>
+	reverse([...pathFrom(target)])
 
 export const parentInTree = (
 	tree: TreeNode,

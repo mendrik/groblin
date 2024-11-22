@@ -1,6 +1,6 @@
 import FocusTravel from '@/components/utils/focus-travel'
 import { cn } from '@/lib/utils'
-import { pipeTap } from '@shared/utils/ramda'
+import { pipeTap } from '@shared/utils/pipe-tap'
 import {
 	type ButtonHTMLAttributes,
 	type ReactNode,
