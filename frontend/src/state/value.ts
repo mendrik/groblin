@@ -6,8 +6,8 @@ import { assertThat } from '@shared/asserts'
 import {
 	assoc,
 	groupBy,
+	head,
 	isNotEmpty,
-	last,
 	omit,
 	pipe,
 	pluck,
@@ -51,13 +51,15 @@ export const deleteListItem = (node: TreeNode): Promise<boolean> => {
 }
 
 export const selectAnyListItem = (node: TreeNode) => {
-	const values = notNil($valueMap, node.id)
+	const current = notNil($activeItems, node.id)
+	const values = notNil($valueMap, node.id).filter(
+		({ id }) => id !== current.id
+	)
+
 	if (isNotEmpty(values)) {
-		activateListItem(last(values))
+		activateListItem(head(values))
 	} else {
 		updateSignal($activeItems, omit([node.id]))
 	}
 	fetchValues()
-
-	return 1
 }
