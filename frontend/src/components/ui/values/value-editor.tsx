@@ -23,7 +23,7 @@ type OwnProps = {
 	active: ActiveLists
 }
 
-type Args = readonly [TreeNode, Value | undefined]
+type Args = readonly [TreeNode, Value[] | undefined]
 const isList: Pred<[TreeNode]> = node => node.type === NodeType.List
 
 const notActive: Pred<[TreeNode]> = node =>
@@ -38,15 +38,16 @@ const isBlank: Pred<[TreeNode]> = pipe(
 
 const matcher = match<Args, ReactNode>(
 	caseOf([isBlank, _], () => null),
-	caseOf([{ type: NodeType.List }, _], node => <ListEditor node={node} />),
+	caseOf([{ type: NodeType.List }, _], (node, value) => (
+		<ListEditor node={node} value={value} />
+	)),
 	caseOf([{ type: NodeType.String }, _], (node, value) => (
-		<StringEditor node={node} value={value} />
+		<StringEditor node={node} value={head(value ?? [])} />
 	)),
 	caseOf([_, _], node => <div className="ml-1">{node.name}</div>)
 )
 
-const propsToArgs = ({ node, value }: OwnProps) =>
-	[node, value ? head(value) : undefined] as Args
+const propsToArgs = ({ node, value }: OwnProps) => [node, value] as Args
 
 export const ValueEditor: FC<OwnProps> = pipe(
 	propsToArgs as Fn<OwnProps, [...Args]>,

@@ -1,6 +1,7 @@
+import type { Value } from '@/gql/graphql'
 import { cn, notNil } from '@/lib/utils'
 import type { TreeNode } from '@/state/tree'
-import { $activeItems, $valueMap, activateListItem } from '@/state/value'
+import { $activeItems, activateListItem } from '@/state/value'
 import {
 	IconSquareRoundedMinus as Minus,
 	IconSquareRoundedPlus as Plus
@@ -12,10 +13,11 @@ import { openListItemDelete } from './list-item-delete'
 
 type OwnProps = {
 	node: TreeNode
+	value?: Value[]
 }
 
-export const ListEditor = ({ node }: OwnProps) => {
-	const items = notNil($valueMap)[node.id] ?? []
+export const ListEditor = ({ node, value }: OwnProps) => {
+	const items = value ?? []
 	const $activeItem = notNil($activeItems)[node.id]
 	return (
 		<div className="flex flex-row w-full gap-2 h-7 items-center">
