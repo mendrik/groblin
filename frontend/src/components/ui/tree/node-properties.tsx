@@ -11,7 +11,7 @@ import { setSignal } from '@/lib/utils'
 import { type TreeNode, refocus } from '@/state/tree'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
-import { pipeAsync } from '@shared/utils/pipe-async'
+import { pipeTap } from '@shared/utils/pipe-tap'
 import { pipe, tap } from 'ramda'
 import { type TypeOf, nativeEnum, strictObject } from 'zod'
 import { Button } from '../button'
@@ -38,7 +38,7 @@ const nodeSettingsSchema = (_node: TreeNode) =>
 export type NodeSettingsSchema = TypeOf<ReturnType<typeof nodeSettingsSchema>>
 
 const saveNodeSettingsCommand: (data: NodeSettingsSchema) => Promise<void> =
-	pipeAsync(tap(console.log))
+	pipeTap(tap(console.log))
 
 type OwnProps = {
 	node: TreeNode

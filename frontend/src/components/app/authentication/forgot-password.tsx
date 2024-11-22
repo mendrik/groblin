@@ -10,7 +10,7 @@ import {
 import { stringField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { EditorType } from '@shared/enums'
-import { pipeAsync } from '@shared/utils/pipe-async'
+import { pipeTap } from '@shared/utils/pipe-tap'
 import type { Fn } from '@tp/functions.ts'
 import { pipe } from 'ramda'
 import { Link } from 'react-router-dom'
@@ -22,7 +22,7 @@ const forgotPasswordSchema = strictObject({
 
 type ForgotPassword = TypeOf<typeof forgotPasswordSchema>
 
-const forgotPasswordCommand: Fn<Partial<ForgotPassword>, void> = pipeAsync(
+const forgotPasswordCommand: Fn<Partial<ForgotPassword>, void> = pipeTap(
 	console.log // todo
 )
 

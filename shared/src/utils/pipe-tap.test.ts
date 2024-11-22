@@ -1,53 +1,158 @@
-import { describe, expect, it, vi } from 'vitest'
-import { pipeTapAsync } from './pipe-tap'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { pipeTap } from './pipe-tap'
 
-describe('pipeTapAsync', () => {
-	it('should handle async functions and await promises', async () => {
-		const fn1 = vi.fn(async (x: number) => x + 1)
-		const fn2 = vi.fn(() => new Promise(res => setTimeout(res, 50)))
-		const fn3 = vi.fn((x: number) => x - 3)
+describe('pipeTap', () => {
+	const normalFn = vi.fn((x: number) => x + 2)
 
-		const result = await pipeTapAsync(fn1, fn2, fn3)(5)
+	const asyncFn = vi.fn(async (x: number) => x + 3)
 
-		expect(fn1).toHaveBeenCalledWith(5)
-		expect(fn2).toHaveBeenCalledWith(5)
-		expect(fn3).toHaveBeenCalledWith(5)
-		expect(result).toBe(2) // The result of the last function (5 - 3 = 2)
+	const asyncFn2 = vi.fn(async (x: number) => x + 4)
+
+	beforeEach(() => {
+		normalFn.mockClear()
+		asyncFn.mockClear()
+		asyncFn2.mockClear()
 	})
 
-	it('should handle mixed functions and await promises', async () => {
-		const consoleSpy = vi.spyOn(console, 'log')
-		const fn1 = vi.fn((a: number) => console.log('fn1'))
-		const fn2 = vi.fn(() =>
-			new Promise(res => setTimeout(res, 10)).then(() => console.log('fn2'))
-		)
-		const fn3 = vi.fn(() => console.log('fn3'))
-
-		const result = await pipeTapAsync(fn1, fn2, fn3)(5)
-
-		expect(fn1).toHaveBeenCalledWith(5)
-		expect(fn2).toHaveBeenCalledWith(5)
-		expect(fn3).toHaveBeenCalledWith(5)
-		expect(result).toBe(void 0)
-
-		expect(consoleSpy).toHaveBeenNthCalledWith(1, 'fn1')
-		expect(consoleSpy).toHaveBeenNthCalledWith(2, 'fn2')
-		expect(consoleSpy).toHaveBeenNthCalledWith(3, 'fn3')
-
-		consoleSpy.mockRestore()
+	it('should handle hybrid case with asyncFn followed by normalFn', async () => {
+		const res = await pipeTap(asyncFn, normalFn)(3)
+		expect(res).toBe(5)
+		expect(asyncFn).toHaveBeenCalledWith(3, undefined)
+		expect(normalFn).toHaveBeenCalledWith(3, 6)
+		expect(asyncFn).toHaveBeenCalledTimes(1)
+		expect(normalFn).toHaveBeenCalledTimes(1)
 	})
 
-	it('should pass the correct argument to each function', async () => {
-		const fn1 = vi.fn().mockResolvedValue(undefined)
-		const fn2 = vi.fn().mockResolvedValue(undefined)
-		const fn3 = vi.fn().mockResolvedValue(undefined)
+	it('should handle async case with asyncFn followed by asyncFn2', async () => {
+		const res = await pipeTap(asyncFn, asyncFn2)(3)
 
-		const result = await pipeTapAsync(fn1, fn2, fn3)('test')
+		expect(res).toBe(7)
+		expect(asyncFn).toHaveBeenCalledWith(3, undefined)
+		expect(asyncFn2).toHaveBeenCalledWith(3, 6)
+		expect(asyncFn).toHaveBeenCalledTimes(1)
+		expect(asyncFn2).toHaveBeenCalledTimes(1)
+	})
 
-		expect(fn1).toHaveBeenCalledWith('test')
-		expect(fn2).toHaveBeenCalledWith('test')
-		expect(fn3).toHaveBeenCalledWith('test')
+	it('should handle sync case with normalFn followed by normalFn', () => {
+		const res = pipeTap(normalFn, normalFn)(3)
 
-		expect(result).toBeUndefined()
+		expect(res).toBe(5)
+		expect(normalFn).toHaveBeenCalledWith(3, undefined)
+		expect(normalFn).toHaveBeenCalledWith(3, 5)
+		expect(normalFn).toHaveBeenCalledTimes(2)
+	})
+
+	it('should resolve types correctly in a hybrid scenario', async () => {
+		const pipe = pipeTap(asyncFn, normalFn)
+
+		const res = await pipe(3)
+
+		expect(res).toBe(5)
+	})
+
+	it('should resolve types correctly in an async scenario', async () => {
+		const pipe = pipeTap(asyncFn, asyncFn2)
+
+		const res = await pipe(3)
+
+		expect(res).toBe(7)
+	})
+
+	it('should resolve types correctly in a sync scenario', () => {
+		const pipe = pipeTap(normalFn, normalFn)
+
+		const res = pipe(3)
+
+		expect(res).toBe(5)
+	})
+
+	it('should pass all arguments correctly to each function in the pipe', async () => {
+		const res = await pipeTap(asyncFn, normalFn)(3)
+
+		expect(asyncFn).toHaveBeenCalledWith(3, undefined)
+		expect(normalFn).toHaveBeenCalledWith(3, 6)
+	})
+
+	it('should return correct type in all cases', async () => {
+		const syncResult = pipeTap(normalFn)(3)
+		expect(syncResult).toBe(5)
+
+		const asyncResult = await pipeTap(asyncFn)(3)
+		expect(asyncResult).toBe(6)
+
+		const mixedResult = await pipeTap(normalFn, asyncFn)(3)
+		expect(mixedResult).toBe(6)
+	})
+
+	it('should return the result of the last function in the pipe', async () => {
+		const pipe = pipeTap(normalFn, asyncFn, normalFn)
+
+		const result = await pipe(3)
+		expect(result).toBe(5)
+	})
+
+	it('should handle hybrid functions with promised results correctly', async () => {
+		const pipe = pipeTap(normalFn, asyncFn)
+
+		const result = await pipe(3)
+		expect(result).toBe(6)
+		expect(normalFn).toHaveBeenCalledTimes(1)
+		expect(asyncFn).toHaveBeenCalledTimes(1)
+	})
+
+	it('should handle multiple synchronous functions', () => {
+		const pipe = pipeTap(normalFn, normalFn, normalFn)
+
+		const result = pipe(3)
+		expect(result).toBe(5)
+		expect(normalFn).toHaveBeenCalledTimes(3)
+	})
+
+	it('should handle multiple asynchronous functions', async () => {
+		const pipe = pipeTap(asyncFn, asyncFn, asyncFn)
+
+		const result = await pipe(3)
+		expect(result).toBe(6)
+		expect(asyncFn).toHaveBeenCalledTimes(3)
+	})
+
+	it('should handle mixed async and sync with multiple steps', async () => {
+		const pipe = pipeTap(normalFn, asyncFn, normalFn)
+
+		const result = await pipe(3)
+		expect(result).toBe(5)
+		expect(normalFn).toHaveBeenCalledTimes(2)
+		expect(asyncFn).toHaveBeenCalledTimes(1)
+	})
+
+	it('should execute correctly for promise handling with multiple steps', async () => {
+		const pipe = pipeTap(asyncFn, asyncFn, normalFn)
+
+		const result = await pipe(3)
+		expect(result).toBe(5)
+		expect(asyncFn).toHaveBeenCalledTimes(2)
+		expect(normalFn).toHaveBeenCalledTimes(1)
+	})
+
+	it('should pass on results', async () => {
+		const fn = (a: number, b: number): number => b + 1
+		const pipe = pipeTap(x => x, fn, fn, fn)
+		const result = pipe(3)
+		expect(result).toBe(6)
+	})
+
+	it('should pass on results asynch', async () => {
+		const fn = async (a: number, b: number): Promise<number> => b + 1
+		const pipe = pipeTap(x => x, fn, fn, fn)
+		const result = await pipe(3)
+		expect(result).toBe(6)
+	})
+
+	it('should pass on results hybrid', async () => {
+		const fn = async (a: number, b: number): Promise<number> => b + 1
+		const fns = (a: number, b: number): number => b + 1
+		const pipe = pipeTap(x => x, fn, fns, fns)
+		const result = await pipe(3)
+		expect(result).toBe(6)
 	})
 })
