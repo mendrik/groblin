@@ -13,6 +13,7 @@ import {
 	groupBy,
 	head,
 	isNotEmpty,
+	isNotNil,
 	map,
 	omit,
 	pipe,
@@ -23,9 +24,10 @@ import {
 	values
 } from 'ramda'
 import { $project } from './project'
-import { type TreeNode, asNode } from './tree'
+import { type TreeNode, asNode, pathFrom } from './tree'
 
 export type NodeId = number
+export type ParentListId = number
 export type ActiveLists = Record<NodeId, Value>
 
 export const $values = signal<Value[]>([])
@@ -39,20 +41,28 @@ $values.subscribe(
 		setSignal($valueMap)
 	)
 )
-const fetchValues = () =>
-	Api.GetValues({
-		ids: pipe(values, pluck('id'))(notNil($activeItems))
-	}).then(setSignal($values))
+const fetchValues = () => {
+	const ids = pipe(values, pluck('id'))(notNil($activeItems))
+	console.log(ids)
+	Api.GetValues({ ids }).then(setSignal($values))
+}
 
 export const subscribeToValues = () =>
 	Subscribe.ValuesUpdated({ projectId: notNil($project, 'id') }, fetchValues)
+
+$activeItems.subscribe(fetchValues)
 
 export const activateListItem = (item: Value) => {
 	const node = asNode(item.node_id)
 	assertThat(propEq(NodeType.List, 'type'), node, 'Value is not a list item')
 	updateSignal($activeItems, assoc(item.node_id, item))
-	fetchValues()
 }
+
+export const findParentListItem = (node: TreeNode): ParentListId | undefined =>
+	[...pathFrom(node)]
+		.filter(node => node.type === 'list')
+		.map(node => $activeItems.value[node.id]?.id)
+		.find(isNotNil)
 
 export const insertListItem = (listItem: InsertListItem) =>
 	Api.InsertListItem({ listItem })
@@ -75,7 +85,6 @@ export const selectAnyListItem = (node: TreeNode) => {
 	} else {
 		updateSignal($activeItems, omit([node.id]))
 	}
-	fetchValues()
 }
 
 export const saveValue = (data: UpsertValue) => Api.UpsertValue({ data })

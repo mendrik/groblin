@@ -1,7 +1,7 @@
 import { NodeType, type Value } from '@/gql/graphql'
 import { caseOf, match } from '@/lib/match'
 import { type TreeNode, pathTo } from '@/state/tree'
-import { $activeItems, type ActiveLists } from '@/state/value'
+import { $activeItems } from '@/state/value'
 import type { Fn } from '@tp/functions'
 import {
 	type Pred,
@@ -19,8 +19,7 @@ import { StringEditor } from './string-editor'
 
 type OwnProps = {
 	node: TreeNode
-	value?: Value[]
-	active: ActiveLists
+	value: Value[]
 }
 
 type Args = readonly [TreeNode, Value[] | undefined]

@@ -87,17 +87,18 @@ export class ValueResolver {
 		ids: number[],
 		@Ctx() { db, extra: user }: Context
 	): Promise<Value[]> {
-		const query = db
+		return db
 			.selectFrom('values')
 			.where('project_id', '=', user.lastProjectId)
+			.where(eb =>
+				eb.or([
+					eb('parent_value_id', 'in', isEmpty(ids) ? [-1] : ids),
+					eb('parent_value_id', 'is', null)
+				])
+			)
 			.orderBy(['node_id', 'order'])
 			.selectAll()
-
-		isEmpty(ids)
-			? query.distinctOn('node_id').where('parent_value_id', 'is', null)
-			: query.where('parent_value_id', 'in', ids)
-
-		return query.execute()
+			.execute()
 	}
 
 	@Mutation(returns => Int)

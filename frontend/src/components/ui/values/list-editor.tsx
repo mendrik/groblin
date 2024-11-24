@@ -16,8 +16,7 @@ type OwnProps = {
 	value?: Value[]
 }
 
-export const ListEditor = ({ node, value }: OwnProps) => {
-	const items = value ?? []
+export const ListEditor = ({ node, value: items = [] }: OwnProps) => {
 	const $activeItem = notNil($activeItems)[node.id]
 	return (
 		<div className="flex flex-row w-full gap-2 h-7 items-center">
