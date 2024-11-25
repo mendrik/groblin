@@ -1,5 +1,4 @@
 import { NodeType, type Value } from '@/gql/graphql'
-import { inputValue } from '@/lib/dom-events'
 import { caseOf, match } from '@/lib/match'
 import { type TreeNode, pathTo } from '@/state/tree'
 import { $activeItems, listPath, saveValue } from '@/state/value'
@@ -60,7 +59,6 @@ export const editorKey = (node: TreeNode) =>
 
 export const save = <T extends Value>(node: TreeNode, value?: T) =>
 	pipeAsync(
-		inputValue,
 		evolveAlt({
 			value: objOf('content'),
 			node_id: () => node.id,

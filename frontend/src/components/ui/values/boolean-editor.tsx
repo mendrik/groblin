@@ -1,8 +1,5 @@
 import type { Value } from '@/gql/graphql'
-import {} from '@/lib/dom-events'
 import type { TreeNode } from '@/state/tree'
-import {} from '@/state/value'
-import {} from '@tabler/icons-react'
 import { Switch } from '../switch'
 import { editorKey, save } from './value-editor'
 
@@ -18,8 +15,8 @@ export const BooleanEditor = ({ node, value }: OwnProps) => {
 		<Switch
 			className="ml-1"
 			key={editorKey(node)}
-			onChange={save(node, value)}
-			defaultValue={value?.value.content}
+			onCheckedChange={save(node, value)}
+			defaultChecked={value?.value.content}
 		/>
 	)
 }

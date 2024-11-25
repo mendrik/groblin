@@ -12,6 +12,7 @@ import {
 	assoc,
 	groupBy,
 	head,
+	isEmpty,
 	isNotEmpty,
 	isNotNil,
 	map,
@@ -57,11 +58,13 @@ export const activateListItem = (item: Value) => {
 	updateSignal($activeItems, assoc(item.node_id, item))
 }
 
-export const listPath = (node: TreeNode): number[] | undefined =>
-	[...pathTo(node)]
+export const listPath = (node: TreeNode): number[] | undefined => {
+	const res = [...pathTo(node)]
 		.filter(node => node.type === 'list')
 		.map(node => $activeItems.value[node.id]?.id)
 		.filter(isNotNil)
+	return isEmpty(res) ? undefined : res
+}
 
 export const insertListItem = (listItem: InsertListItem) =>
 	Api.InsertListItem({ listItem })
