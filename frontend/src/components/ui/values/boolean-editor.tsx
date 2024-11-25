@@ -16,6 +16,7 @@ type OwnProps = {
 export const BooleanEditor = ({ node, value }: OwnProps) => {
 	return (
 		<Switch
+			className="ml-1"
 			key={editorKey(node)}
 			onChange={save(node, value)}
 			defaultValue={value?.value.content}
