@@ -1,7 +1,10 @@
 import { NodeType, type Value } from '@/gql/graphql'
+import { inputValue } from '@/lib/dom-events'
 import { caseOf, match } from '@/lib/match'
 import { type TreeNode, pathTo } from '@/state/tree'
-import { $activeItems, listPath } from '@/state/value'
+import { $activeItems, listPath, saveValue } from '@/state/value'
+import { evolveAlt } from '@shared/utils/evolve-alt'
+import { pipeAsync } from '@shared/utils/pipe-async'
 import type { Fn } from '@tp/functions'
 import {
 	type Pred,
@@ -11,9 +14,11 @@ import {
 	dropLast,
 	filter,
 	head,
+	objOf,
 	pipe
 } from 'ramda'
 import type { FC, ReactNode } from 'react'
+import { BooleanEditor } from './boolean-editor'
 import { ListEditor } from './list-editor'
 import { StringEditor } from './string-editor'
 
@@ -41,6 +46,9 @@ const matcher = match<Args, ReactNode>(
 	caseOf([{ type: NodeType.List }, _], (node, value) => (
 		<ListEditor node={node} value={value} />
 	)),
+	caseOf([{ type: NodeType.Boolean }, _], (node, value) => (
+		<BooleanEditor node={node} value={head(value ?? [])} />
+	)),
 	caseOf([{ type: NodeType.String }, _], (node, value) => (
 		<StringEditor node={node} value={head(value ?? [])} />
 	)),
@@ -49,6 +57,18 @@ const matcher = match<Args, ReactNode>(
 
 export const editorKey = (node: TreeNode) =>
 	`${node.id}-${listPath(node)?.join('-')}`
+
+export const save = <T extends Value>(node: TreeNode, value?: T) =>
+	pipeAsync(
+		inputValue,
+		evolveAlt({
+			value: objOf('content'),
+			node_id: () => node.id,
+			id: () => value?.id,
+			list_path: () => listPath(node)
+		}),
+		saveValue
+	)
 
 const propsToArgs = ({ node, value }: OwnProps) => [node, value] as Args
 

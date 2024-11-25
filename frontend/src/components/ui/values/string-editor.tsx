@@ -1,13 +1,10 @@
 import KeyListener from '@/components/utils/key-listener'
 import type { Value } from '@/gql/graphql'
-import { inputValue, stopPropagation } from '@/lib/dom-events'
+import { stopPropagation } from '@/lib/dom-events'
 import type { TreeNode } from '@/state/tree'
-import { listPath, saveValue } from '@/state/value'
-import { evolveAlt } from '@shared/utils/evolve-alt'
-import { pipeAsync } from '@shared/utils/pipe-async'
+import {} from '@/state/value'
 import {} from '@tabler/icons-react'
-import { objOf } from 'ramda'
-import { editorKey } from './value-editor'
+import { editorKey, save } from './value-editor'
 
 type StringValue = Value & { value: { content: string } }
 
@@ -15,18 +12,6 @@ type OwnProps = {
 	node: TreeNode
 	value?: StringValue
 }
-
-const save = (node: TreeNode, value?: StringValue) =>
-	pipeAsync(
-		inputValue,
-		evolveAlt({
-			value: objOf('content'),
-			node_id: () => node.id,
-			id: () => value?.id,
-			list_path: () => listPath(node)
-		}),
-		saveValue
-	)
 
 export const StringEditor = ({ node, value }: OwnProps) => {
 	return (
