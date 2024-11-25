@@ -121,13 +121,20 @@ export type Node = {
 
 export enum NodeType {
   Boolean = 'boolean',
+  Color = 'color',
   Date = 'date',
+  Email = 'email',
+  Event = 'event',
   List = 'list',
+  Location = 'location',
+  Media = 'media',
   Number = 'number',
   Object = 'object',
+  Phone = 'phone',
   Root = 'root',
-  Schema = 'schema',
-  String = 'string'
+  String = 'string',
+  Time = 'time',
+  Url = 'url'
 }
 
 export type Project = {

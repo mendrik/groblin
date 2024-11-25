@@ -53,7 +53,9 @@ const newNodeSchema = () =>
 			label: 'Type',
 			description: 'The type of node you want to create.',
 			editor: EditorType.Select,
-			options: enumToMap(NodeType).filter(([_, v]) => v !== NodeType.Root)
+			options: enumToMap(NodeType)
+				.filter(([_, v]) => v !== NodeType.Root)
+				.sort()
 		})
 	})
 

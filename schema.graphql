@@ -20,7 +20,14 @@ enum NodeType {
   boolean
   list
   date
-  schema
+  time
+  color
+  location
+  phone
+  email
+  media
+  url
+  event
 }
 
 type Value {

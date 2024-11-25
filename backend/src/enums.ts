@@ -6,7 +6,14 @@ export enum NodeType {
 	boolean = 'Boolean',
 	list = 'List',
 	date = 'Date',
-	schema = 'Schema'
+	time = 'Time',
+	color = 'Color',
+	location = 'Location',
+	phone = 'Phone',
+	email = 'Email',
+	media = 'Media',
+	url = 'Url',
+	event = 'Event'
 }
 
 export enum Role {
