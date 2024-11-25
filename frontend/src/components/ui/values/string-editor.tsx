@@ -6,6 +6,7 @@ import { evolveAlt } from '@shared/utils/evolve-alt'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import {} from '@tabler/icons-react'
 import { objOf } from 'ramda'
+import { editorKey } from './value-editor'
 
 type StringValue = Value & { value: { content: string } }
 
@@ -27,10 +28,9 @@ const save = (node: TreeNode, value?: StringValue) =>
 	)
 
 export const StringEditor = ({ node, value }: OwnProps) => {
-	const path = listPath(node)
 	return (
 		<input
-			key={`${node.id}-${path?.join('-')}`}
+			key={editorKey(node)}
 			className="h-7 bg-transparent border-none appearance-none outline-none ring-0 ml-1"
 			defaultValue={value?.value.content}
 			onBlur={save(node, value)}

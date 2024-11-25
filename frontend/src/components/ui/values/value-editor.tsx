@@ -1,7 +1,7 @@
 import { NodeType, type Value } from '@/gql/graphql'
 import { caseOf, match } from '@/lib/match'
 import { type TreeNode, pathTo } from '@/state/tree'
-import { $activeItems } from '@/state/value'
+import { $activeItems, listPath } from '@/state/value'
 import type { Fn } from '@tp/functions'
 import {
 	type Pred,
@@ -45,6 +45,9 @@ const matcher = match<Args, ReactNode>(
 	)),
 	caseOf([_, _], node => <div className="ml-1">{node.name}</div>)
 )
+
+export const editorKey = (node: TreeNode) =>
+	`${node.id}-${listPath(node)?.join('-')}`
 
 const propsToArgs = ({ node, value }: OwnProps) => [node, value] as Args
 
