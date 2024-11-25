@@ -43,7 +43,7 @@ const rowOrColumn = (dir: Direction, active: Element | null) =>
 		const a = active.getBoundingClientRect()
 		return dir === Direction.Right || dir === Direction.Left
 			? Math.abs(r.top - a.top) > 10
-			: Math.abs(r.left - a.left) > 10
+			: Math.abs(r.left - a.left) > 10 && Math.abs(r.top - a.top) < 20
 	})
 
 const sorters = {
