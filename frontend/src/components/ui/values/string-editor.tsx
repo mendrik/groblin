@@ -1,7 +1,7 @@
 import type { Value } from '@/gql/graphql'
 import { inputValue } from '@/lib/dom-events'
 import type { TreeNode } from '@/state/tree'
-import { findParentListItem, saveValue } from '@/state/value'
+import { listPath, saveValue } from '@/state/value'
 import { evolveAlt } from '@shared/utils/evolve-alt'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import {} from '@tabler/icons-react'
@@ -21,7 +21,7 @@ const save = (node: TreeNode, value?: StringValue) =>
 			value: objOf('content'),
 			node_id: () => node.id,
 			id: () => value?.id,
-			parent_value_id: () => findParentListItem(node)
+			list_path: () => listPath(node)
 		}),
 		saveValue
 	)

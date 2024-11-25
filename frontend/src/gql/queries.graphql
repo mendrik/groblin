@@ -24,7 +24,7 @@ fragment Value on Value {
       node_id
       order
       value
-      parent_value_id
+      list_path
 }
 
 fragment Node on Node {
@@ -78,8 +78,8 @@ subscription ValuesUpdated($projectId: Int!) {
   valuesUpdated(projectId: $projectId)
 }
 
-query GetValues($ids: [Int!]!) {
-  getValues(ids: $ids) {
+query GetValues($data: GetValues!) {
+  getValues(data: $data) {
     ...Value
   }
 }

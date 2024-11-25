@@ -27,10 +27,14 @@ export type ChangeNodeInput = {
   type?: InputMaybe<NodeType>;
 };
 
+export type GetValues = {
+  ids: Array<Scalars['Int']['input']>;
+};
+
 export type InsertListItem = {
+  list_path?: InputMaybe<Array<Scalars['Int']['input']>>;
   name: Scalars['String']['input'];
   node_id: Scalars['Int']['input'];
-  parent_value_id?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type InsertNode = {
@@ -146,7 +150,7 @@ export type Query = {
 
 
 export type QueryGetValuesArgs = {
-  ids: Array<Scalars['Int']['input']>;
+  data: GetValues;
 };
 
 export type Registration = {
@@ -177,25 +181,25 @@ export type Token = {
 
 export type UpsertValue = {
   id?: InputMaybe<Scalars['Int']['input']>;
+  list_path?: InputMaybe<Array<Scalars['Int']['input']>>;
   node_id: Scalars['Int']['input'];
-  parent_value_id?: InputMaybe<Scalars['Int']['input']>;
   value: Scalars['JSONObject']['input'];
 };
 
 export type Value = {
   id: Scalars['Int']['output'];
+  list_path?: Maybe<Array<Scalars['Int']['output']>>;
   node_id: Scalars['Int']['output'];
   order: Scalars['Int']['output'];
-  parent_value_id?: Maybe<Scalars['Int']['output']>;
   value: Scalars['JSONObject']['output'];
 };
 
 export type GetProjectQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetProjectQuery = { getProject: { user: { id: number, email: string, name: string, lastProjectId: number }, project: { id: number, name: string }, nodes: Array<{ id: number, name: string, order: number, type: NodeType, parent_id?: number | null }>, values: Array<{ id: number, node_id: number, order: number, value: any, parent_value_id?: number | null }> } };
+export type GetProjectQuery = { getProject: { user: { id: number, email: string, name: string, lastProjectId: number }, project: { id: number, name: string }, nodes: Array<{ id: number, name: string, order: number, type: NodeType, parent_id?: number | null }>, values: Array<{ id: number, node_id: number, order: number, value: any, list_path?: Array<number> | null }> } };
 
-export type ValueFragment = { id: number, node_id: number, order: number, value: any, parent_value_id?: number | null };
+export type ValueFragment = { id: number, node_id: number, order: number, value: any, list_path?: Array<number> | null };
 
 export type NodeFragment = { id: number, name: string, order: number, type: NodeType, parent_id?: number | null };
 
@@ -261,11 +265,11 @@ export type ValuesUpdatedSubscriptionVariables = Exact<{
 export type ValuesUpdatedSubscription = { valuesUpdated: boolean };
 
 export type GetValuesQueryVariables = Exact<{
-  ids: Array<Scalars['Int']['input']> | Scalars['Int']['input'];
+  data: GetValues;
 }>;
 
 
-export type GetValuesQuery = { getValues: Array<{ id: number, node_id: number, order: number, value: any, parent_value_id?: number | null }> };
+export type GetValuesQuery = { getValues: Array<{ id: number, node_id: number, order: number, value: any, list_path?: Array<number> | null }> };
 
 export type InsertListItemMutationVariables = Exact<{
   listItem: InsertListItem;
@@ -294,7 +298,7 @@ export const ValueFragmentDoc = `
   node_id
   order
   value
-  parent_value_id
+  list_path
 }
     `;
 export const NodeFragmentDoc = `
@@ -382,8 +386,8 @@ export const ValuesUpdatedDocument = `
 }
     `;
 export const GetValuesDocument = `
-    query GetValues($ids: [Int!]!) {
-  getValues(ids: $ids) {
+    query GetValues($data: GetValues!) {
+  getValues(data: $data) {
     ...Value
   }
 }

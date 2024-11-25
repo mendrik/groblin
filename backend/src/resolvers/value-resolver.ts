@@ -1,7 +1,6 @@
 import {} from 'graphql'
 import { GraphQLJSONObject } from 'graphql-scalars'
 import { injectable } from 'inversify'
-import { isEmpty } from 'ramda'
 import type { Context } from 'src/context.ts'
 import type { JsonValue } from 'src/database/schema.ts'
 import { Role } from 'src/enums.ts'
@@ -34,8 +33,8 @@ export class Value {
 	@Field(type => Int)
 	order: number
 
-	@Field(type => Int, { nullable: true })
-	parent_value_id: number | null
+	@Field(type => [Int], { nullable: true })
+	list_path: number[] | null
 
 	@Field(type => GraphQLJSONObject)
 	value: JsonValue
@@ -49,11 +48,17 @@ export class UpsertValue {
 	@Field(type => Int)
 	node_id: number
 
-	@Field(type => Int, { nullable: true })
-	parent_value_id?: number
+	@Field(type => [Int], { nullable: true })
+	list_path: number[] | null
 
 	@Field(type => GraphQLJSONObject)
 	value: JsonValue
+}
+
+@InputType()
+export class GetValues {
+	@Field(type => [Int], { nullable: false })
+	ids: number[]
 }
 
 @InputType()
@@ -64,8 +69,8 @@ export class InsertListItem {
 	@Field(type => Int)
 	node_id: number
 
-	@Field(type => Int, { nullable: true })
-	parent_value_id?: number
+	@Field(type => [Int], { nullable: true })
+	list_path: number[] | null
 }
 
 @injectable()
@@ -83,18 +88,16 @@ export class ValueResolver {
 
 	@Query(returns => [Value])
 	async getValues(
-		@Arg('ids', () => [Int])
-		ids: number[],
+		@Arg('data', () => GetValues) { ids }: GetValues,
 		@Ctx() { db, extra: user }: Context
 	): Promise<Value[]> {
+		console.log(ids, Array.isArray(ids))
+
 		return db
 			.selectFrom('values')
 			.where('project_id', '=', user.lastProjectId)
-			.where(eb =>
-				eb.or([
-					eb('parent_value_id', 'in', isEmpty(ids) ? [-1] : ids),
-					eb('parent_value_id', 'is', null)
-				])
+			.where(({ or, eb }) =>
+				or([eb('list_path', '&&', [ids]), eb('list_path', 'is', null)])
 			)
 			.orderBy(['node_id', 'order'])
 			.selectAll()
@@ -112,7 +115,7 @@ export class ValueResolver {
 				node_id: data.node_id,
 				project_id: user.lastProjectId,
 				value: { name: data.name },
-				parent_value_id: data.parent_value_id
+				list_path: data.list_path
 			})
 			.returning('id as id')
 			.executeTakeFirstOrThrow()
@@ -147,7 +150,7 @@ export class ValueResolver {
 				node_id: data.node_id,
 				project_id: user.lastProjectId,
 				value: data.value,
-				parent_value_id: data.parent_value_id
+				list_path: data.list_path
 			})
 			.onConflict(c =>
 				c.column('id').doUpdateSet(e => ({

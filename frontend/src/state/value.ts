@@ -43,8 +43,7 @@ $values.subscribe(
 )
 const fetchValues = () => {
 	const ids = pipe(values, pluck('id'))(notNil($activeItems))
-	console.log(ids)
-	Api.GetValues({ ids }).then(setSignal($values))
+	Api.GetValues({ data: { ids } }).then(setSignal($values))
 }
 
 export const subscribeToValues = () =>
@@ -58,11 +57,11 @@ export const activateListItem = (item: Value) => {
 	updateSignal($activeItems, assoc(item.node_id, item))
 }
 
-export const findParentListItem = (node: TreeNode): ParentListId | undefined =>
+export const listPath = (node: TreeNode): number[] | undefined =>
 	[...pathFrom(node)]
 		.filter(node => node.type === 'list')
 		.map(node => $activeItems.value[node.id]?.id)
-		.find(isNotNil)
+		.filter(isNotNil)
 
 export const insertListItem = (listItem: InsertListItem) =>
 	Api.InsertListItem({ listItem })
