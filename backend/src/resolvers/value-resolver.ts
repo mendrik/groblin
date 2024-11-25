@@ -136,10 +136,17 @@ export class ValueResolver {
 		@Arg('id', () => Int) id: number,
 		@Ctx() { db, extra: user, pubSub }: Context
 	) {
-		const { numDeletedRows } = await db
-			.deleteFrom('values')
-			.where('id', '=', id)
-			.executeTakeFirstOrThrow()
+		const { numDeletedRows } = await db.transaction().execute(async trx => {
+			await trx
+				.deleteFrom('values')
+				.where('list_path', '&&', [[id]])
+				.execute()
+
+			return await trx
+				.deleteFrom('values')
+				.where('id', '=', id)
+				.executeTakeFirstOrThrow()
+		})
 
 		pubSub.publish(Topic.ValuesUpdated, true)
 		return numDeletedRows > 0
