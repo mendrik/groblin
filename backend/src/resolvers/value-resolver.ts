@@ -109,13 +109,20 @@ export class ValueResolver {
 		@Arg('listItem', () => InsertListItem) data: InsertListItem,
 		@Ctx() { db, extra: user, pubSub }: Context
 	) {
+		const { max_order } = await db
+			.selectFrom('values') // Replace with your table name
+			.where('node_id', '=', data.node_id)
+			.select(db.fn.max('order').as('max_order')) // Replace with your column name
+			.executeTakeFirstOrThrow()
+
 		const res = await db
 			.insertInto('values')
 			.values({
 				node_id: data.node_id,
 				project_id: user.lastProjectId,
 				value: { name: data.name },
-				list_path: data.list_path
+				list_path: data.list_path,
+				order: max_order + 1
 			})
 			.returning('id as id')
 			.executeTakeFirstOrThrow()
