@@ -24,7 +24,7 @@ import {
 	values
 } from 'ramda'
 import { $project } from './project'
-import { type TreeNode, asNode, pathFrom } from './tree'
+import { type TreeNode, asNode, pathTo } from './tree'
 
 export type NodeId = number
 export type ParentListId = number
@@ -58,7 +58,7 @@ export const activateListItem = (item: Value) => {
 }
 
 export const listPath = (node: TreeNode): number[] | undefined =>
-	[...pathFrom(node)]
+	[...pathTo(node)]
 		.filter(node => node.type === 'list')
 		.map(node => $activeItems.value[node.id]?.id)
 		.filter(isNotNil)

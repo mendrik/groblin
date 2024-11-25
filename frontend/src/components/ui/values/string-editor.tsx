@@ -27,9 +27,10 @@ const save = (node: TreeNode, value?: StringValue) =>
 	)
 
 export const StringEditor = ({ node, value }: OwnProps) => {
+	const path = listPath(node)
 	return (
 		<input
-			key={value?.id}
+			key={`${node.id}-${path?.join('-')}`}
 			className="h-7 bg-transparent border-none appearance-none outline-none ring-0 ml-1"
 			defaultValue={value?.value.content}
 			onBlur={save(node, value)}

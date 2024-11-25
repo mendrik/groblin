@@ -97,7 +97,7 @@ export class ValueResolver {
 			.selectFrom('values')
 			.where('project_id', '=', user.lastProjectId)
 			.where(({ or, eb }) =>
-				or([eb('list_path', '&&', [ids]), eb('list_path', 'is', null)])
+				or([eb('list_path', '<@', [ids]), eb('list_path', 'is', null)])
 			)
 			.orderBy(['node_id', 'order'])
 			.selectAll()
