@@ -37,6 +37,7 @@ const isBlank: Pred<[TreeNode]> = pipe(
 
 const matcher = match<Args, ReactNode>(
 	caseOf([isBlank, _], () => null),
+	caseOf([{ type: NodeType.Object }, _], () => null),
 	caseOf([{ type: NodeType.List }, _], (node, value) => (
 		<ListEditor node={node} value={value} />
 	)),

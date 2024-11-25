@@ -1,5 +1,6 @@
+import KeyListener from '@/components/utils/key-listener'
 import type { Value } from '@/gql/graphql'
-import { inputValue } from '@/lib/dom-events'
+import { inputValue, stopPropagation } from '@/lib/dom-events'
 import type { TreeNode } from '@/state/tree'
 import { listPath, saveValue } from '@/state/value'
 import { evolveAlt } from '@shared/utils/evolve-alt'
@@ -29,11 +30,13 @@ const save = (node: TreeNode, value?: StringValue) =>
 
 export const StringEditor = ({ node, value }: OwnProps) => {
 	return (
-		<input
-			key={editorKey(node)}
-			className="h-7 bg-transparent border-none appearance-none outline-none ring-0 ml-1"
-			defaultValue={value?.value.content}
-			onBlur={save(node, value)}
-		/>
+		<KeyListener onArrowLeft={stopPropagation} onArrowRight={stopPropagation}>
+			<input
+				key={editorKey(node)}
+				className="h-7 bg-transparent border-none appearance-none outline-none ring-0 ml-1"
+				defaultValue={value?.value.content}
+				onBlur={save(node, value)}
+			/>
+		</KeyListener>
 	)
 }
