@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 17.0 (Debian 17.0-1.pgdg120+1)
+-- Dumped from database version 17.2 (Debian 17.2-1.pgdg120+1)
 -- Dumped by pg_dump version 17.1 (Ubuntu 17.1-1.pgdg24.10+1)
 
 SET statement_timeout = 0;
@@ -188,8 +188,8 @@ CREATE TABLE public."values" (
     node_id integer NOT NULL,
     value jsonb,
     project_id integer,
-    parent_value_id integer,
-    "order" integer
+    "order" integer,
+    list_path jsonb
 );
 
 
@@ -322,13 +322,6 @@ CREATE INDEX node_id ON public.node USING btree (id);
 
 
 --
--- Name: parent_value_id_1732089088132_index; Type: INDEX; Schema: public; Owner: groblin
---
-
-CREATE INDEX parent_value_id_1732089088132_index ON public."values" USING btree (parent_value_id);
-
-
---
 -- Name: project_id; Type: INDEX; Schema: public; Owner: groblin
 --
 
@@ -418,14 +411,6 @@ ALTER TABLE ONLY public."user"
 
 ALTER TABLE ONLY public."values"
     ADD CONSTRAINT values_node_id_fkey FOREIGN KEY (node_id) REFERENCES public.node(id) ON DELETE CASCADE;
-
-
---
--- Name: values values_parent_value_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: groblin
---
-
-ALTER TABLE ONLY public."values"
-    ADD CONSTRAINT values_parent_value_id_fkey FOREIGN KEY (parent_value_id) REFERENCES public."values"(id) ON DELETE CASCADE;
 
 
 --
