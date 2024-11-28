@@ -187,9 +187,9 @@ CREATE TABLE public."values" (
     id integer NOT NULL,
     node_id integer NOT NULL,
     value jsonb,
-    project_id integer,
-    "order" integer,
-    list_path jsonb
+    project_id integer NOT NULL,
+    "order" integer DEFAULT 0 NOT NULL,
+    list_path integer[]
 );
 
 

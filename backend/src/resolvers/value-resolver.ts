@@ -91,8 +91,6 @@ export class ValueResolver {
 		@Arg('data', () => GetValues) { ids }: GetValues,
 		@Ctx() { db, extra: user }: Context
 	): Promise<Value[]> {
-		console.log(ids, Array.isArray(ids))
-
 		return db
 			.selectFrom('values')
 			.where('project_id', '=', user.lastProjectId)
