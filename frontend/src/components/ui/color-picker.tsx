@@ -4,27 +4,33 @@ import {
 	DialogFooter,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { setSignal } from '@/lib/utils'
+import { notNil, setSignal, updateSignalFn } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { F, T, pipe } from 'ramda'
-import { useState } from 'react'
+import { F, T, assoc, pipe } from 'ramda'
 import PickerLib, { useColorPicker } from 'react-best-gradient-color-picker'
 import { Button } from './button'
 
-type Callback = (color: number[]) => any
-const $dialogOpen = signal(false)
-const $selectColorCallback = signal<Callback>()
+type OpenProps = {
+	callback: (color: number[]) => any
+	color: string
+}
 
-export const openColorPicker: (cb: Callback) => void = pipe(
-	setSignal($selectColorCallback),
+const $dialogOpen = signal(false)
+const $props = signal<OpenProps>({
+	callback: () => {},
+	color: 'rgba(255, 0, 0, 1)'
+})
+
+export const openColorPicker: (props: OpenProps) => void = pipe(
+	setSignal($props),
 	pipe(T, setSignal($dialogOpen))
 )
 const close = pipe(F, setSignal($dialogOpen))
 
 export const ColorPicker = () => {
-	const [color, setColor] = useState('rgba(255,255,255,1)')
-	const { rgbaArr } = useColorPicker(color, setColor)
+	const setColor = updateSignalFn($props, assoc('color'))
+	const { rgbaArr } = useColorPicker(notNil($props).color, setColor)
 
 	return (
 		<Dialog open={$dialogOpen.value}>
@@ -39,7 +45,7 @@ export const ColorPicker = () => {
 				</VisuallyHidden>
 				<PickerLib
 					className="z-20"
-					value={color}
+					value={notNil($props).color}
 					width={270}
 					height={170}
 					onChange={setColor}
@@ -56,7 +62,7 @@ export const ColorPicker = () => {
 					<Button
 						type="button"
 						onClick={() => {
-							$selectColorCallback.value?.(rgbaArr)
+							notNil($props).callback(rgbaArr)
 							close()
 						}}
 					>

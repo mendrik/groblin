@@ -18,6 +18,15 @@ export const setSignal = curry(<T>(signal: Signal<T>, value: T): T => {
 	return value
 })
 
+export const updateSignalFn = curry(
+	<T, INP>(
+		signal: Signal<T>,
+		fn: (arg: INP, cur: T) => T
+	): ((a: INP) => unknown) => {
+		return (arg: INP) => (signal.value = fn(arg, signal.value))
+	}
+)
+
 export const updateSignal: {
 	<T>(signal: Signal<T>, fn: Fn<T, T>): void
 	<T>(signal: Signal<T>): <T2 extends T>(fn: Fn<T2, T2>) => void

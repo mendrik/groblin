@@ -16,6 +16,7 @@ import KeyListener from './key-listener'
 
 type OwnProps = PropsWithChildren<{
 	focusableSelector?: string
+	autoFocus?: boolean
 }>
 
 enum Direction {
@@ -76,6 +77,7 @@ const focusNext = (
 
 const FocusTravel = ({
 	focusableSelector = defaultFocusable,
+	autoFocus,
 	children
 }: OwnProps) => {
 	const ref = useRef<HTMLDivElement>(null)
@@ -87,8 +89,10 @@ const FocusTravel = ({
 	}
 
 	useEffect(() => {
-		focusFirst(focusableSelector)(ref.current)
-	}, [focusableSelector])
+		if (autoFocus) {
+			focusFirst(focusableSelector)(ref.current)
+		}
+	}, [autoFocus, focusableSelector])
 
 	return (
 		<KeyListener

@@ -3,7 +3,6 @@ import { caseOf, match } from '@/lib/match'
 import { type TreeNode, pathTo } from '@/state/tree'
 import { $activeItems, listPath, saveValue } from '@/state/value'
 import { pipeAsync } from '@shared/utils/pipe-async'
-import { debug } from '@shared/utils/ramda'
 import type { Fn } from '@tp/functions'
 import {
 	type Pred,
@@ -68,7 +67,6 @@ export const save = <T extends Value>(node: TreeNode, value?: T) =>
 			id: value?.id,
 			list_path: listPath(node)
 		}),
-		debug,
 		saveValue
 	)
 
