@@ -59,6 +59,7 @@
 		"react-dom": "18.3.1",
 		"react-form-hook": "^0.0.1",
 		"react-hook-form": "^7.53.2",
+		"react-imask": "^7.6.1",
 		"react-resizable-panels": "^2.1.6",
 		"react-router-dom": "^6.28.0",
 		"react-use": "^17.5.1",

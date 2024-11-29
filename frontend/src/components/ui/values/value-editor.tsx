@@ -18,6 +18,7 @@ import type { FC, ReactNode } from 'react'
 import { BooleanEditor } from './boolean-editor'
 import { ColorEditor } from './color-editor'
 import { ListEditor } from './list-editor'
+import { NumberEditor } from './number-editor'
 import { StringEditor } from './string-editor'
 
 type OwnProps = {
@@ -52,6 +53,9 @@ const matcher = match<Args, ReactNode>(
 	)),
 	caseOf([{ type: NodeType.Color }, _], (node, value) => (
 		<ColorEditor node={node} value={head(value ?? [])} />
+	)),
+	caseOf([{ type: NodeType.Number }, _], (node, value) => (
+		<NumberEditor node={node} value={head(value ?? [])} />
 	)),
 	caseOf([_, _], node => <div className="ml-1">{node.name}</div>)
 )
