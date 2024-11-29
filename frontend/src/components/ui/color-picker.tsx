@@ -30,7 +30,7 @@ const close = pipe(F, setSignal($dialogOpen))
 
 export const ColorPicker = () => {
 	const setColor = updateSignalFn($props, assoc('color'))
-	const { rgbaArr } = useColorPicker(notNil($props).color, setColor)
+	const { valueToHex, rgbaArr } = useColorPicker(notNil($props).color, setColor)
 
 	return (
 		<Dialog open={$dialogOpen.value}>
@@ -41,7 +41,7 @@ export const ColorPicker = () => {
 				aria-describedby={undefined}
 			>
 				<VisuallyHidden>
-					<DialogTitle>Color Picker</DialogTitle>
+					<DialogTitle>Color Picker {valueToHex()}</DialogTitle>
 				</VisuallyHidden>
 				<PickerLib
 					className="z-20"

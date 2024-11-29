@@ -6,7 +6,7 @@ import type { TreeNode } from '@/state/tree'
 import { objOf, pipe } from 'ramda'
 import { Button } from '../button'
 import { openColorPicker } from '../color-picker'
-import { save } from './value-editor'
+import { editorKey, save } from './value-editor'
 
 type ColorValue = Value & {
 	value: {
@@ -24,7 +24,7 @@ export const ColorEditor = ({ node, value }: OwnProps) => {
 	return (
 		<KeyListener onArrowLeft={stopPropagation} onArrowRight={stopPropagation}>
 			<Button
-				key={backgroundColor}
+				key={editorKey(node)}
 				variant="ghost"
 				type="button"
 				className={cn(
