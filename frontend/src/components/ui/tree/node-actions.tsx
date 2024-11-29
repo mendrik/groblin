@@ -19,7 +19,7 @@ import {
 import type { RefObject } from 'react'
 import { openNodeCreate } from './node-create'
 import { openNodeDelete } from './node-delete'
-import { openNodeSettings } from './node-properties'
+import { openNodeProperties } from './node-properties'
 import { canHaveChildren } from './utils'
 
 type OwnProps = {
@@ -83,7 +83,7 @@ export const NodeActions = ({ node, editor }: OwnProps) => {
 				<DropdownMenuSeparator />
 				<DropdownMenuItem
 					className="flex gap-2 items-center"
-					onSelect={openNodeSettings}
+					onSelect={() => openNodeProperties(node)}
 				>
 					<IconTrash className="w-4 h-4" />
 					<span>Properties…</span>

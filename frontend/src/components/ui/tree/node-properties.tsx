@@ -6,74 +6,62 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { NodeType } from '@/gql/graphql'
 import { setSignal } from '@/lib/utils'
 import { type TreeNode, refocus } from '@/state/tree'
 import { signal } from '@preact/signals-react'
-import { EditorType } from '@shared/enums'
 import { pipeTap } from '@shared/utils/pipe-tap'
-import { pipe, tap } from 'ramda'
-import { type TypeOf, nativeEnum, strictObject } from 'zod'
+import { F, T, pipe, tap } from 'ramda'
+import type { ZodRawShape } from 'zod'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
-import { asField, enumToMap, stringField } from '../zod-form/utils'
 import { ZodForm } from '../zod-form/zod-form'
+import { nodePropertiesForm } from './utils'
 
-export const $settingsDialogOpen = signal(false)
+const $dialogOpen = signal(false)
+const $node = signal<TreeNode>()
 
-export const openNodeSettings = () => setSignal($settingsDialogOpen, true)
-const close = () => setSignal($settingsDialogOpen, false)
+export const openNodeProperties: (node: TreeNode) => void = pipe(
+	setSignal($node),
+	pipe(T, setSignal($dialogOpen))
+)
+const close = pipe(F, setSignal($dialogOpen))
 
-const nodeSettingsSchema = (_node: TreeNode) =>
-	strictObject({
-		name: stringField('Name', EditorType.Input, 'off', 'Name of the node'),
-		type: asField(nativeEnum(NodeType).default(NodeType.Object), {
-			label: 'Type',
-			description: 'The type of node you want to create.',
-			editor: EditorType.Select,
-			options: enumToMap(NodeType).filter(([_, v]) => v !== NodeType.Root)
-		})
-	})
+const saveNodeSettingsCommand: <T>(data: T) => Promise<void> = pipeTap(
+	tap(console.log)
+)
 
-export type NodeSettingsSchema = TypeOf<ReturnType<typeof nodeSettingsSchema>>
-
-const saveNodeSettingsCommand: (data: NodeSettingsSchema) => Promise<void> =
-	pipeTap(tap(console.log))
-
-type OwnProps = {
-	node: TreeNode
-}
-
-export const NodeProperties = ({ node }: OwnProps) => {
-	const [formApi, ref] = useFormState<NodeSettingsSchema>()
+export const NodeProperties = <T extends ZodRawShape>() => {
+	const [formApi, ref] = useFormState<T>()
 	const dialogClose = pipe(close, refocus)
 
 	return (
-		<Dialog open={$settingsDialogOpen.value}>
-			<DialogContent close={dialogClose}>
-				<DialogHeader>
-					<DialogTitle>Node properties</DialogTitle>
-					<DialogDescription>
-						Please configure how node values will be displayed and edited.
-					</DialogDescription>
-				</DialogHeader>
-				<ZodForm
-					schema={nodeSettingsSchema(node)}
-					columns={2}
-					onSubmit={pipe(saveNodeSettingsCommand, dialogClose)}
-					onError={console.error}
-					ref={ref}
-				>
-					<DialogFooter className="gap-y-2">
-						<Button onClick={close} variant="secondary">
-							Cancel
-						</Button>
-						<Button type="submit" disabled={formApi.isSubmitting}>
-							Apply
-						</Button>
-					</DialogFooter>
-				</ZodForm>
-			</DialogContent>
-		</Dialog>
+		$node.value && (
+			<Dialog open={$dialogOpen.value}>
+				<DialogContent close={dialogClose}>
+					<DialogHeader>
+						<DialogTitle>Node properties</DialogTitle>
+						<DialogDescription>
+							Please configure how node values will be displayed and edited.
+						</DialogDescription>
+					</DialogHeader>
+					<ZodForm
+						schema={nodePropertiesForm($node.value)}
+						columns={2}
+						onSubmit={pipe(saveNodeSettingsCommand, dialogClose)}
+						onError={console.error}
+						ref={ref}
+					>
+						<DialogFooter className="gap-y-2">
+							<Button onClick={close} variant="secondary">
+								Cancel
+							</Button>
+							<Button type="submit" disabled={formApi.isSubmitting}>
+								Apply
+							</Button>
+						</DialogFooter>
+					</ZodForm>
+				</DialogContent>
+			</Dialog>
+		)
 	)
 }
