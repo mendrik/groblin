@@ -28,9 +28,9 @@ export const NumberEditor = ({ node, value }: OwnProps) => {
 				key={editorKey(node)}
 				mask={Number}
 				radix=","
-				value={value?.value.figure}
+				value={`${value?.value.figure}`}
 				unmask
-				onAccept={pipe(objOf('figure'), save(node, value))}
+				onAccept={pipe(Number.parseFloat, objOf('figure'), save(node, value))}
 			/>
 		</KeyListener>
 	)
