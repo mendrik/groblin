@@ -3,6 +3,7 @@ import type { Value } from '@/gql/graphql'
 import { inputValue, stopPropagation } from '@/lib/dom-events'
 import type { TreeNode } from '@/state/tree'
 import { pipeAsync } from '@shared/utils/pipe-async'
+import { objOf } from 'ramda'
 import { editorKey, save } from './value-editor'
 
 type StringValue = Value & { value: { content: string } }
@@ -13,7 +14,7 @@ type OwnProps = {
 }
 
 export const saveInput = (node: TreeNode, value?: StringValue) =>
-	pipeAsync(inputValue, save(node, value))
+	pipeAsync(inputValue, objOf('content'), save(node, value))
 
 export const StringEditor = ({ node, value }: OwnProps) => {
 	return (

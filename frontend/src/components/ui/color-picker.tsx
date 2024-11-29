@@ -1,62 +1,68 @@
 import {
 	Dialog,
 	DialogContent,
-	DialogHeader,
+	DialogFooter,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { Slider as RxSlider } from '@/components/ui/slider'
-import { values } from 'ramda'
-import { Input } from './input'
-import { SimpleSelect } from './simple/select'
-import './color-picker.css'
-import ColorWheel from './color-wheel'
+import { setSignal } from '@/lib/utils'
+import { signal } from '@preact/signals-react'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
+import { F, T, pipe } from 'ramda'
+import { useState } from 'react'
+import PickerLib, { useColorPicker } from 'react-best-gradient-color-picker'
+import { Button } from './button'
 
-type SliderProps = {
-	component: string
-}
+type Callback = (color: number[]) => any
+const $dialogOpen = signal(false)
+const $selectColorCallback = signal<Callback>()
 
-const Slider = ({ component }: SliderProps) => {
-	return (
-		<div className="slider">
-			<div>{component}</div>
-			<RxSlider />
-			<Input className="text-xs p-2 h-6" maxLength={3} />
-		</div>
-	)
-}
-
-export default ColorWheel
-
-enum ColorModel {
-	RGB = 0,
-	HSL = 1
-}
+export const openColorPicker: (cb: Callback) => void = pipe(
+	setSignal($selectColorCallback),
+	pipe(T, setSignal($dialogOpen))
+)
+const close = pipe(F, setSignal($dialogOpen))
 
 export const ColorPicker = () => {
+	const [color, setColor] = useState('rgba(255,255,255,1)')
+	const { rgbaArr } = useColorPicker(color, setColor)
+
 	return (
-		<Dialog open={true}>
-			<DialogContent className="max-w-xs" close={close}>
-				<DialogHeader>
-					<DialogTitle>Color picker</DialogTitle>
-				</DialogHeader>
-				<div className="color-picker">
-					<div className="circle">
-						<ColorWheel />
-					</div>
-					<div className="model">
-						<div className="label">Model</div>
-						<SimpleSelect
-							options={values(ColorModel)}
-							render={toString}
-							value={ColorModel.RGB}
-							onChange={() => void 0}
-						/>
-					</div>
-					<Slider component="R" />
-					<Slider component="G" />
-					<Slider component="B" />
-					<Slider component="A" />
-				</div>
+		<Dialog open={$dialogOpen.value}>
+			<DialogContent
+				className="max-w-xs"
+				close={close}
+				closeButton={false}
+				aria-describedby={undefined}
+			>
+				<VisuallyHidden>
+					<DialogTitle>Color Picker</DialogTitle>
+				</VisuallyHidden>
+				<PickerLib
+					className="z-20"
+					value={color}
+					width={270}
+					height={170}
+					onChange={setColor}
+					hideEyeDrop
+					hideColorGuide
+					hideColorTypeBtns
+					hideGradientControls
+					hidePresets
+				/>
+				<DialogFooter className="gap-y-2">
+					<Button onClick={close} variant="secondary">
+						Cancel
+					</Button>
+					<Button
+						type="button"
+						onClick={() => {
+							$selectColorCallback.value?.(rgbaArr)
+							close()
+						}}
+					>
+						Accept
+					</Button>
+				</DialogFooter>
 			</DialogContent>
 		</Dialog>
 	)

@@ -1,16 +1,15 @@
 import KeyListener from '@/components/utils/key-listener'
 import type { Value } from '@/gql/graphql'
-import { inputValue, stopPropagation } from '@/lib/dom-events'
+import { stopPropagation } from '@/lib/dom-events'
 import type { TreeNode } from '@/state/tree'
-import { pipeAsync } from '@shared/utils/pipe-async'
+import { objOf, pipe } from 'ramda'
+import { Button } from '../button'
+import { openColorPicker } from '../color-picker'
 import { editorKey, save } from './value-editor'
 
 type ColorValue = Value & {
-	color: {
-		r: number
-		g: number
-		b: number
-		a: number
+	value: {
+		rgba: number[]
 	}
 }
 
@@ -19,17 +18,16 @@ type OwnProps = {
 	value?: ColorValue
 }
 
-export const saveInput = (node: TreeNode, value?: ColorValue) =>
-	pipeAsync(inputValue, save(node, value))
-
-export const StringEditor = ({ node, value }: OwnProps) => {
+export const ColorEditor = ({ node, value }: OwnProps) => {
 	return (
 		<KeyListener onArrowLeft={stopPropagation} onArrowRight={stopPropagation}>
-			<input
+			<Button
 				key={editorKey(node)}
-				className="h-7 bg-transparent border-none appearance-none outline-none ring-0 ml-1"
-				defaultValue={value?.value.content}
-				onBlur={saveInput(node, value)}
+				variant="ghost"
+				type="button"
+				className="h-4 w-4 p-0 rounded-sm ml-1"
+				style={{ backgroundColor: `rgba(${value?.value.rgba.join(',')})` }}
+				onClick={() => openColorPicker(pipe(objOf('rgba'), save(node, value)))}
 			/>
 		</KeyListener>
 	)
