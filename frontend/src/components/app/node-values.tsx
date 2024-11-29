@@ -1,6 +1,7 @@
 import { $openNodes } from '@/state/tree'
 import { $valueMap } from '@/state/value'
 import { ColorPicker } from '../ui/color-picker'
+import { DatePicker } from '../ui/date-picker'
 import { ListItemCreate } from '../ui/values/list-item-create'
 import { ListItemDelete } from '../ui/values/list-item-delete'
 import { ValueEditor } from '../ui/values/value-editor'
@@ -21,6 +22,7 @@ export const NodeValues = () => {
 			<ListItemCreate />
 			<ListItemDelete />
 			<ColorPicker />
+			<DatePicker />
 		</>
 	)
 }

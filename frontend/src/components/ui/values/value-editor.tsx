@@ -17,6 +17,7 @@ import {
 import type { FC, ReactNode } from 'react'
 import { BooleanEditor } from './boolean-editor'
 import { ColorEditor } from './color-editor'
+import { DateEditor } from './date-editor'
 import { ListEditor } from './list-editor'
 import { NumberEditor } from './number-editor'
 import { StringEditor } from './string-editor'
@@ -56,6 +57,9 @@ const matcher = match<Args, ReactNode>(
 	)),
 	caseOf([{ type: NodeType.Number }, _], (node, value) => (
 		<NumberEditor node={node} value={head(value ?? [])} />
+	)),
+	caseOf([{ type: NodeType.Date }, _], (node, value) => (
+		<DateEditor node={node} value={head(value ?? [])} />
 	)),
 	caseOf([_, _], node => <div className="ml-1">{node.name}</div>)
 )
