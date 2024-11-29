@@ -11,13 +11,20 @@ import { MicroIcon } from '../random/micro-icon'
 import { openListItemCreate } from './list-item-create'
 import { openListItemDelete } from './list-item-delete'
 
+type ListValue = Value & {
+	value: {
+		name: string
+	}
+}
+
 type OwnProps = {
 	node: TreeNode
-	value?: Value[]
+	value?: ListValue[]
 }
 
 export const ListEditor = ({ node, value: items = [] }: OwnProps) => {
 	const $activeItem = notNil($activeItems)[node.id]
+
 	return (
 		<div className="flex flex-row w-full gap-2 h-7 items-center">
 			<ol className="flex flex-row gap-1 items-center -ml-1 divide-x">
