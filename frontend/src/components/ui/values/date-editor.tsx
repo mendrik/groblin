@@ -6,7 +6,7 @@ import { IconCalendar } from '@tabler/icons-react'
 import { formatRelative, parseJSON } from 'date-fns'
 import { objOf, pipe, when } from 'ramda'
 import { isString } from 'ramda-adjunct'
-import { openDatePicker } from '../date-picker'
+import { openDatePicker } from '../date-picker/date-picker-dialog'
 import { MicroIcon } from '../random/micro-icon'
 import { save } from './value-editor'
 

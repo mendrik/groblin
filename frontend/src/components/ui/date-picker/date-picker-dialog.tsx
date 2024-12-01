@@ -8,16 +8,15 @@ import { setSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { F, T, pipe } from 'ramda'
-import { Button } from './button'
-import { Calendar } from './calendar'
-import 'react-day-picker/style.css'
+import { Button } from '../button'
+import { ScrollCalendar } from './scroll-calendar'
 
 type OpenProps = {
 	callback: (date: Date | undefined) => any
 	date?: Date
 }
 
-const $dialogOpen = signal(false)
+const $dialogOpen = signal(true)
 const $props = signal<OpenProps>({
 	callback: () => {},
 	date: new Date()
@@ -41,12 +40,8 @@ export const DatePicker = () => {
 				<VisuallyHidden>
 					<DialogTitle>Date picker</DialogTitle>
 				</VisuallyHidden>
-				<Calendar
-					mode="single"
-					selected={$props.value.date}
-					onSelect={$props.value.callback}
-					className="rounded-md border"
-				/>
+				<ScrollCalendar />
+
 				<DialogFooter className="gap-y-2">
 					<Button onClick={close} variant="secondary">
 						Cancel
@@ -54,6 +49,7 @@ export const DatePicker = () => {
 					<Button
 						type="button"
 						onClick={() => {
+							$props.value.callback($props.value.date)
 							close()
 						}}
 					>
