@@ -32,7 +32,7 @@ export const DatePicker = () => {
 	return (
 		<Dialog open={$dialogOpen.value}>
 			<DialogContent
-				className="max-w-xs"
+				className="max-w-sm px-4"
 				close={close}
 				closeButton={false}
 				aria-describedby={undefined}
@@ -41,7 +41,6 @@ export const DatePicker = () => {
 					<DialogTitle>Date picker</DialogTitle>
 				</VisuallyHidden>
 				<ScrollCalendar />
-
 				<DialogFooter className="gap-y-2">
 					<Button onClick={close} variant="secondary">
 						Cancel

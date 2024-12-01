@@ -44,7 +44,7 @@ const rowOrColumn = (dir: Direction, active: Element | null) =>
 		const a = active.getBoundingClientRect()
 		return dir === Direction.Right || dir === Direction.Left
 			? Math.abs(r.top - a.top) > 10
-			: Math.abs(r.left - a.left) > 10 && Math.abs(r.top - a.top) < 20
+			: Math.abs(r.left - a.left) > 10
 	})
 
 const sorters = {
@@ -72,7 +72,10 @@ const focusNext = (
 		rowOrColumn(dir, active),
 		sortFocusable(dir),
 		converge(clampIndex, [o(inc, findIndex(equals(active))), identity]),
-		(el: HTMLElement | null) => el?.focus()
+		(el: HTMLElement | null) => {
+			el?.focus()
+			el?.scrollIntoView({ block: 'center' })
+		}
 	)
 
 const FocusTravel = ({

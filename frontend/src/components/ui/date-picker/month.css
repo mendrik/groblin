@@ -1,14 +1,37 @@
 .month {
-    @apply grid grid-cols-7 justify-center items-center;
-    .weekdays {
-        display: grid;
+    @apply grid grid-cols-7 justify-center items-center snap-proximity snap-center py-3;
+
+    .headline {
+        @apply text-center text-lg border-b border-muted mb-2;
         grid-column: 1 / -1;
-        grid-template-columns: subgrid;
+        
+    }
+
+    .weekdays {
+        @apply grid text-muted-foreground text-xs grid-cols-subgrid;
+        grid-column: 1 / -1;
+        
+        > li {
+            @apply items-center justify-center flex py-2;
+        }
     }
     
     .days {
         display: grid;
         grid-column: 1 / -1;
         grid-template-columns: subgrid;
+
+        > li {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            aspect-ratio: 1.2;
+
+            button {
+                @apply aspect-square h-full rounded-full;
+                @apply hover:bg-secondary p-[2px] bg-clip-content;
+                
+            }
+        }
     }
 }

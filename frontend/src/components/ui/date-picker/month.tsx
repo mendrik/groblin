@@ -6,7 +6,7 @@ import {
 	startOfWeek
 } from 'date-fns'
 import './month.css'
-import { take } from 'ramda'
+import { cn } from '@/lib/utils'
 
 type OwnProps = {
 	month: number
@@ -18,20 +18,22 @@ export const Month = ({ month, year }: OwnProps) => {
 	const from = startOfWeek(first, { weekStartsOn: 1 })
 	const until = lastDayOfWeek(lastDayOfMonth(first), { weekStartsOn: 1 })
 	const dates = eachDayOfInterval({ start: from, end: until })
-	const firstWeek = take(7, dates)
 
 	return (
 		<div className="month">
-			<ol className="weekdays">
-				{firstWeek.map(date => (
-					<li key={date.getTime()}>{formatDate(date, 'EEEEEE')}</li>
-				))}
-			</ol>
+			<h2 className="headline">{formatDate(first, 'MMMM')}</h2>
 			<ol className="days">
 				{dates.map(date => (
-					<button type="button" key={date.getTime()}>
-						{date.getDate()}
-					</button>
+					<li key={date.getTime()}>
+						<button
+							type="button"
+							className={cn({
+								'text-muted': date.getMonth() !== month
+							})}
+						>
+							{date.getDate()}
+						</button>
+					</li>
 				))}
 			</ol>
 		</div>

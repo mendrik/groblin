@@ -1,45 +1,52 @@
-import * as React from 'react'
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area'
+import * as React from 'react'
 import './scroll-fade.css'
 
 import { cn } from '@/lib/utils'
 
-const height = 50
-
-const setScrollFade = (e: React.UIEvent<HTMLDivElement>) => {
-	const scroll = e.target as HTMLDivElement
-	const scrollBottom = Math.abs(
-		scroll.scrollTop + scroll.clientHeight - scroll.scrollHeight
-	)
-	const topOpacity = 1 - Math.max(height - scroll.scrollTop, 0) / height
-	const bottomOpacity = 1 - Math.max(height - scrollBottom, 0) / height
-	const style = scroll.parentElement?.style
-	style?.setProperty('--top-opacity', topOpacity.toString())
-	style?.setProperty('--bottom-opacity', bottomOpacity.toString())
-}
+const setScrollFade =
+	(height: number) => (e: React.UIEvent<HTMLDivElement>) => {
+		const scroll = e.target as HTMLDivElement
+		const scrollBottom = Math.abs(
+			scroll.scrollTop + scroll.clientHeight - scroll.scrollHeight
+		)
+		const topOpacity = 1 - Math.max(height - scroll.scrollTop, 0) / height
+		const bottomOpacity = 1 - Math.max(height - scrollBottom, 0) / height
+		const style = scroll.parentElement?.style
+		style?.setProperty('--top-opacity', topOpacity.toString())
+		style?.setProperty('--bottom-opacity', bottomOpacity.toString())
+	}
 
 const ScrollArea = React.forwardRef<
 	React.ElementRef<typeof ScrollAreaPrimitive.Root>,
-	React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root>
->(({ className, children, ...props }, ref) => (
-	<ScrollAreaPrimitive.Root
-		ref={ref}
-		className={cn(
-			'relative overflow-hidden scroll-fade min-h-[-webkit-fill-available]',
-			className
-		)}
-		{...props}
-	>
-		<ScrollAreaPrimitive.Viewport
-			className="h-full w-full rounded-[inherit]"
-			onScroll={setScrollFade}
+	React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> & {
+		fadeHeight?: number
+		viewPortClassName?: string
+	}
+>(
+	(
+		{ className, children, viewPortClassName, fadeHeight = 50, ...props },
+		ref
+	) => (
+		<ScrollAreaPrimitive.Root
+			ref={ref}
+			className={cn(
+				'relative overflow-hidden scroll-fade min-h-[-webkit-fill-available]',
+				className
+			)}
+			{...props}
 		>
-			{children}
-		</ScrollAreaPrimitive.Viewport>
-		<ScrollBar />
-		<ScrollAreaPrimitive.Corner />
-	</ScrollAreaPrimitive.Root>
-))
+			<ScrollAreaPrimitive.Viewport
+				className={cn('h-full w-full rounded-[inherit]', viewPortClassName)}
+				onScroll={setScrollFade(fadeHeight)}
+			>
+				{children}
+			</ScrollAreaPrimitive.Viewport>
+			<ScrollBar />
+			<ScrollAreaPrimitive.Corner />
+		</ScrollAreaPrimitive.Root>
+	)
+)
 ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName
 
 const ScrollBar = React.forwardRef<

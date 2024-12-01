@@ -22,6 +22,7 @@ import {
 	propEq,
 	propOr,
 	sortBy,
+	unless,
 	values
 } from 'ramda'
 import { $project } from './project'
@@ -50,7 +51,7 @@ const fetchValues = () => {
 export const subscribeToValues = () =>
 	Subscribe.ValuesUpdated({ projectId: notNil($project, 'id') }, fetchValues)
 
-$activeItems.subscribe(fetchValues)
+$activeItems.subscribe(unless(isEmpty, fetchValues))
 
 export const activateListItem = (item: Value) => {
 	const node = asNode(item.node_id)
