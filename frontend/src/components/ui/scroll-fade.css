@@ -3,19 +3,23 @@
     --bottom-opacity: 1;
     @apply relative;
     @apply after:opacity-[--top-opacity];
-    @apply after:left-0 after:top-0 after:right-2 after:h-[150px];
+    @apply after:left-0 after:top-0 after:right-2;
     @apply after:pointer-events-none after:absolute after:content-[''];
     
     @apply before:opacity-[--bottom-opacity];
-    @apply before:left-0 before:bottom-0 before:right-2 before:h-[150px];
+    @apply before:left-0 before:bottom-0 before:right-2;
     @apply before:pointer-events-none before:absolute before:content-[''];
+
+    &:after, &:before {
+        height: var(--fade-height);
+    }
 
     @media (min-width: 480px) {
         &:after {
             z-index: 1;
             pointer-events: none;
             background-image: linear-gradient(to bottom, 
-                hsla(var(--background) / 1) 32px,
+                hsla(var(--background) / 1) 0,
                 hsla(var(--background) / 0) 100%
             );
         }
@@ -24,7 +28,7 @@
             z-index: 1;
             pointer-events: none;
             background-image: linear-gradient(to top, 
-                hsla(var(--background) / 1) 32px,
+                hsla(var(--background) / 1) 0,
                 hsla(var(--background) / 0) 100%
             );
         }

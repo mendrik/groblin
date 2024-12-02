@@ -20,7 +20,7 @@ export const Month = ({ month, year }: OwnProps) => {
 	const dates = eachDayOfInterval({ start: from, end: until })
 
 	return (
-		<div className="month">
+		<div className="month min-w-full">
 			<h2 className="headline">{formatDate(first, 'MMMM')}</h2>
 			<ol className="days">
 				{dates.map(date => (

@@ -15,6 +15,7 @@ const setScrollFade =
 		const style = scroll.parentElement?.style
 		style?.setProperty('--top-opacity', topOpacity.toString())
 		style?.setProperty('--bottom-opacity', bottomOpacity.toString())
+		style?.setProperty('--fade-height', `${height}px`)
 	}
 
 const ScrollArea = React.forwardRef<

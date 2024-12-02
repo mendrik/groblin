@@ -32,7 +32,7 @@ export const DatePicker = () => {
 	return (
 		<Dialog open={$dialogOpen.value}>
 			<DialogContent
-				className="max-w-sm px-4"
+				className="max-w-md px-4"
 				close={close}
 				closeButton={false}
 				aria-describedby={undefined}

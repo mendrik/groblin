@@ -6,11 +6,7 @@ import { Month } from './month'
 export const ScrollCalendar = () => {
 	return (
 		<div className="flex flex-row w-full gap-2">
-			<ScrollArea
-				className="pr-4 max-h-[450px] flex-1"
-				viewPortClassName="snap-y [&>div]:contents"
-				fadeHeight={20}
-			>
+			<ScrollArea viewPortClassName="h-[270px] overflow-hidden flex flex-row">
 				<FocusTravel autoFocus={false}>
 					{range(0, 12).map(month => (
 						<Month key={month} month={month} year={2024} />
@@ -18,10 +14,10 @@ export const ScrollCalendar = () => {
 				</FocusTravel>
 			</ScrollArea>
 			<ScrollArea
-				className="max-w-fit px-4 max-h-[450px] border-muted-foreground border-l"
-				fadeHeight={100}
+				className="max-w-fit px-4 max-h-[200px] border-muted-foreground border-l"
+				fadeHeight={50}
 			>
-				<ol className="flex flex-col gap-6">
+				<ol className="flex flex-col gap-2">
 					{range(1976, 2060).map(year => (
 						<li key={year}>{year}</li>
 					))}

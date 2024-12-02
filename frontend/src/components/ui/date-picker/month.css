@@ -1,5 +1,5 @@
 .month {
-    @apply grid grid-cols-7 justify-center items-center snap-proximity snap-center py-3;
+    @apply grid grid-cols-7 justify-center items-center snap-mandatory snap-center py-3;
 
     .headline {
         @apply text-center text-lg border-b border-muted mb-2;
