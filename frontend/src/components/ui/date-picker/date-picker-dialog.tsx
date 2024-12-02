@@ -9,8 +9,8 @@ import { signal } from '@preact/signals-react'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { formatDate } from 'date-fns'
 import { F, T, pipe, range } from 'ramda'
-import { IMaskMixin } from 'react-imask'
 import { Button } from '../button'
+import { MaskedDateInput } from './masked-date-input'
 import { ScrollCalendar } from './scroll-calendar'
 
 type OpenProps = {
@@ -29,14 +29,6 @@ export const openDatePicker: (props: OpenProps) => void = pipe(
 	pipe(T, setSignal($dialogOpen))
 )
 const close = pipe(F, setSignal($dialogOpen))
-
-const MaskedStyledInput = IMaskMixin(({ inputRef, ...props }) => (
-	<input
-		ref={inputRef as any}
-		className="w-full bg-transparent border border-border appearance-none rounded-sm px-2 py-1"
-		{...props}
-	/>
-))
 
 export const DatePicker = () => {
 	return (
@@ -58,10 +50,8 @@ export const DatePicker = () => {
 					))}
 				</ol>
 				<ScrollCalendar />
-				<div className="flex flex-row w-full items-center py-4 border-t border-border">
-					<MaskedStyledInput type="text" />
-				</div>
-				<DialogFooter className="gap-y-2">
+				<DialogFooter className="flex flex-row gap-y-2 pt-4 border-t border-border">
+					<MaskedDateInput className="mr-auto" />
 					<Button onClick={close} variant="secondary">
 						Cancel
 					</Button>
