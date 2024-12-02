@@ -22,6 +22,11 @@ export const Month = ({ month, year }: OwnProps) => {
 	return (
 		<div className="month min-w-full">
 			<h2 className="headline">{formatDate(first, 'MMMM')}</h2>
+			<ol className="weekdays">
+				{dates.slice(0, 7).map(date => (
+					<li key={date.getTime()}>{formatDate(date, 'EEE')}</li>
+				))}
+			</ol>
 			<ol className="days">
 				{dates.map(date => (
 					<li key={date.getTime()}>

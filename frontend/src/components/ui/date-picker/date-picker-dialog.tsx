@@ -7,7 +7,9 @@ import {
 import { setSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { F, T, pipe } from 'ramda'
+import { formatDate } from 'date-fns'
+import { F, T, pipe, range } from 'ramda'
+import { IMaskMixin } from 'react-imask'
 import { Button } from '../button'
 import { ScrollCalendar } from './scroll-calendar'
 
@@ -28,11 +30,19 @@ export const openDatePicker: (props: OpenProps) => void = pipe(
 )
 const close = pipe(F, setSignal($dialogOpen))
 
+const MaskedStyledInput = IMaskMixin(({ inputRef, ...props }) => (
+	<input
+		ref={inputRef as any}
+		className="w-full bg-transparent border border-border appearance-none rounded-sm px-2 py-1"
+		{...props}
+	/>
+))
+
 export const DatePicker = () => {
 	return (
 		<Dialog open={$dialogOpen.value}>
 			<DialogContent
-				className="max-w-md px-4"
+				className="max-w-sm px-4 pt-4 gap-0"
 				close={close}
 				closeButton={false}
 				aria-describedby={undefined}
@@ -40,7 +50,17 @@ export const DatePicker = () => {
 				<VisuallyHidden>
 					<DialogTitle>Date picker</DialogTitle>
 				</VisuallyHidden>
+				<ol className="flex flex-row w-full justify-between content-center pb-4 text-muted-foreground border-b border-border">
+					{range(0, 12).map(month => (
+						<li key={month} className="text-xs">
+							{formatDate(new Date(2024, month, 1), 'MMM')}
+						</li>
+					))}
+				</ol>
 				<ScrollCalendar />
+				<div className="flex flex-row w-full items-center py-4 border-t border-border">
+					<MaskedStyledInput type="text" />
+				</div>
 				<DialogFooter className="gap-y-2">
 					<Button onClick={close} variant="secondary">
 						Cancel

@@ -23,18 +23,23 @@ const ScrollArea = React.forwardRef<
 	React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> & {
 		fadeHeight?: number
 		viewPortClassName?: string
+		orientation?: 'vertical' | 'horizontal'
 	}
 >(
 	(
-		{ className, children, viewPortClassName, fadeHeight = 50, ...props },
+		{
+			className,
+			children,
+			viewPortClassName,
+			orientation = 'vertical',
+			fadeHeight = 50,
+			...props
+		},
 		ref
 	) => (
 		<ScrollAreaPrimitive.Root
 			ref={ref}
-			className={cn(
-				'relative overflow-hidden scroll-fade min-h-[-webkit-fill-available]',
-				className
-			)}
+			className={cn('relative overflow-hidden scroll-fade', className)}
 			{...props}
 		>
 			<ScrollAreaPrimitive.Viewport
@@ -43,7 +48,7 @@ const ScrollArea = React.forwardRef<
 			>
 				{children}
 			</ScrollAreaPrimitive.Viewport>
-			<ScrollBar />
+			<ScrollBar orientation={orientation} />
 			<ScrollAreaPrimitive.Corner />
 		</ScrollAreaPrimitive.Root>
 	)

@@ -43,10 +43,10 @@
     --muted: 225 10% 25%;
     --muted-foreground: 224 5% 40%;
     --accent: 225 10% 15%;
-    --accent-foreground: 224 5% 90%;
+    --accent-foreground: 224 5% 80%;
     --destructive: 0 50% 50%;
     --destructive-foreground: 224 5% 90%;
-    --border: 224 17% 17%;
+    --border: 224 17% 20%;
     --link: 200 100% 50%;
     --input: 224 20% 50%;
     --ring: 224 0% 96%;
