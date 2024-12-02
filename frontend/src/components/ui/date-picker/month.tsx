@@ -20,7 +20,7 @@ export const Month = ({ month, year }: OwnProps) => {
 	const dates = eachDayOfInterval({ start: from, end: until })
 
 	return (
-		<div className="month min-w-full">
+		<div className="month min-w-full" id={`picker-month-${month}`}>
 			<h2 className="headline">{formatDate(first, 'MMMM')}</h2>
 			<ol className="weekdays">
 				{dates.slice(0, 7).map(date => (
@@ -32,6 +32,7 @@ export const Month = ({ month, year }: OwnProps) => {
 					<li key={date.getTime()}>
 						<button
 							type="button"
+							disabled={date.getMonth() !== month}
 							className={cn({
 								'text-muted': date.getMonth() !== month
 							})}

@@ -4,7 +4,7 @@ import {
 	DialogFooter,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { setSignal } from '@/lib/utils'
+import { cn, setSignal } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { formatDate } from 'date-fns'
@@ -15,11 +15,11 @@ import { ScrollCalendar } from './scroll-calendar'
 
 type OpenProps = {
 	callback: (date: Date | undefined) => any
-	date?: Date
+	date: Date
 }
 
 const $dialogOpen = signal(true)
-const $props = signal<OpenProps>({
+export const $props = signal<OpenProps>({
 	callback: () => {},
 	date: new Date()
 })
@@ -42,16 +42,34 @@ export const DatePicker = () => {
 				<VisuallyHidden>
 					<DialogTitle>Date picker</DialogTitle>
 				</VisuallyHidden>
-				<ol className="flex flex-row w-full justify-between content-center pb-4 text-muted-foreground border-b border-border">
+				<ol
+					className={cn(
+						'flex flex-row w-full justify-between content-center',
+						'text-muted-foreground border-b border-border pb-4'
+					)}
+				>
 					{range(0, 12).map(month => (
 						<li key={month} className="text-xs">
-							{formatDate(new Date(2024, month, 1), 'MMM')}
+							<button
+								type="button"
+								className="hover:text-foreground"
+								onClick={() =>
+									document
+										.getElementById(`picker-month-${month}`)
+										?.scrollIntoView({
+											behavior: 'smooth',
+											block: 'center'
+										})
+								}
+							>
+								{formatDate(new Date(2024, month, 1), 'MMM')}
+							</button>
 						</li>
 					))}
 				</ol>
-				<ScrollCalendar />
+				<ScrollCalendar date={$props.value.date} />
 				<DialogFooter className="flex flex-row gap-y-2 pt-4 border-t border-border">
-					<MaskedDateInput className="mr-auto" />
+					<MaskedDateInput className="mr-auto" date={$props.value.date} />
 					<Button onClick={close} variant="secondary">
 						Cancel
 					</Button>

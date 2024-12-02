@@ -20,17 +20,19 @@
         display: grid;
         grid-column: 1 / -1;
         grid-template-columns: subgrid;
+        user-select: none;
 
         > li {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            @apply items-center justify-center flex p-[2px];
             aspect-ratio: 1.2;
 
             button {
                 @apply aspect-square h-full rounded-full;
-                @apply hover:bg-secondary p-[2px] bg-clip-content;
-                
+                @apply p-[1px] bg-clip-content;
+
+                &:not(:disabled) {
+                    @apply hover:bg-secondary;
+                }
             }
         }
     }
