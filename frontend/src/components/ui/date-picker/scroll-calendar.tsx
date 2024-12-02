@@ -1,4 +1,4 @@
-ate import FocusTravel from '@/components/utils/focus-travel'
+import FocusTravel from '@/components/utils/focus-travel'
 import { range } from 'ramda'
 import { useLayoutEffect, useRef } from 'react'
 import { ScrollArea } from '../scroll-area'
