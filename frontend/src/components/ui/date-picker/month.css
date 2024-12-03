@@ -1,15 +1,17 @@
 .month {
     @apply grid grid-cols-7 items-center snap-mandatory snap-center;
 
+    .header {
+        @apply flex justify-between items-center w-full col-span-full px-1;
+    }
+
     .headline {
-        @apply text-muted-foreground text-center text-lg mb-2 pt-4;
-        grid-column: 1 / -1;
+        @apply text-muted-foreground text-center text-lg mb-2 pt-4 col-span-full ;
         
     }
 
     .weekdays {
-        @apply grid text-muted-foreground text-xs grid-cols-subgrid;
-        grid-column: 1 / -1;
+        @apply grid text-muted-foreground text-xs grid-cols-subgrid col-span-full ;
         
         > li {
             @apply items-center justify-center flex py-2;
@@ -17,10 +19,7 @@
     }
     
     .days {
-        display: grid;
-        grid-column: 1 / -1;
-        grid-template-columns: subgrid;
-        user-select: none;
+        @apply grid col-span-full grid-cols-subgrid select-none;
 
         > li {
             @apply flex justify-center;

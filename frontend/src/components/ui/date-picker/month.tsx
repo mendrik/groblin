@@ -8,8 +8,10 @@ import {
 } from 'date-fns'
 import './month.css'
 import { cn } from '@/lib/utils'
+import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 import { forwardRef } from 'react'
-import { $viewDate, updateDay } from './date-picker-dialog'
+import { Button } from '../button'
+import { $viewDate, updateDay, updateMonth } from './date-picker-dialog'
 
 type OwnProps = {
 	month: number
@@ -26,7 +28,23 @@ export const Month = forwardRef<HTMLDivElement, OwnProps>(
 
 		return (
 			<div className="month min-w-full" id={`picker-month-${month}`} ref={ref}>
-				<h2 className="headline">{formatDate(first, 'LLLL')}</h2>
+				<div className="header">
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={() => updateMonth(month - 1)}
+					>
+						<IconChevronLeft stroke={1.5} />
+					</Button>
+					<h2 className="headline">{formatDate(first, 'LLLL')}</h2>
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={() => updateMonth(month + 1)}
+					>
+						<IconChevronRight stroke={1.5} />
+					</Button>
+				</div>
 				<ol className="weekdays">
 					{dates.slice(0, 7).map(date => (
 						<li key={date.getDay()}>{formatDate(date, 'EEEEEE')}</li>
