@@ -44,7 +44,6 @@ describe('notNil', () => {
 		const $test = signal({ date: new Date(2023, 5, 1) })
 		const updateDate = updateSignalFn($test, setMonth)
 		updateDate(6)
-		console.log($test.value)
 		expect($test.value.date.getMonth()).toBe(6)
 	})
 })

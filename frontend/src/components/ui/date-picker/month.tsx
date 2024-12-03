@@ -18,17 +18,15 @@ type OwnProps = {
 
 export const Month = forwardRef<HTMLDivElement, OwnProps>(
 	({ month, year }, ref) => {
-		const first = new Date(year, month, 1)
+		const viewDate = $viewDate.value
+		const first = new Date(viewDate.getFullYear(), month, 1)
 		const from = startOfWeek(first, { weekStartsOn: 1 })
 		const until = lastDayOfWeek(lastDayOfMonth(first), { weekStartsOn: 1 })
 		const dates = eachDayOfInterval({ start: from, end: until })
-		const viewDate = $viewDate.value
 
 		return (
 			<div className="month min-w-full" id={`picker-month-${month}`} ref={ref}>
-				<h2 className="headline">
-					{formatDate(first, 'MMMM') + formatDate(viewDate, 'd.M.y')}
-				</h2>
+				<h2 className="headline">{formatDate(first, 'MMMM')}</h2>
 				<ol className="weekdays">
 					{dates.slice(0, 7).map(date => (
 						<li key={date.getDay()}>{formatDate(date, 'EEE')}</li>

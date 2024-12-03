@@ -23,18 +23,16 @@ export const updateSignalFn = curry(
 		signal: Signal<T>,
 		fn: (arg: INP, cur: T) => T
 	): ((a: INP) => unknown) =>
-		(arg: INP) => {
-			console.log('updateSignalFn', arg)
-			signal.value = fn(arg, signal.value)
-		}
+		(arg: INP) =>
+			(signal.value = fn(arg, signal.value))
 )
 
 export const updateSignal: {
 	<T>(signal: Signal<T>, fn: Fn<T, T>): void
 	<T>(signal: Signal<T>): <T2 extends T>(fn: Fn<T2, T2>) => void
-} = curry(<T>(signal: Signal<T>, fn: Fn<T, T>) => {
-	signal.value = fn(signal.value)
-})
+} = curry(
+	<T>(signal: Signal<T>, fn: Fn<T, T>) => (signal.value = fn(signal.value))
+)
 
 export const notNil: {
 	<T>(signal: Signal<T>): NonNullable<T>

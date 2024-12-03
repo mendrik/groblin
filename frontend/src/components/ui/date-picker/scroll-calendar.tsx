@@ -38,7 +38,7 @@ export const ScrollCalendar = () => {
 			</ScrollArea>
 			<ScrollArea className="shrink-0 border-border border-l" fadeHeight={100}>
 				<ol className="flex flex-col gap-2 px-4">
-					{range(1976, 2060).map(year => (
+					{range(1930, 2060).map(year => (
 						<li key={year}>
 							<button
 								type="button"
