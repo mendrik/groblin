@@ -1,10 +1,10 @@
 import { cn } from '@/lib/utils'
 import { parse } from 'date-fns'
-import { formatDate } from 'date-fns'
+import { format } from 'date-fns/fp'
 import type { HTMLAttributes } from 'react'
 import { IMask, IMaskMixin } from 'react-imask'
 
-const format = 'd.M.yyyy'
+const dateFormat = 'dd.MM.yyyy'
 
 const MaskedStyledInput = IMaskMixin(({ inputRef, className, ...props }) => (
 	<input
@@ -20,22 +20,24 @@ const MaskedStyledInput = IMaskMixin(({ inputRef, className, ...props }) => (
 type OwnProps = { date: Date } & HTMLAttributes<HTMLInputElement>
 
 export const MaskedDateInput = ({ date, className }: OwnProps) => {
+	console.log(format(dateFormat, date))
 	return (
 		<MaskedStyledInput
 			type="text"
+			key={date.getTime()}
 			mask={Date}
 			lazy={false}
-			pattern={format}
+			pattern={dateFormat}
 			placeholderChar="_"
-			value={formatDate(date, format)}
-			placeholder={format}
+			defaultValue={format(dateFormat, date)}
+			placeholder={dateFormat}
 			className={className}
-			format={(d: Date) => formatDate(d, format)}
-			parse={(date: string) => parse(date, format, new Date())}
+			format={format(dateFormat)}
+			parse={(d: string) => parse(d, dateFormat, new Date())}
 			blocks={{
 				yyyy: { mask: IMask.MaskedRange, from: 0, to: 2100 },
-				M: { mask: IMask.MaskedRange, from: 1, to: 12 },
-				d: { mask: IMask.MaskedRange, from: 1, to: 31 }
+				MM: { mask: IMask.MaskedRange, from: 1, to: 12 },
+				dd: { mask: IMask.MaskedRange, from: 1, to: 31 }
 			}}
 		/>
 	)

@@ -22,9 +22,11 @@ export const updateSignalFn = curry(
 	<T, INP>(
 		signal: Signal<T>,
 		fn: (arg: INP, cur: T) => T
-	): ((a: INP) => unknown) => {
-		return (arg: INP) => (signal.value = fn(arg, signal.value))
-	}
+	): ((a: INP) => unknown) =>
+		(arg: INP) => {
+			console.log('updateSignalFn', arg)
+			signal.value = fn(arg, signal.value)
+		}
 )
 
 export const updateSignal: {

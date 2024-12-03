@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 import { range } from 'ramda'
 import { useLayoutEffect, useRef } from 'react'
 import { ScrollArea } from '../scroll-area'
-import { updateYear } from './date-picker-dialog'
+import { $viewDate, updateYear } from './date-picker-dialog'
 import { Month } from './month'
 
 type OwnProps = {
@@ -12,9 +12,13 @@ type OwnProps = {
 
 export const ScrollCalendar = ({ date }: OwnProps) => {
 	const currentYear = useRef<HTMLButtonElement>(null)
+	const currentMonth = useRef<HTMLDivElement>(null)
 
 	useLayoutEffect(() => {
-		currentYear.current?.scrollIntoView({ block: 'center' })
+		if ($viewDate.value) {
+			currentYear.current?.scrollIntoView({ block: 'center' })
+			currentMonth.current?.scrollIntoView({ block: 'center' })
+		}
 	})
 
 	return (
@@ -27,7 +31,12 @@ export const ScrollCalendar = ({ date }: OwnProps) => {
 			>
 				<FocusTravel autoFocus={false}>
 					{range(0, 12).map(month => (
-						<Month key={month} month={month} year={2024} />
+						<Month
+							key={month}
+							month={month}
+							year={2024}
+							ref={month === date.getMonth() ? currentMonth : undefined}
+						/>
 					))}
 				</FocusTravel>
 			</ScrollArea>
