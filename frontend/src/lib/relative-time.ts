@@ -1,10 +1,11 @@
-import { T as _, curry, flip, lt } from 'ramda'
+import { T as _, both, curry, flip, lt } from 'ramda'
 import { caseOf, match } from './match'
 
 const second = 1000
 const minute = 60 * 1000
 const hour = minute * 60
 const day = hour * 24
+const week = day * 7
 const month = day * 30
 const year = day * 365
 
@@ -15,6 +16,8 @@ type Options = {
 }
 
 const lessThan = flip(lt)
+const divisbleBy = (val: number) => (num: number) =>
+	Math.round(num / day) % val === 0
 
 export const relativeTime = curry(
 	(
@@ -43,6 +46,9 @@ export const relativeTime = curry(
 			),
 			caseOf([lessThan(day)], () =>
 				intl.format(sign * Math.round(elapsed / hour), 'hour')
+			),
+			caseOf([both(lessThan(month), divisbleBy(7))], () =>
+				intl.format(sign * Math.round(elapsed / week), 'week')
 			),
 			caseOf([lessThan(month)], () =>
 				intl.format(sign * Math.round(elapsed / day), 'day')
