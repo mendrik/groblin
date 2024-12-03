@@ -9,7 +9,7 @@ import { LoggedIn } from './routing/logged-in'
 import { LoggedOut } from './routing/logged-out'
 import './state/project'
 import { setDefaultOptions } from 'date-fns'
-import { enGB } from 'date-fns/locale'
+import { fi } from 'date-fns/locale'
 import { loadProject } from './state/project'
 import { $user } from './state/user'
 
@@ -48,14 +48,8 @@ const formatRelativeLocale = {
 	other: 'dd.MM.yyyy'
 }
 
-const locale = {
-	...enGB,
-	formatRelative: (token: keyof typeof formatRelativeLocale) =>
-		formatRelativeLocale[token]
-}
-
 setDefaultOptions({
-	locale,
+	locale: fi,
 	weekStartsOn: 1
 })
 
