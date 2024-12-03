@@ -32,6 +32,7 @@ export const Month = forwardRef<HTMLDivElement, OwnProps>(
 					<Button
 						variant="ghost"
 						size="icon"
+						className="mr-auto"
 						onClick={() => updateMonth(month - 1)}
 					>
 						<IconChevronLeft stroke={1.5} />
@@ -40,6 +41,7 @@ export const Month = forwardRef<HTMLDivElement, OwnProps>(
 					<Button
 						variant="ghost"
 						size="icon"
+						className="ml-auto"
 						onClick={() => updateMonth(month + 1)}
 					>
 						<IconChevronRight stroke={1.5} />

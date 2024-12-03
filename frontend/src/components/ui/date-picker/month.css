@@ -26,7 +26,7 @@
             aspect-ratio: 1.2;
 
             button {
-                @apply aspect-square h-full rounded-full;
+                @apply aspect-square h-full rounded-full pr-[2px];
                 @apply flex justify-center items-center bg-clip-content;
                 letter-spacing: -.5px;
 
