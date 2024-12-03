@@ -1,8 +1,9 @@
 import FocusTravel from '@/components/utils/focus-travel'
+import { cn } from '@/lib/utils'
 import { range } from 'ramda'
 import { useLayoutEffect, useRef } from 'react'
 import { ScrollArea } from '../scroll-area'
-import { $props } from './date-picker-dialog'
+import { updateYear } from './date-picker-dialog'
 import { Month } from './month'
 
 type OwnProps = {
@@ -37,7 +38,12 @@ export const ScrollCalendar = ({ date }: OwnProps) => {
 							<button
 								type="button"
 								ref={year === date.getFullYear() ? currentYear : undefined}
-								onClick={() => $props.value.date.setFullYear(year)}
+								onClick={() => updateYear(year)}
+								className={cn(
+									year === date.getFullYear()
+										? 'text-foreground'
+										: 'text-muted-foreground'
+								)}
 							>
 								{year}
 							</button>

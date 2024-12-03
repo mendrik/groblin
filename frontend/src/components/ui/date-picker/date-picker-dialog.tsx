@@ -4,11 +4,12 @@ import {
 	DialogFooter,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { cn, setSignal } from '@/lib/utils'
+import { cn, setSignal, updateSignalFn } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { formatDate } from 'date-fns'
-import { F, T, pipe, range } from 'ramda'
+import { setDay, setMonth, setYear } from 'date-fns/fp'
+import { F, pipe, range } from 'ramda'
 import { Button } from '../button'
 import { MaskedDateInput } from './masked-date-input'
 import { ScrollCalendar } from './scroll-calendar'
@@ -19,16 +20,18 @@ type OpenProps = {
 }
 
 const $dialogOpen = signal(true)
-export const $props = signal<OpenProps>({
-	callback: () => {},
-	date: new Date()
-})
+export const $viewDate = signal<Date>(new Date())
+export const $callback = signal<(date: Date) => unknown>(() => void 0)
 
-export const openDatePicker: (props: OpenProps) => void = pipe(
-	setSignal($props),
-	pipe(T, setSignal($dialogOpen))
-)
+export const openDatePicker = (props: OpenProps) => {
+	setSignal($viewDate, props.date)
+	setSignal($callback, props.callback)
+	setSignal($dialogOpen, true)
+}
 const close = pipe(F, setSignal($dialogOpen))
+export const updateMonth = updateSignalFn($viewDate, setMonth)
+export const updateYear = updateSignalFn($viewDate, setYear)
+export const updateDay = updateSignalFn($viewDate, setDay)
 
 export const DatePicker = () => {
 	return (
@@ -53,30 +56,23 @@ export const DatePicker = () => {
 							<button
 								type="button"
 								className="hover:text-foreground"
-								onClick={() =>
-									document
-										.getElementById(`picker-month-${month}`)
-										?.scrollIntoView({
-											behavior: 'smooth',
-											block: 'center'
-										})
-								}
+								onClick={() => updateMonth(month)}
 							>
 								{formatDate(new Date(2024, month, 1), 'MMM')}
 							</button>
 						</li>
 					))}
 				</ol>
-				<ScrollCalendar date={$props.value.date} />
+				<ScrollCalendar date={$viewDate.value} />
 				<DialogFooter className="flex flex-row gap-y-2 pt-4 border-t border-border">
-					<MaskedDateInput className="mr-auto" date={$props.value.date} />
+					<MaskedDateInput className="mr-auto" date={$viewDate.value} />
 					<Button onClick={close} variant="secondary">
 						Cancel
 					</Button>
 					<Button
 						type="button"
 						onClick={() => {
-							$props.value.callback($props.value.date)
+							$callback.value($viewDate.value)
 							close()
 						}}
 					>

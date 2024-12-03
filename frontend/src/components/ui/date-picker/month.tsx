@@ -7,6 +7,7 @@ import {
 } from 'date-fns'
 import './month.css'
 import { cn } from '@/lib/utils'
+import { updateDay } from './date-picker-dialog'
 
 type OwnProps = {
 	month: number
@@ -37,7 +38,9 @@ export const Month = ({ month, year }: OwnProps) => {
 								'text-muted': date.getMonth() !== month
 							})}
 						>
-							{date.getDate()}
+							<button type="button" onClick={() => updateDay(date.getDay())}>
+								{date.getDate()}
+							</button>
 						</button>
 					</li>
 				))}
