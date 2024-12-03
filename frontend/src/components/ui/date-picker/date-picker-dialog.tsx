@@ -8,7 +8,7 @@ import { cn, setSignal, updateSignalFn } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { formatDate } from 'date-fns'
-import { setDay, setMonth, setYear } from 'date-fns/fp'
+import { setDate, setMonth, setYear } from 'date-fns/fp'
 import { F, pipe, range } from 'ramda'
 import { Button } from '../button'
 import { MaskedDateInput } from './masked-date-input'
@@ -31,7 +31,7 @@ export const openDatePicker = (props: OpenProps) => {
 const close = pipe(F, setSignal($dialogOpen))
 export const updateMonth = updateSignalFn($viewDate, setMonth)
 export const updateYear = updateSignalFn($viewDate, setYear)
-export const updateDay = updateSignalFn($viewDate, setDay)
+export const updateDay = updateSignalFn($viewDate, setDate)
 
 export const DatePicker = () => {
 	return (

@@ -1,8 +1,10 @@
-import { cn } from '@/lib/utils'
+import { cn, setSignal } from '@/lib/utils'
 import { parse } from 'date-fns'
 import { format } from 'date-fns/fp'
+import { isNil, unless } from 'ramda'
 import type { HTMLAttributes } from 'react'
 import { IMask, IMaskMixin } from 'react-imask'
+import { $viewDate } from './date-picker-dialog'
 
 const dateFormat = 'dd.MM.yyyy'
 
@@ -20,12 +22,12 @@ const MaskedStyledInput = IMaskMixin(({ inputRef, className, ...props }) => (
 type OwnProps = { date: Date } & HTMLAttributes<HTMLInputElement>
 
 export const MaskedDateInput = ({ date, className }: OwnProps) => {
-	console.log(format(dateFormat, date))
 	return (
 		<MaskedStyledInput
 			type="text"
 			key={date.getTime()}
 			mask={Date}
+			unmask="typed"
 			lazy={false}
 			pattern={dateFormat}
 			placeholderChar="_"
@@ -33,6 +35,7 @@ export const MaskedDateInput = ({ date, className }: OwnProps) => {
 			placeholder={dateFormat}
 			className={className}
 			format={format(dateFormat)}
+			onAccept={unless(isNil, setSignal($viewDate))}
 			parse={(d: string) => parse(d, dateFormat, new Date())}
 			blocks={{
 				yyyy: { mask: IMask.MaskedRange, from: 0, to: 2100 },

@@ -1,6 +1,7 @@
 import {
 	eachDayOfInterval,
 	formatDate,
+	isSameDay,
 	lastDayOfMonth,
 	lastDayOfWeek,
 	startOfWeek
@@ -8,7 +9,7 @@ import {
 import './month.css'
 import { cn } from '@/lib/utils'
 import { forwardRef } from 'react'
-import { updateDay } from './date-picker-dialog'
+import { $viewDate, updateDay } from './date-picker-dialog'
 
 type OwnProps = {
 	month: number
@@ -37,6 +38,7 @@ export const Month = forwardRef<HTMLDivElement, OwnProps>(
 								type="button"
 								disabled={date.getMonth() !== month}
 								className={cn({
+									selected: isSameDay(date, $viewDate.value),
 									'text-muted': date.getMonth() !== month
 								})}
 								onClick={() => updateDay(date.getDate())}

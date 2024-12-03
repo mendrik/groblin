@@ -14,6 +14,8 @@ export const ScrollCalendar = ({ date }: OwnProps) => {
 	const currentYear = useRef<HTMLButtonElement>(null)
 	const currentMonth = useRef<HTMLDivElement>(null)
 
+	console.log(date)
+
 	useLayoutEffect(() => {
 		if ($viewDate.value) {
 			currentYear.current?.scrollIntoView({ block: 'center' })
@@ -32,7 +34,7 @@ export const ScrollCalendar = ({ date }: OwnProps) => {
 				<FocusTravel autoFocus={false}>
 					{range(0, 12).map(month => (
 						<Month
-							key={month}
+							key={month + date.getTime()}
 							month={month}
 							year={2024}
 							ref={month === date.getMonth() ? currentMonth : undefined}

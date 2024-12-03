@@ -2,7 +2,7 @@
     @apply grid grid-cols-7 items-center snap-mandatory snap-center;
 
     .headline {
-        @apply text-accent-foreground text-center text-lg mb-2 pt-4;
+        @apply text-muted-foreground text-center text-lg mb-2 pt-4;
         grid-column: 1 / -1;
         
     }
@@ -23,15 +23,19 @@
         user-select: none;
 
         > li {
-            @apply items-center justify-center flex p-[2px];
+            @apply p-[1px];
             aspect-ratio: 1.2;
 
             button {
                 @apply aspect-square h-full rounded-full;
-                @apply p-[1px] bg-clip-content;
+                @apply flex justify-center items-center bg-clip-content;
 
                 &:not(:disabled) {
                     @apply hover:bg-secondary;
+                }
+
+                &.selected {
+                    @apply border-2 border-accent-foreground;                    
                 }
             }
         }
