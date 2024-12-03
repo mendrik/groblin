@@ -19,19 +19,21 @@ const MaskedStyledInput = IMaskMixin(({ inputRef, className, ...props }) => (
 	/>
 ))
 
-type OwnProps = { date: Date } & HTMLAttributes<HTMLInputElement>
+type OwnProps = HTMLAttributes<HTMLInputElement>
 
-export const MaskedDateInput = ({ date, className }: OwnProps) => {
+export const MaskedDateInput = ({ className }: OwnProps) => {
+	const viewDate = $viewDate.value
+
 	return (
 		<MaskedStyledInput
 			type="text"
-			key={date.getTime()}
+			key={viewDate.getTime()}
 			mask={Date}
 			unmask="typed"
 			lazy={false}
 			pattern={dateFormat}
 			placeholderChar="_"
-			defaultValue={format(dateFormat, date)}
+			defaultValue={format(dateFormat, viewDate)}
 			placeholder={dateFormat}
 			className={className}
 			format={format(dateFormat)}

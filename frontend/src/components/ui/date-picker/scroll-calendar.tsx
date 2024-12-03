@@ -6,22 +6,16 @@ import { ScrollArea } from '../scroll-area'
 import { $viewDate, updateYear } from './date-picker-dialog'
 import { Month } from './month'
 
-type OwnProps = {
-	date: Date
-}
-
-export const ScrollCalendar = ({ date }: OwnProps) => {
+export const ScrollCalendar = () => {
+	const viewDate = $viewDate.value
 	const currentYear = useRef<HTMLButtonElement>(null)
 	const currentMonth = useRef<HTMLDivElement>(null)
 
-	console.log(date)
-
+	// biome-ignore lint/correctness/useExhaustiveDependencies: viewDate triggers the scroll
 	useLayoutEffect(() => {
-		if ($viewDate.value) {
-			currentYear.current?.scrollIntoView({ block: 'center' })
-			currentMonth.current?.scrollIntoView({ block: 'center' })
-		}
-	})
+		currentYear.current?.scrollIntoView({ block: 'center' })
+		currentMonth.current?.scrollIntoView({ block: 'center' })
+	}, [viewDate])
 
 	return (
 		<div className="flex flex-row w-full gap-2 h-[290px] ">
@@ -34,10 +28,10 @@ export const ScrollCalendar = ({ date }: OwnProps) => {
 				<FocusTravel autoFocus={false}>
 					{range(0, 12).map(month => (
 						<Month
-							key={month + date.getTime()}
+							key={month + viewDate.getFullYear()}
 							month={month}
 							year={2024}
-							ref={month === date.getMonth() ? currentMonth : undefined}
+							ref={month === viewDate.getMonth() ? currentMonth : undefined}
 						/>
 					))}
 				</FocusTravel>
@@ -48,10 +42,10 @@ export const ScrollCalendar = ({ date }: OwnProps) => {
 						<li key={year}>
 							<button
 								type="button"
-								ref={year === date.getFullYear() ? currentYear : undefined}
+								ref={year === viewDate.getFullYear() ? currentYear : undefined}
 								onClick={() => updateYear(year)}
 								className={cn(
-									year === date.getFullYear()
+									year === viewDate.getFullYear()
 										? 'text-foreground'
 										: 'text-muted-foreground'
 								)}

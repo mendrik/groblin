@@ -63,9 +63,9 @@ export const DatePicker = () => {
 						</li>
 					))}
 				</ol>
-				<ScrollCalendar date={$viewDate.value} />
+				<ScrollCalendar />
 				<DialogFooter className="flex flex-row gap-y-2 pt-4 border-t border-border">
-					<MaskedDateInput className="mr-auto" date={$viewDate.value} />
+					<MaskedDateInput className="mr-auto" />
 					<Button onClick={close} variant="secondary">
 						Cancel
 					</Button>

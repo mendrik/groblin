@@ -22,23 +22,26 @@ export const Month = forwardRef<HTMLDivElement, OwnProps>(
 		const from = startOfWeek(first, { weekStartsOn: 1 })
 		const until = lastDayOfWeek(lastDayOfMonth(first), { weekStartsOn: 1 })
 		const dates = eachDayOfInterval({ start: from, end: until })
+		const viewDate = $viewDate.value
 
 		return (
 			<div className="month min-w-full" id={`picker-month-${month}`} ref={ref}>
-				<h2 className="headline">{formatDate(first, 'MMMM')}</h2>
+				<h2 className="headline">
+					{formatDate(first, 'MMMM') + formatDate(viewDate, 'd.M.y')}
+				</h2>
 				<ol className="weekdays">
 					{dates.slice(0, 7).map(date => (
-						<li key={date.getTime()}>{formatDate(date, 'EEE')}</li>
+						<li key={date.getDay()}>{formatDate(date, 'EEE')}</li>
 					))}
 				</ol>
 				<ol className="days">
 					{dates.map(date => (
-						<li key={date.getTime()}>
+						<li key={date.toJSON()}>
 							<button
 								type="button"
 								disabled={date.getMonth() !== month}
 								className={cn({
-									selected: isSameDay(date, $viewDate.value),
+									selected: isSameDay(date, viewDate),
 									'text-muted': date.getMonth() !== month
 								})}
 								onClick={() => updateDay(date.getDate())}
