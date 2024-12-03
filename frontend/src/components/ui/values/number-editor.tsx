@@ -2,7 +2,7 @@ import KeyListener from '@/components/utils/key-listener'
 import type { Value } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
 import type { TreeNode } from '@/state/tree'
-import { objOf, pipe } from 'ramda'
+import { equals, objOf, pipe, unless } from 'ramda'
 import { IMaskMixin } from 'react-imask'
 import { editorKey, save } from './value-editor'
 
@@ -22,15 +22,17 @@ const MaskedStyledInput = IMaskMixin(({ inputRef, ...props }) => (
 ))
 
 export const NumberEditor = ({ node, value }: OwnProps) => {
+	const saveNewValue = pipe(objOf('figure'), save(node, value))
+
 	return (
 		<KeyListener onArrowLeft={stopPropagation} onArrowRight={stopPropagation}>
 			<MaskedStyledInput
 				key={editorKey(node)}
 				mask={Number}
 				radix=","
-				value={`${value?.value.figure}`}
-				unmask
-				onAccept={pipe(Number.parseFloat, objOf('figure'), save(node, value))}
+				defaultValue={`${value?.value.figure}`}
+				unmask="typed"
+				onAccept={unless(equals(value?.value.figure), saveNewValue)}
 			/>
 		</KeyListener>
 	)

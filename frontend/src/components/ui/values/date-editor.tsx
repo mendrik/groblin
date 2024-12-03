@@ -1,9 +1,10 @@
 import KeyListener from '@/components/utils/key-listener'
 import type { Value } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
+import { relativeTime } from '@/lib/relative-time'
 import type { TreeNode } from '@/state/tree'
 import { IconCalendar } from '@tabler/icons-react'
-import { formatRelative, parseJSON } from 'date-fns'
+import { parseJSON } from 'date-fns'
 import { objOf, pipe, when } from 'ramda'
 import { isString } from 'ramda-adjunct'
 import { openDatePicker } from '../date-picker/date-picker-dialog'
@@ -29,9 +30,7 @@ export const DateEditor = ({ node, value }: OwnProps) => {
 	return (
 		<KeyListener onArrowLeft={stopPropagation} onArrowRight={stopPropagation}>
 			<div className="flex items-center flex-row gap-1 h-7">
-				{date && (
-					<span className="ml-1">{formatRelative(date, new Date(), {})}</span>
-				)}
+				{date && <span className="ml-1">{relativeTime({})(date)}</span>}
 				<MicroIcon
 					icon={IconCalendar}
 					onClick={() =>

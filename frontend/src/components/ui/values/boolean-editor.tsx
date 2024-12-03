@@ -1,9 +1,10 @@
 import type { Value } from '@/gql/graphql'
 import type { TreeNode } from '@/state/tree'
+import { objOf, pipe } from 'ramda'
 import { Switch } from '../switch'
 import { editorKey, save } from './value-editor'
 
-type BooleanValue = Value & { value: { content: boolean } }
+type BooleanValue = Value & { value: { state: boolean } }
 
 type OwnProps = {
 	node: TreeNode
@@ -11,12 +12,13 @@ type OwnProps = {
 }
 
 export const BooleanEditor = ({ node, value }: OwnProps) => {
+	const saveNewValue = pipe(objOf('state'), save(node, value))
 	return (
 		<Switch
 			className="ml-1"
 			key={editorKey(node)}
-			onCheckedChange={save(node, value)}
-			defaultChecked={value?.value.content}
+			onCheckedChange={saveNewValue}
+			defaultChecked={value?.value.state}
 		/>
 	)
 }

@@ -36,7 +36,7 @@
                 }
 
                 &.selected {
-                    @apply border-2 border-accent-foreground border-dashed;                    
+                    @apply border-2 border-link border-dashed;                    
                 }
             }
         }
