@@ -23,19 +23,20 @@
         user-select: none;
 
         > li {
-            @apply p-[1px];
+            @apply flex justify-center;
             aspect-ratio: 1.2;
 
             button {
                 @apply aspect-square h-full rounded-full;
                 @apply flex justify-center items-center bg-clip-content;
+                letter-spacing: -.5px;
 
                 &:not(:disabled) {
                     @apply hover:bg-secondary;
                 }
 
                 &.selected {
-                    @apply border-2 border-accent-foreground;                    
+                    @apply border-2 border-accent-foreground border-dashed;                    
                 }
             }
         }

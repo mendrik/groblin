@@ -8,6 +8,8 @@ import './index.css'
 import { LoggedIn } from './routing/logged-in'
 import { LoggedOut } from './routing/logged-out'
 import './state/project'
+import { setDefaultOptions } from 'date-fns'
+import { fi } from 'date-fns/locale'
 import { loadProject } from './state/project'
 import { $user } from './state/user'
 
@@ -36,6 +38,11 @@ const Main = () => (
 		</ThemeProvider>
 	</StrictMode>
 )
+
+setDefaultOptions({
+	locale: fi,
+	weekStartsOn: 1
+})
 
 loadProject().finally(() =>
 	Maybe.fromNullable(document.getElementById('app'))

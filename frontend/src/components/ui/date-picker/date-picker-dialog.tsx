@@ -7,6 +7,7 @@ import {
 import { cn, setSignal, updateSignalFn } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
+import { IconBan } from '@tabler/icons-react'
 import { formatDate } from 'date-fns'
 import { setDate, setMonth, setYear } from 'date-fns/fp'
 import { F, pipe, range } from 'ramda'
@@ -16,15 +17,15 @@ import { ScrollCalendar } from './scroll-calendar'
 
 type OpenProps = {
 	callback: (date: Date | undefined) => any
-	date: Date
+	date?: Date
 }
 
-const $dialogOpen = signal(true)
+const $dialogOpen = signal(false)
 export const $viewDate = signal<Date>(new Date())
 export const $callback = signal<(date: Date) => unknown>(() => void 0)
 
 export const openDatePicker = (props: OpenProps) => {
-	setSignal($viewDate, props.date)
+	setSignal($viewDate, props.date ?? new Date())
 	setSignal($callback, props.callback)
 	setSignal($dialogOpen, true)
 }
@@ -58,7 +59,7 @@ export const DatePicker = () => {
 								className="hover:text-foreground"
 								onClick={() => updateMonth(month)}
 							>
-								{formatDate(new Date(2024, month, 1), 'MMM')}
+								{formatDate(new Date(2024, month, 1), 'MMM').substring(0, 3)}
 							</button>
 						</li>
 					))}
@@ -66,6 +67,13 @@ export const DatePicker = () => {
 				<ScrollCalendar />
 				<DialogFooter className="flex flex-row gap-y-2 pt-4 border-t border-border">
 					<MaskedDateInput className="mr-auto" />
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={() => setSignal($viewDate, new Date())}
+					>
+						<IconBan stroke={1.5} />
+					</Button>
 					<Button onClick={close} variant="secondary">
 						Cancel
 					</Button>

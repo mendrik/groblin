@@ -20,16 +20,16 @@ export const Month = forwardRef<HTMLDivElement, OwnProps>(
 	({ month, year }, ref) => {
 		const viewDate = $viewDate.value
 		const first = new Date(viewDate.getFullYear(), month, 1)
-		const from = startOfWeek(first, { weekStartsOn: 1 })
-		const until = lastDayOfWeek(lastDayOfMonth(first), { weekStartsOn: 1 })
+		const from = startOfWeek(first)
+		const until = lastDayOfWeek(lastDayOfMonth(first))
 		const dates = eachDayOfInterval({ start: from, end: until })
 
 		return (
 			<div className="month min-w-full" id={`picker-month-${month}`} ref={ref}>
-				<h2 className="headline">{formatDate(first, 'MMMM')}</h2>
+				<h2 className="headline">{formatDate(first, 'LLLL')}</h2>
 				<ol className="weekdays">
 					{dates.slice(0, 7).map(date => (
-						<li key={date.getDay()}>{formatDate(date, 'EEE')}</li>
+						<li key={date.getDay()}>{formatDate(date, 'EEEEEE')}</li>
 					))}
 				</ol>
 				<ol className="days">

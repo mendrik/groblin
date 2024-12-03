@@ -2,12 +2,10 @@ import { ForgotPasswordDialog } from '@/components/app/authentication/forgot-pas
 import { LoginDialog } from '@/components/app/authentication/login-dialog'
 import { PasswordResetDialog } from '@/components/app/authentication/password-reset'
 import { RegistrationDialog } from '@/components/app/authentication/register-dialog'
-import { DatePicker } from '@/components/ui/date-picker/date-picker-dialog'
 import { Route, Routes } from 'react-router-dom'
 
 export const LoggedOut = () => (
 	<Routes>
-		<Route path="/date" Component={DatePicker} />
 		<Route path="/reset-password" Component={PasswordResetDialog} />
 		<Route path="/password" Component={ForgotPasswordDialog} />
 		<Route path="/register" Component={RegistrationDialog} />
