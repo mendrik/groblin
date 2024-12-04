@@ -61,7 +61,7 @@ export const safeSignal: {
 		props: P
 	): NonNullable<T>[P]
 } = (signal: Signal<any>, propName?: string) => {
-	return propName ? prop(propName, signal.value ?? {}) : (signal.value ?? {})
+	return propName ? prop(propName, signal.value ?? {}) : signal.value
 }
 
 export const computeSignal = <T, R>(

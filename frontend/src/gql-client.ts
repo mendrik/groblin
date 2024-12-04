@@ -36,7 +36,7 @@ export const Api = new Proxy<any>(
 		get:
 			(target, key) =>
 			async (...args: any[]) => {
-				const res = await target[key](...args)
+				const res = await target[key](...args).catch(console.error)
 				return isNotNilOrEmpty(res) ? firstProperty(res) : undefined
 			}
 	}

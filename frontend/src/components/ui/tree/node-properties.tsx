@@ -30,7 +30,9 @@ const close = pipe(F, setSignal($dialogOpen))
 export const NodeProperties = <T extends ZodRawShape>() => {
 	const [formApi, ref] = useFormState<T>()
 	const dialogClose = pipe(close, refocus)
-	const oldValue = safeSignal($nodeSettingsMap, safeSignal($node).id)
+	const oldValue = safeSignal($nodeSettingsMap, safeSignal($node, 'id'))
+
+	console.log(oldValue)
 
 	return (
 		$node.value && (

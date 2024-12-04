@@ -79,6 +79,8 @@ export class NodeSettingsResolver {
 		@Arg('data', () => UpsertNodeSettings) data: UpsertNodeSettings,
 		@Ctx() { db, extra: user, pubSub }: Context
 	) {
+		console.log('upsertNodeSettings', data)
+
 		const { id } = await db
 			.insertInto('node_settings')
 			.values({

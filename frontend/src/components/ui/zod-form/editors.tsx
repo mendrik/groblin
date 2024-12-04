@@ -57,25 +57,33 @@ const matcher = match<Args, ReactNode>(
 			)
 		}
 	),
-	caseOf([{ editor: EditorType.Input }, _, _], (desc, _, field) => (
-		<FormControl>
-			<Input
-				{...field}
-				placeholder={desc.placeholder}
-				autoComplete={desc.autofill}
-			/>
-		</FormControl>
-	)),
-	caseOf([{ editor: EditorType.Email }, _, _], (desc, _, field) => (
-		<FormControl>
-			<Input
-				{...field}
-				type="email"
-				placeholder={desc.placeholder}
-				autoComplete={desc.autofill}
-			/>
-		</FormControl>
-	)),
+	caseOf(
+		[{ editor: EditorType.Input }, _, _],
+		(desc, _, { value, ...field }) => (
+			<FormControl>
+				<Input
+					{...field}
+					defaultValue={value}
+					placeholder={desc.placeholder}
+					autoComplete={desc.autofill}
+				/>
+			</FormControl>
+		)
+	),
+	caseOf(
+		[{ editor: EditorType.Email }, _, _],
+		(desc, _, { value, ...field }) => (
+			<FormControl>
+				<Input
+					{...field}
+					type="email"
+					defaultValue={value}
+					placeholder={desc.placeholder}
+					autoComplete={desc.autofill}
+				/>
+			</FormControl>
+		)
+	),
 	caseOf([{ editor: EditorType.Password }, _, _], (desc, _, field) => (
 		<FormControl>
 			<Input
@@ -86,11 +94,18 @@ const matcher = match<Args, ReactNode>(
 			/>
 		</FormControl>
 	)),
-	caseOf([{ editor: EditorType.Switch }, _, _], (_desc, _, field) => (
-		<FormControl className="block">
-			<Switch {...field} onCheckedChange={field.onChange} />
-		</FormControl>
-	)),
+	caseOf(
+		[{ editor: EditorType.Switch }, _, _],
+		(desc, _, { value, ...field }) => (
+			<FormControl className="block">
+				<Switch
+					{...field}
+					onCheckedChange={field.onChange}
+					defaultChecked={value}
+				/>
+			</FormControl>
+		)
+	),
 	caseOf([_, _, _], (a, b: any, _) => {
 		return (
 			<div>
