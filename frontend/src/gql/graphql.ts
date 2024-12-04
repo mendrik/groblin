@@ -66,6 +66,7 @@ export type Mutation = {
   logout: Scalars['Boolean']['output'];
   register: Scalars['Boolean']['output'];
   updateNode: Scalars['Boolean']['output'];
+  upsertNodeSettings: Scalars['Int']['output'];
   upsertValue: Scalars['Int']['output'];
 };
 
@@ -107,6 +108,11 @@ export type MutationUpdateNodeArgs = {
 };
 
 
+export type MutationUpsertNodeSettingsArgs = {
+  data: UpsertNodeSettings;
+};
+
+
 export type MutationUpsertValueArgs = {
   data: UpsertValue;
 };
@@ -117,6 +123,12 @@ export type Node = {
   order: Scalars['Int']['output'];
   parent_id?: Maybe<Scalars['Int']['output']>;
   type: NodeType;
+};
+
+export type NodeSettings = {
+  id: Scalars['Int']['output'];
+  node_id: Scalars['Int']['output'];
+  settings: Scalars['JSONObject']['output'];
 };
 
 export enum NodeType {
@@ -140,6 +152,7 @@ export type Project = {
 };
 
 export type ProjectData = {
+  nodeSettings: Array<NodeSettings>;
   nodes: Array<Node>;
   project: Project;
   user: LoggedInUser;
@@ -147,6 +160,7 @@ export type ProjectData = {
 };
 
 export type Query = {
+  getNodeSettings: Array<NodeSettings>;
   getNodes: Array<Node>;
   getProject: ProjectData;
   getValues: Array<Value>;
@@ -164,8 +178,14 @@ export type Registration = {
 };
 
 export type Subscription = {
+  nodeSettingsUpdated: Scalars['Boolean']['output'];
   nodesUpdated: Scalars['Boolean']['output'];
   valuesUpdated: Scalars['Boolean']['output'];
+};
+
+
+export type SubscriptionNodeSettingsUpdatedArgs = {
+  projectId: Scalars['Int']['input'];
 };
 
 
@@ -181,6 +201,12 @@ export type SubscriptionValuesUpdatedArgs = {
 export type Token = {
   expiresDate: Scalars['DateTimeISO']['output'];
   token: Scalars['String']['output'];
+};
+
+export type UpsertNodeSettings = {
+  id?: InputMaybe<Scalars['Int']['input']>;
+  node_id: Scalars['Int']['input'];
+  settings: Scalars['JSONObject']['input'];
 };
 
 export type UpsertValue = {
@@ -201,11 +227,13 @@ export type Value = {
 export type GetProjectQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetProjectQuery = { getProject: { user: { id: number, email: string, name: string, lastProjectId: number }, project: { id: number, name: string }, nodes: Array<{ id: number, name: string, order: number, type: NodeType, parent_id?: number | null }>, values: Array<{ id: number, node_id: number, order: number, value: any, list_path?: Array<number> | null }> } };
+export type GetProjectQuery = { getProject: { user: { id: number, email: string, name: string, lastProjectId: number }, project: { id: number, name: string }, nodes: Array<{ id: number, name: string, order: number, type: NodeType, parent_id?: number | null }>, values: Array<{ id: number, node_id: number, order: number, value: any, list_path?: Array<number> | null }>, nodeSettings: Array<{ id: number, node_id: number, settings: any }> } };
 
 export type ValueFragment = { id: number, node_id: number, order: number, value: any, list_path?: Array<number> | null };
 
 export type NodeFragment = { id: number, name: string, order: number, type: NodeType, parent_id?: number | null };
+
+export type NodeSettingsFragment = { id: number, node_id: number, settings: any };
 
 export type NodesUpdatedSubscriptionVariables = Exact<{
   projectId: Scalars['Int']['input'];
@@ -241,6 +269,25 @@ export type DeleteNodeByIdMutationVariables = Exact<{
 
 
 export type DeleteNodeByIdMutation = { deleteNodeById: boolean };
+
+export type GetNodeSttingsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetNodeSttingsQuery = { getNodeSettings: Array<{ id: number, settings: any, node_id: number }> };
+
+export type UpsertNodeSettingsMutationVariables = Exact<{
+  data: UpsertNodeSettings;
+}>;
+
+
+export type UpsertNodeSettingsMutation = { upsertNodeSettings: number };
+
+export type NodeSettingsUpdatedSubscriptionVariables = Exact<{
+  projectId: Scalars['Int']['input'];
+}>;
+
+
+export type NodeSettingsUpdatedSubscription = { nodeSettingsUpdated: boolean };
 
 export type RegisterMutationVariables = Exact<{
   data: Registration;
@@ -314,6 +361,13 @@ export const NodeFragmentDoc = `
   parent_id
 }
     `;
+export const NodeSettingsFragmentDoc = `
+    fragment NodeSettings on NodeSettings {
+  id
+  node_id
+  settings
+}
+    `;
 export const GetProjectDocument = `
     query GetProject {
   getProject {
@@ -333,10 +387,14 @@ export const GetProjectDocument = `
     values {
       ...Value
     }
+    nodeSettings {
+      ...NodeSettings
+    }
   }
 }
     ${NodeFragmentDoc}
-${ValueFragmentDoc}`;
+${ValueFragmentDoc}
+${NodeSettingsFragmentDoc}`;
 export const NodesUpdatedDocument = `
     subscription NodesUpdated($projectId: Int!) {
   nodesUpdated(projectId: $projectId)
@@ -364,6 +422,25 @@ export const UpdateNodeDocument = `
 export const DeleteNodeByIdDocument = `
     mutation DeleteNodeById($order: Int!, $parent_id: Int!, $id: Int!) {
   deleteNodeById(order: $order, parent_id: $parent_id, id: $id)
+}
+    `;
+export const GetNodeSttingsDocument = `
+    query GetNodeSttings {
+  getNodeSettings {
+    id
+    settings
+    node_id
+  }
+}
+    `;
+export const UpsertNodeSettingsDocument = `
+    mutation UpsertNodeSettings($data: UpsertNodeSettings!) {
+  upsertNodeSettings(data: $data)
+}
+    `;
+export const NodeSettingsUpdatedDocument = `
+    subscription NodeSettingsUpdated($projectId: Int!) {
+  nodeSettingsUpdated(projectId: $projectId)
 }
     `;
 export const RegisterDocument = `
@@ -431,6 +508,15 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     },
     DeleteNodeById(variables: DeleteNodeByIdMutationVariables, options?: C): Promise<ExecutionResult<DeleteNodeByIdMutation, E>> {
       return requester<DeleteNodeByIdMutation, DeleteNodeByIdMutationVariables>(DeleteNodeByIdDocument, variables, options) as Promise<ExecutionResult<DeleteNodeByIdMutation, E>>;
+    },
+    GetNodeSttings(variables?: GetNodeSttingsQueryVariables, options?: C): Promise<ExecutionResult<GetNodeSttingsQuery, E>> {
+      return requester<GetNodeSttingsQuery, GetNodeSttingsQueryVariables>(GetNodeSttingsDocument, variables, options) as Promise<ExecutionResult<GetNodeSttingsQuery, E>>;
+    },
+    UpsertNodeSettings(variables: UpsertNodeSettingsMutationVariables, options?: C): Promise<ExecutionResult<UpsertNodeSettingsMutation, E>> {
+      return requester<UpsertNodeSettingsMutation, UpsertNodeSettingsMutationVariables>(UpsertNodeSettingsDocument, variables, options) as Promise<ExecutionResult<UpsertNodeSettingsMutation, E>>;
+    },
+    NodeSettingsUpdated(variables: NodeSettingsUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<NodeSettingsUpdatedSubscription, E>> {
+      return requester<NodeSettingsUpdatedSubscription, NodeSettingsUpdatedSubscriptionVariables>(NodeSettingsUpdatedDocument, variables, options) as AsyncIterable<ExecutionResult<NodeSettingsUpdatedSubscription, E>>;
     },
     Register(variables: RegisterMutationVariables, options?: C): Promise<ExecutionResult<RegisterMutation, E>> {
       return requester<RegisterMutation, RegisterMutationVariables>(RegisterDocument, variables, options) as Promise<ExecutionResult<RegisterMutation, E>>;

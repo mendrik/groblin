@@ -32,7 +32,8 @@ export interface Node {
 
 export interface NodeSettings {
   id: Generated<number>;
-  node_id: number | null;
+  node_id: number;
+  project_id: number;
   settings: Json | null;
 }
 

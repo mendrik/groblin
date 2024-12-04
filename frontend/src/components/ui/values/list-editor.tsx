@@ -1,7 +1,7 @@
 import type { Value } from '@/gql/graphql'
 import { cn, notNil } from '@/lib/utils'
 import type { TreeNode } from '@/state/tree'
-import { $activeItems, activateListItem } from '@/state/value'
+import { $activeListItems, activateListItem } from '@/state/value'
 import {
 	IconSquareRoundedMinus as Minus,
 	IconSquareRoundedPlus as Plus
@@ -23,11 +23,11 @@ type OwnProps = {
 }
 
 export const ListEditor = ({ node, value: items = [] }: OwnProps) => {
-	const $activeItem = notNil($activeItems)[node.id]
+	const $activeItem = notNil($activeListItems)[node.id]
 
 	return (
 		<div className="flex flex-row w-full gap-2 h-7 items-center">
-			<ol className="flex flex-row gap-1 items-center -ml-1 divide-x">
+			<ol className="flex flex-row gap-1 items-center -ml-1">
 				{items.map(item => (
 					<li key={`${item.id}`}>
 						<Button

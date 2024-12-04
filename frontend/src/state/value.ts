@@ -34,7 +34,7 @@ export type ActiveLists = Record<NodeId, Value>
 
 export const $values = signal<Value[]>([])
 export const $valueMap = signal<Record<NodeId, Value[]>>({})
-export const $activeItems = signal<ActiveLists>({})
+export const $activeListItems = signal<ActiveLists>({})
 
 $values.subscribe(
 	pipe(
@@ -44,25 +44,25 @@ $values.subscribe(
 	)
 )
 const fetchValues = () => {
-	const ids = pipe(values, pluck('id'))(notNil($activeItems))
+	const ids = pipe(values, pluck('id'))(notNil($activeListItems))
 	Api.GetValues({ data: { ids } }).then(setSignal($values))
 }
 
 export const subscribeToValues = () =>
 	Subscribe.ValuesUpdated({ projectId: notNil($project, 'id') }, fetchValues)
 
-$activeItems.subscribe(unless(isEmpty, fetchValues))
+$activeListItems.subscribe(unless(isEmpty, fetchValues))
 
 export const activateListItem = (item: Value) => {
 	const node = asNode(item.node_id)
 	assertThat(propEq(NodeType.List, 'type'), node, 'Value is not a list item')
-	updateSignal($activeItems, assoc(item.node_id, item))
+	updateSignal($activeListItems, assoc(item.node_id, item))
 }
 
 export const listPath = (node: TreeNode): number[] | undefined => {
 	const res = [...pathTo(node)]
 		.filter(node => node.type === 'list')
-		.map(node => $activeItems.value[node.id]?.id)
+		.map(node => $activeListItems.value[node.id]?.id)
 		.filter(isNotNil)
 	return isEmpty(res) ? undefined : res
 }
@@ -73,12 +73,12 @@ export const insertListItem = (listItem: InsertListItem) =>
 export const focusListItem = (params: any) => {}
 
 export const deleteListItem = (node: TreeNode): Promise<boolean> => {
-	const selected = notNil($activeItems, node.id)
+	const selected = notNil($activeListItems, node.id)
 	return Api.DeleteListItem({ id: selected.id })
 }
 
 export const selectAnyListItem = (node: TreeNode) => {
-	const current = notNil($activeItems, node.id)
+	const current = notNil($activeListItems, node.id)
 	const values = notNil($valueMap, node.id).filter(
 		({ id }) => id !== current.id
 	)
@@ -86,7 +86,7 @@ export const selectAnyListItem = (node: TreeNode) => {
 	if (isNotEmpty(values)) {
 		activateListItem(head(values))
 	} else {
-		updateSignal($activeItems, omit([node.id]))
+		updateSignal($activeListItems, omit([node.id]))
 	}
 }
 

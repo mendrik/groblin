@@ -1,7 +1,7 @@
 import { NodeType, type Value } from '@/gql/graphql'
 import { caseOf, match } from '@/lib/match'
 import { type TreeNode, pathTo } from '@/state/tree'
-import { $activeItems, listPath, saveValue } from '@/state/value'
+import { $activeListItems, listPath, saveValue } from '@/state/value'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import type { Fn } from '@tp/functions'
 import {
@@ -31,7 +31,7 @@ type Args = readonly [TreeNode, Value[] | undefined]
 const isList: Pred<[TreeNode]> = node => node.type === NodeType.List
 
 const notActive: Pred<[TreeNode]> = node =>
-	$activeItems.value[node.id] === undefined
+	$activeListItems.value[node.id] === undefined
 
 const isBlank: Pred<[TreeNode]> = pipe(
 	pathTo,

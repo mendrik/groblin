@@ -5,7 +5,8 @@ import type { PubSub } from 'type-graphql'
 export enum Topic {
 	UserRegistered = 'userRegistered',
 	NodesUpdated = 'nodesUpdated',
-	ValuesUpdated = 'valuesUpdated'
+	ValuesUpdated = 'valuesUpdated',
+	NodeSettingsUpdated = 'nodeSettingsUpdated'
 }
 
 type ProjectId = number

@@ -1,17 +1,13 @@
 import { EditorType } from '@shared/enums'
-import { boolean, object, string } from 'zod'
+import { object, string } from 'zod'
 import { asField } from '../../zod-form/utils'
 import { required } from './required'
 
 export const NumberProps = object({
-	mask: asField(string().optional(), {
-		label: 'Input Mask',
+	unit: asField(string().optional(), {
+		label: 'Unit',
 		editor: EditorType.Input,
 		span: 2
-	}),
-	integers: asField(boolean().default(false), {
-		label: 'Integers',
-		editor: EditorType.Switch
 	}),
 	required
 })

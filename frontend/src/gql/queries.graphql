@@ -16,6 +16,9 @@ query GetProject {
     values {
       ...Value
     }
+    nodeSettings {
+      ...NodeSettings
+    }
   }
 }
 
@@ -33,6 +36,12 @@ fragment Node on Node {
   order
   type
   parent_id
+}
+
+fragment NodeSettings on NodeSettings {
+  id
+  node_id
+  settings
 }
 
 subscription NodesUpdated($projectId: Int!) {
@@ -58,6 +67,23 @@ mutation UpdateNode($data: ChangeNodeInput!) {
 mutation DeleteNodeById($order: Int!, $parent_id: Int!, $id: Int!) {
   deleteNodeById(order: $order, parent_id: $parent_id, id: $id)
 }
+
+query GetNodeSttings {
+  getNodeSettings {
+    id
+    settings
+    node_id
+  }
+}
+
+mutation UpsertNodeSettings($data: UpsertNodeSettings!) {
+  upsertNodeSettings(data: $data)
+}
+
+subscription NodeSettingsUpdated($projectId: Int!) {
+  nodeSettingsUpdated(projectId: $projectId)
+}
+
 
 mutation Register($data: Registration!) {
   register(data: $data)

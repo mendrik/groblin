@@ -6,11 +6,12 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { setSignal } from '@/lib/utils'
+import { safeSignal, setSignal } from '@/lib/utils'
+import { $nodeSettingsMap, saveNodeSettings } from '@/state/node-settings'
 import { type TreeNode, refocus } from '@/state/tree'
 import { signal } from '@preact/signals-react'
-import { pipeTap } from '@shared/utils/pipe-tap'
-import { F, T, pipe, tap } from 'ramda'
+import { pipeAsync } from '@shared/utils/pipe-async'
+import { F, T, pipe } from 'ramda'
 import type { ZodRawShape } from 'zod'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
@@ -26,18 +27,15 @@ export const openNodeProperties: (node: TreeNode) => void = pipe(
 )
 const close = pipe(F, setSignal($dialogOpen))
 
-const saveNodeSettingsCommand: <T>(data: T) => Promise<void> = pipeTap(
-	tap(console.log)
-)
-
 export const NodeProperties = <T extends ZodRawShape>() => {
 	const [formApi, ref] = useFormState<T>()
 	const dialogClose = pipe(close, refocus)
+	const oldValue = safeSignal($nodeSettingsMap, safeSignal($node).id)
 
 	return (
 		$node.value && (
 			<Dialog open={$dialogOpen.value}>
-				<DialogContent close={dialogClose}>
+				<DialogContent close={dialogClose} className="max-w-sm">
 					<DialogHeader>
 						<DialogTitle>Node properties</DialogTitle>
 						<DialogDescription>
@@ -47,7 +45,8 @@ export const NodeProperties = <T extends ZodRawShape>() => {
 					<ZodForm
 						schema={nodePropertiesForm($node.value)}
 						columns={2}
-						onSubmit={pipe(saveNodeSettingsCommand, dialogClose)}
+						defaultValues={oldValue}
+						onSubmit={pipeAsync(saveNodeSettings, dialogClose)}
 						onError={console.error}
 						ref={ref}
 					>

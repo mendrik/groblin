@@ -16,6 +16,7 @@ import {
 } from 'type-graphql'
 import { AuthResolver, LoggedInUser } from './auth-resolver.ts'
 import { Node, NodeResolver } from './node-resolver.ts'
+import { NodeSettings, NodeSettingsResolver } from './node-settings-resolver.ts'
 import { Value, ValueResolver } from './value-resolver.ts'
 
 @ObjectType()
@@ -40,6 +41,9 @@ export class ProjectData {
 
 	@Field(type => [Value])
 	values: Value[]
+
+	@Field(type => [NodeSettings])
+	nodeSettings: NodeSettings[]
 }
 
 @injectable()
@@ -53,13 +57,17 @@ export class ProjectResolver {
 	@inject(ValueResolver)
 	private readonly valueResolver: ValueResolver
 
+	@inject(NodeSettingsResolver)
+	private readonly nodeSettingsResolver: NodeSettingsResolver
+
 	@inject(AuthResolver)
 	private readonly authResolver: AuthResolver
 
 	@Query(returns => ProjectData)
 	async getProject(@Ctx() ctx: Context): Promise<ProjectData> {
 		const nodes = await this.nodeResolver.getNodes(ctx)
-		const values = await this.valueResolver.getValues([], ctx)
+		const values = await this.valueResolver.getValues({ ids: [] }, ctx)
+		const nodeSettings = await this.nodeSettingsResolver.getNodeSettings(ctx)
 
 		const project = await ctx.db
 			.selectFrom('project')
@@ -72,7 +80,8 @@ export class ProjectResolver {
 			project,
 			nodes: nodes as Node[],
 			values,
-			user: ctx.extra
+			user: ctx.extra,
+			nodeSettings
 		}
 	}
 }

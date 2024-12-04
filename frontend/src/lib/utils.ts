@@ -40,18 +40,28 @@ export const notNil: {
 		signal: Signal<T>,
 		props: P
 	): NonNullable<T>[P]
-} = (signal: Signal<any>, pathOrProp?: string) => {
-	const res = pathOrProp ? prop(pathOrProp, signal.value) : signal.value
+} = (signal: Signal<any>, propName?: string) => {
+	const res = propName ? prop(propName, signal.value) : signal.value
 
-	pathOrProp && !res && console.log(signal.value, res, pathOrProp)
+	propName && !res && console.log(signal.value, res, propName)
 
 	assertExists(
 		res,
-		pathOrProp
-			? `Signal value (${pathOrProp as string}) is nil`
+		propName
+			? `Signal value (${propName as string}) is nil`
 			: 'Signal value is nil'
 	)
 	return res
+}
+
+export const safeSignal: {
+	<T>(signal: Signal<T>): NonNullable<T>
+	<T, P extends keyof NonNullable<T>>(
+		signal: Signal<T>,
+		props: P
+	): NonNullable<T>[P]
+} = (signal: Signal<any>, propName?: string) => {
+	return propName ? prop(propName, signal.value ?? {}) : (signal.value ?? {})
 }
 
 export const computeSignal = <T, R>(
