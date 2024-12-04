@@ -8,6 +8,7 @@ import type { ControllerRenderProps } from 'react-hook-form'
 import { ZodNativeEnum, ZodNumber, type ZodTypeAny } from 'zod'
 import { FormControl } from '../form'
 import { Input } from '../input'
+import { MaskedInput } from '../random/masked-input'
 import {} from '../select'
 import { SimpleSelect } from '../simple/select'
 import { Switch } from '../switch'
@@ -75,13 +76,17 @@ const matcher = match<Args, ReactNode>(
 		[{ editor: EditorType.Number }, _, _],
 		(desc, _, { value, onChange, ...field }) => (
 			<FormControl>
-				<Input
+				<MaskedInput
 					{...field}
 					onChange={pipe(inputValue, Number, onChange)}
+					mask={Number}
+					className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-0 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+					scale={0}
+					min={0}
+					max={5}
 					defaultValue={value}
 					placeholder={desc.placeholder}
 					autoComplete={desc.autofill}
-					type="number"
 				/>
 			</FormControl>
 		)

@@ -5,7 +5,7 @@ import { notNil } from '@/lib/utils'
 import { $nodeSettingsMap } from '@/state/node-settings'
 import type { TreeNode } from '@/state/tree'
 import { objOf, pipe } from 'ramda'
-import { IMaskMixin } from 'react-imask'
+import { MaskedInput } from '../random/masked-input'
 import type { NumberProps } from '../tree/properties/numbers'
 import { editorKey, save } from './value-editor'
 
@@ -16,25 +16,18 @@ type OwnProps = {
 	value?: NumberValue
 }
 
-const MaskedStyledInput = IMaskMixin(({ inputRef, ...props }) => (
-	<input
-		ref={inputRef as any}
-		className="h-7 w-full bg-transparent border-none appearance-none outline-none ring-0 ml-1"
-		{...props}
-	/>
-))
-
 export const NumberEditor = ({ node, value }: OwnProps) => {
 	const saveNewValue = pipe(objOf('figure'), save(node, value))
 	const settings = notNil($nodeSettingsMap, node.id).settings as NumberProps
 
 	return (
 		<KeyListener onArrowLeft={stopPropagation} onArrowRight={stopPropagation}>
-			<MaskedStyledInput
+			<MaskedInput
 				key={editorKey(node)}
 				mask={`num ${settings.unit}`}
 				defaultValue={value?.value.figure}
 				lazy={false}
+				className="h-7 w-full bg-transparent border-none appearance-none outline-none ring-0 ml-1"
 				onAccept={saveNewValue}
 				blocks={{
 					num: {
@@ -42,8 +35,8 @@ export const NumberEditor = ({ node, value }: OwnProps) => {
 						autofix: true,
 						mask: Number,
 						unmask: 'typed',
-						radix: ',',
-						thousandsSeparator: '🞝'
+						radix: '.',
+						thousandsSeparator: ','
 					}
 				}}
 			/>
