@@ -9,10 +9,7 @@ export enum NodeType {
 	time = 'Time',
 	color = 'Color',
 	location = 'Location',
-	phone = 'Phone',
-	email = 'Email',
 	media = 'Media',
-	url = 'Url',
 	event = 'Event'
 }
 

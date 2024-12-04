@@ -23,10 +23,7 @@ enum NodeType {
   time
   color
   location
-  phone
-  email
   media
-  url
   event
 }
 

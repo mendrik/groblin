@@ -7,8 +7,8 @@ import { IconCalendar } from '@tabler/icons-react'
 import { parseJSON } from 'date-fns'
 import { objOf, pipe, when } from 'ramda'
 import { isString } from 'ramda-adjunct'
+import { Button } from '../button'
 import { openDatePicker } from '../date-picker/date-picker-dialog'
-import { MicroIcon } from '../random/micro-icon'
 import { save } from './value-editor'
 
 type DateValue = Value & {
@@ -29,17 +29,22 @@ export const DateEditor = ({ node, value }: OwnProps) => {
 
 	return (
 		<KeyListener onArrowLeft={stopPropagation} onArrowRight={stopPropagation}>
-			<div className="flex items-center flex-row gap-1 h-7">
-				{date && <span className="ml-1">{relativeTime({})(date)}</span>}
-				<MicroIcon
-					icon={IconCalendar}
+			<div className="flex items-center flex-row gap-1 h-7 -ml-1">
+				{date && <span className="ml-2">{relativeTime({})(date)}</span>}
+				<Button
+					variant="ghost"
+					className="w-7 h-7 p-0"
+					size="icon"
+					type="button"
 					onClick={() =>
 						openDatePicker({
 							date,
 							callback: pipe(objOf('date'), save(node, value))
 						})
 					}
-				/>
+				>
+					<IconCalendar className="h-4 w-4" stroke={1} />
+				</Button>
 			</div>
 		</KeyListener>
 	)
