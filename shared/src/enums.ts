@@ -3,6 +3,7 @@ export enum EditorType {
 	Radios = 'radios',
 	Multiselect = 'multiselect',
 	Input = 'input',
+	Number = 'number',
 	Password = 'password',
 	Email = 'email',
 	Switch = 'switch',

@@ -1,3 +1,4 @@
+import { inputValue } from '@/lib/dom-events'
 import { caseOf, match } from '@/lib/match'
 import { EditorType } from '@shared/enums'
 import type { Fn } from '@tp/functions.ts'
@@ -66,6 +67,21 @@ const matcher = match<Args, ReactNode>(
 					defaultValue={value}
 					placeholder={desc.placeholder}
 					autoComplete={desc.autofill}
+				/>
+			</FormControl>
+		)
+	),
+	caseOf(
+		[{ editor: EditorType.Number }, _, _],
+		(desc, _, { value, onChange, ...field }) => (
+			<FormControl>
+				<Input
+					{...field}
+					onChange={pipe(inputValue, Number, onChange)}
+					defaultValue={value}
+					placeholder={desc.placeholder}
+					autoComplete={desc.autofill}
+					type="number"
 				/>
 			</FormControl>
 		)
