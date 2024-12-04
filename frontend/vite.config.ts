@@ -2,7 +2,7 @@ import 'dotenv/config'
 import { resolve } from 'node:path'
 import react from '@vitejs/plugin-react'
 import tsconfigPaths from 'vite-tsconfig-paths'
-import { defineConfig } from 'vitest/config'
+import { type ViteUserConfig, defineConfig } from 'vitest/config'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -13,7 +13,7 @@ export default defineConfig({
 				plugins: [['module:@preact/signals-react-transform']]
 			}
 		})
-	],
+	] as ViteUserConfig['plugins'],
 	resolve: {
 		alias: {
 			'@tp': resolve(__dirname, '../type-patches/src'),
@@ -22,7 +22,9 @@ export default defineConfig({
 		}
 	},
 	test: {
-		setupFiles: ['vitest-localstorage-mock'],
-		include: ['src/**/*.test.ts']
+		setupFiles: ['vitest-localstorage-mock', 'src/test.setup.ts'],
+		include: ['src/**/*.test.{ts,tsx}'],
+		environment: 'happy-dom',
+		testTimeout: 5000
 	}
 })

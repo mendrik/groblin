@@ -41,9 +41,9 @@ describe('notNil', () => {
 	})
 
 	it('updateSignalFn should update the signal', () => {
-		const $test = signal({ date: new Date(2023, 5, 1) })
+		const $test = signal(new Date(2023, 5, 1))
 		const updateDate = updateSignalFn($test, setMonth)
 		updateDate(6)
-		expect($test.value.date.getMonth()).toBe(6)
+		expect($test.value.getMonth()).toBe(6)
 	})
 })
