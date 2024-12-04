@@ -40,7 +40,6 @@ export const ForgotPasswordDialog = () => {
 				<ZodForm
 					schema={forgotPasswordSchema}
 					onSubmit={pipe(forgotPasswordCommand)}
-					onError={console.error}
 				>
 					<DialogFooter className="gap-2 flex flex-row items-center">
 						<div className="mr-auto">

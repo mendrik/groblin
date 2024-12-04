@@ -103,7 +103,7 @@ export type FormApi<F extends FieldValues> = {
 type OwnProps<T extends AllowedTypes<any>> = {
 	schema: T
 	onSubmit: (data: any) => void
-	onError: (err: Error) => void
+	onError?: (err: Error) => void
 	columns?: number
 	disabled?: boolean
 	defaultValues?: DefaultValues<TypeOf<T>>
@@ -116,7 +116,7 @@ export const ZodForm = forwardRef(
 			columns = 1,
 			onSubmit,
 			disabled = false,
-			onError,
+			onError = console.error,
 			defaultValues: externalDefaults,
 			children
 		}: PropsWithChildren<OwnProps<T>>,

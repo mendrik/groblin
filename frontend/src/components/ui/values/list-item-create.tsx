@@ -59,7 +59,6 @@ export const ListItemCreate = () => {
 					schema={newListItemSchema}
 					columns={1}
 					onSubmit={pipe(createListItemCommand, close)}
-					onError={console.error}
 					ref={ref}
 				>
 					<DialogFooter className="gap-y-2">

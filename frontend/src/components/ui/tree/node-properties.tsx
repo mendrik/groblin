@@ -49,7 +49,6 @@ export const NodeProperties = <T extends ZodRawShape>() => {
 						columns={2}
 						defaultValues={oldValue}
 						onSubmit={pipeAsync(saveNodeSettings, dialogClose)}
-						onError={console.error}
 						ref={ref}
 					>
 						<DialogFooter className="gap-y-2">

@@ -58,7 +58,6 @@ export const PasswordResetDialog = () => {
 				<ZodForm
 					schema={resetPasswordSchema}
 					onSubmit={pipe(resetPasswordCommand)}
-					onError={console.error}
 				>
 					<DialogFooter className="gap-2 flex flex-row items-center">
 						<Button type="submit" className="ml-auto">

@@ -123,7 +123,6 @@ export const NodeCreate = () => {
 					schema={newNodeSchema()}
 					columns={2}
 					onSubmit={pipe(createNodeCommand, dialogClose)}
-					onError={console.error}
 					ref={ref}
 				>
 					<DialogFooter className="gap-y-2">

@@ -43,8 +43,6 @@ export const notNil: {
 } = (signal: Signal<any>, propName?: string) => {
 	const res = propName ? prop(propName, signal.value) : signal.value
 
-	propName && !res && console.log(signal.value, res, propName)
-
 	assertExists(
 		res,
 		propName
