@@ -132,6 +132,7 @@ export type NodeSettings = {
 };
 
 export enum NodeType {
+  Article = 'article',
   Boolean = 'boolean',
   Color = 'color',
   Date = 'date',
@@ -142,8 +143,7 @@ export enum NodeType {
   Number = 'number',
   Object = 'object',
   Root = 'root',
-  String = 'string',
-  Time = 'time'
+  String = 'string'
 }
 
 export type Project = {

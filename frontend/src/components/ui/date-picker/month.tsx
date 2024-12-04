@@ -7,11 +7,11 @@ import {
 	startOfWeek
 } from 'date-fns'
 import './month.css'
-import { cn } from '@/lib/utils'
+import { cn, setSignal } from '@/lib/utils'
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 import { forwardRef } from 'react'
 import { Button } from '../button'
-import { $viewDate, updateDay, updateMonth } from './date-picker-dialog'
+import { $viewDate, updateMonth } from './date-picker-dialog'
 
 type OwnProps = {
 	month: number
@@ -62,7 +62,7 @@ export const Month = forwardRef<HTMLDivElement, OwnProps>(
 									selected: isSameDay(date, viewDate),
 									'text-muted': date.getMonth() !== month
 								})}
-								onClick={() => updateDay(date.getDate())}
+								onClick={() => setSignal($viewDate, date)}
 							>
 								{date.getDate()}
 							</button>

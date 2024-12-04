@@ -17,11 +17,11 @@ enum NodeType {
   root
   object
   string
+  article
   number
   boolean
   list
   date
-  time
   color
   location
   media
