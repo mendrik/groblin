@@ -18,7 +18,7 @@ describe('ZodForm', () => {
 		})
 		const submit = vi.fn()
 
-		const { unmount } = render(
+		render(
 			<ZodForm schema={schemaString} onSubmit={submit}>
 				<Button type="submit">Test</Button>
 			</ZodForm>
@@ -32,7 +32,6 @@ describe('ZodForm', () => {
 				expect.anything()
 			)
 		)
-		unmount()
 	})
 
 	test('string schema works with default', async () => {
@@ -44,7 +43,7 @@ describe('ZodForm', () => {
 		})
 		const submit = vi.fn()
 
-		const { unmount } = render(
+		render(
 			<ZodForm schema={schemaString} onSubmit={submit}>
 				<Button type="submit">Test</Button>
 			</ZodForm>
@@ -56,7 +55,6 @@ describe('ZodForm', () => {
 				expect.anything()
 			)
 		)
-		unmount()
 	})
 
 	test('boolean schema works with default', async () => {
@@ -68,7 +66,7 @@ describe('ZodForm', () => {
 		})
 		const submit = vi.fn()
 
-		const { unmount } = render(
+		render(
 			<ZodForm schema={schemaString} onSubmit={submit}>
 				<Button type="submit">Test</Button>
 			</ZodForm>
@@ -83,6 +81,5 @@ describe('ZodForm', () => {
 				expect.anything()
 			)
 		)
-		unmount()
 	})
 })

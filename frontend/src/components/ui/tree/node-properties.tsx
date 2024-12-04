@@ -32,8 +32,6 @@ export const NodeProperties = <T extends ZodRawShape>() => {
 	const dialogClose = pipe(close, refocus)
 	const oldValue = safeSignal($nodeSettingsMap, safeSignal($node, 'id'))
 
-	console.log(oldValue)
-
 	return (
 		$node.value && (
 			<Dialog open={$dialogOpen.value}>
@@ -41,7 +39,7 @@ export const NodeProperties = <T extends ZodRawShape>() => {
 					<DialogHeader>
 						<DialogTitle>Node properties</DialogTitle>
 						<DialogDescription>
-							Please configure how node values will be displayed and edited.
+							Configure how node values will be displayed and edited.
 						</DialogDescription>
 					</DialogHeader>
 					<ZodForm
