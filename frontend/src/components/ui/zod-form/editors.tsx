@@ -84,16 +84,19 @@ const matcher = match<Args, ReactNode>(
 			</FormControl>
 		)
 	),
-	caseOf([{ editor: EditorType.Password }, _, _], (desc, _, field) => (
-		<FormControl>
-			<Input
-				{...field}
-				type="password"
-				placeholder={desc.placeholder}
-				autoComplete={desc.autofill}
-			/>
-		</FormControl>
-	)),
+	caseOf(
+		[{ editor: EditorType.Password }, _, _],
+		(desc, _, { value, ...field }) => (
+			<FormControl>
+				<Input
+					{...field}
+					type="password"
+					placeholder={desc.placeholder}
+					autoComplete={desc.autofill}
+				/>
+			</FormControl>
+		)
+	),
 	caseOf(
 		[{ editor: EditorType.Switch }, _, _],
 		(desc, _, { value, ...field }) => (
