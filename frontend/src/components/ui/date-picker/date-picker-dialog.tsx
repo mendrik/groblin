@@ -7,7 +7,7 @@ import {
 import { cn, setSignal, updateSignalFn } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { IconBan } from '@tabler/icons-react'
+import { IconCalendarX } from '@tabler/icons-react'
 import { formatDate } from 'date-fns'
 import { setDate, setMonth, setYear } from 'date-fns/fp'
 import { F, pipe, range } from 'ramda'
@@ -74,8 +74,9 @@ export const DatePicker = () => {
 						variant="ghost"
 						size="icon"
 						onClick={() => setSignal($viewDate, new Date())}
+						title="Today"
 					>
-						<IconBan stroke={1.5} />
+						<IconCalendarX stroke={1.5} />
 					</Button>
 					<Button onClick={close} variant="secondary">
 						Cancel
