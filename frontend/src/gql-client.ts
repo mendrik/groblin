@@ -1,5 +1,5 @@
 import { type ExecutionResult, createClient } from 'graphql-ws'
-import { head, pipe, toPairs } from 'ramda'
+import { head, pipe, toPairs, when } from 'ramda'
 import { isNotNilOrEmpty } from 'ramda-adjunct'
 import { type Sdk, getSdk } from './gql/graphql'
 import { getItem } from './lib/local-storage'
@@ -25,20 +25,17 @@ const firstProperty = pipe(toPairs, head, ([, value]) => value)
 
 // Subscription SDK with proxy for subscription methods
 export const Api = new Proxy<any>(
-	getSdk((queryDoc, variables) => {
-		const query = gql.iterate({
-			query: queryDoc,
-			variables: variables ?? {}
-		})
-		return query.next().then(({ value }) => value.data)
-	}),
+	getSdk((queryDoc, variables) =>
+		gql
+			.iterate({ query: queryDoc, variables: variables ?? {} })
+			.next()
+			.then(({ value }) => value.data)
+	),
 	{
 		get:
 			(target, key) =>
-			async (...args: any[]) => {
-				const res = await target[key](...args).catch(console.error)
-				return isNotNilOrEmpty(res) ? firstProperty(res) : undefined
-			}
+			(...args: any[]) =>
+				target[key](...args).then(when(isNotNilOrEmpty, firstProperty))
 	}
 ) as ApiSdk
 
@@ -59,12 +56,13 @@ type SubscribeSdk = {
 
 // Subscription SDK with proxy for subscription methods
 export const Subscribe = new Proxy<any>(
-	getSdk((queryDoc, variables) => {
-		return gql.iterate({
-			query: queryDoc,
-			variables: variables ?? {}
-		}) as AsyncIterable<ExecutionResult<any, any>>
-	}),
+	getSdk(
+		(queryDoc, variables) =>
+			gql.iterate({
+				query: queryDoc,
+				variables: variables ?? {}
+			}) as AsyncIterable<ExecutionResult<any, any>>
+	),
 	{
 		get: (target, key: string) => (vars: any, callback: Function) => {
 			const controller = new AbortController()
