@@ -56,7 +56,10 @@ export const DatePicker = () => {
 						<li key={month} className="text-xs">
 							<button
 								type="button"
-								className="hover:text-foreground"
+								className={cn(
+									'hover:text-foreground',
+									month === $viewDate.value.getMonth() && 'text-foreground'
+								)}
 								onClick={() => updateMonth(month)}
 							>
 								{formatDate(new Date(2024, month, 1), 'MMM').substring(0, 3)}
@@ -66,7 +69,7 @@ export const DatePicker = () => {
 				</ol>
 				<ScrollCalendar />
 				<DialogFooter className="flex flex-row gap-y-2 pt-4 border-t border-border">
-					<MaskedDateInput className="mr-auto" />
+					<MaskedDateInput className="mr-auto font-mono" />
 					<Button
 						variant="ghost"
 						size="icon"

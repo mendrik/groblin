@@ -26,9 +26,8 @@
             aspect-ratio: 1.2;
 
             button {
-                @apply aspect-square h-full rounded-full pr-[2px];
-                @apply flex justify-center items-center bg-clip-content;
-                letter-spacing: -.5px;
+                @apply aspect-square h-full rounded-full flex justify-center items-center;
+                @apply block bg-clip-content text-sm;
 
                 &:not(:disabled) {
                     @apply hover:bg-secondary;
