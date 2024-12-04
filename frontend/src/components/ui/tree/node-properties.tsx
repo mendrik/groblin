@@ -6,7 +6,7 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { safeSignal, setSignal } from '@/lib/utils'
+import { notNil, safeSignal, setSignal } from '@/lib/utils'
 import { $nodeSettingsMap, saveNodeSettings } from '@/state/node-settings'
 import { type TreeNode, refocus } from '@/state/tree'
 import { signal } from '@preact/signals-react'
@@ -46,7 +46,15 @@ export const NodeProperties = <T extends ZodRawShape>() => {
 						schema={nodePropertiesForm($node.value)}
 						columns={2}
 						defaultValues={oldValue}
-						onSubmit={pipeAsync(saveNodeSettings, dialogClose)}
+						onSubmit={pipeAsync(
+							settings => ({
+								id: oldValue?.id,
+								node_id: notNil($node, 'id'),
+								settings
+							}),
+							saveNodeSettings,
+							dialogClose
+						)}
 						ref={ref}
 					>
 						<DialogFooter className="gap-y-2">

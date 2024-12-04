@@ -1,8 +1,9 @@
 import { type ExecutionResult, createClient } from 'graphql-ws'
-import { head, pipe, toPairs, when } from 'ramda'
+import { has, head, pipe, pluck, prop, toPairs, when } from 'ramda'
 import { isNotNilOrEmpty } from 'ramda-adjunct'
 import { type Sdk, getSdk } from './gql/graphql'
 import { getItem } from './lib/local-storage'
+import { throwAny } from './lib/utils'
 
 const gql = createClient({
 	url: 'ws://localhost:6173/graphql',
@@ -23,13 +24,19 @@ type ApiSdk = {
 
 const firstProperty = pipe(toPairs, head, ([, value]) => value)
 
+const throwErrors = when(
+	has('errors'),
+	pipe(prop('errors'), pluck('message'), throwAny)
+) as <T>(a: T) => T
 // Subscription SDK with proxy for subscription methods
 export const Api = new Proxy<any>(
 	getSdk((queryDoc, variables) =>
 		gql
 			.iterate({ query: queryDoc, variables: variables ?? {} })
 			.next()
-			.then(({ value }) => value.data)
+			.then(prop('value'))
+			.then(throwErrors)
+			.then(prop('data'))
 	),
 	{
 		get:

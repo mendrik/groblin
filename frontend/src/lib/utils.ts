@@ -53,11 +53,11 @@ export const notNil: {
 }
 
 export const safeSignal: {
-	<T>(signal: Signal<T>): NonNullable<T>
+	<T>(signal: Signal<T>): T | undefined
 	<T, P extends keyof NonNullable<T>>(
 		signal: Signal<T>,
-		props: P
-	): NonNullable<T>[P]
+		props?: P
+	): NonNullable<T>[P] | undefined
 } = (signal: Signal<any>, propName?: string) => {
 	return propName ? prop(propName, signal.value ?? {}) : signal.value
 }
@@ -80,4 +80,8 @@ export function hasMethod<T extends object>(
 
 export const throwError = (message: string): never => {
 	throw new Error(message)
+}
+
+export const throwAny = (errors: any): never => {
+	throw errors
 }
