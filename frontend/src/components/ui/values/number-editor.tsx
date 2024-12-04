@@ -23,14 +23,13 @@ const MaskedStyledInput = IMaskMixin(({ inputRef, ...props }) => (
 
 export const NumberEditor = ({ node, value }: OwnProps) => {
 	const saveNewValue = pipe(objOf('figure'), save(node, value))
-
 	return (
 		<KeyListener onArrowLeft={stopPropagation} onArrowRight={stopPropagation}>
 			<MaskedStyledInput
 				key={editorKey(node)}
 				mask={Number}
-				radix=","
-				defaultValue={`${value?.value.figure}`}
+				radix="."
+				defaultValue={value?.value.figure}
 				unmask="typed"
 				onAccept={unless(equals(value?.value.figure), saveNewValue)}
 			/>
