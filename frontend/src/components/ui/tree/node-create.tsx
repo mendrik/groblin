@@ -34,14 +34,14 @@ type NodeCreatePosition =
 	| 'sibling-below'
 
 const $node = signal<TreeNode>()
-export const $createDialogOpen = signal(false)
-export const $createNodePosition = signal<NodeCreatePosition>('child')
+const $dialogOpen = signal(false)
+const $position = signal<NodeCreatePosition>('child')
 export const openNodeCreate = (node: TreeNode, pos: NodeCreatePosition) => {
 	setSignal($node, node)
-	setSignal($createNodePosition, pos)
-	setSignal($createDialogOpen, true)
+	setSignal($position, pos)
+	setSignal($dialogOpen, true)
 }
-const close = pipe(F, setSignal($createDialogOpen))
+const close = pipe(F, setSignal($dialogOpen))
 
 const newNodeSchema = () =>
 	strictObject({
@@ -81,8 +81,8 @@ const order = match<[NodeCreatePosition], number>(
 
 const createNodeCommand: (data: NewNodeSchema) => Promise<number> = pipeAsync(
 	evolveAlt({
-		parent_id: () => parent($createNodePosition.value),
-		order: () => order($createNodePosition.value)
+		parent_id: () => parent($position.value),
+		order: () => order($position.value)
 	}),
 	openParent,
 	insertNode
@@ -92,12 +92,10 @@ export const NodeCreate = () => {
 	const [formApi, ref] = useFormState<NewNodeSchema>()
 
 	return (
-		<Dialog open={$createDialogOpen.value}>
+		<Dialog open={$dialogOpen.value}>
 			<DialogContent close={close}>
 				<DialogHeader>
-					<DialogTitle>
-						Create node {position($createNodePosition.value)}
-					</DialogTitle>
+					<DialogTitle>Create node {position($position.value)}</DialogTitle>
 					<DialogDescription>
 						Please select the type of node you want to add to the tree at the
 						specified location.

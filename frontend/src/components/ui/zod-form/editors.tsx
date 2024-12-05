@@ -128,6 +128,20 @@ const matcher = match<Args, ReactNode>(
 			</FormControl>
 		)
 	),
+	caseOf(
+		[{ editor: EditorType.File }, _, _],
+		(desc, _, { value, ...field }) => (
+			<FormControl>
+				<Input
+					{...field}
+					className="py-2"
+					accept=".json"
+					type="file"
+					placeholder={desc.placeholder}
+				/>
+			</FormControl>
+		)
+	),
 	caseOf([_, _, _], (a, b: any, _) => {
 		return (
 			<div>

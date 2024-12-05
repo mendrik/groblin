@@ -6,25 +6,16 @@ import { IconPackageImport } from '@tabler/icons-react'
 import { T as _ } from 'ramda'
 import type { ReactNode } from 'react'
 import { DropdownMenuItem } from '../dropdown-menu'
+import { openImportJson } from '../io/import-dialog'
 
 type OwnProps = {
 	node: TreeNode
 }
 
-const ImportObject = ({ node }: OwnProps) => (
+const ImportJson = ({ node }: OwnProps) => (
 	<DropdownMenuItem
 		className="flex gap-2 items-center"
-		onSelect={() => console.log('click')}
-	>
-		<IconPackageImport className="w-4 h-4" />
-		<span>Import...</span>
-	</DropdownMenuItem>
-)
-
-const ImportList = ({ node }: OwnProps) => (
-	<DropdownMenuItem
-		className="flex gap-2 items-center"
-		onSelect={() => console.log('click list')}
+		onSelect={() => openImportJson(node)}
 	>
 		<IconPackageImport className="w-4 h-4" />
 		<span>Import...</span>
@@ -34,9 +25,9 @@ const ImportList = ({ node }: OwnProps) => (
 export const NodeExtraActions = ({ node }: OwnProps) => {
 	const settings = $nodeSettingsMap.value[node.id] as NodeSettings | undefined
 	return match<[TreeNode, Record<string, any>], ReactNode>(
-		caseOf([{ type: NodeType.Object }, _], () => <ImportObject node={node} />),
+		caseOf([{ type: NodeType.Object }, _], () => <ImportJson node={node} />),
 		caseOf([{ type: NodeType.List }, { excessive: true }], () => (
-			<ImportList node={node} />
+			<ImportJson node={node} />
 		)),
 		caseOf([_, _], () => null)
 	)(node, settings?.settings ?? {})
