@@ -9,11 +9,11 @@ import {
 	AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import { stopPropagation } from '@/lib/dom-events'
-import { setSignal } from '@/lib/utils'
+import { notNil, setSignal } from '@/lib/utils'
 import {
+	type TreeNode,
 	deleteNode,
 	focusNode,
-	focusedNode,
 	previousNode,
 	updateNodeContext
 } from '@/state/tree'
@@ -21,13 +21,18 @@ import { signal } from '@preact/signals-react'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import { F, T, pipe } from 'ramda'
 
+export const $node = signal<TreeNode>()
 export const $deleteDialogOpen = signal(false)
-export const openNodeDelete = pipe(T, setSignal($deleteDialogOpen))
+export const openNodeDelete: (n: TreeNode) => void = pipe(
+	setSignal($node),
+	T,
+	setSignal($deleteDialogOpen)
+)
 
 const close = pipe(F, setSignal($deleteDialogOpen))
 
 export const deleteNodeCommand = pipeAsync(
-	focusedNode,
+	() => notNil($node).id,
 	deleteNode,
 	previousNode,
 	focusNode,

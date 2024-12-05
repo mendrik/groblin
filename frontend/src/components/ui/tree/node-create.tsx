@@ -11,21 +11,17 @@ import { caseOf, match } from '@/lib/match'
 import { notNil, setSignal } from '@/lib/utils'
 import {
 	$root,
-	asNode,
-	focusNode,
-	focusedNode,
+	type TreeNode,
 	insertNode,
 	openParent,
-	parentNode,
-	refocus,
-	updateNodeContext,
-	waitForNode
+	parentOf,
+	refocus
 } from '@/state/tree'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
 import { evolveAlt } from '@shared/utils/evolve-alt'
 import { pipeAsync } from '@shared/utils/pipe-async'
-import { F, T, pipe } from 'ramda'
+import { F, pipe } from 'ramda'
 import { type TypeOf, nativeEnum, strictObject } from 'zod'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
@@ -38,12 +34,14 @@ type NodeCreatePosition =
 	| 'sibling-above'
 	| 'sibling-below'
 
+const $node = signal<TreeNode>()
 export const $createDialogOpen = signal(false)
 export const $createNodePosition = signal<NodeCreatePosition>('child')
-export const openNodeCreate = pipe(
-	setSignal($createNodePosition),
-	pipe(T, setSignal($createDialogOpen))
-)
+export const openNodeCreate = (node: TreeNode, pos: NodeCreatePosition) => {
+	setSignal($node, node)
+	setSignal($createNodePosition, pos)
+	setSignal($createDialogOpen, true)
+}
 const close = pipe(F, setSignal($createDialogOpen))
 
 const newNodeSchema = () =>
@@ -70,25 +68,16 @@ const position = match<[NodeCreatePosition], string>(
 
 const parent = match<[NodeCreatePosition], number>(
 	caseOf(['root-child'], () => notNil($root).id),
-	caseOf(['child'], focusedNode),
-	caseOf(['sibling-above'], parentNode),
-	caseOf(['sibling-below'], parentNode)
+	caseOf(['child'], () => notNil($node).id),
+	caseOf(['sibling-above'], () => parentOf(notNil($node).id)),
+	caseOf(['sibling-below'], () => parentOf(notNil($node).id))
 )
 
 const order = match<[NodeCreatePosition], number>(
 	caseOf(['root-child'], () => 0),
-	caseOf(
-		['child'],
-		pipe(focusedNode, asNode, n => n.nodes.length)
-	),
-	caseOf(
-		['sibling-above'],
-		pipe(focusedNode, asNode, n => n.order)
-	),
-	caseOf(
-		['sibling-below'],
-		pipe(focusedNode, asNode, n => n.order + 1)
-	)
+	caseOf(['child'], () => notNil($node).nodes.length),
+	caseOf(['sibling-above'], () => notNil($node).order),
+	caseOf(['sibling-below'], () => notNil($node).order + 1)
 )
 
 const createNodeCommand: (data: NewNodeSchema) => Promise<number> = pipeAsync(
@@ -97,10 +86,7 @@ const createNodeCommand: (data: NewNodeSchema) => Promise<number> = pipeAsync(
 		order: () => order($createNodePosition.value)
 	}),
 	openParent,
-	insertNode,
-	waitForNode,
-	updateNodeContext,
-	focusNode
+	insertNode
 )
 
 export const NodeCreate = () => {

@@ -168,6 +168,7 @@ export class NodeResolver {
 				.where('order', '>', order)
 				.where('parent_id', '=', parent_id ?? null)
 				.where('project_id', '=', user.lastProjectId)
+				.where('type', '!=', NodeType.root)
 				.set({ order: sql`"order" - 1` })
 				.execute()
 

@@ -5,19 +5,22 @@ import { type TreeNode, confirmNodeName, stopEditing } from '@/state/tree'
 import { pipeTap } from '@shared/utils/pipe-tap'
 import { IconPencil } from '@tabler/icons-react'
 import { pipe } from 'ramda'
-import { forwardRef, useLayoutEffect } from 'react'
+import { type MutableRefObject, forwardRef, useLayoutEffect } from 'react'
 import { Input } from '../input'
 
 type OwnProps = {
 	node: TreeNode
-	textBtn: React.Ref<HTMLButtonElement>
+	textBtn: MutableRefObject<HTMLButtonElement | undefined>
 }
 
 export const NodeEditor = forwardRef<HTMLInputElement, OwnProps>(
 	({ node, textBtn }, ref) => {
 		useLayoutEffect(() => {
 			if (isActiveRef(ref)) {
+				console.log(ref.current)
+				ref.current.focus()
 				ref.current.select()
+				console.log(document.activeElement)
 			}
 		}, [ref])
 

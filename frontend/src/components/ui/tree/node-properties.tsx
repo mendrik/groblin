@@ -31,7 +31,7 @@ const dialogClose = pipe(close, refocus)
 export const NodeProperties = <T extends ZodRawShape>() => {
 	const [formApi, ref] = useFormState<T>()
 	if ($node.value === undefined) return null
-	const oldValue = notNil($nodeSettingsMap, notNil($node, 'id'))
+	const oldValue = $nodeSettingsMap.value[notNil($node, 'id')]
 
 	return (
 		<Dialog open={$dialogOpen.value}>

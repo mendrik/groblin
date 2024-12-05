@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 import { $editingNode, type TreeNode, isOpen } from '@/state/tree'
 import { always } from 'ramda'
-import { useRef } from 'react'
+import { type LegacyRef, useRef } from 'react'
 import { NodeActions } from './node-actions'
 import { NodeChevron } from './node-chevron'
 import { NodeEditor } from './node-editor'
@@ -14,8 +14,8 @@ type OwnProps = {
 
 export const Node = ({ node, depth }: OwnProps) => {
 	const open = isOpen(node.id)
-	const editor = useRef<HTMLInputElement>(null)
-	const textBtn = useRef<HTMLButtonElement>(null)
+	const editor = useRef<HTMLInputElement>()
+	const textBtn = useRef<HTMLButtonElement>()
 
 	return (
 		<ol className={cn(`list-none m-0`)} style={{ paddingLeft: depth * 8 }}>
@@ -23,9 +23,16 @@ export const Node = ({ node, depth }: OwnProps) => {
 				<div className="flex flex-row items-center justify-start w-full gap-1">
 					<NodeChevron node={node} />
 					{node.id === $editingNode.value ? (
-						<NodeEditor node={node} ref={editor} textBtn={textBtn} />
+						<NodeEditor
+							node={node}
+							ref={editor as LegacyRef<HTMLInputElement>}
+							textBtn={textBtn}
+						/>
 					) : (
-						<NodeText node={node} ref={textBtn} />
+						<NodeText
+							node={node}
+							ref={textBtn as LegacyRef<HTMLButtonElement>}
+						/>
 					)}
 					<NodeActions node={node} editor={editor} />
 				</div>

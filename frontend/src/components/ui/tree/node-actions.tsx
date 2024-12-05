@@ -5,9 +5,8 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { focusOn, preventDefault, stopPropagation } from '@/lib/dom-events'
+import { preventDefault, stopPropagation } from '@/lib/dom-events'
 import { type TreeNode, startEditing } from '@/state/tree'
-import { pipeTap } from '@shared/utils/pipe-tap'
 import {
 	IconCopyPlus,
 	IconCursorText,
@@ -16,7 +15,7 @@ import {
 	IconRowInsertTop,
 	IconTrash
 } from '@tabler/icons-react'
-import type { RefObject } from 'react'
+import type { MutableRefObject } from 'react'
 import { openNodeCreate } from './node-create'
 import { openNodeDelete } from './node-delete'
 import { openNodeProperties } from './node-properties'
@@ -24,7 +23,7 @@ import { canHaveChildren } from './utils'
 
 type OwnProps = {
 	node: TreeNode
-	editor: RefObject<HTMLInputElement>
+	editor: MutableRefObject<HTMLInputElement | undefined>
 }
 
 export const NodeActions = ({ node, editor }: OwnProps) => {
@@ -39,13 +38,14 @@ export const NodeActions = ({ node, editor }: OwnProps) => {
 				/>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent
+				onFocus={stopPropagation}
 				onCloseAutoFocus={preventDefault}
 				onKeyDown={stopPropagation}
 			>
 				{canHaveChildren(node) && (
 					<DropdownMenuItem
 						className="flex gap-2 items-center"
-						onClick={() => openNodeCreate('child')}
+						onClick={() => openNodeCreate(node, 'child')}
 					>
 						<IconCopyPlus className="w-4 h-4" />
 						<span>Add child…</span>
@@ -53,14 +53,14 @@ export const NodeActions = ({ node, editor }: OwnProps) => {
 				)}
 				<DropdownMenuItem
 					className="flex gap-2 items-center"
-					onClick={() => openNodeCreate('sibling-above')}
+					onClick={() => openNodeCreate(node, 'sibling-above')}
 				>
 					<IconRowInsertTop className="w-4 h-4" />
 					<span>Insert above…</span>
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					className="flex gap-2 items-center"
-					onClick={() => openNodeCreate('sibling-below')}
+					onClick={() => openNodeCreate(node, 'sibling-below')}
 				>
 					<IconRowInsertBottom className="w-4 h-4" />
 					<span>Insert below…</span>
@@ -68,14 +68,14 @@ export const NodeActions = ({ node, editor }: OwnProps) => {
 				<DropdownMenuSeparator />
 				<DropdownMenuItem
 					className="flex gap-2 items-center"
-					onClick={pipeTap(startEditing, focusOn(editor))}
+					onClick={() => startEditing(node.id)}
 				>
 					<IconCursorText className="w-4 h-4" />
 					<span>Rename</span>
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					className="flex gap-2 items-center"
-					onSelect={openNodeDelete}
+					onSelect={() => openNodeDelete(node)}
 				>
 					<IconTrash className="w-4 h-4" />
 					<span>Delete…</span>

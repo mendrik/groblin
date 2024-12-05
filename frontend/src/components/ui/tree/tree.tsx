@@ -1,11 +1,8 @@
 import { Node } from '@/components/ui/tree/node'
 import { EmptyList } from '@/components/utils/empty-list'
 import { dataInt, safeDataInt } from '@/lib/dom-events'
-import { notNil } from '@/lib/utils'
 import {
-	$focusedNode,
 	type TreeNode,
-	asNode,
 	closeNode,
 	focusNode,
 	nextNode,
@@ -49,7 +46,7 @@ export const Tree = ({ root }: OwnProps) => {
 					<EmptyList list={root.nodes}>
 						<div className="flex justify-center p-4">
 							<Button
-								onClick={() => openNodeCreate('root-child')}
+								onClick={() => openNodeCreate(root, 'root-child')}
 								variant="outline"
 							>
 								Add node…
@@ -60,9 +57,7 @@ export const Tree = ({ root }: OwnProps) => {
 			</KeyListener>
 			<NodeDelete />
 			<NodeCreate />
-			{$focusedNode.value != null && (
-				<NodeProperties node={asNode(notNil($focusedNode))} />
-			)}
+			<NodeProperties />
 		</>
 	)
 }

@@ -68,7 +68,7 @@ $root.subscribe(
 $nodeStates.subscribe(setItem('tree-state'))
 
 /** ---- interfaces ---- **/
-export const startEditing = () => ($editingNode.value = $focusedNode.value)
+export const startEditing: (nodeId: number) => void = setSignal($editingNode)
 export const notEditing = () => $editingNode.value === undefined
 export const isOpen = (nodeId: number): boolean =>
 	$nodeStates.value[`${nodeId}`]?.open
