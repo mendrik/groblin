@@ -9,7 +9,7 @@ export const NumberProps = object({
 		editor: EditorType.Input,
 		span: 2
 	}),
-	precision: asField(number().default(2), {
+	precision: asField(number().default(0), {
 		label: 'Precision',
 		editor: EditorType.Number,
 		span: 2
