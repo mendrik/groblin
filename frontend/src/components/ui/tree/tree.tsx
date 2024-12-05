@@ -14,7 +14,7 @@ import { isNotNil, pipe, when } from 'ramda'
 import { useRef } from 'react'
 import KeyListener from '../../utils/key-listener'
 import { Button } from '../button'
-import { ImportDialog } from '../io/import-dialog'
+import { ImportArrayDialog } from '../io/import-array-dialog'
 import { NodeCreate, openNodeCreate } from './node-create'
 import { NodeDelete } from './node-delete'
 import { NodeProperties } from './node-properties'
@@ -59,7 +59,7 @@ export const Tree = ({ root }: OwnProps) => {
 			<NodeDelete />
 			<NodeCreate />
 			<NodeProperties />
-			<ImportDialog />
+			<ImportArrayDialog />
 		</>
 	)
 }

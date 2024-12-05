@@ -50,7 +50,9 @@ const matchValue = <T>(value: T, matcher: Matcher<T>): boolean => {
 		return value === matcher
 	}
 	if (isObject(matcher) && isObject(value)) {
-		return Object.entries(matcher).every(([key, val]) => value[key] === val)
+		return Object.entries(matcher).every(([key, val]) =>
+			matchValue(value[key], val as Matcher<T>)
+		)
 	}
 	return false
 }

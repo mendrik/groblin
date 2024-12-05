@@ -1,7 +1,6 @@
 import {
 	Dialog,
 	DialogContent,
-	DialogDescription,
 	DialogFooter,
 	DialogHeader,
 	DialogTitle
@@ -13,10 +12,10 @@ import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import { F, pipe } from 'ramda'
-import { type TypeOf, boolean, instanceof as isA, strictObject } from 'zod'
+import { type TypeOf, instanceof as isA, strictObject } from 'zod'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
-import { asField, stringField } from '../zod-form/utils'
+import { asField } from '../zod-form/utils'
 import { ZodForm } from '../zod-form/zod-form'
 
 const $node = signal<TreeNode>()
@@ -27,49 +26,38 @@ export const openImportJson = (node: TreeNode) => {
 }
 const close = pipe(F, setSignal($dialogOpen))
 
-const importJsonSchema = () =>
+const importObjectSchema = () =>
 	strictObject({
 		data: asField(isA(File), {
 			label: 'Json file',
 			editor: EditorType.File,
+			extra: {
+				accept: '.json,application/json'
+			},
 			description: 'Select the json file to import'
-		}),
-		externalId: stringField(
-			'External ID',
-			EditorType.Input,
-			'off',
-			'External ID of the node'
-		),
-		structure: asField(boolean().default(true), {
-			label: 'Structure',
-			editor: EditorType.Switch,
-			description: 'Create missing structure'
 		})
 	})
 
-export type ImportJsonSchema = TypeOf<ReturnType<typeof importJsonSchema>>
+export type ImportObjectSchema = TypeOf<ReturnType<typeof importObjectSchema>>
 
-const importCommand: (data: ImportJsonSchema) => Promise<boolean> = pipeAsync(
+const importCommand: (data: ImportObjectSchema) => Promise<boolean> = pipeAsync(
 	() => console.log('Importing JSON'),
 	() => true
 )
 
-export const ImportDialog = () => {
-	const [formApi, ref] = useFormState<ImportJsonSchema>()
+export const ImportObjectDialog = () => {
+	const [formApi, ref] = useFormState<ImportObjectSchema>()
 
 	return (
 		<Dialog open={$dialogOpen.value}>
 			<DialogContent close={close}>
 				<DialogHeader>
 					<DialogTitle>
-						Import JSON to <strong>{$node.value?.name}</strong>
+						Import json object to <strong>{$node.value?.name}</strong>
 					</DialogTitle>
-					<DialogDescription>
-						Objects can import only objects and lists can import only arrays.
-					</DialogDescription>
 				</DialogHeader>
 				<ZodForm
-					schema={importJsonSchema()}
+					schema={importObjectSchema()}
 					columns={2}
 					onSubmit={pipe(importCommand, close)}
 					ref={ref}

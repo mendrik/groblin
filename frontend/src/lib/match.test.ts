@@ -1,4 +1,4 @@
-import { T as _, equals, gt, is, values } from 'ramda'
+import { T as _, equals, gt, is, isEmpty, values } from 'ramda'
 import { isNumber, isString } from 'ramda-adjunct'
 import { describe, expect, it } from 'vitest'
 import { ZodNativeEnum, type ZodTypeAny, nativeEnum } from 'zod'
@@ -73,5 +73,15 @@ describe('pattern', () => {
 		expect(matcher({ a: 4, b: 2 })).toBe('match')
 		expect(matcher({ b: 3 })).toBe('no match')
 		expect(matcher({ a: 2, c: 3 })).toBe('no match')
+	})
+
+	it('should match object matchers', () => {
+		const matcher = match<[object], string>(
+			caseOf([{ a: isEmpty }], () => `match`),
+			caseOf([_], () => `no match`)
+		)
+
+		expect(matcher({ a: [] })).toBe('match')
+		expect(matcher({ a: [1, 2, 3] })).toBe('no match')
 	})
 })

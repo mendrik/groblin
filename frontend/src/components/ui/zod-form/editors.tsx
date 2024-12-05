@@ -135,7 +135,7 @@ const matcher = match<Args, ReactNode>(
 				<Input
 					{...field}
 					className="py-2"
-					accept=".json"
+					{...desc.extra}
 					type="file"
 					placeholder={desc.placeholder}
 				/>
