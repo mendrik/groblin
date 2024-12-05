@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dialog'
 import { notNil, setSignal } from '@/lib/utils'
 import { $nodeSettingsMap, saveNodeSettings } from '@/state/node-settings'
-import { type TreeNode, refocus } from '@/state/tree'
+import type { TreeNode } from '@/state/tree'
 import { signal } from '@preact/signals-react'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import { F, T, pipe } from 'ramda'
@@ -26,7 +26,6 @@ export const openNodeProperties: (node: TreeNode) => void = pipe(
 	pipe(T, setSignal($dialogOpen))
 )
 const close = pipe(F, setSignal($dialogOpen))
-const dialogClose = pipe(close, refocus)
 
 export const NodeProperties = <T extends ZodRawShape>() => {
 	const [formApi, ref] = useFormState<T>()
@@ -35,7 +34,7 @@ export const NodeProperties = <T extends ZodRawShape>() => {
 
 	return (
 		<Dialog open={$dialogOpen.value}>
-			<DialogContent close={dialogClose} className="max-w-sm">
+			<DialogContent close={close} className="max-w-sm">
 				<DialogHeader>
 					<DialogTitle>Node properties</DialogTitle>
 					<DialogDescription>
@@ -53,7 +52,7 @@ export const NodeProperties = <T extends ZodRawShape>() => {
 							settings
 						}),
 						saveNodeSettings,
-						dialogClose
+						close
 					)}
 					ref={ref}
 				>

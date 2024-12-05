@@ -14,8 +14,7 @@ import {
 	type TreeNode,
 	insertNode,
 	openParent,
-	parentOf,
-	refocus
+	parentOf
 } from '@/state/tree'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
@@ -91,11 +90,10 @@ const createNodeCommand: (data: NewNodeSchema) => Promise<number> = pipeAsync(
 
 export const NodeCreate = () => {
 	const [formApi, ref] = useFormState<NewNodeSchema>()
-	const dialogClose = pipe(close, refocus)
 
 	return (
 		<Dialog open={$createDialogOpen.value}>
-			<DialogContent close={dialogClose}>
+			<DialogContent close={close}>
 				<DialogHeader>
 					<DialogTitle>
 						Create node {position($createNodePosition.value)}
@@ -108,7 +106,7 @@ export const NodeCreate = () => {
 				<ZodForm
 					schema={newNodeSchema()}
 					columns={2}
-					onSubmit={pipe(createNodeCommand, dialogClose)}
+					onSubmit={pipe(createNodeCommand, close)}
 					ref={ref}
 				>
 					<DialogFooter className="gap-y-2">

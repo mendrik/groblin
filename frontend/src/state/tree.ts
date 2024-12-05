@@ -152,11 +152,6 @@ export const focusNode = (nodeId: number): number => {
 	return nodeId
 }
 
-export const refocus = () => {
-	const nodeId = focusedNode()
-	focusNode(nodeId)
-}
-
 export const updateNodeState =
 	(state: Partial<NodeState>) => (nodeId: number) => {
 		$nodeStates.value = over(
