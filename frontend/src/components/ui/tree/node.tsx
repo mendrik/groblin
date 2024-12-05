@@ -34,7 +34,7 @@ export const Node = ({ node, depth }: OwnProps) => {
 							ref={textBtn as LegacyRef<HTMLButtonElement>}
 						/>
 					)}
-					<NodeActions node={node} editor={editor} />
+					<NodeActions node={node} />
 				</div>
 				{node.nodes.filter(always(open)).map(child => (
 					<Node node={child} key={child.id} depth={depth + 1} />

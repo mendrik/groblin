@@ -4,20 +4,17 @@ import type { TreeNode } from '@/state/tree'
 import {
 	IconCalendarClock,
 	IconCalendarMonth,
-	IconClock,
 	IconDatabase,
 	IconHelpHexagon,
 	IconLetterCase,
-	IconMail,
 	IconMapPin,
+	IconMarkdown,
 	IconNumber123,
 	IconPalette,
 	IconPaperclip,
-	IconPhoneCall,
 	type IconProps,
 	IconSitemap,
-	IconToggleLeft,
-	IconWorldWww
+	IconToggleLeft
 } from '@tabler/icons-react'
 import { T as _ } from 'ramda'
 import type { ReactNode } from 'react'
@@ -42,11 +39,8 @@ export const NodeIcon = ({ node, ...props }: OwnProps) =>
 		caseOf([{ type: NodeType.String }, _], (_, p) => <IconLetterCase {...p} />),
 		caseOf([{ type: NodeType.Color }, _], (_, p) => <IconPalette {...p} />),
 		caseOf([{ type: NodeType.Location }, _], (_, p) => <IconMapPin {...p} />),
-		caseOf([{ type: NodeType.Email }, _], (_, p) => <IconMail {...p} />),
 		caseOf([{ type: NodeType.Media }, _], (_, p) => <IconPaperclip {...p} />),
-		caseOf([{ type: NodeType.Phone }, _], (_, p) => <IconPhoneCall {...p} />),
-		caseOf([{ type: NodeType.Time }, _], (_, p) => <IconClock {...p} />),
-		caseOf([{ type: NodeType.Url }, _], (_, p) => <IconWorldWww {...p} />),
+		caseOf([{ type: NodeType.Article }, _], (_, p) => <IconMarkdown {...p} />),
 		caseOf([{ type: NodeType.Event }, _], (_, p) => (
 			<IconCalendarClock {...p} />
 		)),

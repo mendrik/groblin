@@ -3,6 +3,7 @@ import { caseOf, match } from '@/lib/match'
 import type { TreeNode } from '@/state/tree'
 import { F, type Pred, T, T as _ } from 'ramda'
 import { type ZodObject, object } from 'zod'
+import { ListProps } from './properties/list'
 import { NumberProps } from './properties/numbers'
 
 export const canHaveChildren: Pred<[TreeNode]> = match(
@@ -12,6 +13,7 @@ export const canHaveChildren: Pred<[TreeNode]> = match(
 )
 
 export const nodePropertiesForm: (node: TreeNode) => ZodObject<any> = match(
+	caseOf([{ type: NodeType.List }], () => ListProps),
 	caseOf([{ type: NodeType.Number }], () => NumberProps),
 	caseOf([_], () => object({}))
 )

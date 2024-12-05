@@ -15,7 +15,6 @@ import {
 	IconRowInsertTop,
 	IconTrash
 } from '@tabler/icons-react'
-import type { MutableRefObject } from 'react'
 import { openNodeCreate } from './node-create'
 import { openNodeDelete } from './node-delete'
 import { openNodeProperties } from './node-properties'
@@ -23,10 +22,9 @@ import { canHaveChildren } from './utils'
 
 type OwnProps = {
 	node: TreeNode
-	editor: MutableRefObject<HTMLInputElement | undefined>
 }
 
-export const NodeActions = ({ node, editor }: OwnProps) => {
+export const NodeActions = ({ node }: OwnProps) => {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger className="no-focus" onKeyDown={stopPropagation}>

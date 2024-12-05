@@ -37,9 +37,7 @@ export const NodeProperties = <T extends ZodRawShape>() => {
 			<DialogContent close={close} className="max-w-sm">
 				<DialogHeader>
 					<DialogTitle>Node properties</DialogTitle>
-					<DialogDescription>
-						Configure how node values will be displayed and edited.
-					</DialogDescription>
+					<DialogDescription>Configure node type editor</DialogDescription>
 				</DialogHeader>
 				<ZodForm
 					schema={nodePropertiesForm($node.value)}
