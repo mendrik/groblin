@@ -13,6 +13,7 @@ import {
 	IconPalette,
 	IconPaperclip,
 	type IconProps,
+	IconSelect,
 	IconSitemap,
 	IconToggleLeft
 } from '@tabler/icons-react'
@@ -41,6 +42,7 @@ export const NodeIcon = ({ node, ...props }: OwnProps) =>
 		caseOf([{ type: NodeType.Location }, _], (_, p) => <IconMapPin {...p} />),
 		caseOf([{ type: NodeType.Media }, _], (_, p) => <IconPaperclip {...p} />),
 		caseOf([{ type: NodeType.Article }, _], (_, p) => <IconMarkdown {...p} />),
+		caseOf([{ type: NodeType.Enum }, _], (_, p) => <IconSelect {...p} />),
 		caseOf([{ type: NodeType.Event }, _], (_, p) => (
 			<IconCalendarClock {...p} />
 		)),

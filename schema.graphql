@@ -21,6 +21,7 @@ enum NodeType {
   number
   boolean
   list
+  enum
   date
   color
   location

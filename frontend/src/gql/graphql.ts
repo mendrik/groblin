@@ -136,6 +136,7 @@ export enum NodeType {
   Boolean = 'boolean',
   Color = 'color',
   Date = 'date',
+  Enum = 'enum',
   Event = 'event',
   List = 'list',
   Location = 'location',

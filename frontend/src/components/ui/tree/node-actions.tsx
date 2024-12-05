@@ -17,6 +17,7 @@ import {
 } from '@tabler/icons-react'
 import { openNodeCreate } from './node-create'
 import { openNodeDelete } from './node-delete'
+import { NodeExtraActions } from './node-extra-actions'
 import { openNodeProperties } from './node-properties'
 import { canHaveChildren } from './utils'
 
@@ -86,6 +87,7 @@ export const NodeActions = ({ node }: OwnProps) => {
 					<IconTrash className="w-4 h-4" />
 					<span>Properties…</span>
 				</DropdownMenuItem>
+				<NodeExtraActions node={node} />
 			</DropdownMenuContent>
 		</DropdownMenu>
 	)

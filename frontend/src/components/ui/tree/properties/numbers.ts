@@ -12,7 +12,26 @@ export const NumberProps = object({
 	precision: asField(number().default(0), {
 		label: 'Precision',
 		editor: EditorType.Number,
-		span: 2
+		span: 2,
+		extra: {
+			scale: 0,
+			min: 0,
+			max: 5
+		}
+	}),
+	minimum: asField(number().optional(), {
+		label: 'Minimum',
+		editor: EditorType.Number,
+		extra: {
+			scale: 2
+		}
+	}),
+	maximum: asField(number().optional(), {
+		label: 'Maximum',
+		editor: EditorType.Number,
+		extra: {
+			scale: 0
+		}
 	}),
 	required
 })

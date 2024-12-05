@@ -15,7 +15,8 @@ export const FieldMeta = object({
 	editor: nativeEnum(EditorType),
 	placeholder: string().optional(),
 	span: number().optional(),
-	autofill: string().optional()
+	autofill: string().optional(),
+	extra: any().optional()
 })
 
 export const FieldSelectMeta = FieldMeta.extend({

@@ -42,6 +42,8 @@ export const NumberEditor = ({ node, value }: OwnProps) => {
 						mask: Number,
 						unmask: 'typed',
 						radix: '.',
+						min: settings?.minimum ?? Number.NEGATIVE_INFINITY,
+						max: settings?.maximum ?? Number.POSITIVE_INFINITY,
 						thousandsSeparator: ','
 					}
 				}}
