@@ -6,7 +6,7 @@ import {
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { focusOn, preventDefault, stopPropagation } from '@/lib/dom-events'
-import { $focusedNode, type TreeNode, startEditing } from '@/state/tree'
+import { type TreeNode, startEditing } from '@/state/tree'
 import { pipeTap } from '@shared/utils/pipe-tap'
 import {
 	IconCopyPlus,
@@ -28,7 +28,7 @@ type OwnProps = {
 }
 
 export const NodeActions = ({ node, editor }: OwnProps) => {
-	return $focusedNode.value === node.id ? (
+	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger className="no-focus" onKeyDown={stopPropagation}>
 				<IconDots
@@ -90,7 +90,5 @@ export const NodeActions = ({ node, editor }: OwnProps) => {
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
-	) : (
-		<div className="w-4 h-6 shrink-0 ml-auto" />
 	)
 }
