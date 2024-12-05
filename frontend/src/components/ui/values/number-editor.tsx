@@ -22,9 +22,12 @@ export const NumberEditor = ({ node, value }: OwnProps) => {
 		| undefined
 
 	return (
-		<KeyListener onArrowLeft={stopPropagation} onArrowRight={stopPropagation}>
+		<KeyListener
+			onArrowLeft={stopPropagation}
+			onArrowRight={stopPropagation}
+			key={editorKey(node, value)}
+		>
 			<MaskedInput
-				key={editorKey(node)}
 				mask={
 					settings?.unit && value?.value.figure ? `num ${settings.unit}` : 'num'
 				}

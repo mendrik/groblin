@@ -24,7 +24,7 @@ export const ColorEditor = ({ node, value }: OwnProps) => {
 	return (
 		<KeyListener onArrowLeft={stopPropagation} onArrowRight={stopPropagation}>
 			<Button
-				key={editorKey(node)}
+				key={editorKey(node, value)}
 				variant="ghost"
 				type="button"
 				className={cn(

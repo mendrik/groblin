@@ -16,7 +16,7 @@ export const BooleanEditor = ({ node, value }: OwnProps) => {
 	return (
 		<Switch
 			className="ml-1"
-			key={editorKey(node)}
+			key={editorKey(node, value)}
 			onCheckedChange={saveNewValue}
 			defaultChecked={value?.value.state}
 		/>

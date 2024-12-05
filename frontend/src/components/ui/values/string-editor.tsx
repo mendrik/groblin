@@ -20,7 +20,7 @@ export const StringEditor = ({ node, value }: OwnProps) => {
 	return (
 		<KeyListener onArrowLeft={stopPropagation} onArrowRight={stopPropagation}>
 			<input
-				key={editorKey(node)}
+				key={editorKey(node, value)}
 				className="h-7 w-full bg-transparent border-none appearance-none outline-none ring-0 ml-1"
 				defaultValue={value?.value.content}
 				onBlur={saveInput(node, value)}

@@ -64,8 +64,8 @@ const matcher = match<Args, ReactNode>(
 	caseOf([_, _], node => <div className="ml-1">{node.name}</div>)
 )
 
-export const editorKey = (node: TreeNode) =>
-	`${node.id}-${listPath(node)?.join('-')}`
+export const editorKey = (node: TreeNode, value: Value | undefined) =>
+	value?.id ?? `${node.id}-${listPath(node)?.join('-')}`
 
 export const save = <T extends Value>(node: TreeNode, value?: T) =>
 	pipeAsync(
