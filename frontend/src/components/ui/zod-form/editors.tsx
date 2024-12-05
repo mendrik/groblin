@@ -134,7 +134,7 @@ const matcher = match<Args, ReactNode>(
 			<FormControl>
 				<Input
 					{...field}
-					className="py-2"
+					className="p-2"
 					{...desc.extra}
 					type="file"
 					placeholder={desc.placeholder}
