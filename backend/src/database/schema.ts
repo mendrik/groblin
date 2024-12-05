@@ -58,6 +58,7 @@ export interface User {
 }
 
 export interface Values {
+  external_id: string | null;
   id: Generated<number>;
   list_path: number[] | null;
   node_id: number;

@@ -65,8 +65,9 @@ ALTER SEQUENCE public.node_id_seq OWNED BY public.node.id;
 
 CREATE TABLE public.node_settings (
     id integer NOT NULL,
-    node_id integer,
-    settings jsonb
+    node_id integer NOT NULL,
+    settings jsonb,
+    project_id integer NOT NULL
 );
 
 
@@ -189,7 +190,8 @@ CREATE TABLE public."values" (
     value jsonb,
     project_id integer NOT NULL,
     "order" integer DEFAULT 0 NOT NULL,
-    list_path integer[]
+    list_path integer[],
+    external_id text
 );
 
 
@@ -301,6 +303,13 @@ ALTER TABLE ONLY public."values"
 
 
 --
+-- Name: external_id_1733431595845_index; Type: INDEX; Schema: public; Owner: groblin
+--
+
+CREATE INDEX external_id_1733431595845_index ON public."values" USING btree (external_id);
+
+
+--
 -- Name: idx_values_node_id; Type: INDEX; Schema: public; Owner: groblin
 --
 
@@ -379,6 +388,14 @@ ALTER TABLE ONLY public.node
 
 ALTER TABLE ONLY public.node_settings
     ADD CONSTRAINT node_settings_node_id_fkey FOREIGN KEY (node_id) REFERENCES public.node(id) ON DELETE CASCADE;
+
+
+--
+-- Name: node_settings node_settings_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public.node_settings
+    ADD CONSTRAINT node_settings_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.project(id) ON DELETE CASCADE;
 
 
 --
