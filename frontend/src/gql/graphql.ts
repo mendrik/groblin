@@ -17,6 +17,8 @@ export type Scalars = {
   DateTimeISO: { input: any; output: any; }
   /** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSONObject: { input: any; output: any; }
+  /** The `Upload` scalar type represents a file upload. */
+  Upload: { input: any; output: any; }
 };
 
 export type ChangeNodeInput = {
@@ -45,7 +47,7 @@ export type InsertNode = {
 };
 
 export type JsonArrayImportInput = {
-  data: Scalars['Int']['input'];
+  data: Scalars['Upload']['input'];
   external_id: Scalars['String']['input'];
   node_id: Scalars['Int']['input'];
   structure: Scalars['Boolean']['input'];

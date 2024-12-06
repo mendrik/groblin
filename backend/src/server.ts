@@ -2,7 +2,6 @@ import 'reflect-metadata'
 import 'dotenv/config'
 import { createServer } from 'node:http'
 import { makeExecutableSchema } from '@graphql-tools/schema'
-import {} from 'ansicolor'
 import { execute, subscribe } from 'graphql'
 import { useServer } from 'graphql-ws/lib/use/ws'
 import { createYoga } from 'graphql-yoga'
@@ -33,5 +32,5 @@ useServer({ schema, execute, subscribe, context, onConnect, onError }, wsServer)
 initializeEmailService()
 
 httpServer.listen(6173, () => {
-	console.log(`Server is running on port 6153 ${yogaApp.graphqlEndpoint}`)
+	console.log(`Server is running on port 6153`)
 })

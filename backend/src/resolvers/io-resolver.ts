@@ -20,13 +20,13 @@ export class JsonArrayImportInput {
 	@Field(type => Int)
 	node_id: number
 
-	@Field(type => Int)
-	data: number
+	@Field(type => File)
+	data: File
 
 	@Field(type => String)
 	external_id: string
 
-	@Field(type => String)
+	@Field(type => Boolean)
 	structure: boolean
 }
 
@@ -40,7 +40,7 @@ export class IoResolver {
 		@Arg('data', () => JsonArrayImportInput) data: JsonArrayImportInput,
 		@Ctx() { db, extra: user, pubSub }: Context
 	) {
-		console.log('import array', data)
+		console.log('import array', data.data.name)
 		pubSub.publish(Topic.NodesUpdated, true)
 		pubSub.publish(Topic.ValuesUpdated, true)
 		return true

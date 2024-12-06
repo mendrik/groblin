@@ -110,10 +110,13 @@ input Login {
 
 input JsonArrayImportInput {
   node_id: Int!
-  data: Int!
+  data: Upload!
   external_id: String!
   structure: Boolean!
 }
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
 
 input InsertNode {
   name: String!
