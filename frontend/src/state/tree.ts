@@ -1,5 +1,5 @@
 import { Api, Subscribe } from '@/gql-client'
-import type { InsertNode, Node } from '@/gql/graphql.ts'
+import type { InsertNode, JsonArrayImportInput, Node } from '@/gql/graphql.ts'
 import { getItem, setItem } from '@/lib/local-storage'
 import { computeSignal, notNil, setSignal } from '@/lib/utils'
 import { waitForId } from '@/lib/wait-for-id'
@@ -245,3 +245,6 @@ export const parentOf = (node_id: number | undefined): number => {
 	assertExists($root.value, 'Root node is missing')
 	return parentInTree($root.value, node_id)
 }
+
+export const importArray = (data: JsonArrayImportInput) =>
+	Api.ImportArray({ data })

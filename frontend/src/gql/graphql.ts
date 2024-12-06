@@ -44,6 +44,13 @@ export type InsertNode = {
   type: NodeType;
 };
 
+export type JsonArrayImportInput = {
+  data: Scalars['Int']['input'];
+  external_id: Scalars['String']['input'];
+  node_id: Scalars['Int']['input'];
+  structure: Scalars['Boolean']['input'];
+};
+
 export type LoggedInUser = {
   email: Scalars['String']['output'];
   id: Scalars['Int']['output'];
@@ -60,6 +67,7 @@ export type Login = {
 export type Mutation = {
   deleteListItem: Scalars['Boolean']['output'];
   deleteNodeById: Scalars['Boolean']['output'];
+  importArray: Scalars['Boolean']['output'];
   insertListItem: Scalars['Int']['output'];
   insertNode: Node;
   login: Token;
@@ -80,6 +88,11 @@ export type MutationDeleteNodeByIdArgs = {
   id: Scalars['Int']['input'];
   order: Scalars['Int']['input'];
   parent_id: Scalars['Int']['input'];
+};
+
+
+export type MutationImportArrayArgs = {
+  data: JsonArrayImportInput;
 };
 
 
@@ -344,6 +357,13 @@ export type UpsertValueMutationVariables = Exact<{
 
 export type UpsertValueMutation = { upsertValue: number };
 
+export type ImportArrayMutationVariables = Exact<{
+  data: JsonArrayImportInput;
+}>;
+
+
+export type ImportArrayMutation = { importArray: boolean };
+
 export const ValueFragmentDoc = `
     fragment Value on Value {
   id
@@ -489,6 +509,11 @@ export const UpsertValueDocument = `
   upsertValue(data: $data)
 }
     `;
+export const ImportArrayDocument = `
+    mutation ImportArray($data: JsonArrayImportInput!) {
+  importArray(data: $data)
+}
+    `;
 export type Requester<C = {}, E = unknown> = <R, V>(doc: string, vars?: V, options?: C) => Promise<ExecutionResult<R, E>> | AsyncIterable<ExecutionResult<R, E>>
 export function getSdk<C, E>(requester: Requester<C, E>) {
   return {
@@ -542,6 +567,9 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     },
     UpsertValue(variables: UpsertValueMutationVariables, options?: C): Promise<ExecutionResult<UpsertValueMutation, E>> {
       return requester<UpsertValueMutation, UpsertValueMutationVariables>(UpsertValueDocument, variables, options) as Promise<ExecutionResult<UpsertValueMutation, E>>;
+    },
+    ImportArray(variables: ImportArrayMutationVariables, options?: C): Promise<ExecutionResult<ImportArrayMutation, E>> {
+      return requester<ImportArrayMutation, ImportArrayMutationVariables>(ImportArrayDocument, variables, options) as Promise<ExecutionResult<ImportArrayMutation, E>>;
     }
   };
 }

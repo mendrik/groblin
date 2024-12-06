@@ -2,6 +2,7 @@ import 'reflect-metadata'
 import { Container } from 'inversify'
 import { LogAccess } from './middleware/log-access.ts'
 import { AuthResolver } from './resolvers/auth-resolver.ts'
+import { IoResolver } from './resolvers/io-resolver.ts'
 import { NodeResolver } from './resolvers/node-resolver.ts'
 import { NodeSettingsResolver } from './resolvers/node-settings-resolver.ts'
 import { ProjectResolver } from './resolvers/project-resolver.ts'
@@ -16,5 +17,5 @@ container.bind(AuthResolver).toSelf()
 container.bind(ProjectResolver).toSelf()
 container.bind(LogAccess).toSelf()
 container.bind(ProjectService).toSelf()
-
+container.bind(IoResolver).toSelf()
 export { container }

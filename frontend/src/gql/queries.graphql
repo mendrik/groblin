@@ -121,3 +121,7 @@ mutation DeleteListItem($id: Int!) {
 mutation UpsertValue($data: UpsertValue!) {
   upsertValue(data: $data)
 }
+
+mutation ImportArray($data: JsonArrayImportInput!) {
+  importArray(data: $data)
+}

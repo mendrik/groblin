@@ -5,13 +5,14 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { setSignal } from '@/lib/utils'
+import { notNil, setSignal } from '@/lib/utils'
 import type { TreeNode } from '@/state/tree'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
+import { evolveAlt } from '@shared/utils/evolve-alt'
 import { pipeAsync } from '@shared/utils/pipe-async'
-import { F, pipe } from 'ramda'
-import { type TypeOf, boolean, instanceof as isA, strictObject } from 'zod'
+import { F, T, pipe } from 'ramda'
+import { type TypeOf, any, boolean, strictObject } from 'zod'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
 import { asField, stringField } from '../zod-form/utils'
@@ -27,7 +28,7 @@ const close = pipe(F, setSignal($dialogOpen))
 
 const importArraySchema = () =>
 	strictObject({
-		data: asField(isA(File), {
+		data: asField(any(), {
 			label: 'Json file',
 			editor: EditorType.File,
 			extra: {
@@ -51,8 +52,10 @@ const importArraySchema = () =>
 export type ImportArraySchema = TypeOf<ReturnType<typeof importArraySchema>>
 
 const importCommand: (data: ImportArraySchema) => Promise<boolean> = pipeAsync(
-	() => console.log('Importing JSON'),
-	() => true
+	evolveAlt({
+		node_id: () => notNil($node, 'id')
+	}),
+	T
 )
 
 export const ImportArrayDialog = () => {

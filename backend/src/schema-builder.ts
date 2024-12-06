@@ -4,6 +4,7 @@ import { container } from './injections.ts'
 import { authChecker } from './middleware/auth-checker.ts'
 import { pubSub } from './pubsub.ts'
 import { AuthResolver } from './resolvers/auth-resolver.ts'
+import { IoResolver } from './resolvers/io-resolver.ts'
 import { NodeResolver } from './resolvers/node-resolver.ts'
 import { NodeSettingsResolver } from './resolvers/node-settings-resolver.ts'
 import { ProjectResolver } from './resolvers/project-resolver.ts'
@@ -14,7 +15,8 @@ const resolvers: NonEmptyArray<Function> = [
 	ProjectResolver,
 	NodeResolver,
 	NodeSettingsResolver,
-	ValueResolver
+	ValueResolver,
+	IoResolver
 ]
 
 export const schema = await buildSchema({
