@@ -45,7 +45,7 @@ export class Upload {
 
 @injectable()
 @UseMiddleware(LogAccess)
-@Authorized(Role.Admin, Role.Viewer)
+@Authorized(Role.Admin)
 @Resolver()
 export class IoResolver {
 	@Mutation(returns => Boolean)
