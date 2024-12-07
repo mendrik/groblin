@@ -2,7 +2,7 @@ import { inputValue } from '@/lib/dom-events'
 import { caseOf, match } from '@/lib/match'
 import { EditorType } from '@shared/enums'
 import type { Fn } from '@tp/functions.ts'
-import { T as _, apply, nth, pipe } from 'ramda'
+import { path, T as _, apply, nth, pipe } from 'ramda'
 import type { FC, ReactNode } from 'react'
 import type { ControllerRenderProps } from 'react-hook-form'
 import { ZodNativeEnum, ZodNumber, type ZodTypeAny } from 'zod'
@@ -130,12 +130,13 @@ const matcher = match<Args, ReactNode>(
 	),
 	caseOf(
 		[{ editor: EditorType.File }, _, _],
-		(desc, _, { value, ...field }) => (
+		(desc, _, { value, onChange, ...field }) => (
 			<FormControl>
 				<Input
 					{...field}
-					className="p-2"
 					{...desc.extra}
+					onChange={pipe(path(['target', 'files', 0]), onChange)}
+					className="p-2"
 					type="file"
 					placeholder={desc.placeholder}
 				/>

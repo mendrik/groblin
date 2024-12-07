@@ -125,3 +125,10 @@ mutation UpsertValue($data: UpsertValue!) {
 mutation ImportArray($data: JsonArrayImportInput!) {
   importArray(data: $data)
 }
+
+mutation UploadUrl($filename: String!) {
+  uploadUrl(filename: $filename) {
+    signedUrl
+    object
+  }
+}

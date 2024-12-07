@@ -1,8 +1,15 @@
-import type { EditorType } from '@shared/enums'
+import { Api } from '@/gql-client'
+import { EditorType } from '@shared/enums'
 import { isNotEmpty, mergeAll, pipe, trim } from 'ramda'
 import type { ControllerProps, FieldPath, FieldValues } from 'react-hook-form'
-import { type AnyZodObject, type ZodType, type ZodTypeDef, string } from 'zod'
 import * as z from 'zod'
+import {
+	type AnyZodObject,
+	type ZodType,
+	type ZodTypeDef,
+	instanceof as isA,
+	string
+} from 'zod'
 import type { FieldMeta } from './types'
 
 type ZodTypeEnhanced<
@@ -132,3 +139,37 @@ export const stringField = (
 
 export const enumToMap = <T extends Record<string, string>>(enumRef: T) =>
 	Object.entries(enumRef)
+
+export const fileUpload = (
+	label: string,
+	accept: string,
+	description: string
+) =>
+	asField(
+		isA(File).transform(async (file, ctx) => {
+			const { signedUrl, object } = await Api.UploadUrl({ filename: file.name })
+			const response = await fetch(signedUrl, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': file.type
+				},
+				body: file
+			})
+			if (!response.ok) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: response.statusText
+				})
+				return z.NEVER
+			}
+			return object
+		}),
+		{
+			label,
+			editor: EditorType.File,
+			extra: {
+				accept
+			},
+			description
+		}
+	)

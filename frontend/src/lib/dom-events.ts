@@ -31,6 +31,13 @@ export const inputValue = <E extends SyntheticEvent>(e: E): string => {
 	return ''
 }
 
+export const target = <E extends SyntheticEvent>(e: E): string => {
+	if (e.target instanceof HTMLInputElement) {
+		return e.target.value
+	}
+	return ''
+}
+
 export const stopPropagation = <E extends SyntheticEvent | Event>(e: E): void =>
 	e.stopPropagation()
 

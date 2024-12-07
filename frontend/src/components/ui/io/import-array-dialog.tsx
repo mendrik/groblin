@@ -6,16 +6,16 @@ import {
 	DialogTitle
 } from '@/components/ui/dialog'
 import { notNil, setSignal } from '@/lib/utils'
-import type { TreeNode } from '@/state/tree'
+import { type TreeNode, importArray } from '@/state/tree'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
 import { evolveAlt } from '@shared/utils/evolve-alt'
 import { pipeAsync } from '@shared/utils/pipe-async'
-import { F, T, pipe } from 'ramda'
-import { type TypeOf, any, boolean, strictObject } from 'zod'
+import { F, pipe } from 'ramda'
+import { type TypeOf, boolean, strictObject } from 'zod'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
-import { asField, stringField } from '../zod-form/utils'
+import { asField, fileUpload, stringField } from '../zod-form/utils'
 import { ZodForm } from '../zod-form/zod-form'
 
 const $node = signal<TreeNode>()
@@ -28,15 +28,12 @@ const close = pipe(F, setSignal($dialogOpen))
 
 const importArraySchema = () =>
 	strictObject({
-		data: asField(any(), {
-			label: 'Json file',
-			editor: EditorType.File,
-			extra: {
-				accept: '.json,application/json'
-			},
-			description: 'Select the json file to import'
-		}),
-		externalId: stringField(
+		data: fileUpload(
+			'Json file',
+			'.json,application/json',
+			'Select the json file to import'
+		),
+		external_id: stringField(
 			'External ID',
 			EditorType.Input,
 			'off',
@@ -55,7 +52,7 @@ const importCommand: (data: ImportArraySchema) => Promise<boolean> = pipeAsync(
 	evolveAlt({
 		node_id: () => notNil($node, 'id')
 	}),
-	T
+	importArray
 )
 
 export const ImportArrayDialog = () => {

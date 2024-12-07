@@ -17,8 +17,6 @@ export type Scalars = {
   DateTimeISO: { input: any; output: any; }
   /** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSONObject: { input: any; output: any; }
-  /** The `Upload` scalar type represents a file upload. */
-  Upload: { input: any; output: any; }
 };
 
 export type ChangeNodeInput = {
@@ -47,7 +45,7 @@ export type InsertNode = {
 };
 
 export type JsonArrayImportInput = {
-  data: Scalars['Upload']['input'];
+  data: Scalars['String']['input'];
   external_id: Scalars['String']['input'];
   node_id: Scalars['Int']['input'];
   structure: Scalars['Boolean']['input'];
@@ -76,6 +74,7 @@ export type Mutation = {
   logout: Scalars['Boolean']['output'];
   register: Scalars['Boolean']['output'];
   updateNode: Scalars['Boolean']['output'];
+  uploadUrl: Upload;
   upsertNodeSettings: Scalars['Int']['output'];
   upsertValue: Scalars['Int']['output'];
 };
@@ -120,6 +119,11 @@ export type MutationRegisterArgs = {
 
 export type MutationUpdateNodeArgs = {
   data: ChangeNodeInput;
+};
+
+
+export type MutationUploadUrlArgs = {
+  filename: Scalars['String']['input'];
 };
 
 
@@ -217,6 +221,11 @@ export type SubscriptionValuesUpdatedArgs = {
 export type Token = {
   expiresDate: Scalars['DateTimeISO']['output'];
   token: Scalars['String']['output'];
+};
+
+export type Upload = {
+  object: Scalars['String']['output'];
+  signedUrl: Scalars['String']['output'];
 };
 
 export type UpsertNodeSettings = {
@@ -365,6 +374,13 @@ export type ImportArrayMutationVariables = Exact<{
 
 
 export type ImportArrayMutation = { importArray: boolean };
+
+export type UploadUrlMutationVariables = Exact<{
+  filename: Scalars['String']['input'];
+}>;
+
+
+export type UploadUrlMutation = { uploadUrl: { signedUrl: string, object: string } };
 
 export const ValueFragmentDoc = `
     fragment Value on Value {
@@ -516,6 +532,14 @@ export const ImportArrayDocument = `
   importArray(data: $data)
 }
     `;
+export const UploadUrlDocument = `
+    mutation UploadUrl($filename: String!) {
+  uploadUrl(filename: $filename) {
+    signedUrl
+    object
+  }
+}
+    `;
 export type Requester<C = {}, E = unknown> = <R, V>(doc: string, vars?: V, options?: C) => Promise<ExecutionResult<R, E>> | AsyncIterable<ExecutionResult<R, E>>
 export function getSdk<C, E>(requester: Requester<C, E>) {
   return {
@@ -572,6 +596,9 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     },
     ImportArray(variables: ImportArrayMutationVariables, options?: C): Promise<ExecutionResult<ImportArrayMutation, E>> {
       return requester<ImportArrayMutation, ImportArrayMutationVariables>(ImportArrayDocument, variables, options) as Promise<ExecutionResult<ImportArrayMutation, E>>;
+    },
+    UploadUrl(variables: UploadUrlMutationVariables, options?: C): Promise<ExecutionResult<UploadUrlMutation, E>> {
+      return requester<UploadUrlMutation, UploadUrlMutationVariables>(UploadUrlDocument, variables, options) as Promise<ExecutionResult<UploadUrlMutation, E>>;
     }
   };
 }
