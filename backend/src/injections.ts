@@ -8,6 +8,7 @@ import { NodeSettingsResolver } from './resolvers/node-settings-resolver.ts'
 import { ProjectResolver } from './resolvers/project-resolver.ts'
 import { ValueResolver } from './resolvers/value-resolver.ts'
 import { ProjectService } from './services/project-service.ts'
+import { S3Client } from './services/s3-client.ts'
 
 const container = new Container()
 container.bind(NodeResolver).toSelf()
@@ -18,4 +19,5 @@ container.bind(ProjectResolver).toSelf()
 container.bind(LogAccess).toSelf()
 container.bind(ProjectService).toSelf()
 container.bind(IoResolver).toSelf()
+container.bind(S3Client).toSelf()
 export { container }

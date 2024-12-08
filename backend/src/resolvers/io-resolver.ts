@@ -1,10 +1,11 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 import type { Context } from 'src/context.ts'
 import { Role } from 'src/enums.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import { Topic } from 'src/pubsub.ts'
+import { S3Client } from 'src/services/s3-client.ts'
 import {
 	Arg,
 	Authorized,
@@ -48,12 +49,17 @@ export class Upload {
 @Authorized(Role.Admin)
 @Resolver()
 export class IoResolver {
+	@inject(S3Client)
+	private readonly s3: S3Client
+
 	@Mutation(returns => Boolean)
 	async importArray(
-		@Arg('data', () => JsonArrayImportInput) data: JsonArrayImportInput,
+		@Arg('data', () => JsonArrayImportInput) payload: JsonArrayImportInput,
 		@Ctx() { db, extra: user, pubSub }: Context
 	) {
-		console.log('import array', data.data)
+		const json = await this.s3.getContent(payload.data)
+
+		const data = await db.transaction().execute(async trx => {})
 		pubSub.publish(Topic.NodesUpdated, true)
 		pubSub.publish(Topic.ValuesUpdated, true)
 		return true
@@ -64,7 +70,6 @@ export class IoResolver {
 		@Arg('filename', () => String) filename: string,
 		@Ctx() { extra: user }: Context
 	) {
-		const client = new S3Client({ region: process.env.AWS_REGION })
 		const Key = `project_${user.lastProjectId}/${uuid()}`
 		const command = new PutObjectCommand({
 			Metadata: {
@@ -75,7 +80,7 @@ export class IoResolver {
 			Key
 		})
 		return {
-			signedUrl: getSignedUrl(client, command, { expiresIn: 3600 }),
+			signedUrl: getSignedUrl(this.s3, command, { expiresIn: 3600 }),
 			object: Key
 		}
 	}
