@@ -7,6 +7,7 @@ import { NodeResolver } from './resolvers/node-resolver.ts'
 import { NodeSettingsResolver } from './resolvers/node-settings-resolver.ts'
 import { ProjectResolver } from './resolvers/project-resolver.ts'
 import { ValueResolver } from './resolvers/value-resolver.ts'
+import { IoService } from './services/io-service.ts'
 import { ProjectService } from './services/project-service.ts'
 import { S3Client } from './services/s3-client.ts'
 
@@ -20,4 +21,5 @@ container.bind(LogAccess).toSelf()
 container.bind(ProjectService).toSelf()
 container.bind(IoResolver).toSelf()
 container.bind(S3Client).toSelf()
+container.bind(IoService).toSelf()
 export { container }

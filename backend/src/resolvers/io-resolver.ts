@@ -2,9 +2,11 @@ import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { inject, injectable } from 'inversify'
 import type { Context } from 'src/context.ts'
+import type { Json } from 'src/database/schema.ts'
 import { Role } from 'src/enums.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import { Topic } from 'src/pubsub.ts'
+import { IoService } from 'src/services/io-service.ts'
 import { S3Client } from 'src/services/s3-client.ts'
 import {
 	Arg,
@@ -52,14 +54,18 @@ export class IoResolver {
 	@inject(S3Client)
 	private readonly s3: S3Client
 
+	@inject(IoService)
+	private readonly io: IoService
+
 	@Mutation(returns => Boolean)
 	async importArray(
 		@Arg('data', () => JsonArrayImportInput) payload: JsonArrayImportInput,
 		@Ctx() { db, extra: user, pubSub }: Context
 	) {
-		const json = await this.s3.getContent(payload.data)
-
-		const data = await db.transaction().execute(async trx => {})
+		const json: Json = await this.s3.getContent(payload.data).then(JSON.parse)
+		const data = await db.transaction().execute(async trx => {
+			this.io.ensureStructure(trx, payload.node_id, json)
+		})
 		pubSub.publish(Topic.NodesUpdated, true)
 		pubSub.publish(Topic.ValuesUpdated, true)
 		return true
