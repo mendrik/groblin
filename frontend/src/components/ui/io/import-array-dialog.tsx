@@ -12,10 +12,10 @@ import { EditorType } from '@shared/enums'
 import { evolveAlt } from '@shared/utils/evolve-alt'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import { F, pipe } from 'ramda'
-import { type TypeOf, boolean, strictObject } from 'zod'
+import { type TypeOf, boolean, strictObject, string } from 'zod'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
-import { asField, fileUpload, stringField } from '../zod-form/utils'
+import { asField, fileUpload } from '../zod-form/utils'
 import { ZodForm } from '../zod-form/zod-form'
 
 const $node = signal<TreeNode>()
@@ -33,12 +33,11 @@ const importArraySchema = () =>
 			'.json,application/json',
 			'Select the json file to import'
 		),
-		external_id: stringField(
-			'External ID',
-			EditorType.Input,
-			'off',
-			'External ID of the node'
-		),
+		external_id: asField(string().optional(), {
+			label: 'External ID',
+			editor: EditorType.Input,
+			description: 'External ID of each item'
+		}),
 		structure: asField(boolean().default(true), {
 			label: 'Structure',
 			editor: EditorType.Switch,

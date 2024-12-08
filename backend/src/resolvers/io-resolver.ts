@@ -30,8 +30,8 @@ export class JsonArrayImportInput {
 	@Field(type => String)
 	data: string
 
-	@Field(type => String)
-	external_id: string
+	@Field(type => String, { nullable: true })
+	external_id: string | undefined
 
 	@Field(type => Boolean)
 	structure: boolean

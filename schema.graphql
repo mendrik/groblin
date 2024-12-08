@@ -112,7 +112,7 @@ input Login {
 input JsonArrayImportInput {
   node_id: Int!
   data: String!
-  external_id: String!
+  external_id: String
   structure: Boolean!
 }
 
