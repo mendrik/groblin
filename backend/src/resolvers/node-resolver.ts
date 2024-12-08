@@ -1,5 +1,6 @@
 import { assertExists } from '@shared/asserts.ts'
 import { failOn } from '@shared/utils/guards.ts'
+import { type TreeOf, listToTree } from '@shared/utils/list-to-tree.ts'
 import { injectable } from 'inversify'
 import { sql } from 'kysely'
 import { isNil } from 'ramda'
@@ -137,6 +138,26 @@ export class NodeResolver {
 			.where('id', '=', id)
 			.executeTakeFirst()
 			.then(failOn(isNil, 'Node not found')) as Promise<Node>
+	}
+
+	async getTreeNode(db: Context, id: number): Promise<TreeOf<Node, 'nodes'>> {
+		function* allNodes(
+			node: TreeOf<Node, 'nodes'>
+		): Generator<TreeOf<Node, 'nodes'>> {
+			yield node
+			for (const child of node.nodes) {
+				yield* allNodes(child)
+			}
+		}
+
+		const nodes = await this.getNodes(db)
+		const root = listToTree('id', 'parent_id', 'nodes')(nodes) as TreeOf<
+			Node,
+			'nodes'
+		>
+		const node = [...allNodes(root)].find(n => n.id === id)
+		assertExists(node, 'Node not found')
+		return node
 	}
 
 	@Mutation(returns => Boolean)

@@ -1,73 +1,105 @@
 import { describe, expect, test } from 'vitest'
 
-import { traverse } from './json.ts'
+import type { TreeOf } from '@shared/utils/list-to-tree.ts'
+import type { Json } from 'src/database/schema.ts'
+import { NodeType } from 'src/enums.ts'
+import type { Node as DBNode } from 'src/resolvers/node-resolver.ts'
+import { compareStructure } from './json.ts'
 
-describe('traverse', () => {
-	test('should handle undefined input', () => {
-		const result = Array.from(traverse(undefined))
-		expect(result).toEqual([])
+type Node = TreeOf<DBNode, 'nodes'>
+
+describe('compareStructure', () => {
+	test('should detect missing node', () => {
+		const node = {
+			name: 'root',
+			type: NodeType.object,
+			nodes: []
+		} as unknown as Node
+		const json: Json = { key: 'value' }
+		const result = [...compareStructure(node, json)]
+		expect(result).toEqual([{ parent: node, key: 'key', case: 'NODE_MISSING' }])
 	})
 
-	test('should handle null input', () => {
-		const result = Array.from(traverse(null))
-		expect(result).toEqual([])
-	})
-
-	test('should handle empty object', () => {
-		const result = Array.from(traverse({}))
-		expect(result).toEqual([])
-	})
-
-	test('should handle empty array', () => {
-		const result = Array.from(traverse([]))
-		expect(result).toEqual([])
-	})
-
-	test('should traverse a simple object', () => {
-		const json = { a: 1, b: 2 }
-		const result = [...traverse(json)]
+	test('should detect type difference', () => {
+		const node = {
+			name: 'root',
+			type: NodeType.object,
+			nodes: [{ name: 'key', type: NodeType.string, nodes: [] }]
+		} as unknown as Node
+		const json: Json = { key: 123 }
+		const result = [...compareStructure(node, json)]
 		expect(result).toEqual([
-			{ key: ['a'], value: 1 },
-			{ key: ['b'], value: 2 }
+			{ parent: node.nodes[0], key: 'key', case: 'TYPE_DIFFERENCE' }
 		])
 	})
 
-	test('should traverse a nested object', () => {
-		const json = { a: { b: 2 } }
-		const result = [...traverse(json)]
-		expect(result).toEqual([{ key: ['a', 'b'], value: 2 }])
+	test('should handle matching structures', () => {
+		const node = {
+			name: 'root',
+			type: NodeType.object,
+			nodes: [{ name: 'key', type: NodeType.string, nodes: [] }]
+		} as unknown as Node
+		const json: Json = { key: 'value' }
+		const result = [...compareStructure(node, json)]
+		expect(result).toEqual([])
 	})
 
-	test('should traverse an array', () => {
-		const json = [1, 2, 3]
-		const result = [...traverse(json)]
+	test('should handle nested structures', () => {
+		const node = {
+			name: 'root',
+			type: NodeType.object,
+			nodes: [
+				{
+					name: 'nested',
+					type: NodeType.object,
+					nodes: [{ name: 'key', type: NodeType.string, nodes: [] }]
+				}
+			]
+		} as unknown as Node
+		const json: Json = { nested: { key: 'value' } }
+		const result = [...compareStructure(node, json)]
+		expect(result).toEqual([])
+	})
+
+	test('should handle arrays', () => {
+		const node = {
+			name: 'root',
+			type: NodeType.list,
+			nodes: []
+		} as unknown as Node
+		const json: Json = [{ key1: 'value' }, { key2: 'value' }]
+		const result = [...compareStructure(node, json)]
 		expect(result).toEqual([
-			{ key: [0], value: 1 },
-			{ key: [1], value: 2 },
-			{ key: [2], value: 3 }
+			{
+				case: 'NODE_MISSING',
+				key: 'key1',
+				parent: {
+					name: 'root',
+					nodes: [],
+					type: 'List'
+				}
+			},
+			{
+				case: 'NODE_MISSING',
+				key: 'key2',
+				parent: {
+					name: 'root',
+					nodes: [],
+					type: 'List'
+				}
+			}
 		])
 	})
 
-	test('should traverse a nested array', () => {
-		const json = [
-			[1, 2],
-			[3, 4]
-		]
-		const result = [...traverse(json)]
-		expect(result).toEqual([
-			{ key: [0, 0], value: 1 },
-			{ key: [0, 1], value: 2 },
-			{ key: [1, 0], value: 3 },
-			{ key: [1, 1], value: 4 }
-		])
-	})
-
-	test('should traverse a complex structure', () => {
-		const json = { a: [1, { b: 2 }] }
-		const result = [...traverse(json)]
-		expect(result).toEqual([
-			{ key: ['a', 0], value: 1 },
-			{ key: ['a', 1, 'b'], value: 2 }
-		])
+	test('should detect missing node in array', () => {
+		const node = {
+			name: 'root',
+			type: NodeType.list,
+			nodes: []
+		} as unknown as Node
+		const json: Json = ['value']
+		expect(() => [...compareStructure(node, json)]).toThrowError(
+			expect.objectContaining({ message: 'List contains primitive values' })
+		)
 	})
 })

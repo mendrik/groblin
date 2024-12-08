@@ -6,7 +6,6 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import {} from '@/lib/match'
 import { notNil, setSignal } from '@/lib/utils'
 import type { TreeNode } from '@/state/tree'
 import { focusListItem, insertListItem } from '@/state/value'

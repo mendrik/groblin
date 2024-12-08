@@ -67,9 +67,10 @@ export class IoResolver {
 		@Ctx() ctx: Context
 	) {
 		const { db, pubSub } = ctx
-		const node = await this.nodeResolver.getNode(db, payload.node_id)
 		const json: Json = await this.s3.getContent(payload.data).then(JSON.parse)
-		const data = await ctx.db.transaction().execute(async trx => {
+		const node = await this.nodeResolver.getTreeNode(ctx, payload.node_id)
+
+		const data = await db.transaction().execute(async trx => {
 			this.io.ensureStructure(trx, node, json)
 		})
 		pubSub.publish(Topic.NodesUpdated, true)
