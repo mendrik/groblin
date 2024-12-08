@@ -1,6 +1,6 @@
 import { inputValue } from '@/lib/dom-events'
-import { caseOf, match } from '@/lib/match'
 import { EditorType } from '@shared/enums'
+import { caseOf, match } from '@shared/utils/match'
 import type { Fn } from '@tp/functions.ts'
 import { path, T as _, apply, nth, pipe } from 'ramda'
 import type { FC, ReactNode } from 'react'

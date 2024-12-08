@@ -1,7 +1,7 @@
 import { type NodeSettings, NodeType } from '@/gql/graphql'
-import { caseOf, match } from '@/lib/match'
 import { $nodeSettingsMap } from '@/state/node-settings'
 import type { TreeNode } from '@/state/tree'
+import { caseOf, match } from '@shared/utils/match'
 import { IconPackageImport, IconTrash } from '@tabler/icons-react'
 import { T as _, isEmpty } from 'ramda'
 import type { ReactNode } from 'react'

@@ -1,28 +1,23 @@
 import type { Json } from 'src/database/schema.ts'
+import type { Node } from 'src/resolvers/node-resolver.ts'
 
-export function* traverse(
-	json: Json | undefined,
-	parents: (string | number)[] = []
-): Generator<{
-	key: (string | number)[]
-	value: any
-}> {
-	if (typeof json === 'object' && json != null) {
-		if (Array.isArray(json)) {
-			for (let i = 0; i < json.length; i++) {
-				yield* traverse(json[i], [...parents, i])
-			}
-		} else {
-			for (const key of Object.keys(json)) {
-				yield* traverse(json[key], [...parents, key])
-			}
-		}
-	} else {
-		if (json != null) {
-			yield {
-				key: parents,
-				value: json
-			}
-		}
-	}
+enum Case {
+	NODE_MISSING = 'NODE_MISSING',
+	NODE_EXTRA = 'NODE_EXTRA',
+	TYPE_DIFFERENCE = 'TYPE_DIFFERENCE'
+}
+
+type Difference = {
+	parent: Node | undefined
+	json: Json | undefined
+	case: Case
+}
+
+export function* compare(
+	node: Node,
+	json: Json,
+): Generator<Difference> {
+	match<[Node, Json]>(
+		caseOf([], () => )
+	)
 }

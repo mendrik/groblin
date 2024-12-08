@@ -1,5 +1,5 @@
+import { caseOf, match } from '@shared/utils/match'
 import { T as _, both, curry, flip, lt } from 'ramda'
-import { caseOf, match } from './match'
 
 const second = 1000
 const minute = 60 * 1000

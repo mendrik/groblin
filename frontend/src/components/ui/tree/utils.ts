@@ -1,6 +1,6 @@
 import { NodeType } from '@/gql/graphql'
-import { caseOf, match } from '@/lib/match'
 import type { TreeNode } from '@/state/tree'
+import { caseOf, match } from '@shared/utils/match'
 import { F, type Pred, T, T as _ } from 'ramda'
 import { type ZodObject, object } from 'zod'
 import { ListProps } from './properties/list'

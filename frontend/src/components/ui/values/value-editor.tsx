@@ -1,7 +1,7 @@
 import { NodeType, type Value } from '@/gql/graphql'
-import { caseOf, match } from '@/lib/match'
 import { type TreeNode, pathTo } from '@/state/tree'
 import { $activeListItems, listPath, saveValue } from '@/state/value'
+import { caseOf, match } from '@shared/utils/match'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import type { Fn } from '@tp/functions'
 import {
