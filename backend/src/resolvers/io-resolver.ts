@@ -21,6 +21,7 @@ import {
 	UseMiddleware
 } from 'type-graphql'
 import { v4 as uuid } from 'uuid'
+import { NodeResolver } from './node-resolver.ts'
 
 @InputType()
 export class JsonArrayImportInput {
@@ -54,17 +55,22 @@ export class IoResolver {
 	@inject(S3Client)
 	private readonly s3: S3Client
 
+	@inject(NodeResolver)
+	private readonly nodeResolver: NodeResolver
+
 	@inject(IoService)
 	private readonly io: IoService
 
 	@Mutation(returns => Boolean)
 	async importArray(
 		@Arg('data', () => JsonArrayImportInput) payload: JsonArrayImportInput,
-		@Ctx() { db, extra: user, pubSub }: Context
+		@Ctx() ctx: Context
 	) {
+		const { db, pubSub } = ctx
+		const node = await this.nodeResolver.getNode(db, payload.node_id)
 		const json: Json = await this.s3.getContent(payload.data).then(JSON.parse)
-		const data = await db.transaction().execute(async trx => {
-			this.io.ensureStructure(trx, payload.node_id, json)
+		const data = await ctx.db.transaction().execute(async trx => {
+			this.io.ensureStructure(trx, node, json)
 		})
 		pubSub.publish(Topic.NodesUpdated, true)
 		pubSub.publish(Topic.ValuesUpdated, true)
