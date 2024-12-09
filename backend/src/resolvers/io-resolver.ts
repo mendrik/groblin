@@ -1,13 +1,12 @@
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { match } from '@shared/utils/match.ts'
 import { inject, injectable } from 'inversify'
 import type { Context } from 'src/context.ts'
 import type { Json } from 'src/database/schema.ts'
 import { Role } from 'src/enums.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import { Topic } from 'src/pubsub.ts'
-import { type Difference, compareStructure } from 'src/services/json.ts'
+import { compareStructure } from 'src/services/json.ts'
 import { S3Client } from 'src/services/s3-client.ts'
 import {
 	Arg,
@@ -67,11 +66,22 @@ export class IoResolver {
 		const { db, pubSub } = ctx
 		const json: Json = await this.s3.getContent(payload.data).then(JSON.parse)
 		const node = await this.nodeResolver.getTreeNode(ctx, payload.node_id)
-		const diffs = [...compareStructure(node, json, payload.external_id)]
+		const diffs = [...compareStructure(node, json, '', payload.external_id)]
 		await db
 			.transaction()
 			.execute(async trx => {
-				diffs.forEach(match<[Difference], any>())
+				diffs.forEach(diff =>
+					this.nodeResolver.insertNodeTrx(
+						trx,
+						{
+							name: diff.key,
+							order: diff.parent.nodes.length,
+							type: diff.type,
+							parent_id: diff.parent.id
+						},
+						ctx
+					)
+				)
 			})
 			.catch(cause => {
 				throw new Error(`Failed to import data: ${cause.message}`, { cause })

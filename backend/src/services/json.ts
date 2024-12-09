@@ -12,22 +12,13 @@ import type { Json, JsonArray } from 'src/database/schema.ts'
 import { NodeType } from 'src/enums.ts'
 import type { Node as DbNode } from 'src/resolvers/node-resolver.ts'
 import { color } from 'src/utils/color-codec.ts'
+import { date } from 'src/utils/date-codec.ts'
 
-export enum Signal {
-	NODE_MISSING = 0,
-	TYPE_DIFFERENCE = 1
+export type Difference = {
+	key: string
+	parent: Node
+	type: NodeType
 }
-
-export type Difference =
-	| {
-			signal: Signal.NODE_MISSING
-			parent: Node
-			type: NodeType
-	  }
-	| {
-			signal: Signal.TYPE_DIFFERENCE
-			parent: Node
-	  }
 
 type Node = TreeOf<DbNode, 'nodes'>
 
@@ -47,17 +38,22 @@ const isObjectArray = (json: unknown): json is Array<object> =>
 const isColorString = (json: unknown): json is string =>
 	color.safeParse(json).success
 
+const isDate = (json: unknown): json is string => date.safeParse(json).success
+
+const primitiveName = (parent: Node): string => parent.nodes[0]?.name ?? 'data'
+
 export function* compareStructure(
 	node: Node,
 	json: Json,
+	key: string,
 	id = 'id'
 ): Generator<Difference> {
 	const nodeDifference = match<[Node, Json], Generator<Difference>>(
 		caseOf([{ type: NodeType.list }, isPrimitiveArray], function* (parent, j) {
-			yield* compareStructure(parent, { data: j[0] }, id)
+			yield* compareStructure(parent, { [primitiveName(parent)]: j[0] }, '', id)
 		}),
 		caseOf([{ type: NodeType.list }, isObjectArray], function* (_, json) {
-			yield* compareStructure(node, mergeAll(json) as JsonArray, id)
+			yield* compareStructure(node, mergeAll(json) as JsonArray, '', id)
 		}),
 		caseOf([isObjOrArray, isObject], function* (_, json) {
 			for (const [key, value] of Object.entries(json)) {
@@ -65,36 +61,51 @@ export function* compareStructure(
 				yield* compareStructure(
 					node.nodes.find(n => eqBy(toLower, key, n.name)) ?? node,
 					value,
+					key,
 					id
 				)
 			}
 		}),
 		caseOf([isNil, isColorString], function* () {
 			yield {
+				key,
 				parent: node,
-				type: NodeType.color,
-				signal: Signal.NODE_MISSING
+				type: NodeType.color
+			}
+		}),
+		caseOf([isNil, isColorString], function* () {
+			yield {
+				key,
+				parent: node,
+				type: NodeType.color
+			}
+		}),
+		caseOf([isNil, isDate], function* () {
+			yield {
+				key,
+				parent: node,
+				type: NodeType.date
 			}
 		}),
 		caseOf([isNil, isString], function* () {
 			yield {
+				key,
 				parent: node,
-				type: NodeType.string,
-				signal: Signal.NODE_MISSING
+				type: NodeType.string
 			}
 		}),
 		caseOf([isNil, isNumber], function* () {
 			yield {
+				key,
 				parent: node,
-				type: NodeType.number,
-				signal: Signal.NODE_MISSING
+				type: NodeType.number
 			}
 		}),
 		caseOf([isNil, isBoolean], function* () {
 			yield {
+				key,
 				parent: node,
-				type: NodeType.boolean,
-				signal: Signal.NODE_MISSING
+				type: NodeType.boolean
 			}
 		})
 	)
