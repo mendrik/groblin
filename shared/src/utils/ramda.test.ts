@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { pipeTapAsync } from './pipe-tap.ts'
 import { pipeTap } from './pipe-tap.ts'
-import { addOrder } from './ramda.ts'
+import { addOrder, capitalize } from './ramda.ts'
 
 // Tests for pipeTap
 describe('pipeTap', () => {
@@ -94,5 +94,12 @@ describe('addOrder', () => {
 			{ name: 'Alice', index: 0 },
 			{ name: 'Bob', index: 1 }
 		])
+	})
+})
+
+describe('capitalize', () => {
+	it('should capitalize the first letter of a string', () => {
+		const result = capitalize('hello')
+		expect(result).toBe('Hello')
 	})
 })

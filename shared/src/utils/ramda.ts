@@ -1,10 +1,12 @@
+import type { AnyFn } from '@tp/functions.ts'
 import {
+	apply,
 	assoc,
 	compose,
 	concat,
 	head,
 	juxt,
-	o,
+	pipe,
 	range,
 	tail,
 	tap,
@@ -19,7 +21,7 @@ export const addOrder =
 	<T2 extends T & { [key in P]: number }>(t: T[]): T2[] =>
 		zipWith(assoc(prop), range(0, t.length), t) as T2[]
 
-export const capitalize: (str: string) => string = o(
-	juxt([compose(toUpper, head), tail]),
-	concat
-)
+export const capitalize: (s: string) => string = pipe(
+	juxt([compose(toUpper, head), tail]) as AnyFn,
+	apply(concat)
+) as AnyFn

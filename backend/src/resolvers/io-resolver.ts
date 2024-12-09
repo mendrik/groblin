@@ -2,6 +2,8 @@ import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { capitalize } from '@shared/utils/ramda.ts'
 import { inject, injectable } from 'inversify'
+import { sql } from 'kysely'
+import { pipe, uniq } from 'ramda'
 import type { Context } from 'src/context.ts'
 import type { Json } from 'src/database/schema.ts'
 import { Role } from 'src/enums.ts'
@@ -68,21 +70,35 @@ export class IoResolver {
 		const json: Json = await this.s3.getContent(payload.data).then(JSON.parse)
 		const node = await this.nodeResolver.getTreeNode(ctx, payload.node_id)
 		const diffs = [...compareStructure(node, json, '', payload.external_id)]
+		const parentIds = pipe(pluckPath(['parent', 'id']), uniq)(diffs)
+
 		await db
 			.transaction()
 			.execute(async trx => {
-				diffs.forEach(diff =>
-					this.nodeResolver.insertNodeTrx(
-						trx,
-						{
-							name: capitalize(diff.key),
-							order: diff.parent.nodes.length,
-							type: diff.type,
-							parent_id: diff.parent.id
-						},
-						ctx
+				const nodes = diffs.map(diff => ({
+					name: capitalize(diff.key),
+					order: 0,
+					type: diff.type,
+					parent_id: diff.parent.id,
+					project_id: ctx.extra.lastProjectId
+				}))
+				trx
+					.insertInto('node')
+					.values(nodes as any)
+					.returning('id')
+					.execute()
+
+				sql`WITH ordered_nodes AS (
+						SELECT
+							id,
+							parent_id,
+							ROW_NUMBER() OVER (PARTITION BY parent_id ORDER BY id) - 1 AS new_order
+						FROM node WHERE parent_id IN (<list_of_parent_ids>)
+						ORDER BY "order"
 					)
-				)
+					UPDATE node SET order = ordered_nodes.new_order FROM ordered_nodes
+					WHERE node.id = ordered_nodes.id;
+				`
 			})
 			.catch(cause => {
 				throw new Error(`Failed to import data: ${cause.message}`, { cause })
