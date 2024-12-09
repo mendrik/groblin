@@ -37,6 +37,21 @@ describe('compareStructure', () => {
 		expect(differences).toEqual([])
 	})
 
+	it('should fail on type mismatch', () => {
+		const node = createNode(NodeType.list, 'root', [
+			createNode(NodeType.object, 'item', [
+				createNode(NodeType.string, 'name'),
+				createNode(NodeType.number, 'age')
+			])
+		])
+		const json = [
+			{ name: 'Alice', age: 30 },
+			{ name: 'Bob', age: 25 }
+		]
+
+		expect(() => Array.from(compareStructure(node, json, ''))).toThrowError()
+	})
+
 	it('should detect differences in object arrays', () => {
 		const node = createNode(NodeType.list, 'root', [
 			createNode(NodeType.string, 'name'),
@@ -50,6 +65,28 @@ describe('compareStructure', () => {
 		const differences = Array.from(compareStructure(node, json, ''))
 
 		expect(differences).toEqual([])
+	})
+
+	it('should detect new props in object arrays', () => {
+		const node = createNode(NodeType.list, 'root', [
+			createNode(NodeType.string, 'name'),
+			createNode(NodeType.number, 'age')
+		])
+		const json = [
+			{ name: 'Alice', age: 30, surname: 'Smith' },
+			{ name: 'Bob', age: 25 }
+		]
+
+		const differences = Array.from(compareStructure(node, json, ''))
+
+		expect(differences).toEqual([
+			{
+				key: 'surname',
+				parent: node,
+				type: NodeType.string,
+				signal: Signal.MISSING
+			}
+		])
 	})
 
 	it('should detect differences in nested objects', () => {

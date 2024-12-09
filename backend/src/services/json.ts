@@ -1,14 +1,17 @@
+import { throwError } from '@shared/errors.ts'
 import type { TreeOf } from '@shared/utils/list-to-tree.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
-import { T, eqBy, mergeAll, toLower } from 'ramda'
+import { F, T, eqBy, mergeAll, toLower } from 'ramda'
 import {
+	isArray,
 	isBoolean,
 	isNumber,
 	isObject,
+	isPlainObj,
 	isPrimitive,
 	isString
 } from 'ramda-adjunct'
-import type { Json, JsonArray } from 'src/database/schema.ts'
+import type { Json, JsonArray, JsonObject } from 'src/database/schema.ts'
 import { NodeType } from 'src/enums.ts'
 import type { Node as DbNode } from 'src/resolvers/node-resolver.ts'
 import { color } from 'src/utils/color-codec.ts'
@@ -44,7 +47,19 @@ const isColorString = (json: unknown): json is string =>
 
 const isDate = (json: unknown): json is string => date.safeParse(json).success
 
+const isJsonObject = (json: unknown): json is JsonObject => isPlainObj(json)
+
 const primitiveName = (parent: Node): string => parent.nodes[0]?.name ?? 'data'
+
+const validateExistingNodes = match<[Node, Json | undefined], boolean>(
+	caseOf([{ type: NodeType.number }, isNumber], T),
+	caseOf([{ type: NodeType.color }, isColorString], T),
+	caseOf([{ type: NodeType.date }, isDate], T),
+	caseOf([{ type: NodeType.string }, isString], T),
+	caseOf([{ type: NodeType.list }, isArray], T),
+	caseOf([{ type: NodeType.object }, isPlainObj], T),
+	caseOf([T, T], F)
+)
 
 export function* compareStructure(
 	node: Node,
@@ -59,11 +74,16 @@ export function* compareStructure(
 		caseOf([{ type: NodeType.list }, isObjectArray], function* (_, json) {
 			yield* compareStructure(node, mergeAll(json) as JsonArray, '', id)
 		}),
-		caseOf([isObjOrArray, isObject], function* (_, json) {
+		caseOf([isObjOrArray, isJsonObject], function* (_, json) {
+			for (const childNode of node.nodes) {
+				if (!validateExistingNodes(childNode, json[childNode.name])) {
+					throwError(`Type mismatch: ${childNode.name} has no match in json`)
+				}
+			}
 			for (const [key, value] of Object.entries(json)) {
 				if (id && eqBy(toLower, key, id)) continue // do not import external id field
 				const existingNode = node.nodes.find(n => eqBy(toLower, key, n.name))
-				if (!existingNode) {
+				if (!existingNode && value) {
 					yield* compareStructure(node, value, key, id)
 				}
 			}
