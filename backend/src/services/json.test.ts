@@ -26,6 +26,17 @@ describe('compareStructure', () => {
 		])
 	})
 
+	it('should respect data node in primitive arrays', () => {
+		const node = createNode(NodeType.list, 'root', [
+			createNode(NodeType.number, 'renamed')
+		]) as Node
+		const json = [1, 2, 3]
+
+		const differences = Array.from(compareStructure(node, json, ''))
+
+		expect(differences).toEqual([])
+	})
+
 	it('should detect differences in object arrays', () => {
 		const node = createNode(NodeType.list, 'root', [
 			createNode(NodeType.string, 'name'),
@@ -57,10 +68,8 @@ describe('compareStructure', () => {
 
 	it('should detect differences in nested arrays of objects', () => {
 		const node = createNode(NodeType.list, 'root', [
-			createNode(NodeType.object, 'item', [
-				createNode(NodeType.string, 'name'),
-				createNode(NodeType.number, 'quantity')
-			])
+			createNode(NodeType.string, 'name'),
+			createNode(NodeType.number, 'quantity')
 		])
 		const json = [
 			{ name: 'Apple', quantity: 10 },
@@ -68,7 +77,6 @@ describe('compareStructure', () => {
 		]
 
 		const differences = Array.from(compareStructure(node, json, ''))
-
 		expect(differences).toEqual([])
 	})
 
@@ -79,18 +87,23 @@ describe('compareStructure', () => {
 		const differences = Array.from(compareStructure(node, json, 'color'))
 
 		expect(differences).toEqual([
-			{ key: 'color', parent: node, type: NodeType.color }
+			{
+				key: 'color',
+				parent: node,
+				type: NodeType.color,
+				signal: Signal.MISSING
+			}
 		])
 	})
 
 	it('should detect differences in date strings', () => {
 		const node = createNode(NodeType.object, 'root', [])
-		const json = { date: '2023-10-01' }
+		const json = { date: '2024-12-09T14:13:02.764Z' }
 
 		const differences = Array.from(compareStructure(node, json, 'date'))
 
 		expect(differences).toEqual([
-			{ key: 'date', parent: node, type: NodeType.date }
+			{ key: 'date', parent: node, type: NodeType.date, signal: Signal.MISSING }
 		])
 	})
 })

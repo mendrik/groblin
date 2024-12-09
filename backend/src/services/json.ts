@@ -53,8 +53,8 @@ export function* compareStructure(
 	id = 'id'
 ): Generator<Difference> {
 	const nodeDifference = match<[Node, Json], Generator<Difference>>(
-		caseOf([{ type: NodeType.list }, isPrimitiveArray], function* (parent, j) {
-			yield* compareStructure(parent, { [primitiveName(parent)]: j[0] }, '', id)
+		caseOf([{ type: NodeType.list }, isPrimitiveArray], function* (_, j) {
+			yield* compareStructure(node, { [primitiveName(node)]: j[0] }, '', id)
 		}),
 		caseOf([{ type: NodeType.list }, isObjectArray], function* (_, json) {
 			yield* compareStructure(node, mergeAll(json) as JsonArray, '', id)
@@ -62,12 +62,10 @@ export function* compareStructure(
 		caseOf([isObjOrArray, isObject], function* (_, json) {
 			for (const [key, value] of Object.entries(json)) {
 				if (id && eqBy(toLower, key, id)) continue // do not import external id field
-				yield* compareStructure(
-					node.nodes.find(n => eqBy(toLower, key, n.name)) ?? node,
-					value,
-					key,
-					id
-				)
+				const existingNode = node.nodes.find(n => eqBy(toLower, key, n.name))
+				if (!existingNode) {
+					yield* compareStructure(node, value, key, id)
+				}
 			}
 		}),
 		caseOf([T, isColorString], function* () {
@@ -103,8 +101,6 @@ export function* compareStructure(
 			}
 		}),
 		caseOf([T, isNumber], function* () {
-			console.log('num')
-
 			yield {
 				key,
 				parent: node,
