@@ -1,12 +1,13 @@
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { match } from '@shared/utils/match.ts'
 import { inject, injectable } from 'inversify'
 import type { Context } from 'src/context.ts'
 import type { Json } from 'src/database/schema.ts'
 import { Role } from 'src/enums.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import { Topic } from 'src/pubsub.ts'
-import { IoService } from 'src/services/io-service.ts'
+import { type Difference, compareStructure } from 'src/services/json.ts'
 import { S3Client } from 'src/services/s3-client.ts'
 import {
 	Arg,
@@ -58,9 +59,6 @@ export class IoResolver {
 	@inject(NodeResolver)
 	private readonly nodeResolver: NodeResolver
 
-	@inject(IoService)
-	private readonly io: IoService
-
 	@Mutation(returns => Boolean)
 	async importArray(
 		@Arg('data', () => JsonArrayImportInput) payload: JsonArrayImportInput,
@@ -69,10 +67,16 @@ export class IoResolver {
 		const { db, pubSub } = ctx
 		const json: Json = await this.s3.getContent(payload.data).then(JSON.parse)
 		const node = await this.nodeResolver.getTreeNode(ctx, payload.node_id)
+		const diffs = [...compareStructure(node, json, payload.external_id)]
+		await db
+			.transaction()
+			.execute(async trx => {
+				diffs.forEach(match<[Difference], any>())
+			})
+			.catch(cause => {
+				throw new Error(`Failed to import data: ${cause.message}`, { cause })
+			})
 
-		const data = await db.transaction().execute(async trx => {
-			this.io.ensureStructure(trx, node, json)
-		})
 		pubSub.publish(Topic.NodesUpdated, true)
 		pubSub.publish(Topic.ValuesUpdated, true)
 		return true
@@ -81,8 +85,9 @@ export class IoResolver {
 	@Mutation(returns => Upload)
 	async uploadUrl(
 		@Arg('filename', () => String) filename: string,
-		@Ctx() { extra: user }: Context
+		@Ctx() ctx: Context
 	) {
+		const { extra: user } = ctx
 		const Key = `project_${user.lastProjectId}/${uuid()}`
 		const command = new PutObjectCommand({
 			Metadata: {

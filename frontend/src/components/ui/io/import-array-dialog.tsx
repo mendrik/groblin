@@ -12,6 +12,7 @@ import { EditorType } from '@shared/enums'
 import { evolveAlt } from '@shared/utils/evolve-alt'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import { F, pipe } from 'ramda'
+import { toast } from 'sonner'
 import { type TypeOf, boolean, strictObject, string } from 'zod'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
@@ -54,6 +55,12 @@ const importCommand: (data: ImportArraySchema) => Promise<boolean> = pipeAsync(
 	importArray
 )
 
+const failed = (e: Error) =>
+	toast.error('Failed to import data', {
+		description: e.message,
+		closeButton: true
+	})
+
 export const ImportArrayDialog = () => {
 	const [formApi, ref] = useFormState<ImportArraySchema>()
 
@@ -69,6 +76,7 @@ export const ImportArrayDialog = () => {
 					schema={importArraySchema()}
 					columns={2}
 					onSubmit={pipe(importCommand, close)}
+					onError={failed}
 					ref={ref}
 				>
 					<DialogFooter className="gap-y-2">

@@ -124,8 +124,9 @@ export class AuthResolver {
 	@Mutation(returns => Boolean)
 	async register(
 		@Arg('data', () => Registration) data: Registration,
-		@Ctx() { db, pubSub }: Context
+		@Ctx() ctx: Context
 	) {
+		const { db, pubSub } = ctx
 		const existingUser = await userByEmail(db, data.email)
 		assertThat(isNil, existingUser, 'User already exists')
 

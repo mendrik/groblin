@@ -67,11 +67,3 @@ export function hasMethod<T extends object>(
 		typeof (obj as any)[methodName] === 'function'
 	)
 }
-
-export const throwError = (message: string): never => {
-	throw new Error(message)
-}
-
-export const throwAny = (errors: any): never => {
-	throw errors
-}

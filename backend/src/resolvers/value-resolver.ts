@@ -89,8 +89,9 @@ export class ValueResolver {
 	@Query(returns => [Value])
 	async getValues(
 		@Arg('data', () => GetValues) { ids }: GetValues,
-		@Ctx() { db, extra: user }: Context
+		@Ctx() ctx: Context
 	): Promise<Value[]> {
+		const { db, extra: user } = ctx
 		return db
 			.selectFrom('values')
 			.where('project_id', '=', user.lastProjectId)
@@ -105,8 +106,9 @@ export class ValueResolver {
 	@Mutation(returns => Int)
 	async insertListItem(
 		@Arg('listItem', () => InsertListItem) data: InsertListItem,
-		@Ctx() { db, extra: user, pubSub }: Context
+		@Ctx() ctx: Context
 	) {
+		const { db, extra: user, pubSub } = ctx
 		const { max_order } = await db
 			.selectFrom('values') // Replace with your table name
 			.where('node_id', '=', data.node_id)
@@ -130,10 +132,8 @@ export class ValueResolver {
 	}
 
 	@Mutation(returns => Boolean)
-	async deleteListItem(
-		@Arg('id', () => Int) id: number,
-		@Ctx() { db, extra: user, pubSub }: Context
-	) {
+	async deleteListItem(@Arg('id', () => Int) id: number, @Ctx() ctx: Context) {
+		const { db, extra: user, pubSub } = ctx
 		const { numDeletedRows } = await db.transaction().execute(async trx => {
 			await trx
 				.deleteFrom('values')
@@ -153,8 +153,9 @@ export class ValueResolver {
 	@Mutation(returns => Int)
 	async upsertValue(
 		@Arg('data', () => UpsertValue) data: UpsertValue,
-		@Ctx() { db, extra: user, pubSub }: Context
+		@Ctx() ctx: Context
 	) {
+		const { db, extra: user, pubSub } = ctx
 		const { id } = await db
 			.insertInto('values')
 			.values({

@@ -64,9 +64,8 @@ export class NodeSettingsResolver {
 	}
 
 	@Query(returns => [NodeSettings])
-	async getNodeSettings(
-		@Ctx() { db, extra: user }: Context
-	): Promise<NodeSettings[]> {
+	async getNodeSettings(@Ctx() ctx: Context): Promise<NodeSettings[]> {
+		const { db, extra: user } = ctx
 		return db
 			.selectFrom('node_settings')
 			.where('project_id', '=', user.lastProjectId)
@@ -77,10 +76,9 @@ export class NodeSettingsResolver {
 	@Mutation(returns => Int)
 	async upsertNodeSettings(
 		@Arg('data', () => UpsertNodeSettings) data: UpsertNodeSettings,
-		@Ctx() { db, extra: user, pubSub }: Context
+		@Ctx() ctx: Context
 	) {
-		console.log('upsertNodeSettings', data)
-
+		const { db, extra: user, pubSub } = ctx
 		const { id } = await db
 			.insertInto('node_settings')
 			.values({

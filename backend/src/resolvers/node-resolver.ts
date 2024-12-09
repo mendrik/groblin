@@ -2,9 +2,10 @@ import { assertExists } from '@shared/asserts.ts'
 import { failOn } from '@shared/utils/guards.ts'
 import { type TreeOf, listToTree } from '@shared/utils/list-to-tree.ts'
 import { injectable } from 'inversify'
-import { sql } from 'kysely'
+import { type Transaction, sql } from 'kysely'
 import { isNil } from 'ramda'
 import type { Context } from 'src/context.ts'
+import type { DB } from 'src/database/schema.ts'
 import { NodeType, Role } from 'src/enums.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import { Topic } from 'src/pubsub.ts'
@@ -94,7 +95,8 @@ export class NodeResolver {
 	}
 
 	@Query(returns => [Node])
-	async getNodes(@Ctx() { db, extra: user }: Context) {
+	async getNodes(@Ctx() ctx: Context) {
+		const { db, extra: user } = ctx
 		return db
 			.selectFrom('node')
 			.where('project_id', '=', user.lastProjectId)
@@ -103,30 +105,35 @@ export class NodeResolver {
 			.execute()
 	}
 
+	insertNodeTrx(trx: Transaction<DB>, data: InsertNode, ctx: Context) {
+		trx
+			.updateTable('node')
+			.where('order', '>=', data.order)
+			.where('parent_id', '=', data.parent_id ?? null)
+			.set({ order: sql`"order" + 1` })
+			.execute()
+
+		assertExists(data.parent_id, 'Parent ID must be provided')
+
+		return trx
+			.insertInto('node')
+			.values({
+				...data,
+				project_id: ctx.extra.lastProjectId
+			})
+			.returning('id')
+			.executeTakeFirstOrThrow()
+	}
+
 	@Mutation(returns => Node)
 	async insertNode(
 		@Arg('data', () => InsertNode) data: InsertNode,
-		@Ctx() { db, pubSub, extra: user }: Context
+		@Ctx() ctx: Context
 	): Promise<Node> {
-		const { id } = await db.transaction().execute(async trx => {
-			trx
-				.updateTable('node')
-				.where('order', '>=', data.order)
-				.where('parent_id', '=', data.parent_id ?? null)
-				.set({ order: sql`"order" + 1` })
-				.execute()
-
-			assertExists(data.parent_id, 'Parent ID must be provided')
-
-			return trx
-				.insertInto('node')
-				.values({
-					...data,
-					project_id: user.lastProjectId
-				})
-				.returning('id')
-				.executeTakeFirstOrThrow()
-		})
+		const { db, extra: user, pubSub } = ctx
+		const { id } = await db
+			.transaction()
+			.execute(async trx => this.insertNodeTrx(trx, data, ctx))
 		pubSub.publish(Topic.NodesUpdated, true)
 		return await this.getNode(db, id)
 	}
@@ -163,8 +170,9 @@ export class NodeResolver {
 	@Mutation(returns => Boolean)
 	async updateNode(
 		@Arg('data', () => ChangeNodeInput) data: ChangeNodeInput,
-		@Ctx() { db, pubSub, extra: user }: Context
+		@Ctx() ctx: Context
 	): Promise<boolean> {
+		const { db, pubSub, extra: user } = ctx
 		const { numUpdatedRows = 0 } = await db
 			.updateTable('node')
 			.set(data)
@@ -181,8 +189,9 @@ export class NodeResolver {
 		@Arg('id', () => Int) id: number,
 		@Arg('parent_id', () => Int) parent_id: number | undefined,
 		@Arg('order', () => Int) order: number,
-		@Ctx() { db, pubSub, extra: user }: Context
+		@Ctx() ctx: Context
 	): Promise<boolean> {
+		const { db, pubSub, extra: user } = ctx
 		const { numDeletedRows } = await db.transaction().execute(async trx => {
 			trx
 				.updateTable('node')
