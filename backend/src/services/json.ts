@@ -1,7 +1,7 @@
 import { throwError } from '@shared/errors.ts'
 import type { TreeOf } from '@shared/utils/list-to-tree.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
-import { F, T, eqBy, mergeAll, toLower } from 'ramda'
+import { F, T, eqBy, mergeAll, toLower, toUpper } from 'ramda'
 import {
 	isArray,
 	isBoolean,
@@ -51,6 +51,9 @@ const isJsonObject = (json: unknown): json is JsonObject => isPlainObj(json)
 
 const primitiveName = (parent: Node): string => parent.nodes[0]?.name ?? 'data'
 
+const findValue = (name: string, json: JsonObject): Json | undefined =>
+	json[name] ?? json[toLower(name)] ?? json[toUpper(name)]
+
 const validateExistingNodes = match<[Node, Json | undefined], boolean>(
 	caseOf([{ type: NodeType.number }, isNumber], T),
 	caseOf([{ type: NodeType.color }, isColorString], T),
@@ -76,7 +79,9 @@ export function* compareStructure(
 		}),
 		caseOf([isObjOrArray, isJsonObject], function* (_, json) {
 			for (const childNode of node.nodes) {
-				if (!validateExistingNodes(childNode, json[childNode.name])) {
+				if (
+					!validateExistingNodes(childNode, findValue(childNode.name, json))
+				) {
 					throwError(`Type mismatch: ${childNode.name} has no match in json`)
 				}
 			}

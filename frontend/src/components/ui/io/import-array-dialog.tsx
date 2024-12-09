@@ -12,6 +12,7 @@ import { EditorType } from '@shared/enums'
 import { evolveAlt } from '@shared/utils/evolve-alt'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import { F, pipe } from 'ramda'
+import { isArray } from 'ramda-adjunct'
 import { toast } from 'sonner'
 import { type TypeOf, boolean, strictObject, string } from 'zod'
 import { Button } from '../button'
@@ -48,16 +49,17 @@ const importArraySchema = () =>
 
 export type ImportArraySchema = TypeOf<ReturnType<typeof importArraySchema>>
 
-const importCommand: (data: ImportArraySchema) => Promise<boolean> = pipeAsync(
+const importCommand: (data: ImportArraySchema) => Promise<unknown> = pipeAsync(
 	evolveAlt({
 		node_id: () => notNil($node, 'id')
 	}),
-	importArray
+	importArray,
+	close
 )
 
-const failed = (e: Error) =>
+const failed = (e: Error | string[]) =>
 	toast.error('Failed to import data', {
-		description: e.message,
+		description: isArray(e) ? e.join(', ') : e.message,
 		closeButton: true
 	})
 
@@ -75,7 +77,7 @@ export const ImportArrayDialog = () => {
 				<ZodForm
 					schema={importArraySchema()}
 					columns={2}
-					onSubmit={pipe(importCommand, close)}
+					onSubmit={importCommand}
 					onError={failed}
 					ref={ref}
 				>
