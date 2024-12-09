@@ -1,6 +1,6 @@
 import type { TreeOf } from '@shared/utils/list-to-tree.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
-import { eqBy, isNil, mergeAll, toLower } from 'ramda'
+import { T, eqBy, mergeAll, toLower } from 'ramda'
 import {
 	isBoolean,
 	isNumber,
@@ -14,15 +14,19 @@ import type { Node as DbNode } from 'src/resolvers/node-resolver.ts'
 import { color } from 'src/utils/color-codec.ts'
 import { date } from 'src/utils/date-codec.ts'
 
+export enum Signal {
+	MISSING = 'MISSING',
+	NOTHING = 'NOTHING'
+}
+
 export type Difference = {
 	key: string
 	parent: Node
 	type: NodeType
+	signal: Signal
 }
 
-type Node = TreeOf<DbNode, 'nodes'>
-
-function* noop() {}
+export type Node = TreeOf<DbNode, 'nodes'>
 
 const isObjOrArray = (n: Node): n is Node =>
 	n.type === NodeType.object || n.type === NodeType.list
@@ -66,46 +70,62 @@ export function* compareStructure(
 				)
 			}
 		}),
-		caseOf([isNil, isColorString], function* () {
+		caseOf([T, isColorString], function* () {
 			yield {
 				key,
 				parent: node,
-				type: NodeType.color
+				type: NodeType.color,
+				signal: Signal.MISSING
 			}
 		}),
-		caseOf([isNil, isColorString], function* () {
+		caseOf([T, isColorString], function* () {
 			yield {
 				key,
 				parent: node,
-				type: NodeType.color
+				type: NodeType.color,
+				signal: Signal.MISSING
 			}
 		}),
-		caseOf([isNil, isDate], function* () {
+		caseOf([T, isDate], function* () {
 			yield {
 				key,
 				parent: node,
-				type: NodeType.date
+				type: NodeType.date,
+				signal: Signal.MISSING
 			}
 		}),
-		caseOf([isNil, isString], function* () {
+		caseOf([T, isString], function* () {
 			yield {
 				key,
 				parent: node,
-				type: NodeType.string
+				type: NodeType.string,
+				signal: Signal.MISSING
 			}
 		}),
-		caseOf([isNil, isNumber], function* () {
+		caseOf([T, isNumber], function* () {
+			console.log('num')
+
 			yield {
 				key,
 				parent: node,
-				type: NodeType.number
+				type: NodeType.number,
+				signal: Signal.MISSING
 			}
 		}),
-		caseOf([isNil, isBoolean], function* () {
+		caseOf([T, isBoolean], function* () {
 			yield {
 				key,
 				parent: node,
-				type: NodeType.boolean
+				type: NodeType.boolean,
+				signal: Signal.MISSING
+			}
+		}),
+		caseOf([T, T], function* () {
+			yield {
+				key,
+				parent: node,
+				type: NodeType.object,
+				signal: Signal.NOTHING
 			}
 		})
 	)
