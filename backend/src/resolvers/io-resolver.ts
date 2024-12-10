@@ -97,7 +97,7 @@ export class IoResolver {
 					SELECT
 						id,
 						parent_id,
-						ROW_NUMBER() OVER (PARTITION BY parent_id ORDER BY 'order') - 1 AS new_order
+						ROW_NUMBER() OVER (PARTITION BY parent_id ORDER BY 'order', id) - 1 AS new_order
 					FROM node WHERE parent_id IN (${parentIds.join(',')})
 				)
 				UPDATE node SET "order" = ordered_nodes.new_order FROM ordered_nodes 
