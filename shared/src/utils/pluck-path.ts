@@ -1,14 +1,6 @@
 import type { AnyFn } from '@tp/functions'
 import { path, map } from 'ramda'
 
-// Helpers for TypesafePath<T>
-type Cons<H, T> = T extends readonly any[]
-	? ((h: H, ...t: T) => void) extends (...r: infer R) => void
-		? R
-		: never
-	: never
-
-// prettier-ignore
 type Prev = [never, 0, 1, 2, 3, 4, ...0[]]
 
 // Ensure only string keys are used in paths
@@ -21,9 +13,9 @@ type Paths<T, D extends number = 5> = [D] extends [never]
 				[K in StringKeys<T>]-?:
 					| readonly [K]
 					| (Paths<T[K], Prev[D]> extends infer P
-							? P extends []
-								? never
-								: readonly [K, ...P]
+							? P extends readonly any[]
+								? readonly [K, ...P]
+								: never
 							: never)
 			}[StringKeys<T>]
 		: []
@@ -33,7 +25,7 @@ type Paths<T, D extends number = 5> = [D] extends [never]
  */
 export type TypesafePath<T> = Paths<T>
 
-type TypeAtPath<T, P extends readonly string[]> = P extends [
+type TypeAtPath<T, P extends readonly string[]> = P extends readonly [
 	infer First,
 	...infer Rest
 ]
@@ -49,7 +41,7 @@ const impl: AnyFn = p => map(path(p))
 export const pluckPath: <T, P extends TypesafePath<T>>(
 	path: P,
 	list: T[]
-) => TypeAtPath<T, P>[] = impl as any
+) => TypeAtPath<T, P>[] = impl
 
 // Example usage
 type Example = {
