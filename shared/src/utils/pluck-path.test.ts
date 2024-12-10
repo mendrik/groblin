@@ -8,6 +8,7 @@ describe('pluckPath', () => {
 			{ a: { b: 3 }, c: 4 }
 		]
 		const result = pluckPath(['a', 'b'])(list)
+		const result2 = pluckPath(['a', 'b2'])(list)
 		expect(result).toEqual([1, 3])
 	})
 
