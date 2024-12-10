@@ -1,5 +1,6 @@
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { pluckPath } from '@shared/utils/pluck-path.ts'
 import { capitalize } from '@shared/utils/ramda.ts'
 import { inject, injectable } from 'inversify'
 import { sql } from 'kysely'
@@ -9,7 +10,7 @@ import type { Json } from 'src/database/schema.ts'
 import { Role } from 'src/enums.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import { Topic } from 'src/pubsub.ts'
-import { compareStructure } from 'src/services/json.ts'
+import { type Difference, compareStructure } from 'src/services/json.ts'
 import { S3Client } from 'src/services/s3-client.ts'
 import {
 	Arg,
@@ -50,6 +51,9 @@ export class Upload {
 	object: string
 }
 
+const pluckParentIds = (l: Difference[]) =>
+	pluckPath(['parent', 'id'] as const, l)
+
 @injectable()
 @UseMiddleware(LogAccess)
 @Authorized(Role.Admin)
@@ -70,7 +74,7 @@ export class IoResolver {
 		const json: Json = await this.s3.getContent(payload.data).then(JSON.parse)
 		const node = await this.nodeResolver.getTreeNode(ctx, payload.node_id)
 		const diffs = [...compareStructure(node, json, '', payload.external_id)]
-		const parentIds = pipe(pluckPath(['parent', 'id']), uniq)(diffs)
+		const parentIds = pipe(pluckParentIds, uniq)(diffs)
 
 		await db
 			.transaction()
@@ -82,23 +86,23 @@ export class IoResolver {
 					parent_id: diff.parent.id,
 					project_id: ctx.extra.lastProjectId
 				}))
-				trx
+				await trx
 					.insertInto('node')
 					.values(nodes as any)
 					.returning('id')
 					.execute()
 
-				sql`WITH ordered_nodes AS (
-						SELECT
-							id,
-							parent_id,
-							ROW_NUMBER() OVER (PARTITION BY parent_id ORDER BY id) - 1 AS new_order
-						FROM node WHERE parent_id IN (<list_of_parent_ids>)
-						ORDER BY "order"
-					)
-					UPDATE node SET order = ordered_nodes.new_order FROM ordered_nodes
-					WHERE node.id = ordered_nodes.id;
-				`
+				await sql`
+				WITH ordered_nodes AS (
+					SELECT
+						id,
+						parent_id,
+						ROW_NUMBER() OVER (PARTITION BY parent_id ORDER BY 'order') - 1 AS new_order
+					FROM node WHERE parent_id IN (${parentIds.join(',')})
+				)
+				UPDATE node SET "order" = ordered_nodes.new_order FROM ordered_nodes 
+				WHERE node.id = ordered_nodes.id;
+				`.execute(trx)
 			})
 			.catch(cause => {
 				throw new Error(`Failed to import data: ${cause.message}`, { cause })
