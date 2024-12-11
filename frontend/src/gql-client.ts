@@ -1,6 +1,6 @@
 import { throwAny } from '@shared/errors'
 import { type ExecutionResult, createClient } from 'graphql-ws'
-import { has, head, pipe, pluck, prop, toPairs, when } from 'ramda'
+import { T, has, head, pipe, pluck, prop, toPairs, when } from 'ramda'
 import { isNotNilOrEmpty } from 'ramda-adjunct'
 import { type Sdk, getSdk } from './gql/graphql'
 import { getItem } from './lib/local-storage'
@@ -9,7 +9,21 @@ const gql = createClient({
 	url: 'ws://localhost:6173/graphql',
 	connectionParams: () => ({
 		authToken: getItem('token')
-	})
+	}),
+	keepAlive: 300,
+	shouldRetry: T,
+	retryAttempts: Number.POSITIVE_INFINITY,
+	on: {
+		opened: () => {
+			console.log('WebSocket connection established')
+		},
+		closed: e => {
+			console.log('WebSocket connection closed', e)
+		},
+		error: err => {
+			console.error('WebSocket error:', err)
+		}
+	}
 })
 
 type FirstProperty<T> = T extends { [K in keyof T]: infer U } ? U : never

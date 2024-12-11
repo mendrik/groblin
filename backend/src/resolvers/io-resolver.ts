@@ -92,14 +92,13 @@ export class IoResolver {
 		@Ctx() ctx: Context
 	) {
 		const { db, pubSub } = ctx
-		const json: JsonArray = await this.s3
-			.getContent(payload.data)
-			.then(JSON.parse)
-		const node = await this.nodeResolver.getTreeNode(ctx, payload.node_id)
-		const diffs = [...compareStructure(node, json, '', payload.external_id)]
-		const values = [...dbValues(node, json, payload)]
-		const parentIds = pipe(pluckParentIds, uniq)(diffs)
-		const nodes = diffs.map(diff => ({
+		const { node_id, external_id, data } = payload
+		const json: JsonArray = await this.s3.getContent(data).then(JSON.parse)
+		const node = await this.nodeResolver.getTreeNode(ctx, node_id)
+		const missingNodes = [...compareStructure(node, json, '', external_id)]
+		const newValues = [...dbValues(node, json, payload)]
+		const parentIds = pipe(pluckParentIds, uniq)(missingNodes)
+		const newNodes = missingNodes.map(diff => ({
 			name: capitalize(diff.key),
 			order: 0,
 			type: diff.type,
@@ -110,9 +109,9 @@ export class IoResolver {
 		await db
 			.transaction()
 			.execute(async trx => {
-				await trx.insertInto('node').values(nodes).returning('id').execute()
+				await trx.insertInto('node').values(newNodes).returning('id').execute()
 				await this.applyOrder(trx, parentIds)
-				await trx.insertInto('values').values(values).execute()
+				await trx.insertInto('values').values(newValues).execute()
 			})
 			.catch(cause => {
 				throw new Error(`Failed to import data: ${cause.message}`, { cause })

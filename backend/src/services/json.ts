@@ -1,6 +1,7 @@
 import { throwError } from '@shared/errors.ts'
 import type { TreeOf } from '@shared/utils/list-to-tree.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
+import type { InsertObject } from 'kysely'
 import { F, T, eqBy, mergeAll, toLower, toUpper } from 'ramda'
 import {
 	isArray,
@@ -11,12 +12,7 @@ import {
 	isPrimitive,
 	isString
 } from 'ramda-adjunct'
-import type {
-	Json,
-	JsonArray,
-	JsonObject,
-	Values
-} from 'src/database/schema.ts'
+import type { DB, Json, JsonArray, JsonObject } from 'src/database/schema.ts'
 import { NodeType } from 'src/enums.ts'
 import type { JsonArrayImportInput } from 'src/resolvers/io-resolver.ts'
 import type { Node as DbNode } from 'src/resolvers/node-resolver.ts'
@@ -74,7 +70,7 @@ export function* dbValues(
 	node: Node,
 	json: JsonArray,
 	payload: JsonArrayImportInput
-): Generator<Values> {}
+): Generator<InsertObject<DB, 'values'>> {}
 
 export function* compareStructure(
 	node: Node,
