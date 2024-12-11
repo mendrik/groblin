@@ -76,11 +76,11 @@ type Mutation {
   register(data: Registration!): Boolean!
   login(data: Login!): Token!
   logout: Boolean!
-  importArray(data: JsonArrayImportInput!): Boolean!
-  uploadUrl(filename: String!): Upload!
   insertNode(data: InsertNode!): Node!
   updateNode(data: ChangeNodeInput!): Boolean!
   deleteNodeById(order: Int!, parent_id: Int!, id: Int!): Boolean!
+  importArray(data: JsonArrayImportInput!): Boolean!
+  uploadUrl(filename: String!): Upload!
   upsertNodeSettings(data: UpsertNodeSettings!): Int!
   insertListItem(listItem: InsertListItem!): Int!
   deleteListItem(id: Int!): Boolean!
@@ -109,18 +109,6 @@ input Login {
   rememberMe: Boolean
 }
 
-input JsonArrayImportInput {
-  node_id: Int!
-  data: String!
-  external_id: String
-  structure: Boolean!
-}
-
-type Upload {
-  signedUrl: String!
-  object: String!
-}
-
 input InsertNode {
   name: String!
   order: Int!
@@ -134,6 +122,19 @@ input ChangeNodeInput {
   order: Int
   type: NodeType
   parent_id: Int
+}
+
+input JsonArrayImportInput {
+  node_id: Int!
+  data: String!
+  external_id: String
+  structure: Boolean!
+  list_path: [Int!]
+}
+
+type Upload {
+  signedUrl: String!
+  object: String!
 }
 
 input UpsertNodeSettings {

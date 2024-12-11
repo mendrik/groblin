@@ -11,8 +11,14 @@ import {
 	isPrimitive,
 	isString
 } from 'ramda-adjunct'
-import type { Json, JsonArray, JsonObject } from 'src/database/schema.ts'
+import type {
+	Json,
+	JsonArray,
+	JsonObject,
+	Values
+} from 'src/database/schema.ts'
 import { NodeType } from 'src/enums.ts'
+import type { JsonArrayImportInput } from 'src/resolvers/io-resolver.ts'
 import type { Node as DbNode } from 'src/resolvers/node-resolver.ts'
 import { color } from 'src/utils/color-codec.ts'
 import { date } from 'src/utils/date-codec.ts'
@@ -63,6 +69,12 @@ const validateExistingNodes = match<[Node, Json | undefined], boolean>(
 	caseOf([{ type: NodeType.object }, isPlainObj], T),
 	caseOf([T, T], F)
 )
+
+export function* dbValues(
+	node: Node,
+	json: JsonArray,
+	payload: JsonArrayImportInput
+): Generator<Values> {}
 
 export function* compareStructure(
 	node: Node,

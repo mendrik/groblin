@@ -47,6 +47,7 @@ export type InsertNode = {
 export type JsonArrayImportInput = {
   data: Scalars['String']['input'];
   external_id?: InputMaybe<Scalars['String']['input']>;
+  list_path?: InputMaybe<Array<Scalars['Int']['input']>>;
   node_id: Scalars['Int']['input'];
   structure: Scalars['Boolean']['input'];
 };
