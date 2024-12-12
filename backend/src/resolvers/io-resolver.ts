@@ -3,13 +3,13 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { pluckPath } from '@shared/utils/pluck-path.ts'
 import { capitalize } from '@shared/utils/ramda.ts'
 import { inject, injectable } from 'inversify'
-import { type Transaction, sql } from 'kysely'
+import { Kysely, type Transaction, sql } from 'kysely'
 import { pipe, uniq } from 'ramda'
 import type { Context } from 'src/context.ts'
 import type { DB, JsonArray } from 'src/database/schema.ts'
 import { Role } from 'src/enums.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
-import { Topic } from 'src/pubsub.ts'
+import { LoggingPubSub, Topic } from 'src/pubsub.ts'
 import {
 	type Difference,
 	compareStructure,
@@ -25,6 +25,7 @@ import {
 	Int,
 	Mutation,
 	ObjectType,
+	type PubSub,
 	Resolver,
 	UseMiddleware
 } from 'type-graphql'
@@ -66,6 +67,12 @@ const pluckParentIds = (l: Difference[]) =>
 @Authorized(Role.Admin)
 @Resolver()
 export class IoResolver {
+	@inject(Kysely<DB>)
+	private db: Kysely<DB>
+
+	@inject(LoggingPubSub)
+	private pubSub: PubSub
+
 	@inject(S3Client)
 	private readonly s3: S3Client
 
@@ -78,7 +85,7 @@ export class IoResolver {
 				SELECT
 					id,
 					parent_id,
-					ROW_NUMBER() OVER (PARTITION BY parent_id ORDER BY 'order', id) - 1 AS new_order
+					ROW_NUMBER() OVER (PARTITION BY parent_id ORDER BY "order", id) - 1 AS new_order
 				FROM node WHERE parent_id IN (${parentIds.join(',')})
 			)
 			UPDATE node SET "order" = ordered_nodes.new_order FROM ordered_nodes 
@@ -91,7 +98,6 @@ export class IoResolver {
 		@Arg('data', () => JsonArrayImportInput) payload: JsonArrayImportInput,
 		@Ctx() ctx: Context
 	) {
-		const { db, pubSub } = ctx
 		const { node_id, external_id, data } = payload
 		const json: JsonArray = await this.s3.getContent(data).then(JSON.parse)
 		const node = await this.nodeResolver.getTreeNode(ctx, node_id)
@@ -103,10 +109,10 @@ export class IoResolver {
 			order: 0,
 			type: diff.type,
 			parent_id: diff.parent.id,
-			project_id: ctx.extra.lastProjectId
+			project_id: ctx.user.lastProjectId
 		}))
 
-		await db
+		await this.db
 			.transaction()
 			.execute(async trx => {
 				await trx.insertInto('node').values(newNodes).returning('id').execute()
@@ -117,8 +123,8 @@ export class IoResolver {
 				throw new Error(`Failed to import data: ${cause.message}`, { cause })
 			})
 
-		pubSub.publish(Topic.NodesUpdated, true)
-		pubSub.publish(Topic.ValuesUpdated, true)
+		this.pubSub.publish(Topic.NodesUpdated, true)
+		this.pubSub.publish(Topic.ValuesUpdated, true)
 		return true
 	}
 
@@ -127,7 +133,7 @@ export class IoResolver {
 		@Arg('filename', () => String) filename: string,
 		@Ctx() ctx: Context
 	) {
-		const { extra: user } = ctx
+		const { user } = ctx
 		const Key = `project_${user.lastProjectId}/${uuid()}`
 		const command = new PutObjectCommand({
 			Metadata: {

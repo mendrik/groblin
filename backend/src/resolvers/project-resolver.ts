@@ -1,7 +1,9 @@
 import { failOn } from '@shared/utils/guards.ts'
 import { inject, injectable } from 'inversify'
+import { Kysely } from 'kysely'
 import { isNil } from 'ramda'
 import type { Context } from 'src/context.ts'
+import type { DB } from 'src/database/schema.ts'
 import { Role } from 'src/enums.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import {
@@ -14,7 +16,7 @@ import {
 	Resolver,
 	UseMiddleware
 } from 'type-graphql'
-import { AuthResolver, LoggedInUser } from './auth-resolver.ts'
+import { LoggedInUser } from './auth-resolver.ts'
 import { Node, NodeResolver } from './node-resolver.ts'
 import { NodeSettings, NodeSettingsResolver } from './node-settings-resolver.ts'
 import { Value, ValueResolver } from './value-resolver.ts'
@@ -52,16 +54,16 @@ export class ProjectData {
 @Resolver()
 export class ProjectResolver {
 	@inject(NodeResolver)
-	private readonly nodeResolver: NodeResolver
+	private nodeResolver: NodeResolver
 
 	@inject(ValueResolver)
-	private readonly valueResolver: ValueResolver
+	private valueResolver: ValueResolver
 
 	@inject(NodeSettingsResolver)
-	private readonly nodeSettingsResolver: NodeSettingsResolver
+	private nodeSettingsResolver: NodeSettingsResolver
 
-	@inject(AuthResolver)
-	private readonly authResolver: AuthResolver
+	@inject(Kysely<DB>)
+	private db: Kysely<DB>
 
 	@Query(returns => ProjectData)
 	async getProject(@Ctx() ctx: Context): Promise<ProjectData> {
@@ -69,10 +71,10 @@ export class ProjectResolver {
 		const values = await this.valueResolver.getValues({ ids: [] }, ctx)
 		const nodeSettings = await this.nodeSettingsResolver.getNodeSettings(ctx)
 
-		const project = await ctx.db
+		const project = await this.db
 			.selectFrom('project')
 			.selectAll()
-			.where('id', '=', ctx.extra.lastProjectId)
+			.where('id', '=', ctx.user.lastProjectId)
 			.executeTakeFirst()
 			.then(failOn(isNil, 'Project not found'))
 
@@ -80,7 +82,7 @@ export class ProjectResolver {
 			project,
 			nodes: nodes as Node[],
 			values,
-			user: ctx.extra,
+			user: ctx.user,
 			nodeSettings
 		}
 	}

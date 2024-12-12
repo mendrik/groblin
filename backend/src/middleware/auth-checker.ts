@@ -1,9 +1,11 @@
+import { injectable } from 'inversify'
 import type { Context } from 'src/context.ts'
-import type { AuthChecker } from 'type-graphql'
+import type { AuthCheckerInterface, ResolverData } from 'type-graphql'
 
-export const authChecker: AuthChecker<Context> = (
-	{ root, args, context, info },
-	roles
-) => {
-	return context.extra != null
+@injectable()
+export class AuthChecker implements AuthCheckerInterface<Context> {
+	check({ context }: ResolverData<Context>, roles: string[]): boolean {
+		console.log('Auth', context)
+		return context.user != null
+	}
 }

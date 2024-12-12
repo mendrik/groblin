@@ -5,23 +5,33 @@ import { isNotNilOrEmpty } from 'ramda-adjunct'
 import { type Sdk, getSdk } from './gql/graphql'
 import { getItem } from './lib/local-storage'
 
+const authToken = getItem('token')
+
+console.log(authToken)
+
 const gql = createClient({
 	url: 'ws://localhost:6173/graphql',
 	connectionParams: () => ({
-		authToken: getItem('token')
+		authToken
 	}),
-	keepAlive: 300,
+	keepAlive: 1000,
 	shouldRetry: T,
-	retryAttempts: Number.POSITIVE_INFINITY,
+	retryAttempts: 100,
 	on: {
-		opened: () => {
-			console.log('WebSocket connection established')
+		opened: e => {
+			console.log('WebSocket opened:', e)
 		},
 		closed: e => {
-			console.log('WebSocket connection closed', e)
+			console.log('WebSocket closed:', e)
 		},
 		error: err => {
-			console.error('WebSocket error:', err)
+			console.log('WebSocket error:', err)
+		},
+		ping: () => {
+			console.log('ping')
+		},
+		pong: () => {
+			console.log('pong')
 		}
 	}
 })
@@ -91,11 +101,15 @@ export const Subscribe = new Proxy<any>(
 				asyncIter: AsyncIterable<any>,
 				signal: AbortSignal
 			) => {
-				for await (const { data } of asyncIter) {
-					if (signal.aborted) {
-						break
+				try {
+					for await (const { data } of asyncIter) {
+						if (signal.aborted) {
+							break
+						}
+						callback(data)
 					}
-					callback(data)
+				} catch (e) {
+					console.log('subscription failed', e)
 				}
 			}
 			void subscribe(target[key](vars), controller.signal)

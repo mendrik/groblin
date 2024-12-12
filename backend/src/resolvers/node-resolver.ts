@@ -1,14 +1,14 @@
 import { assertExists } from '@shared/asserts.ts'
 import { failOn } from '@shared/utils/guards.ts'
 import { type TreeOf, listToTree } from '@shared/utils/list-to-tree.ts'
-import { injectable } from 'inversify'
-import { type Transaction, sql } from 'kysely'
+import { inject, injectable } from 'inversify'
+import { Kysely, type Transaction, sql } from 'kysely'
 import { isNil } from 'ramda'
 import type { Context } from 'src/context.ts'
 import type { DB } from 'src/database/schema.ts'
 import { NodeType, Role } from 'src/enums.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
-import { Topic } from 'src/pubsub.ts'
+import { LoggingPubSub, Topic } from 'src/pubsub.ts'
 import {
 	Arg,
 	Authorized,
@@ -18,6 +18,7 @@ import {
 	Int,
 	Mutation,
 	ObjectType,
+	type PubSub,
 	Query,
 	Resolver,
 	Subscription,
@@ -86,6 +87,12 @@ export class ChangeNodeInput {
 @Authorized(Role.Admin, Role.Viewer)
 @Resolver()
 export class NodeResolver {
+	@inject(Kysely<DB>)
+	private db: Kysely<DB>
+
+	@inject(LoggingPubSub)
+	private pubSub: PubSub
+
 	@Subscription(returns => Boolean, {
 		topics: Topic.NodesUpdated,
 		filter: matchesLastProject
@@ -96,8 +103,8 @@ export class NodeResolver {
 
 	@Query(returns => [Node])
 	async getNodes(@Ctx() ctx: Context) {
-		const { db, extra: user } = ctx
-		return db
+		const { user } = ctx
+		return this.db
 			.selectFrom('node')
 			.where('project_id', '=', user.lastProjectId)
 			.selectAll()
@@ -119,7 +126,7 @@ export class NodeResolver {
 			.insertInto('node')
 			.values({
 				...data,
-				project_id: ctx.extra.lastProjectId
+				project_id: ctx.user.lastProjectId
 			})
 			.returning('id')
 			.executeTakeFirstOrThrow()
@@ -130,16 +137,16 @@ export class NodeResolver {
 		@Arg('data', () => InsertNode) data: InsertNode,
 		@Ctx() ctx: Context
 	): Promise<Node> {
-		const { db, extra: user, pubSub } = ctx
-		const { id } = await db
+		const { user } = ctx
+		const { id } = await this.db
 			.transaction()
 			.execute(async trx => this.insertNodeTrx(trx, data, ctx))
-		pubSub.publish(Topic.NodesUpdated, true)
-		return await this.getNode(db, id)
+		this.pubSub.publish(Topic.NodesUpdated, true)
+		return await this.getNode(id)
 	}
 
-	async getNode(db: Context['db'], id: number): Promise<Node> {
-		return db
+	async getNode(id: number): Promise<Node> {
+		return this.db
 			.selectFrom('node')
 			.selectAll()
 			.where('id', '=', id)
@@ -147,7 +154,7 @@ export class NodeResolver {
 			.then(failOn(isNil, 'Node not found')) as Promise<Node>
 	}
 
-	async getTreeNode(db: Context, id: number): Promise<TreeOf<Node, 'nodes'>> {
+	async getTreeNode(ctx: Context, id: number): Promise<TreeOf<Node, 'nodes'>> {
 		function* allNodes(
 			node: TreeOf<Node, 'nodes'>
 		): Generator<TreeOf<Node, 'nodes'>> {
@@ -157,7 +164,7 @@ export class NodeResolver {
 			}
 		}
 
-		const nodes = await this.getNodes(db)
+		const nodes = await this.getNodes(ctx)
 		const root = listToTree('id', 'parent_id', 'nodes')(nodes) as TreeOf<
 			Node,
 			'nodes'
@@ -172,15 +179,15 @@ export class NodeResolver {
 		@Arg('data', () => ChangeNodeInput) data: ChangeNodeInput,
 		@Ctx() ctx: Context
 	): Promise<boolean> {
-		const { db, pubSub, extra: user } = ctx
-		const { numUpdatedRows = 0 } = await db
+		const { user } = ctx
+		const { numUpdatedRows = 0 } = await this.db
 			.updateTable('node')
 			.set(data)
 			.where('id', '=', data.id)
 			.where('project_id', '=', user.lastProjectId)
 			.executeTakeFirst()
 
-		pubSub.publish(Topic.NodesUpdated, true)
+		this.pubSub.publish(Topic.NodesUpdated, true)
 		return numUpdatedRows > 0 // Returns true if at least one row was updated
 	}
 
@@ -191,20 +198,22 @@ export class NodeResolver {
 		@Arg('order', () => Int) order: number,
 		@Ctx() ctx: Context
 	): Promise<boolean> {
-		const { db, pubSub, extra: user } = ctx
-		const { numDeletedRows } = await db.transaction().execute(async trx => {
-			trx
-				.updateTable('node')
-				.where('order', '>', order)
-				.where('parent_id', '=', parent_id ?? null)
-				.where('project_id', '=', user.lastProjectId)
-				.where('type', '!=', NodeType.root)
-				.set({ order: sql`"order" - 1` })
-				.execute()
+		const { user } = ctx
+		const { numDeletedRows } = await this.db
+			.transaction()
+			.execute(async trx => {
+				trx
+					.updateTable('node')
+					.where('order', '>', order)
+					.where('parent_id', '=', parent_id ?? null)
+					.where('project_id', '=', user.lastProjectId)
+					.where('type', '!=', NodeType.root)
+					.set({ order: sql`"order" - 1` })
+					.execute()
 
-			return trx.deleteFrom('node').where('id', '=', id).executeTakeFirst()
-		})
-		pubSub.publish(Topic.NodesUpdated, { nodesUpdated: [] })
+				return trx.deleteFrom('node').where('id', '=', id).executeTakeFirst()
+			})
+		this.pubSub.publish(Topic.NodesUpdated, { nodesUpdated: [] })
 		return numDeletedRows > 0
 	}
 }

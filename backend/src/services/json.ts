@@ -66,11 +66,13 @@ const validateExistingNodes = match<[Node, Json | undefined], boolean>(
 	caseOf([T, T], F)
 )
 
+type CreateValue = InsertObject<DB, 'values'>
+
 export function* dbValues(
 	node: Node,
 	json: JsonArray,
 	payload: JsonArrayImportInput
-): Generator<InsertObject<DB, 'values'>> {}
+): Generator<CreateValue> {}
 
 export function* compareStructure(
 	node: Node,

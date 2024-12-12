@@ -5,8 +5,6 @@ import { cyan, lightGreen } from 'ansicolor'
 import { execute, subscribe } from 'graphql'
 import { useServer } from 'graphql-ws/lib/use/ws'
 import { WebSocketServer } from 'ws'
-import { context } from './context.ts'
-import { initializeEmailService } from './emails/email-service.ts'
 import { onConnect } from './middleware/on-connect.ts'
 import { onError } from './middleware/on-errors.ts'
 import { schema as gqlSchema } from './schema-builder.ts'
@@ -20,8 +18,16 @@ const server = new WebSocketServer({
 	path: '/graphql'
 })
 
-useServer({ schema, execute, subscribe, context, onConnect, onError }, server)
+useServer(
+	{
+		schema,
+		execute,
+		subscribe,
+		context: ({ extra }) => console.log(extra),
+		onConnect,
+		onError
+	},
+	server
+)
 
 console.log(cyan(`Started server on ${lightGreen(port)}`))
-
-initializeEmailService()

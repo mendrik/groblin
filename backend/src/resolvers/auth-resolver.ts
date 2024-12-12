@@ -5,13 +5,13 @@ import {} from '@shared/utils/ramda.ts'
 import { resolveObj } from '@shared/utils/resolve-obj.ts'
 import { inject, injectable } from 'inversify'
 import jwt from 'jsonwebtoken'
-import type { Kysely } from 'kysely'
+import { Kysely } from 'kysely'
 import ms from 'ms'
 import { F, equals, isNil, isNotNil, pipe, when } from 'ramda'
 import type { Context } from 'src/context.ts'
 import type { DB } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
-import { Topic } from 'src/pubsub.ts'
+import { LoggingPubSub, Topic } from 'src/pubsub.ts'
 import { ProjectService } from 'src/services/project-service.ts'
 import {
 	Arg,
@@ -21,6 +21,7 @@ import {
 	Int,
 	Mutation,
 	ObjectType,
+	type PubSub,
 	Resolver,
 	UseMiddleware
 } from 'type-graphql'
@@ -99,13 +100,6 @@ export class Login {
 const hashPassword = (password: string): Promise<string> =>
 	crypt(password, 'salt', 64)
 
-const userByEmail = (db: Kysely<DB>, email: string) =>
-	db
-		.selectFrom('user')
-		.selectAll()
-		.where('email', '=', email)
-		.executeTakeFirst()
-
 const regToUser = pipe(
 	evolveAlt({
 		password: hashPassword,
@@ -121,24 +115,32 @@ export class AuthResolver {
 	@inject(ProjectService)
 	private readonly projectService: ProjectService
 
-	@Mutation(returns => Boolean)
-	async register(
-		@Arg('data', () => Registration) data: Registration,
-		@Ctx() ctx: Context
-	) {
-		const { db, pubSub } = ctx
-		const existingUser = await userByEmail(db, data.email)
-		assertThat(isNil, existingUser, 'User already exists')
+	@inject(LoggingPubSub)
+	private readonly pubSub: PubSub
 
+	@inject(Kysely<DB>)
+	private readonly db: Kysely<DB>
+
+	userByEmail = (email: string) =>
+		this.db
+			.selectFrom('user')
+			.selectAll()
+			.where('email', '=', email)
+			.executeTakeFirst()
+
+	@Mutation(returns => Boolean)
+	async register(@Arg('data', () => Registration) data: Registration) {
+		const existingUser = await this.userByEmail(data.email)
+		assertThat(isNil, existingUser, 'User already exists')
 		const user = await regToUser(data)
-		const res = await db.insertInto('user').values(user).execute()
-		pubSub.publish(Topic.UserRegistered, data)
+		const res = await this.db.insertInto('user').values(user).execute()
+		this.pubSub.publish(Topic.UserRegistered, data)
 		return res.length > 0
 	}
 
 	@Mutation(returns => Token)
 	async login(@Arg('data', () => Login) data: Login, @Ctx() ctx: Context) {
-		const user = await userByEmail(ctx.db, data.email)
+		const user = await this.userByEmail(data.email)
 		const hashedPassword = await hashPassword(data.password)
 
 		assertThat(isNotNil, user, 'User not found')
@@ -154,18 +156,16 @@ export class AuthResolver {
 			}),
 			resolveObj
 		)
-
-		ctx.extra = await loggedInUser(user)
-
+		ctx.user = await loggedInUser(user)
 		return {
-			token: jwt.sign(ctx.extra, jwtSecret, { expiresIn: ms(expiresIn) }),
+			token: jwt.sign(ctx.user, jwtSecret, { expiresIn: ms(expiresIn) }),
 			expiresDate: new Date(Date.now() + ms(expiresIn))
 		}
 	}
 
 	@Mutation(returns => Boolean)
 	async logout(@Ctx() ctx: Context) {
-		ctx.extra = undefined as any
+		ctx.user = undefined as any
 		return true
 	}
 

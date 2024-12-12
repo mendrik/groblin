@@ -1,8 +1,8 @@
 import 'dotenv/config'
 import { type NonEmptyArray, buildSchema } from 'type-graphql'
 import { container } from './injections.ts'
-import { authChecker } from './middleware/auth-checker.ts'
-import { pubSub } from './pubsub.ts'
+import { AuthChecker } from './middleware/auth-checker.ts'
+import { LoggingPubSub } from './pubsub.ts'
 import { AuthResolver } from './resolvers/auth-resolver.ts'
 import { IoResolver } from './resolvers/io-resolver.ts'
 import { NodeResolver } from './resolvers/node-resolver.ts'
@@ -21,7 +21,8 @@ const resolvers: NonEmptyArray<Function> = [
 
 export const schema = await buildSchema({
 	resolvers,
-	pubSub,
-	authChecker,
-	container
+	pubSub: container.get(LoggingPubSub),
+	authChecker: AuthChecker,
+	container,
+	authMode: 'null'
 })

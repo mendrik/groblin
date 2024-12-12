@@ -11,7 +11,7 @@ export class LogAccess implements MiddlewareInterface<Context> {
 		{ context, args, info, root }: ResolverData<Context>,
 		next: NextFn
 	) {
-		const username: string = context.extra?.name || 'guest'
+		const username: string = context.user?.name || 'guest'
 		const { variableValues } = args
 		console.log(
 			`${yellow(`Gql:`)} ${green(username)} ${blue(info.path.typename)} ${lightYellow(info.path.key)}`

@@ -1,5 +1,6 @@
 import { lightMagenta, magenta } from 'ansicolor'
 import { createPubSub } from 'graphql-yoga'
+import { injectable } from 'inversify'
 import type { PubSub } from 'type-graphql'
 
 export enum Topic {
@@ -16,7 +17,8 @@ type PubSubTopics = {
 	USER_REGISTERED: [Topic.UserRegistered]
 }
 
-class LoggingPubSub implements PubSub {
+@injectable()
+export class LoggingPubSub implements PubSub {
 	private pubSub: PubSub
 
 	constructor() {
@@ -41,5 +43,3 @@ class LoggingPubSub implements PubSub {
 		return this.pubSub.subscribe(routingKey, dynamicId)
 	}
 }
-
-export const pubSub = new LoggingPubSub()
