@@ -1,11 +1,12 @@
 import {} from 'graphql'
 import { GraphQLJSONObject } from 'graphql-scalars'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
+import { Kysely } from 'kysely'
 import type { Context } from 'src/context.ts'
-import type { JsonValue } from 'src/database/schema.ts'
+import type { DB, JsonValue } from 'src/database/schema.ts'
 import { Role } from 'src/enums.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
-import { Topic } from 'src/pubsub.ts'
+import { LoggingPubSub, Topic } from 'src/pubsub.ts'
 import {
 	Arg,
 	Authorized,
@@ -15,6 +16,7 @@ import {
 	Int,
 	Mutation,
 	ObjectType,
+	type PubSub,
 	Query,
 	Resolver,
 	Subscription,
@@ -78,6 +80,12 @@ export class InsertListItem {
 @Authorized(Role.Admin, Role.Viewer)
 @Resolver()
 export class ValueResolver {
+	@inject(Kysely)
+	private db: Kysely<DB>
+
+	@inject(LoggingPubSub)
+	private pubSub: PubSub
+
 	@Subscription(returns => Boolean, {
 		topics: Topic.ValuesUpdated,
 		filter: matchesLastProject
@@ -91,8 +99,8 @@ export class ValueResolver {
 		@Arg('data', () => GetValues) { ids }: GetValues,
 		@Ctx() ctx: Context
 	): Promise<Value[]> {
-		const { db, extra: user } = ctx
-		return db
+		const { user } = ctx
+		return this.db
 			.selectFrom('values')
 			.where('project_id', '=', user.lastProjectId)
 			.where(({ or, eb }) =>
@@ -108,14 +116,14 @@ export class ValueResolver {
 		@Arg('listItem', () => InsertListItem) data: InsertListItem,
 		@Ctx() ctx: Context
 	) {
-		const { db, extra: user, pubSub } = ctx
-		const { max_order } = await db
+		const { user } = ctx
+		const { max_order } = await this.db
 			.selectFrom('values') // Replace with your table name
 			.where('node_id', '=', data.node_id)
-			.select(db.fn.max('order').as('max_order')) // Replace with your column name
+			.select(this.db.fn.max('order').as('max_order')) // Replace with your column name
 			.executeTakeFirstOrThrow()
 
-		const res = await db
+		const res = await this.db
 			.insertInto('values')
 			.values({
 				node_id: data.node_id,
@@ -127,26 +135,28 @@ export class ValueResolver {
 			.returning('id as id')
 			.executeTakeFirstOrThrow()
 
-		pubSub.publish(Topic.ValuesUpdated, true)
+		this.pubSub.publish(Topic.ValuesUpdated, true)
 		return res.id
 	}
 
 	@Mutation(returns => Boolean)
 	async deleteListItem(@Arg('id', () => Int) id: number, @Ctx() ctx: Context) {
-		const { db, extra: user, pubSub } = ctx
-		const { numDeletedRows } = await db.transaction().execute(async trx => {
-			await trx
-				.deleteFrom('values')
-				.where('list_path', '&&', [[id]])
-				.execute()
+		const { user } = ctx
+		const { numDeletedRows } = await this.db
+			.transaction()
+			.execute(async trx => {
+				await trx
+					.deleteFrom('values')
+					.where('list_path', '&&', [[id]])
+					.execute()
 
-			return await trx
-				.deleteFrom('values')
-				.where('id', '=', id)
-				.executeTakeFirstOrThrow()
-		})
+				return await trx
+					.deleteFrom('values')
+					.where('id', '=', id)
+					.executeTakeFirstOrThrow()
+			})
 
-		pubSub.publish(Topic.ValuesUpdated, true)
+		this.pubSub.publish(Topic.ValuesUpdated, true)
 		return numDeletedRows > 0
 	}
 
@@ -155,8 +165,8 @@ export class ValueResolver {
 		@Arg('data', () => UpsertValue) data: UpsertValue,
 		@Ctx() ctx: Context
 	) {
-		const { db, extra: user, pubSub } = ctx
-		const { id } = await db
+		const { user } = ctx
+		const { id } = await this.db
 			.insertInto('values')
 			.values({
 				id: data.id,
@@ -172,7 +182,7 @@ export class ValueResolver {
 			)
 			.returning('id as id')
 			.executeTakeFirstOrThrow()
-		pubSub.publish(Topic.ValuesUpdated, true)
+		this.pubSub.publish(Topic.ValuesUpdated, true)
 		return id
 	}
 }

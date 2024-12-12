@@ -62,7 +62,7 @@ export class ProjectResolver {
 	@inject(NodeSettingsResolver)
 	private nodeSettingsResolver: NodeSettingsResolver
 
-	@inject(Kysely<DB>)
+	@inject(Kysely)
 	private db: Kysely<DB>
 
 	@Query(returns => ProjectData)

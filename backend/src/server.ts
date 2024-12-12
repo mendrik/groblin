@@ -23,7 +23,10 @@ useServer(
 		schema,
 		execute,
 		subscribe,
-		context: ({ extra }) => console.log(extra),
+		context: ({ extra }) => {
+			console.log(extra)
+			return extra
+		},
 		onConnect,
 		onError
 	},

@@ -1,10 +1,11 @@
 import { GraphQLJSONObject } from 'graphql-scalars'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
+import { Kysely } from 'kysely'
 import type { Context } from 'src/context.ts'
-import type { JsonValue } from 'src/database/schema.ts'
+import type { DB, JsonValue } from 'src/database/schema.ts'
 import { NodeType, Role } from 'src/enums.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
-import { Topic } from 'src/pubsub.ts'
+import { LoggingPubSub, Topic } from 'src/pubsub.ts'
 import {
 	Arg,
 	Authorized,
@@ -14,6 +15,7 @@ import {
 	Int,
 	Mutation,
 	ObjectType,
+	type PubSub,
 	Query,
 	Resolver,
 	Subscription,
@@ -55,6 +57,12 @@ export class UpsertNodeSettings {
 @Authorized(Role.Admin, Role.Viewer)
 @Resolver()
 export class NodeSettingsResolver {
+	@inject(Kysely)
+	private db: Kysely<DB>
+
+	@inject(LoggingPubSub)
+	private pubSub: PubSub
+
 	@Subscription(returns => Boolean, {
 		topics: Topic.NodeSettingsUpdated,
 		filter: matchesLastProject
@@ -65,8 +73,8 @@ export class NodeSettingsResolver {
 
 	@Query(returns => [NodeSettings])
 	async getNodeSettings(@Ctx() ctx: Context): Promise<NodeSettings[]> {
-		const { db, extra: user } = ctx
-		return db
+		const { user } = ctx
+		return this.db
 			.selectFrom('node_settings')
 			.where('project_id', '=', user.lastProjectId)
 			.selectAll()
@@ -78,8 +86,8 @@ export class NodeSettingsResolver {
 		@Arg('data', () => UpsertNodeSettings) data: UpsertNodeSettings,
 		@Ctx() ctx: Context
 	) {
-		const { db, extra: user, pubSub } = ctx
-		const { id } = await db
+		const { user } = ctx
+		const { id } = await this.db
 			.insertInto('node_settings')
 			.values({
 				id: data.id,
@@ -94,7 +102,7 @@ export class NodeSettingsResolver {
 			)
 			.returning('id as id')
 			.executeTakeFirstOrThrow()
-		pubSub.publish(Topic.NodeSettingsUpdated, true)
+		this.pubSub.publish(Topic.NodeSettingsUpdated, true)
 		return id
 	}
 }

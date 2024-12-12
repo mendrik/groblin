@@ -87,7 +87,7 @@ export class ChangeNodeInput {
 @Authorized(Role.Admin, Role.Viewer)
 @Resolver()
 export class NodeResolver {
-	@inject(Kysely<DB>)
+	@inject(Kysely)
 	private db: Kysely<DB>
 
 	@inject(LoggingPubSub)

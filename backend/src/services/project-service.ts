@@ -1,17 +1,23 @@
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
+import { Kysely } from 'kysely'
 import type { Context } from 'src/context.ts'
+import type { DB } from 'src/database/schema.ts'
 import { NodeType, Role } from 'src/enums.ts'
-import type { LoggedInUser } from 'src/resolvers/auth-resolver.ts'
+import { LoggingPubSub } from 'src/pubsub.ts'
+import type { PubSub } from 'type-graphql'
 
 type LastProjectId = number
 
 @injectable()
 export class ProjectService {
-	async initializeProject(
-		user: LoggedInUser,
-		{ db }: Context
-	): Promise<LastProjectId> {
-		return db.transaction().execute(async trx => {
+	@inject(Kysely)
+	private db: Kysely<DB>
+
+	@inject(LoggingPubSub)
+	private pubSub: PubSub
+
+	async initializeProject({ user }: Context): Promise<LastProjectId> {
+		return this.db.transaction().execute(async trx => {
 			const { id: project_id } = await trx
 				.insertInto('project')
 				.values({

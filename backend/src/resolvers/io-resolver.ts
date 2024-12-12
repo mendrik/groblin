@@ -67,7 +67,7 @@ const pluckParentIds = (l: Difference[]) =>
 @Authorized(Role.Admin)
 @Resolver()
 export class IoResolver {
-	@inject(Kysely<DB>)
+	@inject(Kysely)
 	private db: Kysely<DB>
 
 	@inject(LoggingPubSub)

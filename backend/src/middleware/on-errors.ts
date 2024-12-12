@@ -9,5 +9,5 @@ export const onError = (
 ) => {
 	const { extra } = ctx
 	const user = extra as LoggedInUser
-	console.error(`${user.email}: ${message}`, ...errors)
+	console.error(`${user?.email}: ${message}`, ...errors)
 }

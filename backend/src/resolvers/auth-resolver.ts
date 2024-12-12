@@ -118,7 +118,7 @@ export class AuthResolver {
 	@inject(LoggingPubSub)
 	private readonly pubSub: PubSub
 
-	@inject(Kysely<DB>)
+	@inject(Kysely)
 	private readonly db: Kysely<DB>
 
 	userByEmail = (email: string) =>
@@ -148,7 +148,7 @@ export class AuthResolver {
 		assertThat(isNotNil, jwtSecret, 'JWT_SECRET must be defined')
 
 		const expiresIn = data.rememberMe ? '60 days' : '24h'
-		const init = () => this.projectService.initializeProject(user, ctx)
+		const init = () => this.projectService.initializeProject(ctx)
 
 		const loggedInUser = await pipe(
 			evolveAlt({
