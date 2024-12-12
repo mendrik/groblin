@@ -4,10 +4,10 @@ import { injectable } from 'inversify'
 import type { PubSub } from 'type-graphql'
 
 export enum Topic {
-	UserRegistered = 'userRegistered',
-	NodesUpdated = 'nodesUpdated',
-	ValuesUpdated = 'valuesUpdated',
-	NodeSettingsUpdated = 'nodeSettingsUpdated'
+	UserRegistered = 'user registered',
+	NodesUpdated = 'nodes updated',
+	ValuesUpdated = 'values updated',
+	NodeSettingsUpdated = 'node settings updated'
 }
 
 type ProjectId = number

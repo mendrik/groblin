@@ -6,7 +6,7 @@ import type { Context } from 'src/context.ts'
 import type { DB, JsonValue } from 'src/database/schema.ts'
 import { Role } from 'src/enums.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
-import { LoggingPubSub, Topic } from 'src/pubsub.ts'
+import { Topic } from 'src/services/pubsub-service.ts'
 import {
 	Arg,
 	Authorized,
@@ -83,7 +83,7 @@ export class ValueResolver {
 	@inject(Kysely)
 	private db: Kysely<DB>
 
-	@inject(LoggingPubSub)
+	@inject('PubSub')
 	private pubSub: PubSub
 
 	@Subscription(returns => Boolean, {

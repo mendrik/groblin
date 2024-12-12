@@ -7,8 +7,6 @@ import { getItem } from './lib/local-storage'
 
 const authToken = getItem('token')
 
-console.log(authToken)
-
 const gql = createClient({
 	url: 'ws://localhost:6173/graphql',
 	connectionParams: () => ({
@@ -16,24 +14,7 @@ const gql = createClient({
 	}),
 	keepAlive: 1000,
 	shouldRetry: T,
-	retryAttempts: 100,
-	on: {
-		opened: e => {
-			console.log('WebSocket opened:', e)
-		},
-		closed: e => {
-			console.log('WebSocket closed:', e)
-		},
-		error: err => {
-			console.log('WebSocket error:', err)
-		},
-		ping: () => {
-			console.log('ping')
-		},
-		pong: () => {
-			console.log('pong')
-		}
-	}
+	retryAttempts: 10
 })
 
 type FirstProperty<T> = T extends { [K in keyof T]: infer U } ? U : never

@@ -1,10 +1,11 @@
 import { inject, injectable } from 'inversify'
-import { LoggingPubSub, Topic } from 'src/pubsub.ts'
+import { Topic } from 'src/services/pubsub-service.ts'
+import type { PubSub } from 'type-graphql'
 
 @injectable()
 export class EmailService {
-	@inject(LoggingPubSub)
-	pubSub: LoggingPubSub
+	@inject('PubSub')
+	private pubSub: PubSub
 
 	async waitForRegistration() {
 		for await (const reg of this.pubSub.subscribe(Topic.UserRegistered)) {

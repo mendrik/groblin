@@ -3,7 +3,7 @@ import { Kysely } from 'kysely'
 import type { Context } from 'src/context.ts'
 import type { DB } from 'src/database/schema.ts'
 import { NodeType, Role } from 'src/enums.ts'
-import { LoggingPubSub } from 'src/pubsub.ts'
+import { LoggingPubSub } from 'src/services/pubsub-service.ts'
 import type { PubSub } from 'type-graphql'
 
 type LastProjectId = number

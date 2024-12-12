@@ -11,8 +11,8 @@ import { F, equals, isNil, isNotNil, pipe, when } from 'ramda'
 import type { Context } from 'src/context.ts'
 import type { DB } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
-import { LoggingPubSub, Topic } from 'src/pubsub.ts'
 import { ProjectService } from 'src/services/project-service.ts'
+import { Topic } from 'src/services/pubsub-service.ts'
 import {
 	Arg,
 	Ctx,
@@ -115,8 +115,8 @@ export class AuthResolver {
 	@inject(ProjectService)
 	private readonly projectService: ProjectService
 
-	@inject(LoggingPubSub)
-	private readonly pubSub: PubSub
+	@inject('PubSub')
+	private pubSub: PubSub
 
 	@inject(Kysely)
 	private readonly db: Kysely<DB>

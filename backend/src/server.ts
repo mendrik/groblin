@@ -4,6 +4,7 @@ import { makeExecutableSchema } from '@graphql-tools/schema'
 import { cyan, lightGreen } from 'ansicolor'
 import { execute, subscribe } from 'graphql'
 import { useServer } from 'graphql-ws/lib/use/ws'
+import { prop } from 'ramda'
 import { WebSocketServer } from 'ws'
 import { onConnect } from './middleware/on-connect.ts'
 import { onError } from './middleware/on-errors.ts'
@@ -23,10 +24,7 @@ useServer(
 		schema,
 		execute,
 		subscribe,
-		context: ({ extra }) => {
-			console.log(extra)
-			return extra
-		},
+		context: prop('extra'),
 		onConnect,
 		onError
 	},

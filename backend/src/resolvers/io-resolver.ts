@@ -9,12 +9,12 @@ import type { Context } from 'src/context.ts'
 import type { DB, JsonArray } from 'src/database/schema.ts'
 import { Role } from 'src/enums.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
-import { LoggingPubSub, Topic } from 'src/pubsub.ts'
 import {
 	type Difference,
 	compareStructure,
 	dbValues
 } from 'src/services/json.ts'
+import { Topic } from 'src/services/pubsub-service.ts'
 import { S3Client } from 'src/services/s3-client.ts'
 import {
 	Arg,
@@ -70,7 +70,7 @@ export class IoResolver {
 	@inject(Kysely)
 	private db: Kysely<DB>
 
-	@inject(LoggingPubSub)
+	@inject('PubSub')
 	private pubSub: PubSub
 
 	@inject(S3Client)
@@ -112,12 +112,14 @@ export class IoResolver {
 			project_id: ctx.user.lastProjectId
 		}))
 
+		console.dir({ newNodes })
+
 		await this.db
 			.transaction()
 			.execute(async trx => {
 				await trx.insertInto('node').values(newNodes).returning('id').execute()
 				await this.applyOrder(trx, parentIds)
-				await trx.insertInto('values').values(newValues).execute()
+				// await trx.insertInto('values').values(newValues).execute()
 			})
 			.catch(cause => {
 				throw new Error(`Failed to import data: ${cause.message}`, { cause })
