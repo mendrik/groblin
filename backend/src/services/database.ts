@@ -3,7 +3,7 @@ import 'dotenv/config'
 import { Kysely, PostgresDialect } from 'kysely'
 import pg from 'pg'
 import { isNilOrEmpty } from 'ramda-adjunct'
-import type { DB } from './database/schema.ts'
+import type { DB } from '../database/schema.ts'
 
 const dialect = new PostgresDialect({
 	pool: new pg.Pool({

@@ -5,17 +5,17 @@ import { capitalize } from '@shared/utils/ramda.ts'
 import { inject, injectable } from 'inversify'
 import { Kysely, type Transaction, sql } from 'kysely'
 import { pipe, uniq } from 'ramda'
-import type { Context } from 'src/context.ts'
 import type { DB, JsonArray } from 'src/database/schema.ts'
-import { Role } from 'src/enums.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
+import { Topic } from 'src/services/Topic.ts'
 import {
 	type Difference,
 	compareStructure,
 	dbValues
 } from 'src/services/json.ts'
-import { Topic } from 'src/services/pubsub-service.ts'
 import { S3Client } from 'src/services/s3-client.ts'
+import type { Context } from 'src/types.ts'
+import { Role } from 'src/types.ts'
 import {
 	Arg,
 	Authorized,

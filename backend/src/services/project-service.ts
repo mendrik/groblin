@@ -1,9 +1,8 @@
 import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
-import type { Context } from 'src/context.ts'
 import type { DB } from 'src/database/schema.ts'
-import { NodeType, Role } from 'src/enums.ts'
-import { LoggingPubSub } from 'src/services/pubsub-service.ts'
+import type { Context } from 'src/types.ts'
+import { NodeType, Role } from 'src/types.ts'
 import type { PubSub } from 'type-graphql'
 
 type LastProjectId = number
@@ -13,7 +12,7 @@ export class ProjectService {
 	@inject(Kysely)
 	private db: Kysely<DB>
 
-	@inject(LoggingPubSub)
+	@inject('PubSub')
 	private pubSub: PubSub
 
 	async initializeProject({ user }: Context): Promise<LastProjectId> {

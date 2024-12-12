@@ -1,4 +1,4 @@
-import { NodeType } from 'src/enums.ts'
+import { NodeType } from 'src/types.ts'
 import { describe, expect, it } from 'vitest'
 import { type Node, Signal, compareStructure } from './json.ts'
 

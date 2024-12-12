@@ -1,5 +1,5 @@
 import { injectable } from 'inversify'
-import type { Context } from 'src/context.ts'
+import type { Context } from 'src/types.ts'
 import type { AuthCheckerInterface, ResolverData } from 'type-graphql'
 
 @injectable()

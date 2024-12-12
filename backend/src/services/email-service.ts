@@ -1,6 +1,6 @@
 import { inject, injectable } from 'inversify'
-import { Topic } from 'src/services/pubsub-service.ts'
 import type { PubSub } from 'type-graphql'
+import { Topic } from './Topic.ts'
 
 @injectable()
 export class EmailService {

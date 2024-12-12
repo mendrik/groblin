@@ -83,6 +83,8 @@ export const Subscribe = new Proxy<any>(
 				signal: AbortSignal
 			) => {
 				try {
+					console.log(key, vars)
+
 					for await (const { data } of asyncIter) {
 						if (signal.aborted) {
 							break

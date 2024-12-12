@@ -8,7 +8,7 @@ import { prop } from 'ramda'
 import { WebSocketServer } from 'ws'
 import { onConnect } from './middleware/on-connect.ts'
 import { onError } from './middleware/on-errors.ts'
-import { schema as gqlSchema } from './schema-builder.ts'
+import { schema as gqlSchema } from './schema.ts'
 
 const schema = makeExecutableSchema({ typeDefs: gqlSchema })
 

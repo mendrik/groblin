@@ -1,4 +1,4 @@
-import type { Context } from 'src/context.ts'
+import type { Context } from 'src/types.ts'
 
 type TopicSubscription = { args: { projectId: number }; context: Context }
 

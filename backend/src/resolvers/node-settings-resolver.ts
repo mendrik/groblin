@@ -1,11 +1,11 @@
 import { GraphQLJSONObject } from 'graphql-scalars'
 import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
-import type { Context } from 'src/context.ts'
 import type { DB, JsonValue } from 'src/database/schema.ts'
-import { NodeType, Role } from 'src/enums.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
-import { Topic } from 'src/services/pubsub-service.ts'
+import { Topic } from 'src/services/Topic.ts'
+import type { Context } from 'src/types.ts'
+import { NodeType, Role } from 'src/types.ts'
 import {
 	Arg,
 	Authorized,
@@ -22,7 +22,7 @@ import {
 	UseMiddleware,
 	registerEnumType
 } from 'type-graphql'
-import { matchesLastProject } from './utils.ts'
+import { matchesLastProject } from './filters.ts'
 
 registerEnumType(NodeType, {
 	name: 'NodeType'

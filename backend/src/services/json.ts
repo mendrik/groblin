@@ -13,9 +13,9 @@ import {
 	isString
 } from 'ramda-adjunct'
 import type { DB, Json, JsonArray, JsonObject } from 'src/database/schema.ts'
-import { NodeType } from 'src/enums.ts'
 import type { JsonArrayImportInput } from 'src/resolvers/io-resolver.ts'
 import type { Node as DbNode } from 'src/resolvers/node-resolver.ts'
+import { NodeType } from 'src/types.ts'
 import { color } from 'src/utils/color-codec.ts'
 import { date } from 'src/utils/date-codec.ts'
 

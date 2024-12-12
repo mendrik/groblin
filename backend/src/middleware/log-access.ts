@@ -1,6 +1,6 @@
 import { blue, green, lightYellow, yellow } from 'ansicolor'
 import { injectable } from 'inversify'
-import type { Context } from 'src/context.ts'
+import type { Context } from 'src/types.ts'
 import type { MiddlewareInterface, NextFn, ResolverData } from 'type-graphql'
 
 const Content = /\s+\{(.|\n)*$/gim
