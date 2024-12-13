@@ -14,17 +14,15 @@ type Matcher<T = any> =
 
 type NarrowedArg<P, A> = P extends Guard<infer T>
 	? T
-	: P extends [infer P1, infer P2]
-		? A extends [infer A1, infer A2]
-			? [NarrowedArg<P1, A1>, NarrowedArg<P2, A2>]
-			: [NarrowedArg<P1, A>, NarrowedArg<P1, A>]
-		: P extends AnyFn
-			? A
+	: P extends AnyFn
+		? A
+		: P extends [infer P1, infer P2]
+			? A extends [infer A1, infer A2]
+				? [NarrowedArg<P1, A1>, NarrowedArg<P2, A2>]
+				: never
 			: P extends object
 				? {
-						[K in keyof P]: K extends keyof A
-							? NarrowedArg<P[K], A[K]>
-							: NarrowedArg<P[K], A>
+						[K in keyof P]: K extends keyof A ? NarrowedArg<P[K], A[K]> : never
 					}
 				: A
 

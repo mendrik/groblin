@@ -95,7 +95,7 @@ describe('pattern', () => {
 		expect(matcher([2, 2])).toBe('no match')
 	})
 
-	it('should match array matchers', () => {
+	it('should match objects matchers', () => {
 		const matcher = match<[{ a: number | string }], string>(
 			caseOf([{ a: isString }], ({ a }) => `match`),
 			caseOf([_], () => `no match`)
