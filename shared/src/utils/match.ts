@@ -3,6 +3,8 @@ import { isArray, isPrimitive } from 'ramda-adjunct'
 
 type Guard<T> = (value: any) => value is T
 
+type PrimitiveMatcher = string | number | boolean | null | undefined
+
 type Matcher<T = any> =
 	| ((value: any) => boolean)
 	| Guard<any>
@@ -25,8 +27,6 @@ type NarrowedArg<P, A> = P extends Guard<infer T>
 							: NarrowedArg<P[K], A>
 					}
 				: A
-
-type PrimitiveMatcher = string | number | boolean | null | undefined
 
 type ObjectMatcher<T = any> = T extends object
 	? { [P in keyof T]?: T[P] | Matcher<T[P]> }
