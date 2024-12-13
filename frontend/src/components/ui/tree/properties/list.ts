@@ -8,7 +8,7 @@ export const ListProps = object({
 		editor: EditorType.Switch,
 		span: 2,
 		description:
-			'For lists with many items. Enables pagination, preview and search.'
+			'For lists with many items. Enables pagination, preview, search and imports.'
 	})
 })
 

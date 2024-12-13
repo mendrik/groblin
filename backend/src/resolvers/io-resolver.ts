@@ -1,18 +1,14 @@
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { pluckPath } from '@shared/utils/pluck-path.ts'
-import { capitalize } from '@shared/utils/ramda.ts'
 import { inject, injectable } from 'inversify'
 import { Kysely, type Transaction, sql } from 'kysely'
-import { pipe, uniq } from 'ramda'
+import {} from 'ramda'
 import type { DB, JsonArray } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import { Topic } from 'src/services/Topic.ts'
-import {
-	type Difference,
-	compareStructure,
-	dbValues
-} from 'src/services/json.ts'
+import { importJson } from 'src/services/importer.ts'
+import type { Difference } from 'src/services/json.ts'
 import { S3Client } from 'src/services/s3-client.ts'
 import type { Context } from 'src/types.ts'
 import { Role } from 'src/types.ts'
@@ -98,29 +94,14 @@ export class IoResolver {
 		@Arg('data', () => JsonArrayImportInput) payload: JsonArrayImportInput,
 		@Ctx() ctx: Context
 	) {
-		const { node_id, external_id, data } = payload
+		const { node_id, data } = payload
 		const json: JsonArray = await this.s3.getContent(data).then(JSON.parse)
 		const node = await this.nodeResolver.getTreeNode(ctx, node_id)
-		const missingNodes = [...compareStructure(node, json, '', external_id)]
-		const newValues = [...dbValues(node, json, payload)]
-		const parentIds = pipe(pluckParentIds, uniq)(missingNodes)
-		const newNodes = missingNodes.map(diff => ({
-			name: capitalize(diff.key),
-			order: 0,
-			type: diff.type,
-			parent_id: diff.parent.id,
-			project_id: ctx.user.lastProjectId
-		}))
-
-		console.dir({ newNodes })
+		const importer = importJson(json, node, payload)
 
 		await this.db
 			.transaction()
-			.execute(async trx => {
-				await trx.insertInto('node').values(newNodes).returning('id').execute()
-				await this.applyOrder(trx, parentIds)
-				// await trx.insertInto('values').values(newValues).execute()
-			})
+			.execute(importer)
 			.catch(cause => {
 				throw new Error(`Failed to import data: ${cause.message}`, { cause })
 			})

@@ -7,13 +7,22 @@ type Matcher<T = any> =
 	| Guard<any>
 	| PrimitiveMatcher
 	| ObjectMatcher<T>
+	| TupleMatcher<T>
 
-type InferPredicate<P, A> = P extends Guard<infer T> ? T : A
+type InferPredicateEnd<P, A> = P extends Guard<infer T> ? T : A
+
+type InferPredicate<P, A> = P extends [infer T1, infer T2]
+	? [InferPredicateEnd<P[0], T1>, InferPredicateEnd<P[1], T2>]
+	: InferPredicateEnd<P, A>
 
 type PrimitiveMatcher = string | number | boolean | null | undefined
 
 type ObjectMatcher<T = any> = T extends object
-	? { [P in keyof T]?: T[P] }
+	? { [P in keyof T]?: T[P] | Matcher<T[P]> }
+	: never
+
+type TupleMatcher<T = any> = T extends [infer A, infer B]
+	? [A | Matcher<A>, B | Matcher<B>]
 	: never
 
 type HandlerArgs<

@@ -1,5 +1,5 @@
 import { T as _, equals, gt, is, isEmpty, values } from 'ramda'
-import { isNumber, isString } from 'ramda-adjunct'
+import { isNumber, isOdd, isString } from 'ramda-adjunct'
 import { describe, expect, it } from 'vitest'
 import { ZodNativeEnum, type ZodTypeAny, nativeEnum } from 'zod'
 import { caseOf, match } from './match'
@@ -83,5 +83,15 @@ describe('pattern', () => {
 
 		expect(matcher({ a: [] })).toBe('match')
 		expect(matcher({ a: [1, 2, 3] })).toBe('no match')
+	})
+
+	it('should match array matchers', () => {
+		const matcher = match<[[number, number | string]], string>(
+			caseOf([[isOdd, isString]], ([a, b]) => `match`),
+			caseOf([_], () => `no match`)
+		)
+
+		expect(matcher([1, 2])).toBe('match')
+		expect(matcher([2, 2])).toBe('no match')
 	})
 })
