@@ -5,12 +5,14 @@ type Guard<T> = (value: any) => value is T
 
 type PrimitiveMatcher = string | number | boolean | null | undefined
 
+type Predicate = (value: any) => boolean
+
 type Matcher<T = any> =
-	| ((value: any) => boolean)
 	| Guard<any>
 	| PrimitiveMatcher
 	| ObjectMatcher<T>
 	| TupleMatcher<T>
+	| Predicate
 
 type NarrowedArg<P, A> = P extends Guard<infer T>
 	? T
@@ -31,7 +33,7 @@ type ObjectMatcher<T = any> = T extends object
 	: never
 
 type TupleMatcher<T = any> = T extends [infer A, infer B]
-	? [A | Matcher<A>, B | Matcher<B>]
+	? [Matcher<A>, Matcher<B>]
 	: never
 
 type HandlerArgs<

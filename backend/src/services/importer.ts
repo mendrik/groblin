@@ -15,7 +15,7 @@ type Inserts = {
 
 type TreeNode = TreeOf<Node, 'nodes'>
 type JsonStart = JsonArray | JsonObject
-type JsonNode = [string, unknown]
+type JsonNode = [string, any]
 type Options = JsonArrayImportInput
 type PathToRoot = number[]
 
