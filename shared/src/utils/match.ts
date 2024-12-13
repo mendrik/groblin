@@ -1,3 +1,4 @@
+import type { AnyFn } from '@tp/functions'
 import { isArray, isPrimitive } from 'ramda-adjunct'
 
 type Guard<T> = (value: any) => value is T
@@ -9,13 +10,21 @@ type Matcher<T = any> =
 	| ObjectMatcher<T>
 	| TupleMatcher<T>
 
-type NarrowedArg<P, A> = P extends [infer P1, infer P2]
-	? A extends [infer A1, infer A2]
-		? [NarrowedArg<P1, A1>, NarrowedArg<P2, A2>]
-		: [NarrowedArg<P1, A>, NarrowedArg<P1, A>]
-	: P extends Guard<infer T>
-		? T
-		: A
+type NarrowedArg<P, A> = P extends Guard<infer T>
+	? T
+	: P extends [infer P1, infer P2]
+		? A extends [infer A1, infer A2]
+			? [NarrowedArg<P1, A1>, NarrowedArg<P2, A2>]
+			: [NarrowedArg<P1, A>, NarrowedArg<P1, A>]
+		: P extends AnyFn
+			? A
+			: P extends object
+				? {
+						[K in keyof P]: K extends keyof A
+							? NarrowedArg<P[K], A[K]>
+							: NarrowedArg<P[K], A>
+					}
+				: A
 
 type PrimitiveMatcher = string | number | boolean | null | undefined
 
