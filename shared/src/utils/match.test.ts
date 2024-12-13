@@ -104,4 +104,17 @@ describe('pattern', () => {
 		expect(matcher({ a: 'a' })).toBe('match')
 		expect(matcher({ a: 1 })).toBe('no match')
 	})
+
+	it('should narrow types', () => {
+		class Animal {}
+		class Cat extends Animal {}
+
+		const matcher = match<[Animal], string>(
+			caseOf([is(Cat)], cat => `match`),
+			caseOf([_], () => `no match`)
+		)
+
+		expect(matcher(new Cat())).toBe('match')
+		expect(matcher(new Animal())).toBe('no match')
+	})
 })
