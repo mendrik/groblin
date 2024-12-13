@@ -24,7 +24,7 @@ type Options = JsonArrayImportInput
 type PathToRoot = number[]
 
 const processJson = (
-	projectId: number,
+	project_id: number,
 	{ external_id: extIdProp = '' }: Options,
 	nodeId: AsyncGenerator<number>,
 	valueId: AsyncGenerator<number>
@@ -34,14 +34,16 @@ const processJson = (
 		[key, value]: JsonNode,
 		list_path: PathToRoot
 	): AsyncGenerator<Inserts> {
+		const node_id = node
+			? node.id
+			: await nodeId.next().then<number>(r => r.value)
 		if (!node) {
-			const node_id = await nodeId.next()
 			yield {
-				id: node_id.value,
+				id: node_id,
 				name: capitalize(key),
 				order: 0,
 				parent_id: 0,
-				project_id: projectId,
+				project_id,
 				type: NodeType.object
 			} satisfies DbNode
 		}
@@ -54,16 +56,18 @@ const processJson = (
 				async function* (n, [k, v], l): AsyncGenerator<Inserts> {
 					// create list items
 					for (const item of v) {
-						const value_id = await valueId.next()
+						const external_id = item[extIdProp]
+						const value_id = await valueId.next().then<number>(r => r.value)
 						yield {
-							id: value_id.value,
-							node_id: 0,
-							value: item,
-							project_id: projectId,
-							external_id: item[extIdProp] ?? null,
+							id: value_id,
+							node_id,
+							value: { name: 'Item' },
+							project_id,
+							external_id,
 							list_path,
 							order: 0
 						} satisfies DbValue
+						yield* processNode(n, [k, item], [...list_path, value_id])
 					}
 				}
 			),

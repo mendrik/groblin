@@ -102,6 +102,7 @@ export class IoResolver {
 
 		await this.db
 			.transaction()
+			.setIsolationLevel('serializable')
 			.execute(importer)
 			.catch(cause => {
 				throw new Error(`Failed to import data: ${cause.message}`, { cause })
