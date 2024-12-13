@@ -47,13 +47,14 @@ const processJson = (
 			caseOf(
 				[{ type: NodeType.list }, [_, isArray], _],
 				function* (n, [k, v], l): Generator<Inserts> {
+					// create list items
 					for (const item of v) {
 						yield {
 							node_id: 0,
 							value: item,
 							project_id: projectId,
 							external_id: item[extIdProp] ?? null,
-							list_path: [],
+							list_path,
 							order: 0
 						} satisfies DbValue
 					}

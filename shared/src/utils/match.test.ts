@@ -87,7 +87,7 @@ describe('pattern', () => {
 
 	it('should match array matchers', () => {
 		const matcher = match<[[number, number | string]], string>(
-			caseOf([[isOdd, isString]], ([a, b]) => `match`),
+			caseOf([[isOdd, isString]], ([a, b]) => `match`), // { a: number, b: string }
 			caseOf([_], () => `no match`)
 		)
 
@@ -97,7 +97,7 @@ describe('pattern', () => {
 
 	it('should match objects matchers', () => {
 		const matcher = match<[{ a: number | string }], string>(
-			caseOf([{ a: isString }], ({ a }) => `match`),
+			caseOf([{ a: isString }], ({ a }) => `match`), // { a: string }
 			caseOf([_], () => `no match`)
 		)
 
@@ -110,7 +110,7 @@ describe('pattern', () => {
 		class Cat extends Animal {}
 
 		const matcher = match<[Animal], string>(
-			caseOf([is(Cat)], cat => `match`),
+			caseOf([is(Cat)], cat => `match`), // cat: Cat
 			caseOf([_], () => `no match`)
 		)
 
