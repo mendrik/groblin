@@ -2,38 +2,37 @@ import type { AnyFn } from '@tp/functions'
 import { isArray, isPrimitive } from 'ramda-adjunct'
 
 type Guard<T> = (value: any) => value is T
-
-type PrimitiveMatcher = string | number | boolean | null | undefined
-
 type Predicate = (value: any) => boolean
 
 type Matcher<T = any> =
+	| Predicate
 	| Guard<any>
 	| PrimitiveMatcher
 	| ObjectMatcher<T>
 	| TupleMatcher<T>
-	| Predicate
 
 type NarrowedArg<P, A> = P extends Guard<infer T>
 	? T
-	: P extends AnyFn
-		? A
-		: P extends [infer P1, infer P2]
-			? A extends [infer A1, infer A2]
-				? [NarrowedArg<P1, A1>, NarrowedArg<P2, A2>]
-				: never
+	: P extends [infer P1, infer P2]
+		? A extends [infer A1, infer A2]
+			? [NarrowedArg<P1, A1>, NarrowedArg<P2, A2>]
+			: never
+		: P extends AnyFn
+			? A
 			: P extends object
 				? {
 						[K in keyof P]: K extends keyof A ? NarrowedArg<P[K], A[K]> : never
 					}
 				: A
 
+type PrimitiveMatcher = string | number | boolean | null | undefined
+
 type ObjectMatcher<T = any> = T extends object
 	? { [P in keyof T]?: T[P] | Matcher<T[P]> }
 	: never
 
 type TupleMatcher<T = any> = T extends [infer A, infer B]
-	? [Matcher<A>, Matcher<B>]
+	? [A | Matcher<A>, B | Matcher<B>]
 	: never
 
 type HandlerArgs<
