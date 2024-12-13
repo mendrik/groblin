@@ -1,4 +1,4 @@
-import { isPrimitive } from 'ramda-adjunct'
+import { isArray, isPrimitive } from 'ramda-adjunct'
 
 type Guard<T> = (value: any) => value is T
 
@@ -9,7 +9,13 @@ type Matcher<T = any> =
 	| ObjectMatcher<T>
 	| TupleMatcher<T>
 
-type InferPredicate<P, A> = P extends Guard<infer T> ? T : A
+type NarrowedArg<P, A> = P extends [infer P1, infer P2]
+	? A extends [infer A1, infer A2]
+		? [NarrowedArg<P1, A1>, NarrowedArg<P2, A2>]
+		: [NarrowedArg<P1, A>, NarrowedArg<P1, A>]
+	: P extends Guard<infer T>
+		? T
+		: A
 
 type PrimitiveMatcher = string | number | boolean | null | undefined
 
@@ -26,7 +32,7 @@ type HandlerArgs<
 	Args extends readonly unknown[]
 > = {
 	[K in keyof Preds]: K extends keyof Args
-		? InferPredicate<Preds[K], Args[K]>
+		? NarrowedArg<Preds[K], Args[K]>
 		: never
 }
 
@@ -54,6 +60,13 @@ const matchValue = <T>(value: T, matcher: Matcher<T>): boolean => {
 	if (isPrimitive(matcher)) {
 		return value === matcher
 	}
+	if (isTuple(matcher) && isTuple(value)) {
+		matcher[0]
+		return (
+			matchValue(value[0], matcher[0] as Matcher<T>) &&
+			matchValue(value[1], matcher[1] as Matcher<T>)
+		)
+	}
 	if (isObject(matcher) && isObject(value)) {
 		return Object.entries(matcher).every(([key, val]) =>
 			matchValue(value[key], val as Matcher<T>)
@@ -64,6 +77,9 @@ const matchValue = <T>(value: T, matcher: Matcher<T>): boolean => {
 
 const isObject = (value: any): value is Record<string, any> =>
 	typeof value === 'object' && value !== null
+
+const isTuple = (value: any): value is [any, any] =>
+	isArray(value) && value.length === 2
 
 export function match<Args extends readonly unknown[], R>(
 	...cases: MatchCase<readonly Matcher<Args[number]>[], Args, R>[]

@@ -91,7 +91,7 @@ describe('pattern', () => {
 			caseOf([_], () => `no match`)
 		)
 
-		expect(matcher([1, 2])).toBe('match')
+		expect(matcher([1, '2'])).toBe('match')
 		expect(matcher([2, 2])).toBe('no match')
 	})
 
