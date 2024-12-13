@@ -1,9 +1,10 @@
 import { assertExists } from '@shared/asserts.ts'
+import { failOn } from '@shared/utils/guards.ts'
 import type { TreeOf } from '@shared/utils/list-to-tree.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
 import { capitalize } from '@shared/utils/ramda.ts'
-import type { InsertObject, Transaction } from 'kysely'
-import { T as _ } from 'ramda'
+import { type InsertObject, type Transaction, sql } from 'kysely'
+import { path, T as _, isNil } from 'ramda'
 import { isArray, isPlainObj } from 'ramda-adjunct'
 import type { DB, JsonArray, JsonObject } from 'src/database/schema.ts'
 import type { LoggedInUser } from 'src/resolvers/auth-resolver.ts'
@@ -24,15 +25,19 @@ type PathToRoot = number[]
 
 const processJson = (
 	projectId: number,
-	{ external_id: extIdProp = '' }: Options
+	{ external_id: extIdProp = '' }: Options,
+	nodeId: AsyncGenerator<number>,
+	valueId: AsyncGenerator<number>
 ) => {
-	return function* processNode(
+	return async function* processNode(
 		node: TreeNode | undefined,
 		[key, value]: JsonNode,
 		list_path: PathToRoot
-	): Generator<Inserts> {
+	): AsyncGenerator<Inserts> {
 		if (!node) {
+			const node_id = await nodeId.next()
 			yield {
+				id: node_id.value,
 				name: capitalize(key),
 				order: 0,
 				parent_id: 0,
@@ -42,14 +47,16 @@ const processJson = (
 		}
 		return match<
 			[TreeNode | undefined, JsonNode, PathToRoot],
-			Generator<Inserts>
+			AsyncGenerator<Inserts>
 		>(
 			caseOf(
 				[{ type: NodeType.list }, [_, isArray], _],
-				function* (n, [k, v], l): Generator<Inserts> {
+				async function* (n, [k, v], l): AsyncGenerator<Inserts> {
 					// create list items
 					for (const item of v) {
+						const value_id = await valueId.next()
 						yield {
+							id: value_id.value,
 							node_id: 0,
 							value: item,
 							project_id: projectId,
@@ -62,7 +69,7 @@ const processJson = (
 			),
 			caseOf(
 				[{ type: NodeType.object }, [_, isPlainObj], _],
-				function* (n, [k, v], l): Generator<Inserts> {
+				async function* (n, [k, v], l): AsyncGenerator<Inserts> {
 					yield* processNode(n, [k, v], l)
 				}
 			)
@@ -78,9 +85,30 @@ export const importJson =
 		options: Options
 	) =>
 	async (trx: Transaction<DB>): Promise<void> => {
+		async function* nodeId(): AsyncGenerator<number> {
+			while (true) {
+				yield await sql`SELECT nextval('node_id_seq')`
+					.execute(trx)
+					.then<number | undefined>(path(['rows', 0, 'nextval']))
+					.then(failOn(isNil, 'node_id_seq failed'))
+			}
+		}
+		async function* valueId(): AsyncGenerator<number> {
+			while (true) {
+				yield await sql`SELECT nextval('values_id_seq')`
+					.execute(trx)
+					.then<number | undefined>(path(['rows', 0, 'nextval']))
+					.then(failOn(isNil, 'node_id_seq failed'))
+			}
+		}
 		assertExists(lastProjectId, 'lastProjectId missing')
-		const importData = [
-			...processJson(lastProjectId, options)(node, ['root', json], [])
-		]
-		console.log(importData)
+		const generator = processJson(
+			lastProjectId,
+			options,
+			nodeId(),
+			valueId()
+		)(node, ['root', json], options.list_path ?? [])
+		for await (const value of generator) {
+			console.log(value)
+		}
 	}
