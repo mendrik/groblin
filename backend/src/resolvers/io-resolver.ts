@@ -94,10 +94,11 @@ export class IoResolver {
 		@Arg('data', () => JsonArrayImportInput) payload: JsonArrayImportInput,
 		@Ctx() ctx: Context
 	) {
+		const { user } = ctx
 		const { node_id, data } = payload
 		const json: JsonArray = await this.s3.getContent(data).then(JSON.parse)
 		const node = await this.nodeResolver.getTreeNode(ctx, node_id)
-		const importer = importJson(json, node, payload)
+		const importer = importJson(user, json, node, payload)
 
 		await this.db
 			.transaction()
