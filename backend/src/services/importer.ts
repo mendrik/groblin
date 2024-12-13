@@ -30,7 +30,7 @@ const processJson = (
 	valueId: AsyncGenerator<number>
 ) => {
 	return async function* processNode(
-		node: TreeNode | undefined,
+		node: TreeNode,
 		[key, value]: JsonNode,
 		list_path: PathToRoot
 	): AsyncGenerator<Inserts> {
@@ -47,10 +47,8 @@ const processJson = (
 				type: NodeType.object
 			} satisfies DbNode
 		}
-		return match<
-			[TreeNode | undefined, JsonNode, PathToRoot],
-			AsyncGenerator<Inserts>
-		>(
+		return match<[TreeNode, JsonNode, PathToRoot], AsyncGenerator<Inserts>>(
+			/* - - - - Arrays - - - - */
 			caseOf(
 				[{ type: NodeType.list }, [_, isArray], _],
 				async function* (n, [k, v], l): AsyncGenerator<Inserts> {
@@ -71,12 +69,22 @@ const processJson = (
 					}
 				}
 			),
+			/* - - - - Array items - - - - */
+			caseOf(
+				[{ type: NodeType.list }, [_, isPlainObj], _],
+				async function* (n, [k, v], l): AsyncGenerator<Inserts> {
+					yield* processNode(n, [k, v], l)
+				}
+			),
+			/* - - - - Objects - - - - */
 			caseOf(
 				[{ type: NodeType.object }, [_, isPlainObj], _],
 				async function* (n, [k, v], l): AsyncGenerator<Inserts> {
 					yield* processNode(n, [k, v], l)
 				}
 			)
+			/* - - - - Object properties - - - - */
+			// todo: handle object properties
 		)(node, [key, value], list_path)
 	}
 }
