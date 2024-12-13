@@ -89,6 +89,24 @@ const processJson = (
 	}
 }
 
+async function* nodeId(trx: Transaction<DB>): AsyncGenerator<number> {
+	while (true) {
+		yield await sql`SELECT nextval('node_id_seq')`
+			.execute(trx)
+			.then<number | undefined>(path(['rows', 0, 'nextval']))
+			.then(failOn(isNil, 'node_id_seq failed'))
+	}
+}
+
+async function* valueId(trx: Transaction<DB>): AsyncGenerator<number> {
+	while (true) {
+		yield await sql`SELECT nextval('values_id_seq')`
+			.execute(trx)
+			.then<number | undefined>(path(['rows', 0, 'nextval']))
+			.then(failOn(isNil, 'node_id_seq failed'))
+	}
+}
+
 export const importJson =
 	(
 		{ lastProjectId }: LoggedInUser,
@@ -97,28 +115,12 @@ export const importJson =
 		options: Options
 	) =>
 	async (trx: Transaction<DB>): Promise<void> => {
-		async function* nodeId(): AsyncGenerator<number> {
-			while (true) {
-				yield await sql`SELECT nextval('node_id_seq')`
-					.execute(trx)
-					.then<number | undefined>(path(['rows', 0, 'nextval']))
-					.then(failOn(isNil, 'node_id_seq failed'))
-			}
-		}
-		async function* valueId(): AsyncGenerator<number> {
-			while (true) {
-				yield await sql`SELECT nextval('values_id_seq')`
-					.execute(trx)
-					.then<number | undefined>(path(['rows', 0, 'nextval']))
-					.then(failOn(isNil, 'node_id_seq failed'))
-			}
-		}
 		assertExists(lastProjectId, 'lastProjectId missing')
 		const generator = processJson(
 			lastProjectId,
 			options,
-			nodeId(),
-			valueId()
+			nodeId(trx),
+			valueId(trx)
 		)(node, ['root', json], options.list_path ?? [])
 		for await (const value of generator) {
 			console.log(value)
