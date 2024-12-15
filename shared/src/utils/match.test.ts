@@ -117,4 +117,14 @@ describe('pattern', () => {
 		expect(matcher(new Cat())).toBe('match')
 		expect(matcher(new Animal())).toBe('no match')
 	})
+
+	it('can return static values', () => {
+		const matcher = match<[number], string>(
+			caseOf([2], '2'), // cat: Cat
+			caseOf([3], '3')
+		)
+
+		expect(matcher(2)).toBe('2')
+		expect(matcher(3)).toBe('3')
+	})
 })

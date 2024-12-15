@@ -1,5 +1,5 @@
 import type { AnyFn } from '@tp/functions'
-import { isArray, isPrimitive } from 'ramda-adjunct'
+import { isArray, isFunction, isPrimitive } from 'ramda-adjunct'
 
 type Guard<T> = (value: any) => value is T
 type Predicate = (value: any) => boolean
@@ -48,7 +48,7 @@ type MatchCase<
 	Preds extends readonly Matcher[],
 	Args extends readonly unknown[],
 	R
-> = [Preds, (...args: HandlerArgs<Preds, Args>) => R]
+> = [Preds, ((...args: HandlerArgs<Preds, Args>) => R) | R]
 
 export function caseOf<
 	Preds extends [Matcher, ...Matcher[]],
@@ -56,7 +56,7 @@ export function caseOf<
 	R
 >(
 	predicates: Preds,
-	handler: (...args: HandlerArgs<Preds, Args>) => R
+	handler: ((...args: HandlerArgs<Preds, Args>) => R) | R
 ): MatchCase<Preds, Args, R> {
 	return [predicates, handler]
 }
@@ -99,7 +99,9 @@ export function match<Args extends readonly unknown[], R>(
 				matchValue(values[index], pred as Matcher<unknown>)
 			)
 			if (allMatch) {
-				return handler(...(values as HandlerArgs<typeof predicates, Args>))
+				return isFunction(handler)
+					? handler(...(values as HandlerArgs<typeof predicates, Args>))
+					: handler
 			}
 		}
 		throw new Error('No match found')

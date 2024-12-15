@@ -59,10 +59,10 @@ const newNodeSchema = () =>
 export type NewNodeSchema = TypeOf<ReturnType<typeof newNodeSchema>>
 
 const position = match<[NodeCreatePosition], string>(
-	caseOf(['root-child'], _ => 'as a root child'),
-	caseOf(['child'], _ => 'as a child'),
-	caseOf(['sibling-above'], _ => 'as a sibling above'),
-	caseOf(['sibling-below'], _ => 'as a sibling below')
+	caseOf(['root-child'], 'as a root child'),
+	caseOf(['child'], 'as a child'),
+	caseOf(['sibling-above'], 'as a sibling above'),
+	caseOf(['sibling-below'], 'as a sibling below')
 )
 
 const parent = match<[NodeCreatePosition], number>(

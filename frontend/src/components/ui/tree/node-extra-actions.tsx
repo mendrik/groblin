@@ -44,12 +44,14 @@ const ImportObject = ({ node }: OwnProps) => (
 export const NodeExtraActions = ({ node }: OwnProps) => {
 	const settings = $nodeSettingsMap.value[node.id] as NodeSettings | undefined
 	return match<[TreeNode, Record<string, any>], ReactNode>(
-		caseOf([{ type: NodeType.Object, nodes: isEmpty }, _], () => (
+		caseOf(
+			[{ type: NodeType.Object, nodes: isEmpty }, _],
 			<ImportObject node={node} />
-		)),
-		caseOf([{ type: NodeType.List }, { excessive: true }], () => (
+		),
+		caseOf(
+			[{ type: NodeType.List }, { excessive: true }],
 			<ImportArray node={node} />
-		)),
-		caseOf([_, _], () => null)
+		),
+		caseOf([_, _], null)
 	)(node, settings?.settings ?? {})
 }

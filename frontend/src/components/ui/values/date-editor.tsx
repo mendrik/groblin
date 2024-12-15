@@ -13,7 +13,7 @@ import { save } from './value-editor'
 
 type DateValue = Value & {
 	value: {
-		date: Date[]
+		date: Date
 	}
 }
 
