@@ -68,6 +68,7 @@ type Mutation {
   login(data: Login!): Token!
   logout: Boolean!
   register(data: Registration!): Boolean!
+  truncate(data: TruncateValue!): Boolean!
   updateNode(data: ChangeNodeInput!): Boolean!
   uploadUrl(filename: String!): Upload!
   upsertNodeSettings(data: UpsertNodeSettings!): Int!
@@ -139,6 +140,10 @@ type Subscription {
 type Token {
   expiresDate: DateTimeISO!
   token: String!
+}
+
+input TruncateValue {
+  node_id: Int!
 }
 
 type Upload {

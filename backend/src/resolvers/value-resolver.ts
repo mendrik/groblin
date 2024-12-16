@@ -58,6 +58,12 @@ export class UpsertValue {
 }
 
 @InputType()
+export class TruncateValue {
+	@Field(type => Int)
+	node_id: number
+}
+
+@InputType()
 export class GetValues {
 	@Field(type => [Int], { nullable: false })
 	ids: number[]
@@ -106,7 +112,7 @@ export class ValueResolver {
 			.where(({ or, eb }) =>
 				or([eb('list_path', '<@', [ids]), eb('list_path', 'is', null)])
 			)
-			.orderBy(['node_id', 'order'])
+			.orderBy(['order', 'id'])
 			.selectAll()
 			.execute()
 	}
@@ -184,5 +190,22 @@ export class ValueResolver {
 			.executeTakeFirstOrThrow()
 		this.pubSub.publish(Topic.ValuesUpdated, true)
 		return id
+	}
+
+	@Mutation(returns => Boolean)
+	async truncate(
+		@Arg('data', () => TruncateValue) data: TruncateValue,
+		@Ctx() ctx: Context
+	) {
+		const { user } = ctx
+		const { numDeletedRows } = await this.db.transaction().execute(trx => {
+			return trx
+				.deleteFrom('values')
+				.where('node_id', '=', data.node_id)
+				.where('project_id', '=', user.lastProjectId)
+				.executeTakeFirstOrThrow()
+		})
+		this.pubSub.publish(Topic.ValuesUpdated, true)
+		return numDeletedRows > 0
 	}
 }

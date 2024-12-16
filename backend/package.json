@@ -5,7 +5,7 @@
 	"scripts": {
 		"types:db": "kysely-codegen --out-file src/database/schema.ts --dialect postgres",
 		"schema:db": "./dump_db.sh",
-		"schema": "pnpm types:db && pnpm types:gql",
+		"schema": "pnpm types:db",
 		"server": "tsx watch --include ./src --include ../shared/src --include ../type-patches src/server.ts",
 		"test": "vitest"
 	},

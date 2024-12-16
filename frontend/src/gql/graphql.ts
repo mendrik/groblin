@@ -74,6 +74,7 @@ export type Mutation = {
   login: Token;
   logout: Scalars['Boolean']['output'];
   register: Scalars['Boolean']['output'];
+  truncate: Scalars['Boolean']['output'];
   updateNode: Scalars['Boolean']['output'];
   uploadUrl: Upload;
   upsertNodeSettings: Scalars['Int']['output'];
@@ -115,6 +116,11 @@ export type MutationLoginArgs = {
 
 export type MutationRegisterArgs = {
   data: Registration;
+};
+
+
+export type MutationTruncateArgs = {
+  data: TruncateValue;
 };
 
 
@@ -222,6 +228,10 @@ export type SubscriptionValuesUpdatedArgs = {
 export type Token = {
   expiresDate: Scalars['DateTimeISO']['output'];
   token: Scalars['String']['output'];
+};
+
+export type TruncateValue = {
+  node_id: Scalars['Int']['input'];
 };
 
 export type Upload = {
@@ -375,6 +385,13 @@ export type ImportArrayMutationVariables = Exact<{
 
 
 export type ImportArrayMutation = { importArray: boolean };
+
+export type TruncateListMutationVariables = Exact<{
+  data: TruncateValue;
+}>;
+
+
+export type TruncateListMutation = { truncate: boolean };
 
 export type UploadUrlMutationVariables = Exact<{
   filename: Scalars['String']['input'];
@@ -533,6 +550,11 @@ export const ImportArrayDocument = `
   importArray(data: $data)
 }
     `;
+export const TruncateListDocument = `
+    mutation TruncateList($data: TruncateValue!) {
+  truncate(data: $data)
+}
+    `;
 export const UploadUrlDocument = `
     mutation UploadUrl($filename: String!) {
   uploadUrl(filename: $filename) {
@@ -597,6 +619,9 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     },
     ImportArray(variables: ImportArrayMutationVariables, options?: C): Promise<ExecutionResult<ImportArrayMutation, E>> {
       return requester<ImportArrayMutation, ImportArrayMutationVariables>(ImportArrayDocument, variables, options) as Promise<ExecutionResult<ImportArrayMutation, E>>;
+    },
+    TruncateList(variables: TruncateListMutationVariables, options?: C): Promise<ExecutionResult<TruncateListMutation, E>> {
+      return requester<TruncateListMutation, TruncateListMutationVariables>(TruncateListDocument, variables, options) as Promise<ExecutionResult<TruncateListMutation, E>>;
     },
     UploadUrl(variables: UploadUrlMutationVariables, options?: C): Promise<ExecutionResult<UploadUrlMutation, E>> {
       return requester<UploadUrlMutation, UploadUrlMutationVariables>(UploadUrlDocument, variables, options) as Promise<ExecutionResult<UploadUrlMutation, E>>;

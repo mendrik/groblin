@@ -7,6 +7,7 @@ import { T as _, isEmpty } from 'ramda'
 import type { ReactNode } from 'react'
 import { DropdownMenuItem } from '../dropdown-menu'
 import { openImportJson } from '../io/import-array-dialog'
+import { openNodeTruncate } from './node-truncate'
 
 type OwnProps = {
 	node: TreeNode
@@ -23,7 +24,7 @@ const ImportArray = ({ node }: OwnProps) => (
 		</DropdownMenuItem>
 		<DropdownMenuItem
 			className="flex gap-2 items-center"
-			onSelect={() => console.log('truncate')}
+			onSelect={() => openNodeTruncate(node)}
 		>
 			<IconTrash className="w-4 h-4" />
 			<span>Truncate...</span>

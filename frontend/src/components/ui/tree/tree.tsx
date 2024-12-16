@@ -18,6 +18,7 @@ import { ImportArrayDialog } from '../io/import-array-dialog'
 import { NodeCreate, openNodeCreate } from './node-create'
 import { NodeDelete } from './node-delete'
 import { NodeProperties } from './node-properties'
+import { NodeTruncate } from './node-truncate'
 
 type OwnProps = {
 	root: TreeNode
@@ -57,6 +58,7 @@ export const Tree = ({ root }: OwnProps) => {
 				</div>
 			</KeyListener>
 			<NodeDelete />
+			<NodeTruncate />
 			<NodeCreate />
 			<NodeProperties />
 			<ImportArrayDialog />

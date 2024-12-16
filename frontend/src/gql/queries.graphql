@@ -126,6 +126,10 @@ mutation ImportArray($data: JsonArrayImportInput!) {
   importArray(data: $data)
 }
 
+mutation TruncateList($data: TruncateValue!) {
+  truncate(data: $data)
+}
+
 mutation UploadUrl($filename: String!) {
   uploadUrl(filename: $filename) {
     signedUrl

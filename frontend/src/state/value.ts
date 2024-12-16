@@ -77,6 +77,10 @@ export const deleteListItem = (node: TreeNode): Promise<boolean> => {
 	return Api.DeleteListItem({ id: selected.id })
 }
 
+export const truncateList = (node: TreeNode): Promise<number> => {
+	return Api.TruncateList({ data: { node_id: node.id } }).then(() => node.id)
+}
+
 export const selectAnyListItem = (node: TreeNode) => {
 	const current = notNil($activeListItems, node.id)
 	const values = notNil($valueMap, node.id).filter(
