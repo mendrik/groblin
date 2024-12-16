@@ -35,11 +35,19 @@ export const entriesWithIndex = <T extends object>(
 		index
 	])
 
-type INF<G extends Array<(e: any) => e is any>> = {
-	[K in keyof G]: G[K] extends (e: any) => e is infer T ? T[] : never
+type Guard<T, ST extends T> = (e: T) => e is ST
+type Pred<T> = (e: T) => boolean
+type GP<T, ST extends T> = Guard<T, ST> | Pred<T>
+
+type INF<G> = {
+	[K in keyof G]: G[K] extends Guard<infer T, infer ST>
+		? ST[]
+		: G[K] extends (a: infer A) => boolean
+			? A[]
+			: never
 }
 
 export const fork =
-	<T, ST extends T, G extends Array<(e: T) => e is ST>>(...preds: G) =>
-	(v: T[]): [...INF<G>] =>
+	<T, ST extends T, G extends Array<GP<any, any>>>(...preds: G) =>
+	<T2 extends T>(v: T2[]): [...INF<G>] =>
 		preds.map(pred => v.filter(pred)) as [...INF<G>]
