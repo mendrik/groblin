@@ -67,7 +67,6 @@ const matchValue = <T>(value: T, matcher: Matcher<T>): boolean => {
 		return value === matcher
 	}
 	if (isTuple(matcher) && isTuple(value)) {
-		matcher[0]
 		return (
 			matchValue(value[0], matcher[0] as Matcher<T>) &&
 			matchValue(value[1], matcher[1] as Matcher<T>)

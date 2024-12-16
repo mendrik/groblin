@@ -4,9 +4,9 @@ import { toArray } from '@shared/utils/async-generator.ts'
 import { failOn } from '@shared/utils/guards.ts'
 import type { TreeOf } from '@shared/utils/list-to-tree.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
-import { capitalize, entriesWithIndex } from '@shared/utils/ramda.ts'
+import { capitalize, entriesWithIndex, fork } from '@shared/utils/ramda.ts'
 import { type InsertObject, type Transaction, sql } from 'kysely'
-import { path, T as _, eqBy, isNil, isNotEmpty, partition } from 'ramda'
+import { path, T as _, eqBy, isNil, isNotEmpty, prop, uniqBy } from 'ramda'
 import {
 	isArray,
 	isBoolean,
@@ -24,8 +24,9 @@ import { date } from 'src/utils/date-codec.ts'
 
 type DbValue = InsertObject<DB, 'values'>
 type DbNode = InsertObject<DB, 'node'>
+type DbNodeSetting = InsertObject<DB, 'node_settings'>
 
-type Inserts = DbValue | DbNode
+type Inserts = DbValue | DbNode | DbNodeSetting
 
 type TreeNode = TreeOf<Node, 'nodes'>
 type JsonStart = JsonArray | JsonObject
@@ -114,6 +115,13 @@ const processJson = (
 			caseOf(
 				[[_, isArray], { type: NodeType.list }],
 				async function* ([k, v], n): AsyncGenerator<Inserts> {
+					yield {
+						node_id: n.id,
+						project_id,
+						settings: {
+							scoped: true
+						}
+					}
 					for (const item of v) {
 						// create list items
 						const external_id = options.external_id
@@ -190,6 +198,8 @@ async function* valueId(trx: Transaction<DB>): AsyncGenerator<number> {
 }
 
 const isNode = (value: any): value is DbNode => 'type' in value
+const isValue = (value: any): value is DbValue => 'list_path' in value
+const isSetting = (value: any): value is DbNodeSetting => 'settings' in value
 
 export const importJson =
 	(
@@ -214,9 +224,22 @@ export const importJson =
 			valueId(trx)
 		)(['root', json], node, options.list_path ?? [])
 
-		const [nodes, values] = await toArray(generator).then(partition(isNode))
+		const [nodes, values, settings] = await toArray(generator).then(
+			fork(isNode, isValue, isSetting)
+		)
 		if (isNotEmpty(nodes)) {
 			await trx.insertInto('node').values(nodes).execute()
+		}
+		if (isNotEmpty(settings)) {
+			await trx
+				.insertInto('node_settings')
+				.values(uniqBy(prop('node_id'), settings))
+				.onConflict(c =>
+					c.columns(['node_id']).doUpdateSet(e => ({
+						settings: e.ref('excluded.settings')
+					}))
+				)
+				.execute()
 		}
 		if (isNotEmpty(values)) {
 			await trx

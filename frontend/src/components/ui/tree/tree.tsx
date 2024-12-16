@@ -1,6 +1,7 @@
 import { Node } from '@/components/ui/tree/node'
 import { EmptyList } from '@/components/utils/empty-list'
 import { dataInt, safeDataInt } from '@/lib/dom-events'
+import { cn } from '@/lib/utils'
 import {
 	type TreeNode,
 	closeNode,
@@ -36,7 +37,7 @@ export const Tree = ({ root }: OwnProps) => {
 			>
 				<div
 					ref={tree}
-					className="w-full px-2 tree grid-lines"
+					className={cn('w-full px-2 tree', root.nodes.length && 'grid-lines')}
 					onFocus={pipe(
 						safeDataInt('node_id'),
 						when(isNotNil, updateNodeContext)

@@ -109,6 +109,7 @@ export class IoResolver {
 			})
 
 		this.pubSub.publish(Topic.NodesUpdated, true)
+		this.pubSub.publish(Topic.NodeSettingsUpdated, true)
 		this.pubSub.publish(Topic.ValuesUpdated, true)
 		return true
 	}
