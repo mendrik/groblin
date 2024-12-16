@@ -61,7 +61,7 @@ const typeForValue = match<[any], NodeType>(
 )
 
 const valueForType = match<[any, NodeType], JsonObject>(
-	caseOf([isString, NodeType.color], v => ({ color: color.parse(v) })),
+	caseOf([isString, NodeType.color], v => ({ rgba: color.parse(v) })),
 	caseOf([isString, NodeType.date], v => ({ date: date.parse(v) })),
 	caseOf([isString, _], v => ({ content: v })),
 	caseOf([isNumber], v => ({ figure: v })),
