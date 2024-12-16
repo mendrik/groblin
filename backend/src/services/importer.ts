@@ -1,11 +1,12 @@
 import { assertExists } from '@shared/asserts.ts'
 import { throwError } from '@shared/errors.ts'
+import { toArray } from '@shared/utils/async-generator.ts'
 import { failOn } from '@shared/utils/guards.ts'
 import type { TreeOf } from '@shared/utils/list-to-tree.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
 import { capitalize } from '@shared/utils/ramda.ts'
 import { type InsertObject, type Transaction, sql } from 'kysely'
-import { path, T as _, isNil } from 'ramda'
+import { path, T as _, eqBy, isNil, partition } from 'ramda'
 import {
 	isArray,
 	isBoolean,
@@ -104,7 +105,6 @@ const processJson = (
 		const baseValue = {
 			node_id: node.id,
 			project_id,
-			list_path,
 			order: 0
 		}
 		const matchCase = match<[JsonNode, TreeNode], AsyncGenerator<Inserts>>(
@@ -125,9 +125,7 @@ const processJson = (
 							value: { name: 'Item' },
 							external_id
 						}
-						for await (const innerVal of processNode([k, item], n, lp)) {
-							yield innerVal
-						}
+						yield* processNode([k, item], n, lp)
 					}
 				}
 			),
@@ -136,6 +134,7 @@ const processJson = (
 				[[_, isPlainObj], _],
 				async function* ([k, v], n): AsyncGenerator<Inserts> {
 					for await (const [key, value] of Object.entries(v)) {
+						if (eqBy(normalize, key, options.external_id ?? '')) continue
 						const node = await nodeForName(key, value, n, nodeId)
 						yield {
 							id: node.id,
@@ -145,32 +144,25 @@ const processJson = (
 							order: node.order,
 							parent_id: node.parent_id
 						} satisfies DbNode
-						for await (const innerVal of processNode(
-							[key, value],
-							node,
-							list_path
-						)) {
-							yield innerVal
-						}
+						yield* processNode([key, value], node, list_path)
 					}
 				}
 			),
 			/* - - - - Object properties - - - - */
 			caseOf(
 				[[_, _], _],
-				async function* ([_, value]): AsyncGenerator<Inserts> {
+				async function* ([key, value]): AsyncGenerator<Inserts> {
 					const value_id = await valueId.next().then<number>(r => r.value)
 					yield {
 						...baseValue,
 						id: value_id,
+						list_path,
 						value: valueForType(value, node.type)
 					}
 				}
 			)
 		)
-		for await (const value of matchCase(json, node)) {
-			yield value
-		}
+		yield* matchCase(json, node)
 	}
 }
 
@@ -205,22 +197,21 @@ export const importJson =
 	) =>
 	async (trx: Transaction<DB>): Promise<void> => {
 		assertExists(lastProjectId, 'lastProjectId missing')
+		/**
+		 * The generator is something that climbs down the json and generates
+		 * either values or nodes that need to be inserted into the database.
+		 * if nodes already exist they are used instead. This whole process
+		 * runs inside a locking transaction, because we need to fetch the
+		 * ids ahead of the execution.
+		 */
 		const generator = processJson(
 			lastProjectId,
 			options,
 			nodeId(trx),
 			valueId(trx)
 		)(['root', json], node, options.list_path ?? [])
-		const values: DbValue[] = []
-		const nodes: DbNode[] = []
-		for await (const value of generator) {
-			if (isNode(value)) {
-				nodes.push(value)
-			}
-			if (isValue(value)) {
-				values.push(value)
-			}
-		}
+
+		const [nodes, values] = await toArray(generator).then(partition(isNode))
 		await trx
 			.insertInto('node')
 			.values(nodes)
