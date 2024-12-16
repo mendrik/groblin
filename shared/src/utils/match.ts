@@ -1,5 +1,5 @@
 import type { AnyFn } from '@tp/functions'
-import { isArray, isFunction, isPrimitive } from 'ramda-adjunct'
+import { isArray, isPrimitive } from 'ramda-adjunct'
 
 type Guard<T> = (value: any) => value is T
 type Predicate = (value: any) => boolean
@@ -89,12 +89,19 @@ const isObject = (value: any): value is Record<string, any> =>
 const isTuple = (value: any): value is [any, any] =>
 	isArray(value) && value.length === 2
 
+type GenMatchCase<
+	Preds extends readonly Matcher[],
+	Args extends readonly unknown[],
+	R
+> = [Preds, AsyncGeneratorFunction]
+
+const isFunction = (fn: any): fn is Function => typeof fn === 'function'
+
 export function match<Args extends readonly unknown[], R>(
 	...cases: MatchCase<readonly Matcher<Args[number]>[], Args, R>[]
 ) {
 	return (...values: Args): R => {
 		for (const [predicates, handler] of cases) {
-			if (predicates.length !== values.length) continue
 			const allMatch = predicates.every((pred, index) =>
 				matchValue(values[index], pred as Matcher<unknown>)
 			)

@@ -1,5 +1,5 @@
 import { T as _, equals, gt, is, isEmpty, values } from 'ramda'
-import { isNumber, isOdd, isString } from 'ramda-adjunct'
+import { isBoolean, isNumber, isOdd, isString } from 'ramda-adjunct'
 import { describe, expect, it } from 'vitest'
 import { ZodNativeEnum, type ZodTypeAny, nativeEnum } from 'zod'
 import { caseOf, match } from './match'
@@ -126,5 +126,38 @@ describe('pattern', () => {
 
 		expect(matcher(2)).toBe('2')
 		expect(matcher(3)).toBe('3')
+	})
+
+	it('should match the correct case with async generator', async () => {
+		const matcher = match<
+			[string | number | boolean, number],
+			AsyncGenerator<any, void>
+		>(
+			caseOf([isString, equals(42)], async function* (s1, n1) {
+				yield `string match ${s1} ${n1}`
+			}),
+			caseOf([isNumber, equals(10)], async function* (n1, n2) {
+				yield `number match ${n1} ${n2}`
+			}),
+			caseOf([isBoolean, _], async function* (b1, n2) {
+				yield `boolean match ${b1} ${n2}`
+			})
+		)
+
+		const result1 = []
+		for await (const res of matcher('hello', 42)) {
+			result1.push(res)
+		}
+		expect(result1).toEqual(['string match hello 42'])
+
+		const result2 = []
+		for await (const res of matcher(30, 10)) result2.push(res)
+		expect(result2).toEqual(['number match 30 10'])
+
+		const result3 = []
+		for await (const res of matcher(true, 25)) {
+			result3.push(res)
+		}
+		expect(result3).toEqual(['boolean match true 25'])
 	})
 })

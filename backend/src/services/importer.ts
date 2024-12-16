@@ -78,7 +78,7 @@ const nodeForName = async (
 	const node = parent.nodes.find(byNormalizedName(name))
 	if (node) return node
 	const { value: id } = await nodeId.next()
-	return {
+	const res: TreeNode = {
 		id,
 		name: capitalize(name),
 		order: 0,
@@ -86,6 +86,8 @@ const nodeForName = async (
 		type: typeForValue(value),
 		nodes: []
 	}
+	parent.nodes.push(res)
+	return res
 }
 
 const processJson = (
@@ -99,59 +101,76 @@ const processJson = (
 		node: TreeNode,
 		list_path: PathToRoot
 	): AsyncGenerator<Inserts> {
-		console.log('processNode', json[0], json[1], node, list_path)
 		const baseValue = {
 			node_id: node.id,
 			project_id,
 			list_path,
 			order: 0
 		}
-		yield* match<[JsonNode, TreeNode], AsyncGenerator<Inserts>>(
+		const matchCase = match<[JsonNode, TreeNode], AsyncGenerator<Inserts>>(
 			/* - - - - Arrays - - - - */
 			caseOf(
 				[[_, isArray], { type: NodeType.list }],
 				async function* ([k, v], n): AsyncGenerator<Inserts> {
-					console.log(`array value ${k}`, v)
-
-					// create list items
 					for (const item of v) {
+						// create list items
 						const external_id = options.external_id
 							? item[options.external_id]
 							: null
 						const { value: value_id } = await valueId.next()
+						const lp = [...list_path, value_id]
 						yield {
+							...baseValue,
 							id: value_id,
 							value: { name: 'Item' },
-							external_id,
-							...baseValue
-						} satisfies DbValue
-						yield* processNode([k, item], n, [...list_path, value_id])
+							external_id
+						}
+						for await (const innerVal of processNode([k, item], n, lp)) {
+							yield innerVal
+						}
 					}
 				}
 			),
 			/* - - - - Objects items - - - - */
 			caseOf(
-				[[_, isPlainObj], { type: NodeType.object }],
+				[[_, isPlainObj], _],
 				async function* ([k, v], n): AsyncGenerator<Inserts> {
-					console.log('object value', k, v)
 					for await (const [key, value] of Object.entries(v)) {
 						const node = await nodeForName(key, value, n, nodeId)
-						yield { ...node, project_id: project_id }
-						yield* processNode([key, value], node, list_path)
+						yield {
+							id: node.id,
+							project_id: project_id,
+							type: node.type,
+							name: node.name,
+							order: node.order,
+							parent_id: node.parent_id
+						} satisfies DbNode
+						for await (const innerVal of processNode(
+							[key, value],
+							node,
+							list_path
+						)) {
+							yield innerVal
+						}
 					}
 				}
 			),
 			/* - - - - Object properties - - - - */
-			caseOf([_, _], async function* ([key, value]): AsyncGenerator<Inserts> {
-				console.log('new value', key, value)
-				const value_id = await valueId.next().then<number>(r => r.value)
-				yield {
-					id: value_id,
-					value: valueForType(value, node.type),
-					...baseValue
-				} satisfies DbValue
-			})
-		)(json, node)
+			caseOf(
+				[[_, _], _],
+				async function* ([_, value]): AsyncGenerator<Inserts> {
+					const value_id = await valueId.next().then<number>(r => r.value)
+					yield {
+						...baseValue,
+						id: value_id,
+						value: valueForType(value, node.type)
+					}
+				}
+			)
+		)
+		for await (const value of matchCase(json, node)) {
+			yield value
+		}
 	}
 }
 
@@ -173,6 +192,10 @@ async function* valueId(trx: Transaction<DB>): AsyncGenerator<number> {
 	}
 }
 
+const isNode = (value: any): value is DbNode => 'type' in value
+
+const isValue = (value: any): value is DbValue => 'list_path' in value
+
 export const importJson =
 	(
 		{ lastProjectId }: LoggedInUser,
@@ -188,7 +211,28 @@ export const importJson =
 			nodeId(trx),
 			valueId(trx)
 		)(['root', json], node, options.list_path ?? [])
+		const values: DbValue[] = []
+		const nodes: DbNode[] = []
 		for await (const value of generator) {
-			console.log(value)
+			if (isNode(value)) {
+				nodes.push(value)
+			}
+			if (isValue(value)) {
+				values.push(value)
+			}
 		}
+		await trx
+			.insertInto('node')
+			.values(nodes)
+			.onConflict(c => c.columns(['id']).doNothing())
+			.execute()
+		await trx
+			.insertInto('values')
+			.values(values)
+			.onConflict(c =>
+				c.columns(['external_id', 'list_path']).doUpdateSet(e => ({
+					value: e.ref('excluded.value')
+				}))
+			)
+			.execute()
 	}
