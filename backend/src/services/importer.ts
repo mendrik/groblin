@@ -134,27 +134,27 @@ const processJson = (
 			/* - - - - Objects items - - - - */
 			caseOf(
 				[[_, isPlainObj], _],
-				async function* ([k, v], n): AsyncGenerator<Inserts> {
+				async function* ([_, v], n): AsyncGenerator<Inserts> {
 					for await (const [key, value, index] of entriesWithIndex(v)) {
 						if (eqBy(normalize, key, options.external_id ?? '')) continue
-						const [node, created] = await nodeForName(key, value, n, nodeId)
+						const [subNode, created] = await nodeForName(key, value, n, nodeId)
 						yield {
-							id: node.id,
+							id: subNode.id,
 							project_id: project_id,
-							type: node.type,
-							name: node.name,
-							order: created ? index : node.order,
-							parent_id: node.parent_id
+							type: subNode.type,
+							name: subNode.name,
+							order: created ? index : subNode.order,
+							parent_id: subNode.parent_id
 						} satisfies DbNode
-						yield* processNode([key, value], node, list_path)
+						yield* processNode([key, value], subNode, list_path)
 					}
 				}
 			),
 			/* - - - - Object properties - - - - */
 			caseOf(
 				[[_, _], _],
-				async function* ([key, value]): AsyncGenerator<Inserts> {
-					const value_id = await valueId.next().then<number>(r => r.value)
+				async function* ([_, value]): AsyncGenerator<Inserts> {
+					const { value: value_id } = await valueId.next()
 					yield {
 						...baseValue,
 						id: value_id,
