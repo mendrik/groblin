@@ -6,7 +6,7 @@ import type { TreeOf } from '@shared/utils/list-to-tree.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
 import { capitalize, entriesWithIndex } from '@shared/utils/ramda.ts'
 import { type InsertObject, type Transaction, sql } from 'kysely'
-import { path, T as _, eqBy, isNil, partition } from 'ramda'
+import { path, T as _, eqBy, isNil, isNotEmpty, partition } from 'ramda'
 import {
 	isArray,
 	isBoolean,
@@ -120,14 +120,15 @@ const processJson = (
 							? item[options.external_id]
 							: null
 						const { value: value_id } = await valueId.next()
-						const lp = [...list_path, value_id]
-						yield {
+						const listItem = {
 							...baseValue,
 							id: value_id,
 							value: { name: 'Item' },
+							list_path,
 							external_id
 						}
-						yield* processNode([k, item], n, lp)
+						yield listItem
+						yield* processNode([k, item], n, [...list_path, value_id])
 					}
 				}
 			),
@@ -138,14 +139,16 @@ const processJson = (
 					for await (const [key, value, index] of entriesWithIndex(v)) {
 						if (eqBy(normalize, key, options.external_id ?? '')) continue
 						const [subNode, created] = await nodeForName(key, value, n, nodeId)
-						yield {
-							id: subNode.id,
-							project_id: project_id,
-							type: subNode.type,
-							name: subNode.name,
-							order: created ? index : subNode.order,
-							parent_id: subNode.parent_id
-						} satisfies DbNode
+						if (created) {
+							yield {
+								id: subNode.id,
+								project_id: project_id,
+								type: subNode.type,
+								name: subNode.name,
+								order: created ? index : subNode.order,
+								parent_id: subNode.parent_id
+							}
+						}
 						yield* processNode([key, value], subNode, list_path)
 					}
 				}
@@ -212,18 +215,18 @@ export const importJson =
 		)(['root', json], node, options.list_path ?? [])
 
 		const [nodes, values] = await toArray(generator).then(partition(isNode))
-		await trx
-			.insertInto('node')
-			.values(nodes)
-			.onConflict(c => c.columns(['id']).doNothing())
-			.execute()
-		await trx
-			.insertInto('values')
-			.values(values)
-			.onConflict(c =>
-				c.columns(['external_id', 'list_path']).doUpdateSet(e => ({
-					value: e.ref('excluded.value')
-				}))
-			)
-			.execute()
+		if (isNotEmpty(nodes)) {
+			await trx.insertInto('node').values(nodes).execute()
+		}
+		if (isNotEmpty(values)) {
+			await trx
+				.insertInto('values')
+				.values(values)
+				.onConflict(c =>
+					c.columns(['external_id', 'list_path']).doUpdateSet(e => ({
+						value: e.ref('excluded.value')
+					}))
+				)
+				.execute()
+		}
 	}
