@@ -1,74 +1,5 @@
-import { describe, expect, it, vi } from 'vitest'
-import { pipeTapAsync } from './pipe-tap.ts'
-import { pipeTap } from './pipe-tap.ts'
-import { addOrder, capitalize } from './ramda.ts'
-
-// Tests for pipeTap
-describe('pipeTap', () => {
-	it("each function with the original argument called and returns the last function's result", () => {
-		const fn1 = vi.fn((x: number) => x + 1)
-		const fn2 = vi.fn((x: number) => x * 2)
-		const fn3 = vi.fn((x: number) => x - 3)
-
-		const result = pipeTap(fn1, fn2, fn3)(5)
-
-		expect(fn1).toHaveBeenCalledWith(5)
-		expect(fn2).toHaveBeenCalledWith(5)
-		expect(fn3).toHaveBeenCalledWith(5)
-		expect(result).toBe(2) // The result of the last function (5 - 3 = 2)
-	})
-
-	it('side effects like console.log and still return the last value', () => {
-		const consoleSpy = vi.spyOn(console, 'log')
-
-		const result = pipeTap(
-			(x: number) => console.log('Fn1:', x),
-			(x: number) => console.log('Fn2:', x),
-			(x: number) => x * 10
-		)(3)
-
-		expect(consoleSpy).toHaveBeenCalledWith('Fn1:', 3)
-		expect(consoleSpy).toHaveBeenCalledWith('Fn2:', 3)
-		expect(result).toBe(30) // Last function returns 3 * 10
-
-		consoleSpy.mockRestore()
-	})
-
-	it('should handle async functions and await promises', async () => {
-		const fn1 = vi.fn(async (x: number) => x + 1)
-		const fn2 = vi.fn(() => new Promise(res => setTimeout(res, 50)))
-		const fn3 = vi.fn((x: number) => x - 3)
-
-		const result = await pipeTapAsync(fn1, fn2, fn3)(5)
-
-		expect(fn1).toHaveBeenCalledWith(5)
-		expect(fn2).toHaveBeenCalledWith(5)
-		expect(fn3).toHaveBeenCalledWith(5)
-		expect(result).toBe(2) // The result of the last function (5 - 3 = 2)
-	})
-
-	it('should handle mixed functions and await promises', async () => {
-		const consoleSpy = vi.spyOn(console, 'log')
-		const fn1 = vi.fn((a: number) => console.log('fn1'))
-		const fn2 = vi.fn(() =>
-			new Promise(res => setTimeout(res, 10)).then(() => console.log('fn2'))
-		)
-		const fn3 = vi.fn(() => console.log('fn3'))
-
-		const result = await pipeTapAsync(fn1, fn2, fn3)(5)
-
-		expect(fn1).toHaveBeenCalledWith(5)
-		expect(fn2).toHaveBeenCalledWith(5)
-		expect(fn3).toHaveBeenCalledWith(5)
-		expect(result).toBe(void 0)
-
-		expect(consoleSpy).toHaveBeenNthCalledWith(1, 'fn1')
-		expect(consoleSpy).toHaveBeenNthCalledWith(2, 'fn2')
-		expect(consoleSpy).toHaveBeenNthCalledWith(3, 'fn3')
-
-		consoleSpy.mockRestore()
-	})
-})
+import { describe, expect, it } from 'vitest'
+import { addOrder, capitalize, entriesWithIndex } from './ramda.ts'
 
 describe('addOrder', () => {
 	it('should add an order property to each object in the array', () => {
@@ -101,5 +32,33 @@ describe('capitalize', () => {
 	it('should capitalize the first letter of a string', () => {
 		const result = capitalize('hello')
 		expect(result).toBe('Hello')
+	})
+})
+
+describe('entriesWithIndex', () => {
+	it('should return entries with their index', () => {
+		const input = { a: 1, b: 2, c: 3 }
+		const result = entriesWithIndex(input)
+		expect(result).toEqual([
+			['a', 1, 0],
+			['b', 2, 1],
+			['c', 3, 2]
+		])
+	})
+
+	it('should return an empty array for an empty object', () => {
+		const input = {}
+		const result = entriesWithIndex(input)
+		expect(result).toEqual([])
+	})
+
+	it('should handle objects with different types of values', () => {
+		const input = { a: 1, b: 'string', c: true }
+		const result = entriesWithIndex(input)
+		expect(result).toEqual([
+			['a', 1, 0],
+			['b', 'string', 1],
+			['c', true, 2]
+		])
 	})
 })

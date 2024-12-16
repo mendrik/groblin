@@ -25,3 +25,12 @@ export const capitalize: (s: string) => string = pipe(
 	juxt([compose(toUpper, head), tail]) as AnyFn,
 	apply(concat)
 ) as AnyFn
+
+export const entriesWithIndex = <T extends object>(
+	obj: T
+): [keyof T, T, number][] =>
+	Object.entries(obj).map(([key, value], index) => [
+		key as keyof T,
+		value,
+		index
+	])

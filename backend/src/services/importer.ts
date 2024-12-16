@@ -4,7 +4,7 @@ import { toArray } from '@shared/utils/async-generator.ts'
 import { failOn } from '@shared/utils/guards.ts'
 import type { TreeOf } from '@shared/utils/list-to-tree.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
-import { capitalize } from '@shared/utils/ramda.ts'
+import { capitalize, entriesWithIndex } from '@shared/utils/ramda.ts'
 import { type InsertObject, type Transaction, sql } from 'kysely'
 import { path, T as _, eqBy, isNil, partition } from 'ramda'
 import {
@@ -70,14 +70,16 @@ const valueForType = match<[any, NodeType], JsonObject>(
 	caseOf([_], () => throwError('Unknown type'))
 )
 
+type Created = boolean
+
 const nodeForName = async (
 	name: string,
 	value: any,
 	parent: TreeNode,
 	nodeId: AsyncGenerator<number>
-): Promise<TreeNode> => {
+): Promise<[TreeNode, Created]> => {
 	const node = parent.nodes.find(byNormalizedName(name))
-	if (node) return node
+	if (node) return [node, false]
 	const { value: id } = await nodeId.next()
 	const res: TreeNode = {
 		id,
@@ -88,7 +90,7 @@ const nodeForName = async (
 		nodes: []
 	}
 	parent.nodes.push(res)
-	return res
+	return [res, true]
 }
 
 const processJson = (
@@ -133,15 +135,15 @@ const processJson = (
 			caseOf(
 				[[_, isPlainObj], _],
 				async function* ([k, v], n): AsyncGenerator<Inserts> {
-					for await (const [key, value] of Object.entries(v)) {
+					for await (const [key, value, index] of entriesWithIndex(v)) {
 						if (eqBy(normalize, key, options.external_id ?? '')) continue
-						const node = await nodeForName(key, value, n, nodeId)
+						const [node, created] = await nodeForName(key, value, n, nodeId)
 						yield {
 							id: node.id,
 							project_id: project_id,
 							type: node.type,
 							name: node.name,
-							order: node.order,
+							order: created ? index : node.order,
 							parent_id: node.parent_id
 						} satisfies DbNode
 						yield* processNode([key, value], node, list_path)
