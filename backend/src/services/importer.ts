@@ -186,8 +186,6 @@ async function* valueId(trx: Transaction<DB>): AsyncGenerator<number> {
 
 const isNode = (value: any): value is DbNode => 'type' in value
 
-const isValue = (value: any): value is DbValue => 'list_path' in value
-
 export const importJson =
 	(
 		{ lastProjectId }: LoggedInUser,

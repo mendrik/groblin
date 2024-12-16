@@ -1,5 +1,11 @@
 import { T as _, equals, gt, is, isEmpty, values } from 'ramda'
-import { isBoolean, isNumber, isOdd, isString } from 'ramda-adjunct'
+import {
+	isBoolean,
+	isNumber,
+	isOdd,
+	isPrimitive,
+	isString
+} from 'ramda-adjunct'
 import { describe, expect, it } from 'vitest'
 import { ZodNativeEnum, type ZodTypeAny, nativeEnum } from 'zod'
 import { caseOf, match } from './match'
@@ -159,5 +165,22 @@ describe('pattern', () => {
 			result3.push(res)
 		}
 		expect(result3).toEqual(['boolean match true 25'])
+	})
+
+	describe('isPrimitive', () => {
+		it('should return true for primitive values', () => {
+			expect(isPrimitive(42)).toBe(true)
+			expect(isPrimitive('hello')).toBe(true)
+			expect(isPrimitive(true)).toBe(true)
+			expect(isPrimitive(null)).toBe(true)
+			expect(isPrimitive(undefined)).toBe(true)
+		})
+
+		it('should return false for non-primitive values', () => {
+			expect(isPrimitive({})).toBe(false)
+			expect(isPrimitive([])).toBe(false)
+			expect(isPrimitive(() => {})).toBe(false)
+			expect(isPrimitive(new Date())).toBe(false)
+		})
 	})
 })

@@ -1,6 +1,4 @@
-import type { AnyFn } from '@tp/functions'
-import { isArray, isPrimitive } from 'ramda-adjunct'
-
+type AnyFn = (arg: any) => any
 type Guard<T> = (value: any) => value is T
 type Predicate = (value: any) => boolean
 
@@ -20,7 +18,7 @@ type NarrowedArg<P, A> = P extends Guard<infer T>
 		: P extends AnyFn
 			? A
 			: P extends object
-				? {
+				? A & {
 						[K in keyof P]: K extends keyof A ? NarrowedArg<P[K], A[K]> : never
 					}
 				: A
@@ -87,15 +85,14 @@ const isObject = (value: any): value is Record<string, any> =>
 	typeof value === 'object' && value !== null
 
 const isTuple = (value: any): value is [any, any] =>
-	isArray(value) && value.length === 2
-
-type GenMatchCase<
-	Preds extends readonly Matcher[],
-	Args extends readonly unknown[],
-	R
-> = [Preds, AsyncGeneratorFunction]
+	Array.isArray(value) && value.length === 2
 
 const isFunction = (fn: any): fn is Function => typeof fn === 'function'
+
+export const isPrimitive = (
+	value: any
+): value is Exclude<any, object | Array<any>> =>
+	!['object', 'function'].includes(typeof value)
 
 export function match<Args extends readonly unknown[], R>(
 	...cases: MatchCase<readonly Matcher<Args[number]>[], Args, R>[]
