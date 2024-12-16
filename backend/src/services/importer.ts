@@ -223,9 +223,12 @@ export const importJson =
 				.insertInto('values')
 				.values(values)
 				.onConflict(c =>
-					c.columns(['external_id', 'list_path']).doUpdateSet(e => ({
-						value: e.ref('excluded.value')
-					}))
+					c
+						.columns(['external_id', 'node_id'])
+						.where('external_id', 'is not', null)
+						.doUpdateSet(e => ({
+							value: e.ref('excluded.value')
+						}))
 				)
 				.execute()
 		}

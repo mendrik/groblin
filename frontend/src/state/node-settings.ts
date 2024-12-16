@@ -26,3 +26,8 @@ export const subscribeToNodeSettings = () =>
 
 export const saveNodeSettings = (data: UpsertNodeSettings) =>
 	Api.UpsertNodeSettings({ data })
+
+export const settings = <T>(nodeId: NodeId): T | undefined => {
+	const settings = $nodeSettingsMap.value[nodeId]
+	return settings?.settings
+}

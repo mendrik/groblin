@@ -67,9 +67,9 @@ export const listPath = (node: TreeNode): number[] | undefined => {
 	return isEmpty(res) ? undefined : res
 }
 
-export const insertListItem = (listItem: InsertListItem) =>
-	Api.InsertListItem({ listItem })
-
+export const insertListItem = (listItem: InsertListItem) => {
+	return Api.InsertListItem({ listItem })
+}
 export const focusListItem = (params: any) => {}
 
 export const deleteListItem = (node: TreeNode): Promise<boolean> => {

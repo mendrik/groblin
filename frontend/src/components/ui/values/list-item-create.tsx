@@ -7,8 +7,9 @@ import {
 	DialogTitle
 } from '@/components/ui/dialog'
 import { notNil, setSignal } from '@/lib/utils'
+import { settings } from '@/state/node-settings'
 import type { TreeNode } from '@/state/tree'
-import { focusListItem, insertListItem } from '@/state/value'
+import { focusListItem, insertListItem, listPath } from '@/state/value'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
 import { evolveAlt } from '@shared/utils/evolve-alt'
@@ -16,6 +17,7 @@ import { pipeAsync } from '@shared/utils/pipe-async'
 import { pipe } from 'ramda'
 import { type TypeOf, strictObject } from 'zod'
 import { Button } from '../button'
+import type { ListProps } from '../tree/properties/list'
 import { useFormState } from '../zod-form/use-form-state'
 import { stringField } from '../zod-form/utils'
 import { ZodForm } from '../zod-form/zod-form'
@@ -37,7 +39,11 @@ export type NewListItemSchema = TypeOf<typeof newListItemSchema>
 const createListItemCommand: (data: NewListItemSchema) => Promise<void> =
 	pipeAsync(
 		evolveAlt({
-			node_id: () => notNil($node, 'id')
+			node_id: () => notNil($node, 'id'),
+			list_path: () => {
+				const props = settings<ListProps>(notNil($node, 'id'))
+				return props?.scoped ? listPath(notNil($node)) : null
+			}
 		}),
 		insertListItem,
 		focusListItem
