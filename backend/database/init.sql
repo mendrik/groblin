@@ -17,6 +17,26 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+--
+-- Name: delete_referenced_rows(); Type: FUNCTION; Schema: public; Owner: groblin
+--
+
+CREATE FUNCTION public.delete_referenced_rows() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    -- Delete rows where list_path contains the OLD.id (the id of the deleted row)
+    DELETE FROM "values"
+    WHERE OLD.id = ANY(list_path);
+
+    -- Return the old row (standard for delete triggers)
+    RETURN OLD;
+END;
+$$;
+
+
+ALTER FUNCTION public.delete_referenced_rows() OWNER TO groblin;
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -255,6 +275,22 @@ ALTER TABLE ONLY public."values" ALTER COLUMN id SET DEFAULT nextval('public.val
 
 
 --
+-- Name: values constraint_name; Type: CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public."values"
+    ADD CONSTRAINT constraint_name UNIQUE (list_path, external_id);
+
+
+--
+-- Name: node constraint_node_name; Type: CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public.node
+    ADD CONSTRAINT constraint_node_name UNIQUE (name, parent_id);
+
+
+--
 -- Name: node node_pkey; Type: CONSTRAINT; Schema: public; Owner: groblin
 --
 
@@ -324,6 +360,13 @@ CREATE INDEX idx_values_project_id ON public."values" USING btree (project_id);
 
 
 --
+-- Name: list_path_1734340899774_index; Type: INDEX; Schema: public; Owner: groblin
+--
+
+CREATE INDEX list_path_1734340899774_index ON public."values" USING btree (list_path);
+
+
+--
 -- Name: node_id; Type: INDEX; Schema: public; Owner: groblin
 --
 
@@ -331,10 +374,24 @@ CREATE INDEX node_id ON public.node USING btree (id);
 
 
 --
+-- Name: parent_id_1734341132059_index; Type: INDEX; Schema: public; Owner: groblin
+--
+
+CREATE INDEX parent_id_1734341132059_index ON public.node USING btree (parent_id);
+
+
+--
 -- Name: project_id; Type: INDEX; Schema: public; Owner: groblin
 --
 
 CREATE INDEX project_id ON public.project USING btree (id);
+
+
+--
+-- Name: project_id_1734341137450_index; Type: INDEX; Schema: public; Owner: groblin
+--
+
+CREATE INDEX project_id_1734341137450_index ON public.node USING btree (project_id);
 
 
 --
@@ -356,6 +413,13 @@ CREATE INDEX project_user_user_id ON public.project_user USING btree (user_id);
 --
 
 CREATE UNIQUE INDEX sqlite_autoindex_project_user_1 ON public.project_user USING btree (project_id);
+
+
+--
+-- Name: values cascade_delete_on_list_path; Type: TRIGGER; Schema: public; Owner: groblin
+--
+
+CREATE TRIGGER cascade_delete_on_list_path AFTER DELETE ON public."values" FOR EACH ROW EXECUTE FUNCTION public.delete_referenced_rows();
 
 
 --
