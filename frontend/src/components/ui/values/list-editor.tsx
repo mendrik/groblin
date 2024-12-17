@@ -3,6 +3,8 @@ import { cn, notNil } from '@/lib/utils'
 import type { TreeNode } from '@/state/tree'
 import { $activeListItems, activateListItem } from '@/state/value'
 import {
+	IconPoint,
+	IconPointFilled,
 	IconSquareRoundedMinus as Minus,
 	IconSquareRoundedPlus as Plus
 } from '@tabler/icons-react'
@@ -22,7 +24,7 @@ type OwnProps = {
 	value?: ListValue[]
 }
 
-export const ListEditor = ({ node, value: items = [] }: OwnProps) => {
+export const TabEditor = ({ node, value: items = [] }: OwnProps) => {
 	const $activeItem = notNil($activeListItems)[node.id]
 
 	return (
@@ -51,5 +53,33 @@ export const ListEditor = ({ node, value: items = [] }: OwnProps) => {
 				)}
 			</div>
 		</div>
+	)
+}
+export const PagedEditor = ({ node, value: items = [] }: OwnProps) => {
+	const $activeItem = notNil($activeListItems)[node.id]
+
+	return (
+		<ol className="flex flex-row items-center -ml-1">
+			{items.slice(0, 20).map(item => (
+				<li key={`${item.id}`} className="h-6">
+					{$activeItem?.id === item.id ? (
+						<MicroIcon icon={IconPointFilled} />
+					) : (
+						<MicroIcon
+							icon={IconPoint}
+							onClick={() => activateListItem(item)}
+						/>
+					)}
+				</li>
+			))}
+		</ol>
+	)
+}
+
+export const ListEditor = ({ node, value = [] }: OwnProps) => {
+	return value.length <= 5 ? (
+		<TabEditor node={node} value={value} />
+	) : (
+		<PagedEditor node={node} value={value} />
 	)
 }
