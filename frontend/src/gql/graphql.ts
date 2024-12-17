@@ -106,6 +106,7 @@ export type MutationInsertListItemArgs = {
 
 export type MutationInsertNodeArgs = {
   data: InsertNode;
+  settings?: InputMaybe<Scalars['JSONObject']['input']>;
 };
 
 
@@ -285,6 +286,7 @@ export type GetNodesQuery = { getNodes: Array<{ id: number, name: string, order:
 
 export type InsertNodeMutationVariables = Exact<{
   data: InsertNode;
+  settings?: InputMaybe<Scalars['JSONObject']['input']>;
 }>;
 
 
@@ -465,8 +467,8 @@ export const GetNodesDocument = `
 }
     ${NodeFragmentDoc}`;
 export const InsertNodeDocument = `
-    mutation InsertNode($data: InsertNode!) {
-  insertNode(data: $data) {
+    mutation InsertNode($data: InsertNode!, $settings: JSONObject) {
+  insertNode(data: $data, settings: $settings) {
     id
   }
 }

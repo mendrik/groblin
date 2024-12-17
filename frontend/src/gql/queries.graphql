@@ -54,8 +54,8 @@ query GetNodes {
   }
 }
 
-mutation InsertNode($data: InsertNode!) {
-  insertNode(data: $data) {
+mutation InsertNode($data: InsertNode!, $settings: JSONObject) {
+  insertNode(data: $data, settings: $settings) {
     id
   }
 }

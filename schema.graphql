@@ -64,7 +64,7 @@ type Mutation {
   deleteNodeById(id: Int!, order: Int!, parent_id: Int!): Boolean!
   importArray(data: JsonArrayImportInput!): Boolean!
   insertListItem(listItem: InsertListItem!): Int!
-  insertNode(data: InsertNode!): Node!
+  insertNode(data: InsertNode!, settings: JSONObject): Node!
   login(data: Login!): Token!
   logout: Boolean!
   register(data: Registration!): Boolean!

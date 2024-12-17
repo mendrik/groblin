@@ -22,6 +22,7 @@ export type JsonPrimitive = boolean | number | string | null;
 export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
 export interface Node {
+  depth: Generated<number | null>;
   id: Generated<number>;
   name: string;
   order: number;

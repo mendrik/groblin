@@ -1,10 +1,11 @@
 import { assertExists } from '@shared/asserts.ts'
 import { failOn } from '@shared/utils/guards.ts'
 import { type TreeOf, listToTree } from '@shared/utils/list-to-tree.ts'
+import { GraphQLJSONObject } from 'graphql-scalars'
 import { inject, injectable } from 'inversify'
 import { Kysely, type Transaction, sql } from 'kysely'
 import { isNil } from 'ramda'
-import type { DB } from 'src/database/schema.ts'
+import type { DB, JsonValue } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import { Topic } from 'src/services/Topic.ts'
 import type { Context } from 'src/types.ts'
@@ -82,6 +83,24 @@ export class ChangeNodeInput {
 	parent_id?: number
 }
 
+@InputType()
+export class InsertNodeSettings {
+	@Field(type => Int)
+	id: number
+
+	@Field(type => String)
+	name: string
+
+	@Field(type => Int, { nullable: true })
+	order: number
+
+	@Field(type => NodeType, { nullable: true })
+	type: NodeType
+
+	@Field(type => Int, { nullable: true })
+	parent_id?: number
+}
+
 @injectable()
 @UseMiddleware(LogAccess)
 @Authorized(Role.Admin, Role.Viewer)
@@ -135,13 +154,29 @@ export class NodeResolver {
 	@Mutation(returns => Node)
 	async insertNode(
 		@Arg('data', () => InsertNode) data: InsertNode,
+		@Arg('settings', () => GraphQLJSONObject, { nullable: true })
+		settings: JsonValue | undefined,
 		@Ctx() ctx: Context
 	): Promise<Node> {
 		const { user } = ctx
-		const { id } = await this.db
-			.transaction()
-			.execute(async trx => this.insertNodeTrx(trx, data, ctx))
+		const id = await this.db.transaction().execute(async trx => {
+			const { id } = await this.insertNodeTrx(trx, data, ctx)
+			if (settings) {
+				await trx
+					.insertInto('node_settings')
+					.values({
+						node_id: id,
+						project_id: user.lastProjectId,
+						settings
+					})
+					.execute()
+			}
+			return id
+		})
 		this.pubSub.publish(Topic.NodesUpdated, true)
+		if (settings) {
+			this.pubSub.publish(Topic.NodeSettingsUpdated, true)
+		}
 		return await this.getNode(id)
 	}
 

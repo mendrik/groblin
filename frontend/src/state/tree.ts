@@ -1,15 +1,22 @@
 import { Api, Subscribe } from '@/gql-client'
-import type { InsertNode, JsonArrayImportInput, Node } from '@/gql/graphql.ts'
+import {
+	type InsertNode,
+	type JsonArrayImportInput,
+	type Node,
+	NodeType
+} from '@/gql/graphql.ts'
 import { getItem, setItem } from '@/lib/local-storage'
 import { computeSignal, notNil, setSignal } from '@/lib/utils'
 import { waitForId } from '@/lib/wait-for-id'
 import { computed, signal } from '@preact/signals-react'
 import { assertExists } from '@shared/asserts'
 import { type TreeOf, listToTree } from '@shared/utils/list-to-tree'
+import { caseOf, match } from '@shared/utils/match'
 import { Maybe, MaybeAsync } from 'purify-ts'
 import {
 	type NonEmptyArray,
 	type Tuple,
+	T as _,
 	aperture,
 	toString as asStr,
 	find,
@@ -189,10 +196,18 @@ export const deleteNode = (id: number) =>
 		order: asNode(id).order
 	})
 
+const defaultSettings = match<[InsertNode], any>(
+	caseOf([{ type: NodeType.List }], { scoped: true }),
+	caseOf([_], undefined)
+)
+
 export const insertNode = (data: InsertNode): Promise<number> => {
 	assertExists(data.parent_id, 'insertNode needs a valid node_id')
 	assertExists(data.order, 'insertNode needs a valid order')
-	return Api.InsertNode({ data }).then(prop('id'))
+	return Api.InsertNode({
+		data,
+		settings: defaultSettings(data)
+	}).then(prop('id'))
 }
 
 function* iterateNodes(root: TreeNode): Generator<TreeNode> {
