@@ -37,6 +37,37 @@ $$;
 
 ALTER FUNCTION public.delete_referenced_rows() OWNER TO groblin;
 
+--
+-- Name: set_node_depth(); Type: FUNCTION; Schema: public; Owner: groblin
+--
+
+CREATE FUNCTION public.set_node_depth() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    parent_depth INTEGER;
+BEGIN
+    IF NEW.parent_id IS NULL THEN
+        -- If no parent, this is a root node
+        NEW.depth := 1;
+    ELSE
+        -- Fetch the parent's depth and add 1
+        SELECT depth INTO parent_depth FROM node WHERE id = NEW.parent_id;
+
+        IF parent_depth IS NULL THEN
+            RAISE EXCEPTION 'Parent with id % not found or depth not set', NEW.parent_id;
+        END IF;
+
+        NEW.depth := parent_depth + 1;
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION public.set_node_depth() OWNER TO groblin;
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -51,7 +82,8 @@ CREATE TABLE public.node (
     type text NOT NULL,
     "order" integer NOT NULL,
     parent_id integer,
-    project_id integer NOT NULL
+    project_id integer NOT NULL,
+    depth integer DEFAULT 0
 );
 
 
@@ -339,6 +371,13 @@ ALTER TABLE ONLY public."values"
 
 
 --
+-- Name: constraint_ext_node; Type: INDEX; Schema: public; Owner: groblin
+--
+
+CREATE UNIQUE INDEX constraint_ext_node ON public."values" USING btree (external_id, node_id) WHERE (external_id IS NOT NULL);
+
+
+--
 -- Name: external_id_1733431595845_index; Type: INDEX; Schema: public; Owner: groblin
 --
 
@@ -374,6 +413,13 @@ CREATE INDEX node_id ON public.node USING btree (id);
 
 
 --
+-- Name: node_id_1734381396869_index; Type: INDEX; Schema: public; Owner: groblin
+--
+
+CREATE UNIQUE INDEX node_id_1734381396869_index ON public.node_settings USING btree (node_id);
+
+
+--
 -- Name: parent_id_1734341132059_index; Type: INDEX; Schema: public; Owner: groblin
 --
 
@@ -392,6 +438,13 @@ CREATE INDEX project_id ON public.project USING btree (id);
 --
 
 CREATE INDEX project_id_1734341137450_index ON public.node USING btree (project_id);
+
+
+--
+-- Name: project_id_1734381367913_index; Type: INDEX; Schema: public; Owner: groblin
+--
+
+CREATE INDEX project_id_1734381367913_index ON public.node_settings USING btree (project_id);
 
 
 --
@@ -420,6 +473,13 @@ CREATE UNIQUE INDEX sqlite_autoindex_project_user_1 ON public.project_user USING
 --
 
 CREATE TRIGGER cascade_delete_on_list_path AFTER DELETE ON public."values" FOR EACH ROW EXECUTE FUNCTION public.delete_referenced_rows();
+
+
+--
+-- Name: node set_node_depth_trg; Type: TRIGGER; Schema: public; Owner: groblin
+--
+
+CREATE TRIGGER set_node_depth_trg BEFORE INSERT ON public.node FOR EACH ROW EXECUTE FUNCTION public.set_node_depth();
 
 
 --
