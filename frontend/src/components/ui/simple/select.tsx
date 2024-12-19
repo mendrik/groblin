@@ -68,7 +68,9 @@ export const SimpleSelect = <T,>({
 					{options.map((value, idx) => (
 						<SelectItem
 							key={`${idx}-${render(value)}`}
-							ref={el => (selectables.current[idx] = el)}
+							ref={el => {
+								selectables.current[idx] = el
+							}}
 							onClick={() => {
 								onChange(value)
 								setOpen(false)
