@@ -42,7 +42,9 @@ export const ColorEditor = ({ node, value }: OwnProps) => {
 						})
 					}
 				/>
-				<span>{chroma.hex().toUpperCase()}</span>
+				<span className="text-muted-foreground">
+					{chroma.hex().toUpperCase()}
+				</span>
 			</div>
 		</KeyListener>
 	)

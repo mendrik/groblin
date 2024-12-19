@@ -3,8 +3,9 @@ import { cn, notNil } from '@/lib/utils'
 import type { TreeNode } from '@/state/tree'
 import { $activeListItems, activateListItem } from '@/state/value'
 import {
-	IconArrowNarrowLeft,
-	IconArrowNarrowRight,
+	IconArrowBackUp,
+	IconCaretLeftFilled,
+	IconCaretRightFilled,
 	IconDotsVertical,
 	IconSquareRoundedPlus as Plus
 } from '@tabler/icons-react'
@@ -51,7 +52,7 @@ export const TabEditor = ({ node, value: items = [] }: OwnProps) => {
 					>
 						<button
 							type="button"
-							className="py-0 pl-2 pr-1 text-md"
+							className="py-0 pl-3 pr-1 text-md"
 							onClick={() => activateListItem(item)}
 						>
 							{item.value.name}
@@ -71,15 +72,18 @@ export const PagedEditor = ({ node, value: items = [] }: OwnProps) => {
 	const page = findIndex(item => item.id === $activeItem?.id, items) + 1
 
 	return (
-		<ol className="flex flex-row items-center -ml-1">
-			<li>
-				{page} of {items.length}
+		<ol className="flex flex-row items-center h-7 -ml-1 px-2 divider-x-1 divider-border">
+			<li className="h-5">
+				<MicroIcon icon={IconArrowBackUp} stroke={2} />
+			</li>
+			<li className="mx-2 text-muted-foreground">
+				<span className="text-foreground">{page}</span> of {items.length}
 			</li>
 			<li className="h-5">
-				<MicroIcon icon={IconArrowNarrowLeft} />
+				<MicroIcon icon={IconCaretLeftFilled} stroke={2} />
 			</li>
 			<li className="h-5">
-				<MicroIcon icon={IconArrowNarrowRight} />
+				<MicroIcon icon={IconCaretRightFilled} stroke={2} />
 			</li>
 		</ol>
 	)
