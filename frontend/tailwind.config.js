@@ -13,6 +13,9 @@ export default {
 			dropShadow: {
 				tooltip: '2px 2px 5px rgba(0, 0, 0, 0.8)'
 			},
+			boxShadow: {
+				tabs: '0 -1px 0 hsl(var(--muted-foreground)) inset'
+			},
 			colors: {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',

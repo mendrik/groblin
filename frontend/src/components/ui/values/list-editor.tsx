@@ -3,12 +3,14 @@ import { cn, notNil } from '@/lib/utils'
 import type { TreeNode } from '@/state/tree'
 import { $activeListItems, activateListItem } from '@/state/value'
 import {
-	IconPoint,
-	IconPointFilled,
+	IconArrowNarrowLeft,
+	IconArrowNarrowRight,
+	IconDotsVertical,
 	IconSquareRoundedMinus as Minus,
 	IconSquareRoundedPlus as Plus
 } from '@tabler/icons-react'
-import { Button } from '../button'
+import { findIndex } from 'ramda'
+import { isObject } from 'ramda-adjunct'
 import { MicroIcon } from '../random/micro-icon'
 import { openListItemCreate } from './list-item-create'
 import { openListItemDelete } from './list-item-delete'
@@ -26,23 +28,37 @@ type OwnProps = {
 
 export const TabEditor = ({ node, value: items = [] }: OwnProps) => {
 	const $activeItem = notNil($activeListItems)[node.id]
+	const active = isObject($activeItem)
 
 	return (
-		<div className="flex flex-row w-full gap-2 h-7 items-center">
-			<ol className="flex flex-row gap-1 items-center -ml-1">
+		<div
+			className={cn(
+				'flex flex-row w-full gap-2 h-7 items-center relative',
+				active && 'shadow-tabs'
+			)}
+		>
+			<ol className="flex flex-row gap-1 items-end">
 				{items.map(item => (
-					<li key={`${item.id}`}>
-						<Button
-							size="sm"
-							variant="ghost"
-							className={cn(
-								'py-0 px-2 h-6 text-md font-normal',
-								$activeItem?.id === item.id && 'ring-1 ring-muted-foreground'
-							)}
+					<li
+						key={`${item.id}`}
+						className={cn(
+							'flex flex-row items-center gap-1 h-7 border border-border border-b-0 rounded-md',
+							'rounded-b-none px-1 text-muted-foreground',
+							$activeItem?.id === item.id &&
+								'border-muted-foreground bg-background hover:bg-background text-foreground',
+							active &&
+								$activeItem?.id !== item.id &&
+								'translate-y-[-1px] translate-z-[-1px] h-6'
+						)}
+					>
+						<button
+							type="button"
+							className="py-0 pl-2 text-md"
 							onClick={() => activateListItem(item)}
 						>
 							{item.value.name}
-						</Button>
+						</button>
+						<MicroIcon icon={IconDotsVertical} />
 					</li>
 				))}
 			</ol>
@@ -57,21 +73,19 @@ export const TabEditor = ({ node, value: items = [] }: OwnProps) => {
 }
 export const PagedEditor = ({ node, value: items = [] }: OwnProps) => {
 	const $activeItem = notNil($activeListItems)[node.id]
+	const page = findIndex(item => item.id === $activeItem?.id, items) + 1
 
 	return (
 		<ol className="flex flex-row items-center -ml-1">
-			{items.slice(0, 20).map(item => (
-				<li key={`${item.id}`} className="h-5">
-					{$activeItem?.id === item.id ? (
-						<MicroIcon icon={IconPointFilled} />
-					) : (
-						<MicroIcon
-							icon={IconPoint}
-							onClick={() => activateListItem(item)}
-						/>
-					)}
-				</li>
-			))}
+			<li>
+				{page} of {items.length}
+			</li>
+			<li className="h-5">
+				<MicroIcon icon={IconArrowNarrowLeft} />
+			</li>
+			<li className="h-5">
+				<MicroIcon icon={IconArrowNarrowRight} />
+			</li>
 		</ol>
 	)
 }

@@ -31,14 +31,14 @@ export function App() {
 					</ResizablePanel>
 					<ResizableHandle />
 					<ResizablePanel defaultSize={$panelSizes.value[1]}>
-						<div className="w-full shrink-0 h-11 p-1">...</div>
+						<div className="w-full shrink-0 h-11 p-1" />
 						<div className="flex-1 py-2">
 							<NodeValues />
 						</div>
 					</ResizablePanel>
 					<ResizableHandle />
 					<ResizablePanel defaultSize={$panelSizes.value[2]}>
-						Preview
+						<span />
 					</ResizablePanel>
 				</ResizablePanelGroup>
 			</ScrollArea>

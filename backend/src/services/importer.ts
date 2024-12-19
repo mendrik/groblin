@@ -131,7 +131,7 @@ const processJson = (
 						const listItem = {
 							...baseValue,
 							id: value_id,
-							value: { name: 'Item' },
+							value: { name: null },
 							list_path,
 							external_id
 						}
