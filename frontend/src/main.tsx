@@ -9,7 +9,7 @@ import { LoggedIn } from './routing/logged-in'
 import { LoggedOut } from './routing/logged-out'
 import './state/project'
 import { setDefaultOptions } from 'date-fns'
-import { fi } from 'date-fns/locale'
+import { enGB } from 'date-fns/locale'
 import { loadProject } from './state/project'
 import { $user } from './state/user'
 
@@ -29,10 +29,7 @@ const Main = () => (
 					}
 				}}
 			/>
-			<BrowserRouter
-				basename="/"
-				future={{ v7_relativeSplatPath: true, v7_startTransition: true }}
-			>
+			<BrowserRouter basename="/">
 				{$user.value ? <LoggedIn /> : <LoggedOut />}
 			</BrowserRouter>
 		</ThemeProvider>
@@ -49,7 +46,7 @@ const formatRelativeLocale = {
 }
 
 setDefaultOptions({
-	locale: fi,
+	locale: enGB,
 	weekStartsOn: 1
 })
 

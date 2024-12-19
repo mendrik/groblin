@@ -1,6 +1,5 @@
 import FocusTravel from '@/components/utils/focus-travel'
 import { cn } from '@/lib/utils'
-import { pipeTap } from '@shared/utils/pipe-tap'
 import {
 	type ButtonHTMLAttributes,
 	type ReactNode,
@@ -51,7 +50,7 @@ export const SimpleSelect = <T,>({
 	const currentItem = value && render(value)
 
 	return (
-		<Select onOpenChange={pipeTap(setOpen)} open={open}>
+		<Select onOpenChange={setOpen} open={open}>
 			<SelectTrigger>{currentItem ?? placeholder}</SelectTrigger>
 			<SelectContent>
 				<FocusTravel>

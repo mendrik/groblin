@@ -1,6 +1,7 @@
 import { T as _, equals, gt, is, isEmpty, values } from 'ramda'
 import {
 	isBoolean,
+	isEven,
 	isNumber,
 	isOdd,
 	isPrimitive,
@@ -132,6 +133,20 @@ describe('pattern', () => {
 
 		expect(matcher(2)).toBe('2')
 		expect(matcher(3)).toBe('3')
+	})
+
+	it('matcher can narrow down unions', () => {
+		type Cat = number & { readonly __type: unique symbol }
+		type Dog = number & { readonly __type: unique symbol }
+		type Animal = Cat | Dog
+		const isCat = (a: Animal): a is Cat => isEven(a)
+		const isDog = (a: Animal): a is Dog => isOdd(a)
+		const matcher = match<[Animal], string>(
+			caseOf([isCat], c => 'cat'), // c: Cat
+			caseOf([isDog], d => 'dog') // d: Dog
+		)
+		expect(matcher(2 as Animal)).toBe('cat')
+		expect(matcher(3 as Animal)).toBe('dog')
 	})
 
 	it('should match the correct case with async generator', async () => {

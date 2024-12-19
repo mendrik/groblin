@@ -49,10 +49,7 @@ export const NodeExtraActions = ({ node }: OwnProps) => {
 			[{ type: NodeType.Object, nodes: isEmpty }, _],
 			<ImportObject node={node} />
 		),
-		caseOf(
-			[{ type: NodeType.List }, { scoped: true }],
-			<ImportArray node={node} />
-		),
+		caseOf([{ type: NodeType.List }, _], <ImportArray node={node} />),
 		caseOf([_, _], null)
 	)(node, settings?.settings ?? {})
 }

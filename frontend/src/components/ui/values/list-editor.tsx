@@ -61,7 +61,7 @@ export const PagedEditor = ({ node, value: items = [] }: OwnProps) => {
 	return (
 		<ol className="flex flex-row items-center -ml-1">
 			{items.slice(0, 20).map(item => (
-				<li key={`${item.id}`} className="h-6">
+				<li key={`${item.id}`} className="h-5">
 					{$activeItem?.id === item.id ? (
 						<MicroIcon icon={IconPointFilled} />
 					) : (
