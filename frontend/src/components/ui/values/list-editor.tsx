@@ -6,14 +6,12 @@ import {
 	IconArrowNarrowLeft,
 	IconArrowNarrowRight,
 	IconDotsVertical,
-	IconSquareRoundedMinus as Minus,
 	IconSquareRoundedPlus as Plus
 } from '@tabler/icons-react'
 import { findIndex } from 'ramda'
 import { isObject } from 'ramda-adjunct'
 import { MicroIcon } from '../random/micro-icon'
 import { openListItemCreate } from './list-item-create'
-import { openListItemDelete } from './list-item-delete'
 
 type ListValue = Value & {
 	value: {
@@ -33,17 +31,17 @@ export const TabEditor = ({ node, value: items = [] }: OwnProps) => {
 	return (
 		<div
 			className={cn(
-				'flex flex-row w-full gap-2 h-7 items-center relative',
+				'flex flex-row gap-2 h-7 items-center relative',
 				active && 'shadow-tabs'
 			)}
 		>
-			<ol className="flex flex-row gap-1 items-end">
+			<ol className="flex flex-row gap-1 ml-1 items-end">
 				{items.map(item => (
 					<li
 						key={`${item.id}`}
 						className={cn(
-							'flex flex-row items-center gap-1 h-7 border border-border border-b-0 rounded-md',
-							'rounded-b-none px-1 text-muted-foreground',
+							'transform duration-100 flex flex-row items-center h-7 border border-border border-b-0 rounded-md',
+							'rounded-b-none text-muted-foreground pr-1',
 							$activeItem?.id === item.id &&
 								'border-muted-foreground bg-background hover:bg-background text-foreground',
 							active &&
@@ -53,7 +51,7 @@ export const TabEditor = ({ node, value: items = [] }: OwnProps) => {
 					>
 						<button
 							type="button"
-							className="py-0 pl-2 text-md"
+							className="py-0 pl-2 pr-1 text-md"
 							onClick={() => activateListItem(item)}
 						>
 							{item.value.name}
@@ -64,9 +62,6 @@ export const TabEditor = ({ node, value: items = [] }: OwnProps) => {
 			</ol>
 			<div className="flex content-center">
 				<MicroIcon icon={Plus} onClick={() => openListItemCreate(node)} />
-				{$activeItem && (
-					<MicroIcon icon={Minus} onClick={() => openListItemDelete(node)} />
-				)}
 			</div>
 		</div>
 	)
