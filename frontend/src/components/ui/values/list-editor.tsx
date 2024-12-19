@@ -4,16 +4,19 @@ import { cn, notNil } from '@/lib/utils'
 import type { TreeNode } from '@/state/tree'
 import { $activeListItems, activateListItem } from '@/state/value'
 import {
-	IconArrowBackUp,
-	IconCaretLeftFilled,
-	IconCaretRightFilled,
+	IconChevronLeft,
+	IconChevronLeftPipe,
+	IconChevronRight,
+	IconChevronRightPipe,
+	IconChevronsLeft,
+	IconChevronsRight,
 	IconCursorText,
 	IconDotsVertical,
 	IconTrash,
 	IconSquareRoundedPlus as Plus
 } from '@tabler/icons-react'
-import { findIndex } from 'ramda'
-import { isObject } from 'ramda-adjunct'
+import { clamp, findIndex } from 'ramda'
+import { useEffect } from 'react'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -71,15 +74,15 @@ const ListItemActions = ({ node, item }: ListItemActionsProps) => (
 
 export const TabEditor = ({ node, value: items = [] }: OwnProps) => {
 	const $activeItem = notNil($activeListItems)[node.id]
-	const active = isObject($activeItem)
+
+	useEffect(() => {
+		if (items.length > 0 && !items.some(i => $activeItem?.id === i.id)) {
+			activateListItem(items[0])
+		}
+	})
 
 	return (
-		<div
-			className={cn(
-				'flex flex-row gap-2 h-7 items-center relative',
-				active && 'shadow-tabs'
-			)}
-		>
+		<div className="flex flex-row gap-2 h-7 items-center relative shadow-tabs">
 			<ol className="flex flex-row gap-1 ml-1 items-end">
 				{items.map(item => (
 					<li
@@ -89,14 +92,13 @@ export const TabEditor = ({ node, value: items = [] }: OwnProps) => {
 							'rounded-b-none text-muted-foreground pr-1',
 							$activeItem?.id === item.id &&
 								'border-muted-foreground bg-black text-foreground',
-							active &&
-								$activeItem?.id !== item.id &&
+							$activeItem?.id !== item.id &&
 								'translate-y-[-1px] translate-z-[-1px] h-6 bg-background'
 						)}
 					>
 						<button
 							type="button"
-							className="py-0 pl-3 pr-1 text-md"
+							className="py-0 pl-3 pr-1 text-md whitespace-nowrap"
 							onClick={() => activateListItem(item)}
 						>
 							{item.value.name}
@@ -113,23 +115,68 @@ export const TabEditor = ({ node, value: items = [] }: OwnProps) => {
 		</div>
 	)
 }
+
 export const PagedEditor = ({ node, value: items = [] }: OwnProps) => {
+	const step = (items.length / 10) | 0
 	const $activeItem = notNil($activeListItems)[node.id]
-	const page = findIndex(item => item.id === $activeItem?.id, items) + 1
+	const page = findIndex(item => item.id === $activeItem?.id, items)
+
+	const activate = (offset: number) => {
+		activateListItem(
+			items[clamp(0, items.length - 1, page === -1 ? 0 : page + offset)]
+		)
+	}
+
+	useEffect(() => {
+		activate(0)
+	})
 
 	return (
-		<ol className="flex flex-row items-center h-7 -ml-2 px-2 divider-x-1 divider-border">
-			<li className="h-5">
-				<MicroIcon icon={IconArrowBackUp} stroke={2} />
+		<ol className="flex flex-row items-center h-5 mt-1 -ml-2 px-2 divider-x-1 divider-border">
+			<li>
+				<MicroIcon
+					icon={IconChevronLeftPipe}
+					stroke={2}
+					onClick={() => activate(Number.MIN_SAFE_INTEGER)}
+				/>
+			</li>
+			<li>
+				<MicroIcon
+					icon={IconChevronsLeft}
+					stroke={2}
+					onClick={() => activate(-step)}
+				/>
+			</li>
+			<li>
+				<MicroIcon
+					icon={IconChevronLeft}
+					stroke={2}
+					onClick={() => activate(-1)}
+				/>
+			</li>
+			<li>
+				<MicroIcon
+					icon={IconChevronRight}
+					stroke={2}
+					onClick={() => activate(1)}
+				/>
+			</li>
+			<li>
+				<MicroIcon
+					icon={IconChevronsRight}
+					stroke={2}
+					onClick={() => activate(step)}
+				/>
+			</li>
+			<li>
+				<MicroIcon
+					icon={IconChevronRightPipe}
+					stroke={2}
+					onClick={() => activate(Number.MAX_SAFE_INTEGER)}
+				/>
 			</li>
 			<li className="mx-2 text-muted-foreground">
-				<span className="text-foreground">{page}</span> of {items.length}
-			</li>
-			<li className="h-5">
-				<MicroIcon icon={IconCaretLeftFilled} stroke={2} />
-			</li>
-			<li className="h-5">
-				<MicroIcon icon={IconCaretRightFilled} stroke={2} />
+				<span className="text-foreground">{page + 1}</span> of {items.length}
 			</li>
 		</ol>
 	)
