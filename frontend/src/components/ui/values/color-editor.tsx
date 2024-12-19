@@ -21,7 +21,7 @@ type OwnProps = {
 }
 
 export const ColorEditor = ({ node, value }: OwnProps) => {
-	const chroma = rgb.apply(rgb, value?.value.rgba)
+	const chroma = rgb.apply(null, value?.value.rgba ?? [0, 0, 0, 1])
 	const backgroundColor = chroma.css()
 	return (
 		<KeyListener onArrowLeft={stopPropagation} onArrowRight={stopPropagation}>

@@ -4,6 +4,7 @@ import { ColorPicker } from '../ui/color-picker'
 import { DatePicker } from '../ui/date-picker/date-picker-dialog'
 import { ListItemCreate } from '../ui/values/list-item-create'
 import { ListItemDelete } from '../ui/values/list-item-delete'
+import { ListItemEdit } from '../ui/values/list-item-edit'
 import { ValueEditor } from '../ui/values/value-editor'
 import FocusTravel from '../utils/focus-travel'
 
@@ -21,6 +22,7 @@ export const NodeValues = () => {
 			</FocusTravel>
 			<ListItemCreate />
 			<ListItemDelete />
+			<ListItemEdit />
 			<ColorPicker />
 			<DatePicker />
 		</>
