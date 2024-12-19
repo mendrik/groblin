@@ -3,6 +3,7 @@ import type { Value } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
 import { cn } from '@/lib/utils'
 import type { TreeNode } from '@/state/tree'
+import { rgb } from 'chroma-js'
 import { objOf, pipe } from 'ramda'
 import { Button } from '../button'
 import { openColorPicker } from '../color-picker'
@@ -20,25 +21,29 @@ type OwnProps = {
 }
 
 export const ColorEditor = ({ node, value }: OwnProps) => {
-	const backgroundColor = `rgba(${value?.value.rgba.join(',')})`
+	const chroma = rgb.apply(rgb, value?.value.rgba)
+	const backgroundColor = chroma.css()
 	return (
 		<KeyListener onArrowLeft={stopPropagation} onArrowRight={stopPropagation}>
-			<Button
-				key={editorKey(node, value)}
-				variant="ghost"
-				type="button"
-				className={cn(
-					'h-4 w-4 p-0 rounded-sm ml-1',
-					!value && 'border border-border'
-				)}
-				style={{ backgroundColor }}
-				onClick={() =>
-					openColorPicker({
-						callback: pipe(objOf('rgba'), save(node, value)),
-						color: backgroundColor
-					})
-				}
-			/>
+			<div className="flex flex-row gap-2">
+				<Button
+					key={editorKey(node, value)}
+					variant="ghost"
+					type="button"
+					className={cn(
+						'h-4 w-4 p-0 rounded-sm ml-1',
+						!value && 'border border-border'
+					)}
+					style={{ backgroundColor }}
+					onClick={() =>
+						openColorPicker({
+							callback: pipe(objOf('rgba'), save(node, value)),
+							color: backgroundColor
+						})
+					}
+				/>
+				<span>{chroma.hex().toUpperCase()}</span>
+			</div>
 		</KeyListener>
 	)
 }
