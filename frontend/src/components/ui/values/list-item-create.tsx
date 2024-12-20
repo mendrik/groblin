@@ -7,7 +7,7 @@ import {
 	DialogTitle
 } from '@/components/ui/dialog'
 import { notNil, setSignal } from '@/lib/utils'
-import type { TreeNode } from '@/state/tree'
+import { type TreeNode } from '@/state/tree'
 import { focusListItem, insertListItem, listPath } from '@/state/value'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
@@ -38,7 +38,7 @@ const createListItemCommand: (data: NewListItemSchema) => Promise<void> =
 	pipeAsync(
 		evolveAlt({
 			node_id: () => notNil($node, 'id'),
-			list_path: () => listPath(notNil($node))
+			list_path: () => listPath(notNil($node))?.slice(0, -1)
 		}),
 		insertListItem,
 		focusListItem

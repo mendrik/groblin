@@ -1,6 +1,7 @@
 import './app.css'
 import { DocumentTree } from './components/app/document-tree'
 import { NodeValues } from './components/app/node-values'
+import { PreviewPanel } from './components/app/preview-panel'
 import { Layout } from './components/layout'
 import {
 	ResizableHandle,
@@ -22,7 +23,7 @@ export function App() {
 					onLayout={setSignal($panelSizes)}
 				>
 					<ResizablePanel defaultSize={$panelSizes.value[0]}>
-						<div className="w-full h-11 shrink-0">
+						<div className="w-full h-8 shrink-0">
 							<h1 className="px-2 py-1 text-xl font-normal text-muted-foreground tracking-tight transition-colors truncate  w-full overflow-hidden">
 								{notNil($project).name}
 							</h1>
@@ -31,14 +32,16 @@ export function App() {
 					</ResizablePanel>
 					<ResizableHandle />
 					<ResizablePanel defaultSize={$panelSizes.value[1]}>
-						<div className="w-full shrink-0 h-11 p-1" />
+						<div className="w-full shrink-0 h-8 p-1" />
 						<div className="flex-1 py-2">
 							<NodeValues />
 						</div>
 					</ResizablePanel>
 					<ResizableHandle />
 					<ResizablePanel defaultSize={$panelSizes.value[2]}>
-						<span />
+						<div className="flex-1 py-2">
+							<PreviewPanel />
+						</div>
 					</ResizablePanel>
 				</ResizablePanelGroup>
 			</ScrollArea>

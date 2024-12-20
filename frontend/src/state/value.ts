@@ -68,6 +68,8 @@ export const listPath = (node: TreeNode): number[] | undefined => {
 }
 
 export const insertListItem = (listItem: InsertListItem) => {
+	console.log(listItem)
+
 	return Api.InsertListItem({ listItem })
 }
 export const focusListItem = (params: any) => {}

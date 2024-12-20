@@ -85,8 +85,18 @@ export const TabEditor = ({ node, value: items = [] }: OwnProps) => {
 	}, [items, itemInList])
 
 	return (
-		<div className="flex flex-row gap-2 h-7 items-center relative shadow-tabs">
-			<ol className="flex flex-row gap-1 ml-1 items-end">
+		<div
+			className={cn(
+				'flex flex-row gap-2 h-7 items-center relative',
+				items.length && 'shadow-tabs'
+			)}
+		>
+			<ol
+				className={cn(
+					'flex flex-row gap-1 ml-1 items-end',
+					!items.length && 'hidden'
+				)}
+			>
 				{items.map(item => (
 					<li
 						key={`${item.id}`}
