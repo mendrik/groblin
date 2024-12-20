@@ -87,7 +87,7 @@ export const TabEditor = ({ node, value: items = [] }: OwnProps) => {
 	return (
 		<div
 			className={cn(
-				'flex flex-row gap-2 h-7 items-center relative',
+				'flex flex-row gap-2 h-6 items-center relative',
 				items.length && 'shadow-tabs'
 			)}
 		>
@@ -101,7 +101,7 @@ export const TabEditor = ({ node, value: items = [] }: OwnProps) => {
 					<li
 						key={`${item.id}`}
 						className={cn(
-							'transform duration-100 flex flex-row items-center h-7 border border-border border-b-0 rounded-md',
+							'transform duration-100 flex flex-row items-center h-6 border border-border border-b-0 rounded-md',
 							'rounded-b-none text-muted-foreground pr-1',
 							$activeItem?.id === item.id &&
 								'border-muted-foreground bg-black text-foreground',

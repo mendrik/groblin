@@ -117,7 +117,7 @@ importers:
         version: 0.17.0(better-sqlite3@11.5.0)(kysely@0.27.5)(pg@8.13.1)
       vite-tsconfig-paths:
         specifier: 5.1.4
-        version: 5.1.4(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.2))
+        version: 5.1.4(typescript@5.7.2)(vite@6.0.3(@types/node@22.10.2)(jiti@2.3.3)(tsx@4.19.2)(yaml@2.6.0))
       vitest:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.2)(@vitest/browser@2.1.8)(happy-dom@15.11.7)(msw@2.6.6(@types/node@22.10.2)(typescript@5.7.2))
@@ -256,6 +256,9 @@ importers:
       react-dom:
         specifier: 19.0.0
         version: 19.0.0(react@19.0.0)
+      react-error-boundary:
+        specifier: ^4.1.2
+        version: 4.1.2(react@19.0.0)
       react-form-hook:
         specifier: 0.0.1
         version: 0.0.1
@@ -364,7 +367,7 @@ importers:
         version: 2.1.8(@types/node@22.10.2)(@vitest/browser@2.1.8)(happy-dom@15.11.7)(msw@2.6.6(@types/node@22.10.2)(typescript@5.7.2))
       vitest-localstorage-mock:
         specifier: 0.1.2
-        version: 0.1.2(vitest@2.1.8)
+        version: 0.1.2(vitest@2.1.8(@types/node@22.10.2)(@vitest/browser@2.1.8)(happy-dom@15.11.7)(msw@2.6.6(@types/node@22.10.2)(typescript@5.7.2)))
 
   shared:
     devDependencies:
@@ -4500,6 +4503,11 @@ packages:
     peerDependencies:
       react: ^19.0.0
 
+  react-error-boundary@4.1.2:
+    resolution: {integrity: sha512-GQDxZ5Jd+Aq/qUxbCm1UtzmL/s++V7zKgE8yMktJiCQXCCFZnMZh9ng+6/Ne6PjNSXH0L9CjeOEREfRnq6Duag==}
+    peerDependencies:
+      react: '>=16.13.1'
+
   react-form-hook@0.0.1:
     resolution: {integrity: sha512-uTC837MyrUs4gknm3UAt3ElwV/YUJ/ztUolJORBxb/W1po5NDZJYSTZkJz5Z9Cy9ZPxdfjOmZf+DwvVTm6v70Q==}
 
@@ -8507,11 +8515,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/browser@2.1.8(@types/node@22.10.2)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.2))(vitest@2.1.8)':
+  '@vitest/browser@2.1.8(@types/node@22.10.2)(typescript@5.7.2)(vite@6.0.3(@types/node@22.10.2)(jiti@2.3.3)(tsx@4.19.2)(yaml@2.6.0))(vitest@2.1.8)':
     dependencies:
       '@testing-library/dom': 10.4.0
       '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
-      '@vitest/mocker': 2.1.8(msw@2.6.6(@types/node@22.10.2)(typescript@5.7.2))(vite@5.4.11(@types/node@22.10.2))
+      '@vitest/mocker': 2.1.8(msw@2.6.6(@types/node@22.10.2)(typescript@5.7.2))(vite@6.0.3(@types/node@22.10.2)(jiti@2.3.3)(tsx@4.19.2)(yaml@2.6.0))
       '@vitest/utils': 2.1.8
       magic-string: 0.30.12
       msw: 2.6.6(@types/node@22.10.2)(typescript@5.7.2)
@@ -8542,6 +8550,16 @@ snapshots:
     optionalDependencies:
       msw: 2.6.6(@types/node@22.10.2)(typescript@5.7.2)
       vite: 5.4.11(@types/node@22.10.2)
+
+  '@vitest/mocker@2.1.8(msw@2.6.6(@types/node@22.10.2)(typescript@5.7.2))(vite@6.0.3(@types/node@22.10.2)(jiti@2.3.3)(tsx@4.19.2)(yaml@2.6.0))':
+    dependencies:
+      '@vitest/spy': 2.1.8
+      estree-walker: 3.0.3
+      magic-string: 0.30.12
+    optionalDependencies:
+      msw: 2.6.6(@types/node@22.10.2)(typescript@5.7.2)
+      vite: 6.0.3(@types/node@22.10.2)(jiti@2.3.3)(tsx@4.19.2)(yaml@2.6.0)
+    optional: true
 
   '@vitest/pretty-format@2.1.8':
     dependencies:
@@ -10303,6 +10321,11 @@ snapshots:
       react: 19.0.0
       scheduler: 0.25.0
 
+  react-error-boundary@4.1.2(react@19.0.0):
+    dependencies:
+      '@babel/runtime': 7.26.0
+      react: 19.0.0
+
   react-form-hook@0.0.1: {}
 
   react-hook-form@7.54.1(react@19.0.0):
@@ -11004,17 +11027,6 @@ snapshots:
       - supports-color
       - terser
 
-  vite-tsconfig-paths@5.1.4(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.2)):
-    dependencies:
-      debug: 4.3.7
-      globrex: 0.1.2
-      tsconfck: 3.1.4(typescript@5.7.2)
-    optionalDependencies:
-      vite: 5.4.11(@types/node@22.10.2)
-    transitivePeerDependencies:
-      - supports-color
-      - typescript
-
   vite-tsconfig-paths@5.1.4(typescript@5.7.2)(vite@6.0.3(@types/node@22.10.2)(jiti@2.3.3)(tsx@4.19.2)(yaml@2.6.0)):
     dependencies:
       debug: 4.3.7
@@ -11047,7 +11059,7 @@ snapshots:
       tsx: 4.19.2
       yaml: 2.6.0
 
-  vitest-localstorage-mock@0.1.2(vitest@2.1.8):
+  vitest-localstorage-mock@0.1.2(vitest@2.1.8(@types/node@22.10.2)(@vitest/browser@2.1.8)(happy-dom@15.11.7)(msw@2.6.6(@types/node@22.10.2)(typescript@5.7.2))):
     dependencies:
       vitest: 2.1.8(@types/node@22.10.2)(@vitest/browser@2.1.8)(happy-dom@15.11.7)(msw@2.6.6(@types/node@22.10.2)(typescript@5.7.2))
 
@@ -11075,7 +11087,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.10.2
-      '@vitest/browser': 2.1.8(@types/node@22.10.2)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.2))(vitest@2.1.8)
+      '@vitest/browser': 2.1.8(@types/node@22.10.2)(typescript@5.7.2)(vite@6.0.3(@types/node@22.10.2)(jiti@2.3.3)(tsx@4.19.2)(yaml@2.6.0))(vitest@2.1.8)
       happy-dom: 15.11.7
     transitivePeerDependencies:
       - less

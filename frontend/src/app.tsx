@@ -1,3 +1,4 @@
+import { ErrorBoundary } from 'react-error-boundary'
 import './app.css'
 import { DocumentTree } from './components/app/document-tree'
 import { NodeValues } from './components/app/node-values'
@@ -39,9 +40,9 @@ export function App() {
 					</ResizablePanel>
 					<ResizableHandle />
 					<ResizablePanel defaultSize={$panelSizes.value[2]}>
-						<div className="flex-1 py-2">
+						<ErrorBoundary fallback={<div>Preview panel has crashed</div>}>
 							<PreviewPanel />
-						</div>
+						</ErrorBoundary>
 					</ResizablePanel>
 				</ResizablePanelGroup>
 			</ScrollArea>
