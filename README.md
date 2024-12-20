@@ -26,5 +26,4 @@ Validation
 Graphql API
 - dynamic resolver
 
-
-
+- list item position to local storage
