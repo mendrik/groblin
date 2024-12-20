@@ -13,9 +13,9 @@ const matcher = match<[TreeNode, NodeSettings | undefined], ReactNode>(
 
 const Warning = () => (
 	<Alert variant="default" className="max-w-sm m-auto">
-		<IconAlertCircle className="h-4 w-4" />
-		<AlertTitle>Notice</AlertTitle>
-		<AlertDescription>
+		<IconAlertCircle className="h-6 w-6 mr-8" stroke={1} />
+		<AlertTitle className="!pl-10">Notice</AlertTitle>
+		<AlertDescription className="!pl-10">
 			To activate the preview panel, select a node in the document tree.
 		</AlertDescription>
 	</Alert>
