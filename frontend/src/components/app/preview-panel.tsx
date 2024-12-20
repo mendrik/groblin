@@ -1,4 +1,4 @@
-import type { NodeSettings } from '@/gql/graphql'
+import { type NodeSettings, NodeType } from '@/gql/graphql'
 import { $nodeSettingsMap } from '@/state/node-settings'
 import { $focusedNode, type TreeNode, asNode } from '@/state/tree'
 import { caseOf, match } from '@shared/utils/match'
@@ -6,9 +6,13 @@ import { IconAlertCircle } from '@tabler/icons-react'
 import { T as _ } from 'ramda'
 import type { ReactNode } from 'react'
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert'
+import { ListPreview } from '../ui/previews/list-preview'
 
 const matcher = match<[TreeNode, NodeSettings | undefined], ReactNode>(
-	caseOf([_, _], 'preview panel')
+	caseOf([{ type: NodeType.List }, _], (n, s) => (
+		<ListPreview node={n} settings={s} />
+	)),
+	caseOf([_, _], () => <NoSupport />)
 )
 
 const Warning = () => (
@@ -17,6 +21,16 @@ const Warning = () => (
 		<AlertTitle className="!pl-10">Notice</AlertTitle>
 		<AlertDescription className="!pl-10">
 			To activate the preview panel, select a node in the document tree.
+		</AlertDescription>
+	</Alert>
+)
+
+const NoSupport = () => (
+	<Alert variant="default" className="max-w-sm m-auto">
+		<IconAlertCircle className="h-6 w-6 mr-8" stroke={1} />
+		<AlertTitle className="!pl-10">Information</AlertTitle>
+		<AlertDescription className="!pl-10">
+			For this node type there is no preview panel available.
 		</AlertDescription>
 	</Alert>
 )
