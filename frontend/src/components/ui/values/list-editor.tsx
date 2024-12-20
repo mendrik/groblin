@@ -15,8 +15,9 @@ import {
 	IconTrash,
 	IconSquareRoundedPlus as Plus
 } from '@tabler/icons-react'
-import { clamp, findIndex } from 'ramda'
+import { clamp, findIndex, isNotNil } from 'ramda'
 import { useEffect } from 'react'
+import { useEffectOnce } from 'react-use'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -74,12 +75,14 @@ const ListItemActions = ({ node, item }: ListItemActionsProps) => (
 
 export const TabEditor = ({ node, value: items = [] }: OwnProps) => {
 	const $activeItem = notNil($activeListItems)[node.id]
+	const itemInList =
+		isNotNil($activeItem) && items.some(i => i.id === $activeItem.id)
 
 	useEffect(() => {
-		if (items.length > 0 && !items.some(i => $activeItem?.id === i.id)) {
+		if (items.length > 0 && !itemInList) {
 			activateListItem(items[0])
 		}
-	})
+	}, [items, itemInList])
 
 	return (
 		<div className="flex flex-row gap-2 h-7 items-center relative shadow-tabs">
@@ -127,9 +130,7 @@ export const PagedEditor = ({ node, value: items = [] }: OwnProps) => {
 		)
 	}
 
-	useEffect(() => {
-		activate(0)
-	})
+	useEffectOnce(() => activate(0))
 
 	return (
 		<ol className="flex flex-row items-center h-5 mt-1 -ml-2 px-2 divider-x-1 divider-border">

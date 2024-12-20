@@ -29,7 +29,9 @@ export const NumberEditor = ({ node, value }: OwnProps) => {
 		>
 			<MaskedInput
 				mask={
-					settings?.unit && value?.value.figure ? `num ${settings.unit}` : 'num'
+					settings?.unit && value?.value.figure
+						? `num ${settings.unit.replace(/[0a*[\]{}`]/g, '\\$&')}`
+						: 'num'
 				}
 				defaultValue={value?.value.figure}
 				lazy={false}

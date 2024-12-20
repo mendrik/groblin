@@ -25,7 +25,7 @@ export const ColorEditor = ({ node, value }: OwnProps) => {
 	const backgroundColor = chroma.css()
 	return (
 		<KeyListener onArrowLeft={stopPropagation} onArrowRight={stopPropagation}>
-			<div className="flex flex-row gap-2">
+			<div className="flex flex-row gap-2 mt-1">
 				<Button
 					key={editorKey(node, value)}
 					variant="ghost"
