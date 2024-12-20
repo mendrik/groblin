@@ -1,7 +1,7 @@
 import { assertExists, assertThat } from '@shared/asserts'
 import { is, tryCatch } from 'ramda'
 import { delayP } from 'ramda-adjunct'
-import type { MutableRefObject, SyntheticEvent } from 'react'
+import type { RefObject, SyntheticEvent } from 'react'
 
 export const data =
 	<FN extends (value: string) => any>(key: string, transformer: FN) =>
@@ -45,6 +45,6 @@ export const preventDefault = <E extends SyntheticEvent | Event>(e: E): void =>
 	e.preventDefault()
 
 export const focusOn =
-	<EL extends HTMLElement>(ref: MutableRefObject<EL | undefined>) =>
+	<EL extends HTMLElement>(ref: RefObject<EL | null>) =>
 	(): Promise<void> =>
 		delayP(50).then(() => ref.current?.focus())

@@ -114,7 +114,7 @@ export const TabEditor = ({ node, value: items = [] }: OwnProps) => {
 							className="py-0 pl-3 pr-1 text-md whitespace-nowrap"
 							onClick={() => activateListItem(item)}
 						>
-							{item.value.name}
+							{item.value.name ?? 'Unnamed'}
 						</button>
 						{$activeItem?.id === item.id && (
 							<ListItemActions node={node} item={item} />

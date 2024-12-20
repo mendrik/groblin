@@ -14,8 +14,8 @@ type OwnProps = {
 
 export const Node = ({ node, depth }: OwnProps) => {
 	const open = isOpen(node.id)
-	const editor = useRef<HTMLInputElement>()
-	const textBtn = useRef<HTMLButtonElement>()
+	const editor = useRef<HTMLInputElement>(null)
+	const textBtn = useRef<HTMLButtonElement>(null)
 
 	return (
 		<ol className={cn(`list-none m-0`)} style={{ paddingLeft: depth * 8 }}>
@@ -23,11 +23,7 @@ export const Node = ({ node, depth }: OwnProps) => {
 				<div className="flex flex-row items-center justify-start w-full gap-1">
 					<NodeChevron node={node} />
 					{node.id === $editingNode.value ? (
-						<NodeEditor
-							node={node}
-							ref={editor as LegacyRef<HTMLInputElement>}
-							textBtn={textBtn}
-						/>
+						<NodeEditor node={node} ref={editor} textBtn={textBtn} />
 					) : (
 						<NodeText
 							node={node}

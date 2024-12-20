@@ -3,18 +3,17 @@ import { type TreeNode, pathTo } from '@/state/tree'
 import { $activeListItems, listPath, saveValue } from '@/state/value'
 import { caseOf, match } from '@shared/utils/match'
 import { pipeAsync } from '@shared/utils/pipe-async'
-import type { Fn } from '@tp/functions'
 import {
 	type Pred,
 	T as _,
 	any,
-	apply,
 	dropLast,
 	filter,
 	head,
+	ifElse,
 	pipe
 } from 'ramda'
-import type { FC, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { BooleanEditor } from './boolean-editor'
 import { ColorEditor } from './color-editor'
 import { DateEditor } from './date-editor'
@@ -33,16 +32,22 @@ const isList: Pred<[TreeNode]> = node => node.type === NodeType.List
 const notActive: Pred<[TreeNode]> = node =>
 	$activeListItems.value[node.id] === undefined
 
-const isBlank: Pred<[TreeNode]> = pipe(
+const isBlankField: Pred<[TreeNode]> = pipe(
 	pathTo,
-	dropLast(1),
 	filter(isList),
 	any(notActive)
 )
+const isBlankList: Pred<[TreeNode]> = pipe(
+	pathTo,
+	filter(isList),
+	dropLast(1),
+	any(notActive)
+)
+const isBlank: Pred<[TreeNode]> = ifElse(isList, isBlankList, isBlankField)
 
 const matcher = match<Args, ReactNode>(
-	caseOf([isBlank, _], () => null),
-	caseOf([{ type: NodeType.Object }, _], () => null),
+	caseOf([isBlank, _], n => n.id),
+	caseOf([{ type: NodeType.Object }, _], null),
 	caseOf([{ type: NodeType.List }, _], (node, value) => (
 		<ListEditor node={node} value={value} />
 	)),
@@ -78,9 +83,8 @@ export const save = <T extends Value>(node: TreeNode, value?: T) =>
 		saveValue
 	)
 
-const propsToArgs = ({ node, value }: OwnProps) => [node, value] as Args
+export const ValueEditor = ({ node, value }: OwnProps) => {
+	if (node.id === 527) console.log(value)
 
-export const ValueEditor: FC<OwnProps> = pipe(
-	propsToArgs as Fn<OwnProps, [...Args]>,
-	apply(matcher)
-)
+	return matcher(node, value)
+}

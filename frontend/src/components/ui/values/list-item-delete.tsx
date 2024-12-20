@@ -15,6 +15,7 @@ import { deleteListItem, selectAnyListItem } from '@/state/value'
 import { signal } from '@preact/signals-react'
 import { pipeTap } from '@shared/utils/pipe-tap'
 import { pipe } from 'ramda'
+import { delayP } from 'ramda-adjunct'
 
 export const $deleteListItemOpen = signal(false)
 export const $node = signal<TreeNode>()
@@ -25,7 +26,7 @@ export const openListItemDelete = (node: TreeNode) => {
 const close = () => setSignal($deleteListItemOpen, false)
 
 export const deleteTagCommand = () =>
-	pipeTap(deleteListItem, selectAnyListItem)(notNil($node))
+	pipeTap(deleteListItem, x => delayP(100), selectAnyListItem)(notNil($node))
 
 export const ListItemDelete = () => (
 	<AlertDialog open={$deleteListItemOpen.value}>

@@ -1,10 +1,10 @@
-import { type LegacyRef, useMemo, useRef } from 'react'
+import { type RefObject, useMemo, useRef } from 'react'
 import type { FieldValues, FormState } from 'react-hook-form'
 import type { FormApi } from './zod-form'
 
 export const useFormState = <T extends FieldValues>(): [
 	FormState<T>,
-	LegacyRef<FormApi<T>>
+	RefObject<FormApi<T> | null>
 ] => {
 	const ref = useRef<FormApi<T>>(null)
 

@@ -11,9 +11,7 @@ import { assertThat } from '@shared/asserts'
 import {
 	assoc,
 	groupBy,
-	head,
 	isEmpty,
-	isNotEmpty,
 	isNotNil,
 	map,
 	omit,
@@ -25,6 +23,7 @@ import {
 	unless,
 	values
 } from 'ramda'
+import { isNonEmptyArray } from 'ramda-adjunct'
 import { $project } from './project'
 import { type TreeNode, asNode, pathTo } from './tree'
 
@@ -43,6 +42,7 @@ $values.subscribe(
 		setSignal($valueMap)
 	)
 )
+
 const fetchValues = () => {
 	const ids = pipe(values, pluck('id'))(notNil($activeListItems))
 	Api.GetValues({ data: { ids } }).then(setSignal($values))
@@ -85,12 +85,10 @@ export const truncateList = (node: TreeNode): Promise<number> => {
 
 export const selectAnyListItem = (node: TreeNode) => {
 	const current = notNil($activeListItems, node.id)
-	const values = notNil($valueMap, node.id).filter(
-		({ id }) => id !== current.id
-	)
+	const values = $valueMap.value[node.id]?.filter(({ id }) => id !== current.id)
 
-	if (isNotEmpty(values)) {
-		activateListItem(head(values))
+	if (isNonEmptyArray(values)) {
+		activateListItem(values[0])
 	} else {
 		updateSignal($activeListItems, omit([node.id]))
 	}

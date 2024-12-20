@@ -5,12 +5,12 @@ import { type TreeNode, confirmNodeName, stopEditing } from '@/state/tree'
 import { pipeTap } from '@shared/utils/pipe-tap'
 import { IconPencil } from '@tabler/icons-react'
 import { pipe } from 'ramda'
-import { type MutableRefObject, forwardRef, useLayoutEffect } from 'react'
+import { type RefObject, forwardRef, useLayoutEffect } from 'react'
 import { Input } from '../input'
 
 type OwnProps = {
 	node: TreeNode
-	textBtn: MutableRefObject<HTMLButtonElement | undefined>
+	textBtn: RefObject<HTMLButtonElement | null>
 }
 
 export const NodeEditor = forwardRef<HTMLInputElement, OwnProps>(
