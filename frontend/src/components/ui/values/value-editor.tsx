@@ -3,19 +3,17 @@ import { type TreeNode, pathTo } from '@/state/tree'
 import { $activeListItems, activePath, saveValue } from '@/state/value'
 import { caseOf, match } from '@shared/utils/match'
 import { pipeAsync } from '@shared/utils/pipe-async'
-import type { Fn } from '@tp/functions'
 import {
 	type Pred,
 	T as _,
 	any,
-	apply,
 	dropLast,
 	filter,
 	head,
 	ifElse,
 	pipe
 } from 'ramda'
-import type { FC, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { BooleanEditor } from './boolean-editor'
 import { ColorEditor } from './color-editor'
 import { DateEditor } from './date-editor'
@@ -85,9 +83,4 @@ export const save = <T extends Value>(node: TreeNode, value?: T) =>
 		saveValue
 	)
 
-const propsToArgs = ({ node, value }: OwnProps) => [node, value] as Args
-
-export const ValueEditor: FC<OwnProps> = pipe(
-	propsToArgs as Fn<OwnProps, [...Args]>,
-	apply(matcher)
-)
+export const ValueEditor = ({ node, value }: OwnProps) => matcher(node, value)

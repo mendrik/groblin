@@ -50,7 +50,9 @@ export const NodeText = forwardRef<HTMLButtonElement, OwnProps>(
 							stroke={1}
 						/>
 					)}
-					<div className={cn('p-1 truncate font-light')}>{node.name}</div>
+					<div className={cn('p-1 truncate font-light')}>
+						{node.name} {node.id}
+					</div>
 				</Button>
 			</KeyListener>
 		)

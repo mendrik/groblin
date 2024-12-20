@@ -13,6 +13,7 @@ import {
 	groupBy,
 	isEmpty,
 	isNotNil,
+	keys,
 	map,
 	omit,
 	pipe,
@@ -23,7 +24,7 @@ import {
 	unless,
 	values
 } from 'ramda'
-import { isNonEmptyArray } from 'ramda-adjunct'
+import { isNilOrEmpty, isNonEmptyArray } from 'ramda-adjunct'
 import { $project } from './project'
 import { type TreeNode, asNode, pathTo } from './tree'
 
@@ -42,6 +43,14 @@ $values.subscribe(
 		setSignal($valueMap)
 	)
 )
+
+$valueMap.subscribe(valueMap => {
+	for (const nodeId of keys($activeListItems.peek())) {
+		if (isNilOrEmpty(valueMap[nodeId])) {
+			updateSignal($activeListItems, omit([nodeId]))
+		}
+	}
+})
 
 const fetchValues = () => {
 	const ids = pipe(values, pluck('id'))(notNil($activeListItems))
@@ -68,11 +77,9 @@ export const activePath = (node: TreeNode): number[] | undefined => {
 	return isEmpty(res) ? undefined : res
 }
 
-export const insertListItem = (listItem: InsertListItem) => {
-	console.log(listItem)
+export const insertListItem = (listItem: InsertListItem) =>
+	Api.InsertListItem({ listItem })
 
-	return Api.InsertListItem({ listItem })
-}
 export const focusListItem = (params: any) => {}
 
 export const deleteListItem = (node: TreeNode): Promise<boolean> => {
@@ -80,23 +87,18 @@ export const deleteListItem = (node: TreeNode): Promise<boolean> => {
 	return Api.DeleteListItem({ id: selected.id })
 }
 
-export const truncateList = (node: TreeNode): Promise<number> => {
-	return Api.TruncateList({ data: { node_id: node.id } }).then(() => node.id)
-}
+export const truncateList = (node: TreeNode): Promise<number> =>
+	Api.TruncateList({ data: { node_id: node.id } }).then(() => node.id)
 
 export const selectAnyListItem = (node: TreeNode) => {
-	const current = notNil($activeListItems, node.id)
+	const current = $activeListItems.value[node.id]
+	if (!current) {
+		return
+	}
 	const values = $valueMap.value[node.id]?.filter(({ id }) => id !== current.id)
-
 	if (isNonEmptyArray(values)) {
 		activateListItem(values[0])
-	} else {
-		updateSignal($activeListItems, omit([node.id]))
 	}
 }
 
-export const saveValue = (data: UpsertValue) => {
-	console.log(data)
-
-	return Api.UpsertValue({ data })
-}
+export const saveValue = (data: UpsertValue) => Api.UpsertValue({ data })
