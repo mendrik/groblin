@@ -52,6 +52,18 @@ export type JsonArrayImportInput = {
   structure: Scalars['Boolean']['input'];
 };
 
+export type ListItem = {
+  children: Array<Value>;
+  id: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
+  order: Scalars['Int']['output'];
+};
+
+export type ListRequest = {
+  list_path?: InputMaybe<Array<Scalars['Int']['input']>>;
+  node_id: Scalars['Int']['input'];
+};
+
 export type LoggedInUser = {
   email: Scalars['String']['output'];
   id: Scalars['Int']['output'];
@@ -188,10 +200,16 @@ export type ProjectData = {
 };
 
 export type Query = {
+  getListItems: Array<ListItem>;
   getNodeSettings: Array<NodeSettings>;
   getNodes: Array<Node>;
   getProject: ProjectData;
   getValues: Array<Value>;
+};
+
+
+export type QueryGetListItemsArgs = {
+  request: ListRequest;
 };
 
 
@@ -402,6 +420,13 @@ export type UploadUrlMutationVariables = Exact<{
 
 export type UploadUrlMutation = { uploadUrl: { signedUrl: string, object: string } };
 
+export type GetListItemsQueryVariables = Exact<{
+  request: ListRequest;
+}>;
+
+
+export type GetListItemsQuery = { getListItems: Array<{ id: number, name: string, order: number, children: Array<{ node_id: number, value: any }> }> };
+
 export const ValueFragmentDoc = `
     fragment Value on Value {
   id
@@ -565,6 +590,19 @@ export const UploadUrlDocument = `
   }
 }
     `;
+export const GetListItemsDocument = `
+    query GetListItems($request: ListRequest!) {
+  getListItems(request: $request) {
+    id
+    name
+    order
+    children {
+      node_id
+      value
+    }
+  }
+}
+    `;
 export type Requester<C = {}, E = unknown> = <R, V>(doc: string, vars?: V, options?: C) => Promise<ExecutionResult<R, E>> | AsyncIterable<ExecutionResult<R, E>>
 export function getSdk<C, E>(requester: Requester<C, E>) {
   return {
@@ -627,6 +665,9 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     },
     UploadUrl(variables: UploadUrlMutationVariables, options?: C): Promise<ExecutionResult<UploadUrlMutation, E>> {
       return requester<UploadUrlMutation, UploadUrlMutationVariables>(UploadUrlDocument, variables, options) as Promise<ExecutionResult<UploadUrlMutation, E>>;
+    },
+    GetListItems(variables: GetListItemsQueryVariables, options?: C): Promise<ExecutionResult<GetListItemsQuery, E>> {
+      return requester<GetListItemsQuery, GetListItemsQueryVariables>(GetListItemsDocument, variables, options) as Promise<ExecutionResult<GetListItemsQuery, E>>;
     }
   };
 }

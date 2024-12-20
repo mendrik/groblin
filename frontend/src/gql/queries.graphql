@@ -136,3 +136,15 @@ mutation UploadUrl($filename: String!) {
     object
   }
 }
+
+query GetListItems($request: ListRequest!) {
+  getListItems(request: $request) {
+    id
+    name
+    order
+    children {
+      node_id
+      value
+    }
+  }
+}

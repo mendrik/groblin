@@ -46,6 +46,18 @@ input JsonArrayImportInput {
   structure: Boolean!
 }
 
+type ListItem {
+  children: [Value!]!
+  id: Int!
+  name: String!
+  order: Int!
+}
+
+input ListRequest {
+  list_path: [Int!]
+  node_id: Int!
+}
+
 type LoggedInUser {
   email: String!
   id: Int!
@@ -119,6 +131,7 @@ type ProjectData {
 }
 
 type Query {
+  getListItems(request: ListRequest!): [ListItem!]!
   getNodeSettings: [NodeSettings!]!
   getNodes: [Node!]!
   getProject: ProjectData!

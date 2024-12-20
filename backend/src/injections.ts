@@ -9,6 +9,7 @@ import { AuthChecker } from './middleware/auth-checker.ts'
 import { LogAccess } from './middleware/log-access.ts'
 import { AuthResolver } from './resolvers/auth-resolver.ts'
 import { IoResolver } from './resolvers/io-resolver.ts'
+import { ListResolver } from './resolvers/list-resolver.ts'
 import { NodeResolver } from './resolvers/node-resolver.ts'
 import { NodeSettingsResolver } from './resolvers/node-settings-resolver.ts'
 import { ProjectResolver } from './resolvers/project-resolver.ts'
@@ -25,6 +26,7 @@ container.bind(NodeResolver).toSelf()
 container.bind(NodeSettingsResolver).toSelf()
 container.bind(ValueResolver).toSelf()
 container.bind(AuthResolver).toSelf()
+container.bind(ListResolver).toSelf()
 container.bind(ProjectResolver).toSelf()
 container.bind(LogAccess).toSelf()
 container.bind(ProjectService).toSelf()

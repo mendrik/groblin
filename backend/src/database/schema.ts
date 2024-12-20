@@ -34,7 +34,9 @@ export interface Node {
 export interface NodeSettings {
   id: Generated<number>;
   node_id: number;
+  priority: Generated<boolean | null>;
   project_id: number;
+  required: Generated<boolean | null>;
   settings: Json | null;
 }
 
