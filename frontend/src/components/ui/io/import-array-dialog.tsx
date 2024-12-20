@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/dialog'
 import { notNil, setSignal } from '@/lib/utils'
 import { type TreeNode, importArray } from '@/state/tree'
-import { listPath } from '@/state/value'
+import { activePath } from '@/state/value'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
 import { evolveAlt } from '@shared/utils/evolve-alt'
@@ -53,7 +53,7 @@ export type ImportArraySchema = TypeOf<ReturnType<typeof importArraySchema>>
 const importCommand: (data: ImportArraySchema) => Promise<unknown> = pipeAsync(
 	evolveAlt({
 		node_id: () => notNil($node, 'id'),
-		list_path: () => listPath(notNil($node))
+		list_path: () => activePath(notNil($node))
 	}),
 	importArray,
 	close

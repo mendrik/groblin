@@ -59,8 +59,9 @@ export const activateListItem = (item: Value) => {
 	updateSignal($activeListItems, assoc(item.node_id, item))
 }
 
-export const listPath = (node: TreeNode): number[] | undefined => {
+export const activePath = (node: TreeNode): number[] | undefined => {
 	const res = [...pathTo(node)]
+		.slice(0, -1)
 		.filter(node => node.type === 'list')
 		.map(node => $activeListItems.value[node.id]?.id)
 		.filter(isNotNil)
@@ -94,4 +95,8 @@ export const selectAnyListItem = (node: TreeNode) => {
 	}
 }
 
-export const saveValue = (data: UpsertValue) => Api.UpsertValue({ data })
+export const saveValue = (data: UpsertValue) => {
+	console.log(data)
+
+	return Api.UpsertValue({ data })
+}

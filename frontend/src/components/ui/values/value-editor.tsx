@@ -1,19 +1,21 @@
 import { NodeType, type Value } from '@/gql/graphql'
 import { type TreeNode, pathTo } from '@/state/tree'
-import { $activeListItems, listPath, saveValue } from '@/state/value'
+import { $activeListItems, activePath, saveValue } from '@/state/value'
 import { caseOf, match } from '@shared/utils/match'
 import { pipeAsync } from '@shared/utils/pipe-async'
+import type { Fn } from '@tp/functions'
 import {
 	type Pred,
 	T as _,
 	any,
+	apply,
 	dropLast,
 	filter,
 	head,
 	ifElse,
 	pipe
 } from 'ramda'
-import type { ReactNode } from 'react'
+import type { FC, ReactNode } from 'react'
 import { BooleanEditor } from './boolean-editor'
 import { ColorEditor } from './color-editor'
 import { DateEditor } from './date-editor'
@@ -46,11 +48,11 @@ const isBlankList: Pred<[TreeNode]> = pipe(
 const isBlank: Pred<[TreeNode]> = ifElse(isList, isBlankList, isBlankField)
 
 const matcher = match<Args, ReactNode>(
-	caseOf([isBlank, _], n => n.id),
-	caseOf([{ type: NodeType.Object }, _], null),
+	caseOf([isBlank, _], () => null),
 	caseOf([{ type: NodeType.List }, _], (node, value) => (
 		<ListEditor node={node} value={value} />
 	)),
+	caseOf([{ type: NodeType.Object }, _], () => null),
 	caseOf([{ type: NodeType.Boolean }, _], (node, value) => (
 		<BooleanEditor node={node} value={head(value ?? [])} />
 	)),
@@ -70,7 +72,7 @@ const matcher = match<Args, ReactNode>(
 )
 
 export const editorKey = (node: TreeNode, value: Value | undefined) =>
-	value?.id ?? `${node.id}-${listPath(node)?.join('-')}`
+	value?.id ?? `${node.id}-${activePath(node)?.join('-')}`
 
 export const save = <T extends Value>(node: TreeNode, value?: T) =>
 	pipeAsync(
@@ -78,13 +80,14 @@ export const save = <T extends Value>(node: TreeNode, value?: T) =>
 			value: typeValue,
 			node_id: node.id,
 			id: value?.id,
-			list_path: listPath(node)
+			list_path: activePath(node)
 		}),
 		saveValue
 	)
 
-export const ValueEditor = ({ node, value }: OwnProps) => {
-	if (node.id === 527) console.log(value)
+const propsToArgs = ({ node, value }: OwnProps) => [node, value] as Args
 
-	return matcher(node, value)
-}
+export const ValueEditor: FC<OwnProps> = pipe(
+	propsToArgs as Fn<OwnProps, [...Args]>,
+	apply(matcher)
+)

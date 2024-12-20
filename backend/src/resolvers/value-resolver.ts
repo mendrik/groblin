@@ -2,7 +2,6 @@ import {} from 'graphql'
 import { GraphQLJSONObject } from 'graphql-scalars'
 import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
-import { without } from 'ramda'
 import type { DB, JsonValue } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import { Topic } from 'src/services/Topic.ts'
@@ -180,7 +179,7 @@ export class ValueResolver {
 				node_id: data.node_id,
 				project_id: user.lastProjectId,
 				value: data.value,
-				list_path: data.list_path ? without([data.id], data.list_path) : null
+				list_path: data.list_path
 			})
 			.onConflict(c =>
 				c.column('id').doUpdateSet(e => ({
