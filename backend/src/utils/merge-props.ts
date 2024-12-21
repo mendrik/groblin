@@ -15,30 +15,26 @@ import {
 import { ensureArray, renameKeys } from 'ramda-adjunct'
 
 type MergePropsReturnType<
-	T extends object,
-	K extends keyof T,
-	R extends { [RK in keyof T]: string },
+	T extends { [s: string]: any },
+	R extends { [RK: string]: string },
 	MP extends string
-> = Omit<
-	{
-		[P in MP]: Array<{
-			[RP in keyof R]: T[K] extends keyof T ? T[T[K]] : never // Add the `mergeProp` array with renamed keys
-		}>
-	} & T,
-	keyof R
->
+> = Omit<T, keyof R> & {
+	[P in MP]: Array<{
+		[RP in keyof R as R[RP]]: RP extends keyof T ? T[RP] : never
+	}>
+}
 
 export const mergeProps = <
-	T extends object,
-	K extends keyof T,
-	R extends { [RK in keyof T]: string },
-	M extends string
+	T extends { [s: string]: any },
+	R extends { [RK: string]: string },
+	GP extends keyof T,
+	MP extends string
 >(
-	groupByProp: K,
+	groupByProp: GP,
 	renameProps: R,
-	mergeProp: M,
+	mergeProp: MP,
 	obj: T[]
-): MergePropsReturnType<T, K, R, M> => {
+): MergePropsReturnType<T, R, MP>[] => {
 	const keys = Object.keys(renameProps)
 	const reducer = mergeWithKey((k, a, b) =>
 		k === mergeProp ? concat(a, b) : a

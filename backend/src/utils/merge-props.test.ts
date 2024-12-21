@@ -41,11 +41,10 @@ describe('mergeProps', () => {
 
 		const result = mergeProps(
 			'id',
-			{ group: 'g', value: 'v' },
+			{ group: 'g', value: 'v' } as const,
 			'children',
 			input
 		)
-		type X = typeof result
 		expect(result).toEqual(expectedOutput)
 	})
 })
