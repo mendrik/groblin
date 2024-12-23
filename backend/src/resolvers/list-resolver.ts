@@ -1,11 +1,13 @@
 import {} from '@shared/utils/list-to-tree.ts'
+import { GraphQLJSONObject } from 'graphql-scalars'
 import { inject, injectable } from 'inversify'
 import { Kysely, sql } from 'kysely'
 import {} from 'ramda'
-import type { DB } from 'src/database/schema.ts'
+import type { DB, JsonValue } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import type { Context } from 'src/types.ts'
 import { Role } from 'src/types.ts'
+import { mergeProps } from 'src/utils/merge-props.ts'
 import {
 	Arg,
 	Authorized,
@@ -19,7 +21,6 @@ import {
 	Resolver,
 	UseMiddleware
 } from 'type-graphql'
-import { Value } from './value-resolver.ts'
 
 @InputType()
 export class ListRequest {
@@ -31,19 +32,30 @@ export class ListRequest {
 }
 
 @ObjectType()
+export class ChildValue {
+	@Field(type => Int)
+	node_id: number | null
+
+	@Field(type => GraphQLJSONObject)
+	value: JsonValue
+}
+
+@ObjectType()
 export class ListItem {
 	@Field(type => Int)
 	id: number
 
-	@Field(type => String)
-	name: string
+	@Field(type => GraphQLJSONObject)
+	value: JsonValue
 
 	@Field(type => Int)
 	order: number
 
-	@Field(type => [Value])
-	children: Value[]
+	@Field(type => [ChildValue])
+	children: ChildValue[]
 }
+
+const renameMap = { child_value: 'value', child_node_id: 'node_id' } as const
 
 @injectable()
 @UseMiddleware(LogAccess)
@@ -77,10 +89,14 @@ export class ListResolver {
 			.orderBy('v2.list_path')
 			.orderBy('n.order')
 			.orderBy('n.depth')
-			.selectAll('v')
-			.select(['v2.value as child_value', 'v2.node_id as child_node_id'])
+			.select([
+				'v.id',
+				'v.value',
+				'v.order',
+				'v2.value as child_value',
+				'v2.node_id as child_node_id'
+			])
 			.execute()
-			.then(console.log)
-		return []
+		return mergeProps('id', renameMap, 'children', result)
 	}
 }

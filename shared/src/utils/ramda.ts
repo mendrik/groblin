@@ -48,6 +48,6 @@ type INF<G> = {
 }
 
 export const fork =
-	<T, ST extends T, G extends Array<GP<any, any>>>(...preds: G) =>
+	<T, G extends Array<GP<any, any>>>(...preds: G) =>
 	<T2 extends T>(v: T2[]): [...INF<G>] =>
 		preds.map(pred => v.filter(pred)) as [...INF<G>]
