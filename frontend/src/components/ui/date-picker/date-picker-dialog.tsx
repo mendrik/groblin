@@ -4,7 +4,9 @@ import {
 	DialogFooter,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { cn, setSignal, updateSignalFn } from '@/lib/utils'
+import { setSignal } from '@/lib/signals'
+import { updateSignalFn } from '@/lib/signals'
+import { cn } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { IconCalendarX } from '@tabler/icons-react'

@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dialog'
 import { stringField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
-import { setSignal } from '@/lib/utils'
+import { setSignal } from '@/lib/signals'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
 import { pipeTap } from '@shared/utils/pipe-tap'

@@ -4,7 +4,9 @@ import {
 	DialogFooter,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { notNil, setSignal, updateSignalFn } from '@/lib/utils'
+import { setSignal } from '@/lib/signals'
+import { updateSignalFn } from '@/lib/signals'
+import { notNil } from '@/lib/signals'
 import { signal } from '@preact/signals-react'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { F, T, assoc, pipe } from 'ramda'

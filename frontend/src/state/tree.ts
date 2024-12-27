@@ -6,7 +6,9 @@ import {
 	NodeType
 } from '@/gql/graphql.ts'
 import { getItem, setItem } from '@/lib/local-storage'
-import { computeSignal, notNil, setSignal } from '@/lib/utils'
+import { setSignal } from '@/lib/signals'
+import { notNil } from '@/lib/signals'
+import { computeSignal } from '@/lib/signals'
 import { waitForId } from '@/lib/wait-for-id'
 import { computed, signal } from '@preact/signals-react'
 import { assertExists } from '@shared/asserts'

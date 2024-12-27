@@ -54,8 +54,8 @@ input JsonArrayImportInput {
 type ListItem {
   children: [ChildValue!]!
   id: Int!
-  name: String!
   order: Int!
+  value: JSONObject!
 }
 
 input ListRequest {

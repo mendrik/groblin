@@ -5,7 +5,9 @@ import {
 	type UpsertValue,
 	type Value
 } from '@/gql/graphql'
-import { notNil, setSignal, updateSignal } from '@/lib/utils'
+import { setSignal } from '@/lib/signals'
+import { updateSignal } from '@/lib/signals'
+import { notNil } from '@/lib/signals'
 import { signal } from '@preact/signals-react'
 import { assertThat } from '@shared/asserts'
 import {

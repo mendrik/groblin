@@ -10,7 +10,8 @@ import {
 	ResizablePanelGroup
 } from './components/ui/resizable'
 import { ScrollArea } from './components/ui/scroll-area'
-import { notNil, setSignal } from './lib/utils'
+import { setSignal } from './lib/signals'
+import { notNil } from './lib/signals'
 import { $panelSizes } from './state/panels'
 import { $project } from './state/project'
 

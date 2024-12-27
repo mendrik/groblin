@@ -1,7 +1,8 @@
 import { signal } from '@preact/signals-react'
 import { setMonth } from 'date-fns/fp'
 import { describe, expect, it } from 'vitest'
-import { notNil, updateSignalFn } from './utils'
+import { updateSignalFn } from './signals'
+import { notNil } from './signals'
 
 describe('notNil', () => {
 	it('should return the value when the signal is not nil', () => {

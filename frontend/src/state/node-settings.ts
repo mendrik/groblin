@@ -1,6 +1,7 @@
 import { Api, Subscribe } from '@/gql-client'
 import type { NodeSettings, UpsertNodeSettings } from '@/gql/graphql'
-import { notNil, setSignal } from '@/lib/utils'
+import { setSignal } from '@/lib/signals'
+import { notNil } from '@/lib/signals'
 import { signal } from '@preact/signals-react'
 import { groupBy, head, map, pipe, propOr } from 'ramda'
 import { $project } from './project'

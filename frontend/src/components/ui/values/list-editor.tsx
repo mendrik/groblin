@@ -1,6 +1,7 @@
 import type { Value } from '@/gql/graphql'
 import { preventDefault, stopPropagation } from '@/lib/dom-events'
-import { cn, notNil } from '@/lib/utils'
+import { notNil } from '@/lib/signals'
+import { cn } from '@/lib/utils'
 import type { TreeNode } from '@/state/tree'
 import { $activeListItems, activateListItem } from '@/state/value'
 import {

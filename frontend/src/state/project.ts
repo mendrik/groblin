@@ -1,6 +1,6 @@
 import { Api } from '@/gql-client'
 import type { Project } from '@/gql/graphql'
-import { setSignal } from '@/lib/utils'
+import { setSignal } from '@/lib/signals'
 import { signal } from '@preact/signals-react'
 import { evolveAlt } from '@shared/utils/evolve-alt'
 import { failOn } from '@shared/utils/guards'

@@ -7,7 +7,8 @@ import {
 	startOfWeek
 } from 'date-fns'
 import './month.css'
-import { cn, setSignal } from '@/lib/utils'
+import { setSignal } from '@/lib/signals'
+import { cn } from '@/lib/utils'
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 import { forwardRef } from 'react'
 import { Button } from '../button'

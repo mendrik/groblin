@@ -6,7 +6,8 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { notNil, setSignal } from '@/lib/utils'
+import { setSignal } from '@/lib/signals'
+import { notNil } from '@/lib/signals'
 import type { TreeNode } from '@/state/tree'
 import { activePath, focusListItem, insertListItem } from '@/state/value'
 import { signal } from '@preact/signals-react'

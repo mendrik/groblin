@@ -9,7 +9,8 @@ import {
 	AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import { stopPropagation } from '@/lib/dom-events'
-import { notNil, setSignal } from '@/lib/utils'
+import { setSignal } from '@/lib/signals'
+import { notNil } from '@/lib/signals'
 import { type TreeNode, focusNode, updateNodeContext } from '@/state/tree'
 import { truncateList } from '@/state/value'
 import { signal } from '@preact/signals-react'

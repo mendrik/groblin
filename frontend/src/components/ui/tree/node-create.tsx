@@ -7,7 +7,8 @@ import {
 	DialogTitle
 } from '@/components/ui/dialog'
 import { NodeType } from '@/gql/graphql'
-import { notNil, setSignal } from '@/lib/utils'
+import { setSignal } from '@/lib/signals'
+import { notNil } from '@/lib/signals'
 import {
 	$root,
 	type TreeNode,

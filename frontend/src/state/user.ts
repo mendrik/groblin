@@ -1,7 +1,7 @@
 import { Api } from '@/gql-client'
 import type { LoggedInUser, Login, Registration } from '@/gql/graphql'
 import { getItem, removeItems, setItem } from '@/lib/local-storage'
-import { setSignal } from '@/lib/utils'
+import { setSignal } from '@/lib/signals'
 import { signal } from '@preact/signals-react'
 import { evolveAlt } from '@shared/utils/evolve-alt'
 import { pipe, prop } from 'ramda'

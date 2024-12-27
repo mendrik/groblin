@@ -5,7 +5,7 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { setSignal } from '@/lib/utils'
+import { setSignal } from '@/lib/signals'
 import type { TreeNode } from '@/state/tree'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'

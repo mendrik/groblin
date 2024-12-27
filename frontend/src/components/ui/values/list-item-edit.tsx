@@ -5,7 +5,8 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { notNil, setSignal } from '@/lib/utils'
+import { setSignal } from '@/lib/signals'
+import { notNil } from '@/lib/signals'
 import { saveValue } from '@/state/value'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
