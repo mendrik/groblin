@@ -27,6 +27,11 @@ export type ChangeNodeInput = {
   type?: InputMaybe<NodeType>;
 };
 
+export type ChildValue = {
+  node_id: Scalars['Int']['output'];
+  value: Scalars['JSONObject']['output'];
+};
+
 export type GetValues = {
   ids: Array<Scalars['Int']['input']>;
 };
@@ -53,10 +58,10 @@ export type JsonArrayImportInput = {
 };
 
 export type ListItem = {
-  children: Array<Value>;
+  children: Array<ChildValue>;
   id: Scalars['Int']['output'];
-  name: Scalars['String']['output'];
   order: Scalars['Int']['output'];
+  value: Scalars['JSONObject']['output'];
 };
 
 export type ListRequest = {
@@ -425,7 +430,7 @@ export type GetListItemsQueryVariables = Exact<{
 }>;
 
 
-export type GetListItemsQuery = { getListItems: Array<{ id: number, name: string, order: number, children: Array<{ node_id: number, value: any }> }> };
+export type GetListItemsQuery = { getListItems: Array<{ id: number, value: any, order: number, children: Array<{ node_id: number, value: any }> }> };
 
 export const ValueFragmentDoc = `
     fragment Value on Value {
@@ -594,7 +599,7 @@ export const GetListItemsDocument = `
     query GetListItems($request: ListRequest!) {
   getListItems(request: $request) {
     id
-    name
+    value
     order
     children {
       node_id

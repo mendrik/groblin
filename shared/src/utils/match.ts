@@ -21,7 +21,7 @@ type NarrowedArg<P, A> = P extends Guard<infer T>
 				? A & {
 						[K in keyof P]: K extends keyof A ? NarrowedArg<P[K], A[K]> : never
 					}
-				: A
+				: Extract<P, A>
 
 type PrimitiveMatcher = string | number | boolean | null | undefined
 
