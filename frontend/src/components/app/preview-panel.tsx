@@ -1,19 +1,16 @@
-import { type NodeSettings, NodeType } from '@/gql/graphql'
-import { $nodeSettingsMap } from '@/state/node-settings'
+import { NodeType } from '@/gql/graphql'
 import { $focusedNode, type TreeNode, asNode } from '@/state/tree'
+import { signal } from '@preact/signals-react'
 import { caseOf, match } from '@shared/utils/match'
 import { IconAlertCircle } from '@tabler/icons-react'
+import { Maybe } from 'purify-ts'
 import { T as _ } from 'ramda'
-import type { ReactNode } from 'react'
+import { type ReactNode, Suspense } from 'react'
+import { ErrorBoundary } from 'react-error-boundary'
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert'
 import { ListPreview } from '../ui/previews/list-preview'
 
-const matcher = match<[TreeNode, NodeSettings | undefined], ReactNode>(
-	caseOf([{ type: NodeType.List }, _], (n, s) => (
-		<ListPreview node={n} settings={s} />
-	)),
-	caseOf([_, _], () => <NoSupport />)
-)
+export const $previewPanel = signal<ReactNode>(null)
 
 const Warning = () => (
 	<Alert variant="default" className="max-w-sm m-auto">
@@ -35,12 +32,25 @@ const NoSupport = () => (
 	</Alert>
 )
 
+const Panel = match<[{ node: TreeNode }], ReactNode>(
+	caseOf([{ node: { type: NodeType.List } }], ({ node }) => (
+		<ListPreview node={node} />
+	)),
+	caseOf([_], () => <NoSupport />)
+)
+
 export const PreviewPanel = () => {
-	const focusedNode = $focusedNode.value
-	const settings = $nodeSettingsMap.value[focusedNode ?? 0]
+	const node = Maybe.fromNullable($focusedNode.value).map(asNode)
 	return (
 		<div className="flex-1 min-h-svh p-2">
-			{focusedNode ? matcher(asNode(focusedNode), settings) : <Warning />}
+			<ErrorBoundary fallback={<Warning />}>
+				<Suspense fallback={<div>Loading....</div>}>
+					{node.caseOf({
+						Just: node => <Panel node={node} />,
+						Nothing: () => null
+					})}{' '}
+				</Suspense>
+			</ErrorBoundary>
 		</div>
 	)
 }

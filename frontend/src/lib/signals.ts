@@ -1,12 +1,11 @@
 import {
 	type ReadonlySignal,
 	type Signal,
-	computed,
-	signal
+	computed
 } from '@preact/signals-react'
 import { assertExists } from '@shared/asserts'
 import type { Fn } from '@tp/functions'
-import { assoc, curry, prop } from 'ramda'
+import { curry, prop } from 'ramda'
 
 export const setSignal = curry(<T>(signal: Signal<T>, value: T): T => {
 	signal.value = value
@@ -48,40 +47,3 @@ export const computeSignal = <T, R>(
 	signal: Signal<T>,
 	fn: (v: T) => R
 ): ReadonlySignal<R> => computed(() => fn(signal.value))
-
-type PromisedSignal<T> =
-	| {
-			loading: true
-			error: null
-			data: null
-	  }
-	| {
-			loading: false
-			error: Error
-			data: null
-	  }
-	| {
-			loading: false
-			error: null
-			data: T
-	  }
-
-const promiseMap = new WeakMap<Promise<any>, Signal<PromisedSignal<any>>>()
-
-export const job = <T>(promise: Promise<T>) => {
-	if (promiseMap.has(promise)) {
-		return promiseMap.get(promise)
-	}
-	const sig = signal<PromisedSignal<T>>({
-		loading: true,
-		error: null,
-		data: null
-	})
-	promise
-		.then(updateSignalFn(sig, assoc('data')))
-		.catch(updateSignalFn(sig, assoc('error')))
-		.finally(() => updateSignal(sig, assoc('loading', false)))
-
-	promiseMap.set(promise, sig)
-	return sig
-}
