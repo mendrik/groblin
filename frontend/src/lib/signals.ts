@@ -1,11 +1,13 @@
 import {
 	type ReadonlySignal,
 	type Signal,
-	computed
+	computed,
+	signal
 } from '@preact/signals-react'
 import { assertExists } from '@shared/asserts'
 import type { Fn } from '@tp/functions'
 import { curry, prop } from 'ramda'
+import {} from 'react'
 
 export const setSignal = curry(<T>(signal: Signal<T>, value: T): T => {
 	signal.value = value
@@ -47,3 +49,54 @@ export const computeSignal = <T, R>(
 	signal: Signal<T>,
 	fn: (v: T) => R
 ): ReadonlySignal<R> => computed(() => fn(signal.value))
+
+export type Job<T, A extends any[]> = {
+	run: (...args: A) => void
+} & (
+	| {
+			state: 'idle' | 'working'
+	  }
+	| {
+			state: 'done'
+			data: T
+	  }
+	| {
+			state: 'error'
+			error: Error
+	  }
+)
+
+export const job = <T, A extends any[]>(
+	promiseFn: (...args: A) => Promise<T>
+): Job<T, A> => {
+	const $state = signal<Job<T, A>['state']>('idle')
+	const $data = signal<T>()
+	const $error = signal<Error>()
+
+	const run = (...args: A) =>
+		promiseFn(...args)
+			.then(d => {
+				setSignal($data, d)
+				setSignal($state, 'done')
+			})
+			.catch(e => {
+				setSignal($error, e)
+				setSignal($state, 'error')
+			})
+
+	return {
+		run(...args: A) {
+			setSignal($state, 'working')
+			run(...args)
+		},
+		get state() {
+			return $state.value
+		},
+		get data() {
+			return notNil($data)
+		},
+		get error() {
+			return notNil($error)
+		}
+	}
+}
