@@ -30,7 +30,8 @@
 				"noAssignInExpressions": "off"
 			},
 			"correctness": {
-				"noUnusedImports": "error"
+				"noUnusedImports": "error",
+				"noChildrenProp": "off"
 			},
 			"performance": {
 				"noAccumulatingSpread": "off"

@@ -6,6 +6,7 @@ import { Maybe } from 'purify-ts'
 import { T as _ } from 'ramda'
 import { type ReactNode, Suspense } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
+import { SWRConfig } from 'swr'
 import {} from '../../ui/alert'
 import { ListPreview } from './list-preview'
 import { NoSupport } from './no-support'
@@ -27,8 +28,17 @@ export const PreviewPanel = () => {
 			className="flex flex-1 min-h-svh p-2 w-full"
 			key={JSON.stringify($activeListItems.value)}
 		>
-			<ErrorBoundary fallback={<SelectInfo />}>
-				<Suspense fallback={<PreviewLoader />}>{Panel}</Suspense>
+			<ErrorBoundary fallback={<SelectInfo />} onError={console.error}>
+				<SWRConfig
+					value={{
+						suspense: true,
+						onError: (err, key) => {
+							throw err
+						}
+					}}
+				>
+					<Suspense fallback={<PreviewLoader />}>{Panel}</Suspense>
+				</SWRConfig>
 			</ErrorBoundary>
 		</div>
 	)
