@@ -1,5 +1,6 @@
 import { NodeType } from '@/gql/graphql'
 import { $focusedNode, type TreeNode, asNode } from '@/state/tree'
+import { $activeListItems } from '@/state/value'
 import { caseOf, match } from '@shared/utils/match'
 import { Maybe } from 'purify-ts'
 import { T as _ } from 'ramda'
@@ -21,9 +22,11 @@ export const PreviewPanel = () => {
 		.map(asNode)
 		.map(toPreviewPanel)
 		.extract()
-
 	return (
-		<div className="flex flex-1 min-h-svh p-2 w-full">
+		<div
+			className="flex flex-1 min-h-svh p-2 w-full"
+			key={JSON.stringify($activeListItems.value)}
+		>
 			<ErrorBoundary fallback={<SelectInfo />}>
 				<Suspense fallback={<PreviewLoader />}>{Panel}</Suspense>
 			</ErrorBoundary>

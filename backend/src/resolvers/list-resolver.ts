@@ -74,8 +74,6 @@ export class ListResolver {
 		@Ctx() ctx: Context
 	): Promise<ListItem[]> {
 		const { user } = ctx
-		console.log('getListItems', request)
-
 		const result = await this.db
 			.selectFrom('values as v')
 			.leftJoin('values as v2', j =>
