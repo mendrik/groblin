@@ -38,13 +38,23 @@ import { $user } from './user'
 
 /** ---- types ---- **/
 export type TreeNode = TreeOf<Node, 'nodes'>
+
 type NodeState = {
 	open: boolean
 	selected: boolean
 }
 
+type NodeId = number
+
 /** ---- state ---- **/
 export const $nodes = signal<Node[]>([])
+export const $nodesMap = computed<Record<NodeId, TreeNode>>(() => {
+	const res = {} as Record<NodeId, TreeNode>
+	for (const node of iterateNodes($root.value)) {
+		res[node.id] = node
+	}
+	return res
+})
 export const $root = computeSignal(
 	$nodes,
 	listToTree('id', 'parent_id', 'nodes')
@@ -133,8 +143,7 @@ export const waitForNode = (id: number) =>
 	waitForId(`node-${id}`).then(() => id)
 
 export const asNode = (nodeId: number): TreeNode => {
-	assertExists($root.value, 'Root node is missing')
-	const res = [...iterateNodes($root.value)].find(node => node.id === nodeId)
+	const res = notNil($nodesMap, nodeId)
 	assertExists(res, `Node with id ${nodeId} not found`)
 	return res
 }

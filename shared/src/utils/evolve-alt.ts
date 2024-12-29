@@ -10,18 +10,18 @@ type OptionalKeys<T> = {
 }[keyof T]
 
 // EvolveResult type
-type EvolveResult<O, T> = Omit<O, keyof T> & {
-	[K in keyof T]: K extends keyof O
+type EvolveResult<O, SPEC> = Omit<O, keyof SPEC> & {
+	[K in keyof SPEC]: K extends keyof O
 		? K extends RequiredKeys<O>
-			? T[K] extends (value: O[K]) => infer R
+			? SPEC[K] extends (value: O[K]) => infer R
 				? R
 				: never
 			: K extends OptionalKeys<O>
-				? T[K] extends (object: O) => infer R
+				? SPEC[K] extends (object: O) => infer R
 					? R
 					: never
 				: never
-		: T[K] extends (object: O) => infer R
+		: SPEC[K] extends (object: O) => infer R
 			? R
 			: never
 }
