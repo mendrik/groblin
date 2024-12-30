@@ -60,24 +60,24 @@ const newNodeSchema = () =>
 export type NewNodeSchema = TypeOf<ReturnType<typeof newNodeSchema>>
 
 const position = match<[NodeCreatePosition], string>(
-	caseOf(['root-child'], 'as a root child'),
-	caseOf(['child'], 'as a child'),
-	caseOf(['sibling-above'], 'as a sibling above'),
-	caseOf(['sibling-below'], 'as a sibling below')
+	caseOf(['root-child'] as const, 'as a root child'),
+	caseOf(['child'] as const, 'as a child'),
+	caseOf(['sibling-above'] as const, 'as a sibling above'),
+	caseOf(['sibling-below'] as const, 'as a sibling below')
 )
 
 const parent = match<[NodeCreatePosition], number>(
-	caseOf(['root-child'], () => notNil($root).id),
-	caseOf(['child'], () => notNil($node).id),
-	caseOf(['sibling-above'], () => parentOf(notNil($node).id)),
-	caseOf(['sibling-below'], () => parentOf(notNil($node).id))
+	caseOf(['root-child'] as const, () => notNil($root).id),
+	caseOf(['child'] as const, () => notNil($node).id),
+	caseOf(['sibling-above'] as const, () => parentOf(notNil($node).id)),
+	caseOf(['sibling-below'] as const, () => parentOf(notNil($node).id))
 )
 
 const order = match<[NodeCreatePosition], number>(
-	caseOf(['root-child'], () => 0),
-	caseOf(['child'], () => notNil($node).nodes.length),
-	caseOf(['sibling-above'], () => notNil($node).order),
-	caseOf(['sibling-below'], () => notNil($node).order + 1)
+	caseOf(['root-child'] as const, () => 0),
+	caseOf(['child'] as const, () => notNil($node).nodes.length),
+	caseOf(['sibling-above'] as const, () => notNil($node).order),
+	caseOf(['sibling-below'] as const, () => notNil($node).order + 1)
 )
 
 const createNodeCommand: (data: NewNodeSchema) => Promise<number> = pipeAsync(

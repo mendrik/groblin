@@ -47,7 +47,7 @@ export const mergeProps = <
 		)
 	}
 	return pipe(
-		map(evolveAlt(spec)),
+		map(evolveAlt<any, any>(spec)),
 		map(omit(keys)) as AnyFn,
 		groupBy(propOr('', groupByProp as string)),
 		map(reduce(reducer, {})),

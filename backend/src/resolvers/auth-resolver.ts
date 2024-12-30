@@ -100,13 +100,12 @@ export class Login {
 const hashPassword = (password: string): Promise<string> =>
 	crypt(password, 'salt', 64)
 
-const regToUser = pipe(
-	evolveAlt({
-		password: hashPassword,
-		confirmed: F
-	}),
-	resolveObj
-)
+const spec = {
+	password: hashPassword,
+	confirmed: F
+}
+
+const regToUser = pipe(evolveAlt<Registration, typeof spec>(spec), resolveObj)
 
 @injectable()
 @UseMiddleware(LogAccess)
