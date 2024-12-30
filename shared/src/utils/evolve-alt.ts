@@ -8,61 +8,32 @@ import {
 } from 'ramda-adjunct'
 import { caseOf, match } from './match'
 
-export type TransformFn<Prop, Source> =
-	| ((prop: Prop) => any)
-	| ((source: Source) => any)
-
-export type SpecOrFn<Prop, Source extends object> = Prop extends (infer Item)[]
-	? Item extends object
-		? Spec<Item> | TransformFn<Prop, Source>
-		: TransformFn<Prop, Source>
-	: Prop extends object
-		? Spec<Prop> | TransformFn<Prop, Source>
-		: TransformFn<Prop, Source>
-
-export type Spec<T extends object> = {
-	[K: string]: any
-}
-
-type ResultOfSpecOrFn<Sp, Prop, S extends object> = Sp extends (
-	...args: any[]
-) => any
-	? Sp extends (p: Prop) => infer R1
-		? R1
-		: Sp extends (source: S) => infer R2
-			? R2
-			: never
-	: Sp extends Spec<any>
-		? Prop extends Array<infer Item>
+export type EvolveResult<Source, Spec> = Omit<Source, keyof Spec> & {
+	[K in keyof Spec]: K extends keyof Source
+		? Source[K] extends Array<infer Item>
 			? Item extends object
-				? Sp extends Spec<Item>
-					? Array<EvolveResult<Item, Sp>>
+				? Array<EvolveResult<Item, Spec[K]>>
+				: Spec[K] extends (source: any) => infer R
+					? R
 					: never
-				: never
-			: Prop extends object
-				? Sp extends Spec<Prop>
-					? EvolveResult<Prop, Sp>
+			: Spec[K] extends (source: any) => infer R
+				? R
+				: Spec[K] extends object
+					? EvolveResult<Source[K], Spec[K]>
 					: never
-				: never
-		: never
-
-export type EvolveResult<S extends object, Sp extends Spec<S>> = Omit<
-	S,
-	keyof Sp
-> & {
-	[K in keyof Sp]: K extends keyof S
-		? ResultOfSpecOrFn<Sp[K], S[K], S>
-		: Sp[K] extends (source: S) => infer R
+		: Spec[K] extends (source: any) => infer R
 			? R
-			: never
+			: Spec[K] extends object
+				? EvolveResult<Source, Spec[K]>
+				: never
 }
 
-export function evolveAlt<O extends object, Sp extends Spec<O>>(
+export function evolveAlt<O extends object, Sp extends object>(
 	specs: Sp,
 	source: O
 ): EvolveResult<O, Sp>
 
-export function evolveAlt<O extends object, Sp extends Spec<O>>(
+export function evolveAlt<O extends object, Sp extends object>(
 	specs: Sp
 ): <R extends EvolveResult<O, Sp>>(source: O) => R
 

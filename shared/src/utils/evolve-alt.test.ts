@@ -1,4 +1,4 @@
-import { always, inc, isNil, pipe, prop, when } from 'ramda'
+import { always, inc, isNil, map, pipe, prop, when } from 'ramda'
 import { expectType } from 'tsd'
 // Import the necessary functions from Vitest
 import { describe, expect, it } from 'vitest'
@@ -140,7 +140,7 @@ describe('evolveAlt', () => {
 	it('should handle arrays as properties', () => {
 		const obj = { arr: [1, 2, 3] }
 		const transformations = {
-			arr: (a: number[]) => a.map(x => `${x * 2}`)
+			arr: map((x: number) => `${x * 2}`)
 		}
 		const result = evolveAlt(transformations, obj)
 		expectType<string[]>(result.arr)
