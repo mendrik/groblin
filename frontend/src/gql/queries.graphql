@@ -143,9 +143,7 @@ query GetListItems($request: ListRequest!) {
     value
     order
     children {
-      id
-      node_id
-      value
+      ...Value
     }
   }
 }

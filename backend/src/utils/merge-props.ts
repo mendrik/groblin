@@ -20,7 +20,7 @@ type MergePropsReturnType<
 	MP extends string
 > = Omit<T, keyof R> & {
 	[P in MP]: Array<{
-		[RP in keyof R as R[RP]]: RP extends keyof T ? T[RP] : never
+		[RP in keyof R as R[RP]]: RP extends keyof T ? Exclude<T[RP], null> : never
 	}>
 }
 

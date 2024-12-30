@@ -81,3 +81,7 @@ flex
   background-image: linear-gradient(to bottom, transparent 27px, hsl(var(--border) / 80%) 28px);
   background-size: 100% 28px; /* Repeat every 28 pixels */
 }
+
+.container-size {
+  container-type: inline-size;
+}

@@ -21,6 +21,7 @@ import {
 	Resolver,
 	UseMiddleware
 } from 'type-graphql'
+import { Value } from './value-resolver.ts'
 
 @InputType()
 export class ListRequest {
@@ -29,18 +30,6 @@ export class ListRequest {
 
 	@Field(type => [Int], { nullable: true })
 	list_path: number[] | null
-}
-
-@ObjectType()
-export class ChildValue {
-	@Field(type => Int)
-	id: number | null
-
-	@Field(type => Int)
-	node_id: number | null
-
-	@Field(type => GraphQLJSONObject)
-	value: JsonValue
 }
 
 @ObjectType()
@@ -54,14 +43,16 @@ export class ListItem {
 	@Field(type => Int)
 	order: number
 
-	@Field(type => [ChildValue])
-	children: ChildValue[]
+	@Field(type => [Value])
+	children: Value[]
 }
 
 const renameMap = {
-	child_value: 'value',
+	child_id: 'id',
 	child_node_id: 'node_id',
-	child_id: 'id'
+	child_value: 'value',
+	child_order: 'order',
+	child_list_path: 'list_path'
 } as const
 
 @injectable()
@@ -80,10 +71,9 @@ export class ListResolver {
 		@Arg('request', () => ListRequest) request: ListRequest,
 		@Ctx() ctx: Context
 	): Promise<ListItem[]> {
-		const { user } = ctx
 		const result = await this.db
 			.selectFrom('values as v')
-			.leftJoin('values as v2', j =>
+			.innerJoin('values as v2', j =>
 				j.on(sql`v2.list_path = array_append(v.list_path, v.id)`)
 			)
 			.leftJoin('node as n', 'v2.node_id', 'n.id')
@@ -100,7 +90,9 @@ export class ListResolver {
 				'v.order',
 				'v2.id as child_id',
 				'v2.value as child_value',
-				'v2.node_id as child_node_id'
+				'v2.node_id as child_node_id',
+				'v2.list_path as child_list_path',
+				'v2.order as child_order'
 			])
 			.execute()
 		return mergeProps('id', renameMap, 'children', result)

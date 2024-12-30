@@ -40,7 +40,10 @@ export function App() {
 						</div>
 					</ResizablePanel>
 					<ResizableHandle />
-					<ResizablePanel defaultSize={$panelSizes.value[2]}>
+					<ResizablePanel
+						defaultSize={$panelSizes.value[2]}
+						className="container-size"
+					>
 						<ErrorBoundary fallback={<div>Preview panel has crashed</div>}>
 							<PreviewPanel />
 						</ErrorBoundary>

@@ -27,12 +27,6 @@ export type ChangeNodeInput = {
   type?: InputMaybe<NodeType>;
 };
 
-export type ChildValue = {
-  id: Scalars['Int']['output'];
-  node_id: Scalars['Int']['output'];
-  value: Scalars['JSONObject']['output'];
-};
-
 export type GetValues = {
   ids: Array<Scalars['Int']['input']>;
 };
@@ -59,7 +53,7 @@ export type JsonArrayImportInput = {
 };
 
 export type ListItem = {
-  children: Array<ChildValue>;
+  children: Array<Value>;
   id: Scalars['Int']['output'];
   order: Scalars['Int']['output'];
   value: Scalars['JSONObject']['output'];
@@ -431,7 +425,7 @@ export type GetListItemsQueryVariables = Exact<{
 }>;
 
 
-export type GetListItemsQuery = { getListItems: Array<{ id: number, value: any, order: number, children: Array<{ id: number, node_id: number, value: any }> }> };
+export type GetListItemsQuery = { getListItems: Array<{ id: number, value: any, order: number, children: Array<{ id: number, node_id: number, order: number, value: any, list_path?: Array<number> | null }> }> };
 
 export const ValueFragmentDoc = `
     fragment Value on Value {
@@ -603,13 +597,11 @@ export const GetListItemsDocument = `
     value
     order
     children {
-      id
-      node_id
-      value
+      ...Value
     }
   }
 }
-    `;
+    ${ValueFragmentDoc}`;
 export type Requester<C = {}, E = unknown> = <R, V>(doc: string, vars?: V, options?: C) => Promise<ExecutionResult<R, E>> | AsyncIterable<ExecutionResult<R, E>>
 export function getSdk<C, E>(requester: Requester<C, E>) {
   return {

@@ -31,7 +31,7 @@ export const ColorEditor = ({ node, value }: OwnProps) => {
 					variant="ghost"
 					type="button"
 					className={cn(
-						'h-4 w-4 p-0 rounded-sm ml-1',
+						'h-4 w-4 p-0 rounded-sm',
 						!value && 'border border-border'
 					)}
 					style={{ backgroundColor }}

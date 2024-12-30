@@ -35,7 +35,7 @@ export const NumberEditor = ({ node, value }: OwnProps) => {
 				}
 				defaultValue={value?.value.figure}
 				lazy={false}
-				className="h-7 w-full bg-transparent border-none appearance-none outline-none ring-0 ml-1"
+				className="h-7 w-full bg-transparent border-none appearance-none outline-none ring-0"
 				onAccept={pipe(Number.parseFloat, saveNewValue)}
 				blocks={{
 					num: {

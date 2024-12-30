@@ -24,17 +24,26 @@ type OwnProps = {
 const node = ({ node_id }: Value) => notNil($nodesMap, node_id)
 
 export const ListPreview = ({ node: currentNode }: OwnProps) => {
-	const data = useLoadItems(currentNode).map(evolveAlt({ children: { node } }))
+	const data = useLoadItems(currentNode).map(
+		evolveAlt({
+			children: { node }
+		})
+	)
+
+	console.log(data)
+
 	return (
-		<ol className="w-full divide-y divide-gray-200">
+		<ol className="w-full table">
 			{data.map(({ id, children }) => (
 				<li key={id} className="item">
-					{children.map(({ node, value, id }) => (
-						<div key={id} className="item">
-							<div>{node.name}</div>
-							<ValueEditor node={node} value={[value]} />
-						</div>
-					))}
+					{children.map(({ node, value, id }) => {
+						return (
+							<div key={id} className="key-value">
+								<div>{node.name}</div>
+								<ValueEditor node={node} value={[value]} />
+							</div>
+						)
+					})}
 				</li>
 			))}
 		</ol>
