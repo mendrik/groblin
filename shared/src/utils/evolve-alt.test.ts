@@ -1,4 +1,5 @@
-import { always, inc, isNil, multiply, pipe, prop, when } from 'ramda'
+import { always, inc, isNil, pipe, prop, when } from 'ramda'
+import { expectType } from 'tsd'
 // Import the necessary functions from Vitest
 import { describe, expect, it } from 'vitest'
 import { evolveAlt } from './evolve-alt' // Adjust the import path accordingly
@@ -9,18 +10,20 @@ describe('evolveAlt', () => {
 		const obj = { a: 2, b: 3 }
 		const transformations = {
 			a: (x: number) => x * 2,
-			b: (x: number) => x + 1
+			b: (x: number) => x + 1,
+			c: (o: typeof obj) => o.a + o.b
 		}
 		const result = evolveAlt(transformations, obj)
-		result.a // type is numnber
-		result.b // type is numnber
+		expectType<number>(result.a)
+		expectType<number>(result.b)
 		expect(result).toEqual({ a: 4, b: 4 })
 	})
 
 	it('should add new properties using the entire object', () => {
 		const obj = { x: 1, y: 2 }
 		const transformations = {
-			z: (o: typeof obj) => o.x + o.y
+			z: (o: typeof obj) => o.x + o.y,
+			x: inc(1)
 		}
 		const result = evolveAlt(transformations, obj)
 		expect(result).toEqual({ x: 1, y: 2, z: 3 })
@@ -59,6 +62,7 @@ describe('evolveAlt', () => {
 			nested: (n: { value: number }) => ({ value: n.value * 3 })
 		}
 		const result = evolveAlt(transformations, obj)
+		expectType<number>(result.nested.value)
 		expect(result).toEqual({ nested: { value: 6 } })
 	})
 
@@ -75,6 +79,7 @@ describe('evolveAlt', () => {
 			a: (x: number) => x + 10
 		}
 		const result = evolveAlt(transformations, obj)
+		expectType<number>(result.a)
 		expect(result).toEqual({ a: 11, b: 2, c: 3 })
 	})
 
@@ -85,6 +90,8 @@ describe('evolveAlt', () => {
 			b: (s: string) => s.length
 		}
 		const result = evolveAlt(transformations, obj)
+		expectType<string>(result.a)
+		expectType<number>(result.b)
 		expect(result).toEqual({ a: '1', b: 4 })
 	})
 
@@ -105,23 +112,9 @@ describe('evolveAlt', () => {
 			newProp: (o: typeof obj) => o.str + o.num
 		}
 		const result = evolveAlt(transformations, obj)
-
-		// TypeScript should infer the result type as:
-		// {
-		//   num: string;
-		//   str: number;
-		//   newProp: string;
-		// }
-
-		type ExpectedType = {
-			num: string
-			str: number
-			newProp: string
-		}
-		type ActualType = typeof result
-
-		// Ensure the types match
-		const typeTest: ExpectedType = result
+		expectType<string>(result.num)
+		expectType<number>(result.str)
+		expectType<string>(result.newProp)
 		expect(result).toEqual({ num: '10', str: 5, newProp: 'hello10' })
 	})
 
@@ -147,18 +140,20 @@ describe('evolveAlt', () => {
 	it('should handle arrays as properties', () => {
 		const obj = { arr: [1, 2, 3] }
 		const transformations = {
-			arr: (a: number[]) => a.map(x => x * 2)
+			arr: (a: number[]) => a.map(x => `${x * 2}`)
 		}
 		const result = evolveAlt(transformations, obj)
-		expect(result).toEqual({ arr: [2, 4, 6] })
+		expectType<string[]>(result.arr)
+		expect(result).toEqual({ arr: ['2', '4', '6'] })
 	})
 
 	it('should handle arrays as auto-map', () => {
 		const obj = { arr: [{ a: 1 }, { a: 2 }, { a: 3 }] }
 		const transformations = {
-			arr: { a: multiply(2) }
+			arr: { a: (a: number) => `${a * 2}` }
 		}
-		const result = evolveAlt(transformations as any, obj)
+		const result = evolveAlt(transformations, obj)
+		expectType<string>(result.arr[0].a)
 		expect(result).toEqual({ arr: [{ a: 2 }, { a: 4 }, { a: 6 }] })
 	})
 
@@ -179,6 +174,10 @@ describe('evolveAlt', () => {
 			c: pipe(prop('a'), inc)
 		}
 		const result = evolveAlt(transformations, obj)
+		expectType<number>(result.a)
+		expectType<number>(result.b)
+		expectType<number>(result.c)
+		expectType<number>(result.d)
 		expect(result).toEqual({ a: 3, b: 3, c: 3, d: 0 })
 	})
 
