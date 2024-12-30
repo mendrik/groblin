@@ -7,25 +7,29 @@ import {
 	isPrimitive,
 	isString
 } from 'ramda-adjunct'
+import { expectNotType, expectType } from 'tsd'
 import { describe, expect, it } from 'vitest'
-import { ZodNativeEnum, type ZodTypeAny, nativeEnum } from 'zod'
+import { type EnumLike, ZodNativeEnum, type ZodTypeAny, nativeEnum } from 'zod'
 import { caseOf, match } from './match'
 
 describe('pattern', () => {
 	it('should match the correct case', () => {
 		const matcher = match<[string | number | boolean, number], string>(
-			caseOf(
-				[isString, equals(42)],
-				(r1, r2) => `string: ${r1}, number: ${r2}`
-			),
-			caseOf(
-				[isNumber, equals(10)],
-				(r3, r4) => `number: ${r3}, number: ${r4}`
-			),
-			caseOf(
-				[() => true, gt(20)],
-				(r5, r6) => `string | number | boolean: ${r5}, number: ${r6}`
-			)
+			caseOf([isString, equals(42)], (r1, r2) => {
+				expectType<string>(r1)
+				expectType<number>(r2)
+				return `string: ${r1}, number: ${r2}`
+			}),
+			caseOf([isNumber, equals(10)], (r3, r4) => {
+				expectType<number>(r3)
+				expectType<number>(r4)
+				return `number: ${r3}, number: ${r4}`
+			}),
+			caseOf([() => true, gt(20)], (r5, r6) => {
+				expectType<string | number | boolean>(r5)
+				expectType<number>(r6)
+				return `string | number | boolean: ${r5}, number: ${r6}`
+			})
 		)
 
 		expect(matcher('hello', 42)).toBe('string: hello, number: 42')
@@ -40,7 +44,10 @@ describe('pattern', () => {
 		}
 
 		const matcher = match<[ZodTypeAny], string>(
-			caseOf([is(ZodNativeEnum)], r1 => `enum: ${values(r1.enum)}`)
+			caseOf([is(ZodNativeEnum)], r1 => {
+				expectType<ZodNativeEnum<EnumLike>>(r1)
+				return `enum: ${values(r1.enum)}`
+			})
 		)
 		expect(matcher(nativeEnum(Test))).toBe('enum: a,b')
 	})
@@ -94,7 +101,7 @@ describe('pattern', () => {
 
 	it('should match array matchers', () => {
 		const matcher = match<[[number, number | string]], string>(
-			caseOf([[isOdd, isString]], ([a, b]) => `match`), // { a: number, b: string }
+			caseOf([[isOdd, isString]], ([a, b]) => `match`),
 			caseOf([_], () => `no match`)
 		)
 
@@ -104,7 +111,7 @@ describe('pattern', () => {
 
 	it('should match objects matchers', () => {
 		const matcher = match<[{ a: number | string }], string>(
-			caseOf([{ a: isString }], ({ a }) => `match`), // { a: string }
+			caseOf([{ a: isString }], ({ a }) => `match`),
 			caseOf([_], () => `no match`)
 		)
 
@@ -114,10 +121,19 @@ describe('pattern', () => {
 
 	it('should narrow types', () => {
 		class Animal {}
-		class Cat extends Animal {}
+		class Cat extends Animal {
+			meow: () => void
+		}
+		class Dog extends Animal {
+			bark: () => void
+		}
 
 		const matcher = match<[Animal], string>(
-			caseOf([is(Cat)], cat => `match`), // cat: Cat
+			caseOf([is(Cat)], cat => {
+				expectType<Cat>(cat)
+				expectNotType<Dog>(cat)
+				return `match`
+			}),
 			caseOf([_], () => `no match`)
 		)
 
@@ -126,11 +142,7 @@ describe('pattern', () => {
 	})
 
 	it('can return static values', () => {
-		const matcher = match<[number], string>(
-			caseOf([2], '2'), // cat: Cat
-			caseOf([3], '3')
-		)
-
+		const matcher = match<[number], string>(caseOf([2], '2'), caseOf([3], '3'))
 		expect(matcher(2)).toBe('2')
 		expect(matcher(3)).toBe('3')
 	})

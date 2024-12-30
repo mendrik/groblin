@@ -1,4 +1,4 @@
-import { always, inc, isNil, pipe, prop, when } from 'ramda'
+import { always, inc, isNil, multiply, pipe, prop, when } from 'ramda'
 // Import the necessary functions from Vitest
 import { describe, expect, it } from 'vitest'
 import { evolveAlt } from './evolve-alt' // Adjust the import path accordingly
@@ -12,8 +12,8 @@ describe('evolveAlt', () => {
 			b: (x: number) => x + 1
 		}
 		const result = evolveAlt(transformations, obj)
-		result.a // $ExpectType number
-		result.b // $ExpectType number
+		result.a // type is numnber
+		result.b // type is numnber
 		expect(result).toEqual({ a: 4, b: 4 })
 	})
 
@@ -153,6 +153,15 @@ describe('evolveAlt', () => {
 		expect(result).toEqual({ arr: [2, 4, 6] })
 	})
 
+	it('should handle arrays as auto-map', () => {
+		const obj = { arr: [{ a: 1 }, { a: 2 }, { a: 3 }] }
+		const transformations = {
+			arr: { a: multiply(2) }
+		}
+		const result = evolveAlt(transformations as any, obj)
+		expect(result).toEqual({ arr: [{ a: 2 }, { a: 4 }, { a: 6 }] })
+	})
+
 	it('should handle complex nested transformations', () => {
 		const obj = { a: { b: { c: 1 } } }
 		const transformations = {
@@ -184,7 +193,6 @@ describe('evolveAlt', () => {
 		const loggedInUser = pipe(evolver, resolveObj)
 		const user = { name: 'test', last_project_id: null }
 		const res = await loggedInUser(user)
-		type T = typeof res
 		expect(res).toEqual({
 			name: 'test',
 			lastProjectId: 1,
