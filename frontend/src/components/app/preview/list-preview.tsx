@@ -1,12 +1,14 @@
-import { $nodesMap, type TreeNode } from '@/state/tree'
-import { activePath } from '@/state/value'
-import useSWR from 'swr'
-import './list-preview.css'
 import { ValueEditor } from '@/components/ui/values/value-editor'
 import { Api } from '@/gql-client'
 import type { Value } from '@/gql/graphql'
 import { notNil } from '@/lib/signals'
+import { cn } from '@/lib/utils'
+import { $nodesMap, type TreeNode } from '@/state/tree'
+import { activePath } from '@/state/value'
 import { evolveAlt } from '@shared/utils/evolve-alt'
+import useSWR from 'swr'
+
+import './list-preview.css'
 
 const useLoadItems = (node: TreeNode) => {
 	const request = {
@@ -38,8 +40,8 @@ export const ListPreview = ({ node: currentNode }: OwnProps) => {
 				<li key={id} className="item">
 					{children.map(({ node, value, id }) => {
 						return (
-							<div key={id} className="key-value">
-								<div>{node.name}</div>
+							<div key={id} className={cn('key-value', node.type)}>
+								<div className="label">{node.name}</div>
 								<ValueEditor node={node} value={[value]} />
 							</div>
 						)

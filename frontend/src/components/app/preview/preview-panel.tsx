@@ -25,7 +25,7 @@ export const PreviewPanel = () => {
 		.extract()
 	return (
 		<div
-			className="flex flex-1 min-h-svh p-2 w-full"
+			className="flex flex-1 min-h-svh w-full"
 			key={JSON.stringify($activeListItems.value)}
 		>
 			<ErrorBoundary fallback={<SelectInfo />} onError={console.error}>
