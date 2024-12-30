@@ -1,4 +1,12 @@
-import { isFunction, isObject } from 'ramda-adjunct'
+import { T, assoc, map } from 'ramda'
+import {
+	isArray,
+	isFunction,
+	isNotUndefined,
+	isPlainObj,
+	isUndefined
+} from 'ramda-adjunct'
+import { caseOf, match } from './match'
 
 // Utility types
 type RequiredKeys<T> = {
@@ -49,21 +57,21 @@ export function evolveAlt<
 >(transformations: T): <O2 extends O>(object: O2) => EvolveResult<O2, T>
 
 // Function implementation
-export function evolveAlt(transformations: any, object?: any): any {
-	if (object === undefined) {
-		return (obj: any) => evolveAlt(transformations, obj)
+export function evolveAlt(specs: any, source?: any): any {
+	if (source === undefined) {
+		return (obj: any) => evolveAlt(specs, obj)
 	} else {
-		const result: any = isObject(object) ? { ...object } : {}
-		for (const key in transformations) {
-			const transformFn = transformations[key]
-			if (Object.prototype.hasOwnProperty.call(object, key)) {
-				result[key] = transformFn(object[key])
-			} else if (isFunction(transformFn)) {
-				result[key] = transformFn(object)
-			} else {
-				result[key] = transformations[key]
-			}
-		}
-		return result
+		const fork = match<[any, any], any>(
+			caseOf([isArray, isPlainObj], (prop, spec) => map(evolveAlt(spec), prop)),
+			caseOf([isPlainObj, isPlainObj], (obj, spec) => evolveAlt(spec, obj)),
+			caseOf([isNotUndefined, isFunction], (prop, fn) => fn(prop)),
+			caseOf([isUndefined, isFunction], (_, fn) => fn(source)),
+			caseOf([T, T], (prop, _) => prop)
+		)
+		return Object.entries(specs).reduce(
+			(acc: any, [key, spec]: [string, any]) =>
+				assoc(key, fork(acc[key], spec), acc),
+			source ?? {}
+		)
 	}
 }
