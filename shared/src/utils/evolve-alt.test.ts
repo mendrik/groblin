@@ -16,7 +16,7 @@ describe('evolveAlt', () => {
 		const result = evolveAlt(transformations, obj)
 		expectType<number>(result.a)
 		expectType<number>(result.b)
-		expect(result).toEqual({ a: 4, b: 4 })
+		expect(result).toEqual({ a: 4, b: 4, c: 5 })
 	})
 
 	it('should add new properties using the entire object', () => {
@@ -154,7 +154,7 @@ describe('evolveAlt', () => {
 		}
 		const result = evolveAlt(transformations, obj)
 		expectType<string>(result.arr[0].a)
-		expect(result).toEqual({ arr: [{ a: 2 }, { a: 4 }, { a: 6 }] })
+		expect(result).toEqual({ arr: [{ a: '2' }, { a: '4' }, { a: '6' }] })
 	})
 
 	it('should handle complex nested transformations', () => {

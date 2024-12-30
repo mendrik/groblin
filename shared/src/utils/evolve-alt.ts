@@ -24,9 +24,6 @@ export type Spec<T extends object> = {
 	[K: string]: any
 }
 
-// --------------------------------------------------
-// 1) NARROW the Spec with "Sp extends Spec<Prop>"
-// --------------------------------------------------
 type ResultOfSpecOrFn<Sp, Prop, S extends object> = Sp extends (
 	...args: any[]
 ) => any

@@ -1,4 +1,3 @@
-jhilimport { Api } from '@/gql-client'
 import { $nodesMap, type TreeNode } from '@/state/tree'
 import { activePath } from '@/state/value'
 import useSWR from 'swr'
@@ -22,31 +21,23 @@ type OwnProps = {
 	node: TreeNode
 }
 
-
-/**
- * 
- * 
- */
-
-
 export const ListPreview = ({ node }: OwnProps) => {
 	const data = useLoadItems(node).map(
 		evolveAlt({
 			children: {
-						node: ({ node_id }: Value) => notNil($nodesMap, node_id),
-						settings: ({ node_id }: Value) => $nodeSettings.value[node_id]
-					}
+				node: ({ node_id }: Value) => notNil($nodesMap, node_id),
+				settings: ({ node_id }: Value) => $nodeSettings.value[node_id]
+			}
 		})
 	)
-
 
 	return (
 		<ol>
 			{data.map(({ id, children }) => (
 				<li key={id} className="item">
 					{children.map(({ node_id, node, settings, value }) => (
-						<div key={node.} className="item">
-							{node.value}
+						<div key={node_id} className="item">
+							{node_id} - {value}
 						</div>
 					))}
 				</li>
