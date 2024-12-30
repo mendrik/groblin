@@ -37,7 +37,7 @@ export const ListPreview = ({ node }: OwnProps) => {
 				<li key={id} className="item">
 					{children.map(({ node_id, node, settings, value }) => (
 						<div key={node_id} className="item">
-							{node_id} - {value}
+							{node_id}
 						</div>
 					))}
 				</li>
