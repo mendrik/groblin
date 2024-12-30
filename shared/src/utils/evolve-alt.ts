@@ -8,9 +8,7 @@ import {
 } from 'ramda-adjunct'
 import { caseOf, match } from './match'
 
-type Recurse<Source, Spec, Arg = Source> = Spec extends (
-	source: Source
-) => infer R
+type Recurse<Source, Spec> = Spec extends (source: any) => infer R
 	? R
 	: Spec extends object
 		? EvolveResult<Source, Spec>
@@ -21,21 +19,9 @@ export type EvolveResult<Source, Spec> = Omit<Source, keyof Spec> & {
 		? Source[K] extends Array<infer Item>
 			? Item extends object
 				? Array<EvolveResult<Item, Spec[K]>>
-				: Spec[K] extends (source: Source[K]) => infer R
-					? R
-					: Spec[K] extends object
-						? EvolveResult<Source[K], Spec[K]>
-						: never
-			: Spec[K] extends (source: Source[K]) => infer R
-				? R
-				: Spec[K] extends object
-					? EvolveResult<Source[K], Spec[K]>
-					: never
-		: Spec[K] extends (source: Source) => infer R
-			? R
-			: Spec[K] extends object
-				? EvolveResult<Source, Spec[K]>
-				: never
+				: Recurse<Source[K], Spec[K]>
+			: Recurse<Source[K], Spec[K]>
+		: Recurse<Source, Spec[K]>
 }
 
 export function evolveAlt<O extends object, Sp extends object>(
