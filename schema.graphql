@@ -12,6 +12,7 @@ input ChangeNodeInput {
 }
 
 type ChildValue {
+  id: Int!
   node_id: Int!
   value: JSONObject!
 }

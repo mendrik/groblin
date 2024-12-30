@@ -2,10 +2,10 @@ import { $nodesMap, type TreeNode } from '@/state/tree'
 import { activePath } from '@/state/value'
 import useSWR from 'swr'
 import './list-preview.css'
+import { ValueEditor } from '@/components/ui/values/value-editor'
 import { Api } from '@/gql-client'
 import type { Value } from '@/gql/graphql'
 import { notNil } from '@/lib/signals'
-import { $nodeSettings } from '@/state/node-settings'
 import { evolveAlt } from '@shared/utils/evolve-alt'
 
 const useLoadItems = (node: TreeNode) => {
@@ -21,23 +21,18 @@ type OwnProps = {
 	node: TreeNode
 }
 
-export const ListPreview = ({ node }: OwnProps) => {
-	const data = useLoadItems(node).map(
-		evolveAlt({
-			children: {
-				node: ({ node_id }: Value) => notNil($nodesMap, node_id),
-				settings: ({ node_id }: Value) => $nodeSettings.value[node_id]
-			}
-		})
-	)
+const node = ({ node_id }: Value) => notNil($nodesMap, node_id)
 
+export const ListPreview = ({ node: currentNode }: OwnProps) => {
+	const data = useLoadItems(currentNode).map(evolveAlt({ children: { node } }))
 	return (
-		<ol>
+		<ol className="w-full divide-y divide-gray-200">
 			{data.map(({ id, children }) => (
 				<li key={id} className="item">
-					{children.map(({ node_id, node, settings, value }) => (
-						<div key={node_id} className="item">
-							{node.name}
+					{children.map(({ node, value, id }) => (
+						<div key={id} className="item">
+							<div>{node.name}</div>
+							<ValueEditor node={node} value={[value]} />
 						</div>
 					))}
 				</li>

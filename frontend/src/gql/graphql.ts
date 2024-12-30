@@ -28,6 +28,7 @@ export type ChangeNodeInput = {
 };
 
 export type ChildValue = {
+  id: Scalars['Int']['output'];
   node_id: Scalars['Int']['output'];
   value: Scalars['JSONObject']['output'];
 };
@@ -430,7 +431,7 @@ export type GetListItemsQueryVariables = Exact<{
 }>;
 
 
-export type GetListItemsQuery = { getListItems: Array<{ id: number, value: any, order: number, children: Array<{ node_id: number, value: any }> }> };
+export type GetListItemsQuery = { getListItems: Array<{ id: number, value: any, order: number, children: Array<{ id: number, node_id: number, value: any }> }> };
 
 export const ValueFragmentDoc = `
     fragment Value on Value {
@@ -602,6 +603,7 @@ export const GetListItemsDocument = `
     value
     order
     children {
+      id
       node_id
       value
     }

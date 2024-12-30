@@ -34,6 +34,9 @@ export class ListRequest {
 @ObjectType()
 export class ChildValue {
 	@Field(type => Int)
+	id: number | null
+
+	@Field(type => Int)
 	node_id: number | null
 
 	@Field(type => GraphQLJSONObject)
@@ -55,7 +58,11 @@ export class ListItem {
 	children: ChildValue[]
 }
 
-const renameMap = { child_value: 'value', child_node_id: 'node_id' } as const
+const renameMap = {
+	child_value: 'value',
+	child_node_id: 'node_id',
+	child_id: 'id'
+} as const
 
 @injectable()
 @UseMiddleware(LogAccess)
@@ -91,6 +98,7 @@ export class ListResolver {
 				'v.id',
 				'v.value',
 				'v.order',
+				'v2.id as child_id',
 				'v2.value as child_value',
 				'v2.node_id as child_node_id'
 			])
