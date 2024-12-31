@@ -38,26 +38,23 @@ export const PreviewPanel = () => {
 		.map(toPreviewPanel)
 		.extract()
 
-	const fetchColumnCount = () => {
+	const { width } = useResize(ref)
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: run on width change
+	useEffect(() => {
 		if (ref.current) {
 			const columns = getComputedStyle(ref.current).getPropertyValue(
 				'--columns'
 			)
 			setColumns(Number.parseInt(columns))
 		}
-	}
-
-	const { width } = useResize(ref)
-
-	// biome-ignore lint/correctness/useExhaustiveDependencies: run on width change
-	useEffect(() => fetchColumnCount(), [width])
+	}, [width])
 
 	return (
 		<div
 			className="flex flex-1 min-h-svh w-full"
 			key={JSON.stringify($activeListItems.value)}
 			ref={ref}
-			onResize={fetchColumnCount}
 		>
 			<CssContext.Provider value={{ columns }}>
 				<ErrorBoundary fallback={<SelectInfo />} onError={console.error}>
