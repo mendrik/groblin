@@ -1,18 +1,4 @@
 .table {
-    --columns: 3;
-    @container (min-width: 800px) {
-        --columns: 4;
-    }
-    @container (min-width: 1000px) {
-        --columns: 5;
-    }
-    @container (min-width: 1200px) {
-        --columns: 6;
-    }
-    @container (min-width: 1400px) {
-        --columns: 7;
-    }
-
     display: grid;
     background: hsl(var(--background));
     font-size: 0.875em;
