@@ -1,38 +1,79 @@
 .table {
+	@container (min-width: 300px) {
+		--columns: 2;
+	}
+	@container (min-width: 450px) {
+		--columns: 3;
+	}
+	@container (min-width: 600px) {
+		--columns: 4;
+	}
+	@container (min-width: 750px) {
+		--columns: 5;
+	}
+	@container (min-width: 900px) {
+		--columns: 6;
+	}
+	@container (min-width: 1050px) {
+		--columns: 7;
+	}
+	@container (min-width: 1200px) {
+		--columns: 8;
+	}
+	@container (min-width: 1350px) {
+		--columns: 9;
+	}
+	@container (min-width: 1500px) {
+		--columns: 10;
+	}
+}
+
+.table {
 	width: 100%;
 	display: grid;
-	background: hsl(var(--background));
 	font-size: 0.875em;
-	gap: 1px;
+	row-gap: 1px;
 	display: grid;
-	grid-column: 1fr;
+	grid-template-columns: repeat(var(--columns, 1), 1fr);
 	grid-auto-rows: auto;
 
 	.item {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		justify-content: stretch;
+		display: grid;
 		height: 28px;
+		column-gap: 1px;
+		grid-column: 1 / -1;
+		grid-template-columns: subgrid;
 		overflow: hidden;
+		width: 100%;
 	}
 
 	.key-value {
-		background-color: hsl(var(--primary-foreground));
 		flex: auto;
 		min-width: min-content;
+		border-right: 1px solid hsl(var(--background));
+
+		.editor,
+		.label {
+			height: 28px;
+		}
+
+		.editor {
+			border-top: 1px solid hsl(var(--background));
+		}
 	}
 
 	.item:not(:first-child) .key-value .label {
 		display: none;
 	}
 
-	.item:first-child .key-value .label {
-		position: sticky;
-		display: flex;
-		align-items: center;
-		padding: 2px 5px;
-		height: 28px;
-		border-bottom: 1px solid hsl(var(--background));
+	.item:first-child {
+		height: 56px;
+		.key-value .label {
+			position: sticky;
+			display: flex;
+			align-items: center;
+			padding: 2px 5px;
+			border-bottom: 1px solid hsl(var(--background));
+		}
 	}
 }

@@ -35,7 +35,9 @@ export const ListPreview = ({ node: currentNode }: OwnProps) => {
 						return (
 							<div key={id} className={cn('key-value', node.type)}>
 								<div className="label">{node.name}</div>
-								<ValueEditor node={node} value={[value]} />
+								<div className="editor">
+									<ValueEditor node={node} value={[value]} />
+								</div>
 							</div>
 						)
 					})}
