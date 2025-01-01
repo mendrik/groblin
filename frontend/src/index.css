@@ -86,18 +86,3 @@ flex
   container-type: inline-size;
 }
 
-.container-size > * {
-  --columns: 3;
-  @container (min-width: 600px) {
-      --columns: 4;
-  }
-  @container (min-width: 750) {
-      --columns: 5;
-  }
-  @container (min-width: 900px) {
-      --columns: 6;
-  }
-  @container (min-width: 950px) {
-      --columns: 7;
-  }
-}

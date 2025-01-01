@@ -23,7 +23,7 @@ export const StringEditor = ({ node, value }: OwnProps) => {
 				key={editorKey(node, value)}
 				className="h-7 w-full bg-transparent border-none appearance-none outline-none ring-0"
 				defaultValue={value?.value?.content ?? undefined}
-				onBlur={saveInput(node, value)}
+				//				onBlur={saveInput(node, value)}
 			/>
 		</KeyListener>
 	)

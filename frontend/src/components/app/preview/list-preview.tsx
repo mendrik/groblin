@@ -9,8 +9,6 @@ import { evolveAlt } from '@shared/utils/evolve-alt'
 import useSWR from 'swr'
 
 import './list-preview.css'
-import { useContext } from 'react'
-import { CssContext } from './preview-panel'
 
 const useLoadItems = (node: TreeNode) => {
 	const request = {
@@ -28,20 +26,12 @@ type OwnProps = {
 const node = ({ node_id }: Value) => notNil($nodesMap, node_id)
 
 export const ListPreview = ({ node: currentNode }: OwnProps) => {
-	const { columns } = useContext(CssContext)
-	const data = useLoadItems(currentNode).map(
-		evolveAlt({
-			children: { node }
-		})
-	)
-
-	console.log(columns)
-
+	const data = useLoadItems(currentNode).map(evolveAlt({ children: { node } }))
 	return (
 		<ol className="w-full table">
 			{data.map(({ id, children }) => (
 				<li key={id} className="item">
-					{children.map(({ node, value, id }) => {
+					{children.slice(0, 10).map(({ node, value, id }) => {
 						return (
 							<div key={id} className={cn('key-value', node.type)}>
 								<div className="label">{node.name}</div>
