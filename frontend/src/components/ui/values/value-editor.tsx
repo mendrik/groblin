@@ -70,7 +70,9 @@ const matcher = match<Args, ReactNode>(
 )
 
 export const editorKey = (node: TreeNode, value?: Value) =>
-	value?.id ?? `${node.id}-${activePath(node)?.join('-')}`
+	value
+		? `${value.id}-${value.updated_at}`
+		: `${node.id}-${activePath(node)?.join('-')}`
 
 export const save = <T extends Value>(node: TreeNode, value?: T) =>
 	pipeAsync(

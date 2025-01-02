@@ -21,6 +21,8 @@ export type JsonPrimitive = boolean | number | string | null;
 
 export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
+export type Timestamp = ColumnType<Date, Date | string, Date | string>;
+
 export interface Node {
   depth: Generated<number | null>;
   id: Generated<number>;
@@ -67,6 +69,7 @@ export interface Values {
   node_id: number;
   order: Generated<number>;
   project_id: number;
+  updated_at: Generated<Timestamp>;
   value: Json | null;
 }
 

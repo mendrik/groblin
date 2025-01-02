@@ -262,7 +262,7 @@ CREATE TABLE public."values" (
     "order" integer DEFAULT 0 NOT NULL,
     list_path integer[],
     external_id text,
-    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 

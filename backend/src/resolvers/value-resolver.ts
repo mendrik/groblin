@@ -40,6 +40,9 @@ export class Value {
 
 	@Field(type => GraphQLJSONObject)
 	value: JsonValue
+
+	@Field(type => Date)
+	updated_at: Date
 }
 
 @InputType()

@@ -182,5 +182,6 @@ type Value {
   list_path: [Int!]
   node_id: Int!
   order: Int!
+  updated_at: DateTimeISO!
   value: JSONObject!
 }

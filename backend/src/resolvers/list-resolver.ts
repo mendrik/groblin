@@ -52,6 +52,7 @@ const renameMap = {
 	child_node_id: 'node_id',
 	child_value: 'value',
 	child_order: 'order',
+	child_updated_at: 'updated_at',
 	child_list_path: 'list_path'
 } as const
 
@@ -91,6 +92,7 @@ export class ListResolver {
 				'v2.id as child_id',
 				'v2.value as child_value',
 				'v2.node_id as child_node_id',
+				'v2.updated_at as child_updated_at',
 				'v2.list_path as child_list_path',
 				'v2.order as child_order'
 			])

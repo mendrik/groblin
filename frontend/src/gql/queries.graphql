@@ -28,6 +28,7 @@ fragment Value on Value {
       order
       value
       list_path
+      updated_at
 }
 
 fragment Node on Node {
