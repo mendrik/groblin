@@ -10,6 +10,7 @@ import useSWR, { useSWRConfig } from 'swr'
 
 import './list-preview.css'
 import { useSignalEffect } from '@preact/signals-react'
+import { compact } from 'ramda-adjunct'
 import { ListItemActions } from './list-item-actions'
 
 type Request = {
@@ -53,9 +54,7 @@ export const ListPreview = ({ node: currentNode }: OwnProps) => {
 					{children.slice(0, 10).map(({ node, ...value }) => (
 						<div key={value.id} className={cn('key-value', node.type)}>
 							<div className="label">{node.name}</div>
-							<div className="editor">
-								<ValueEditor node={node} value={[value]} />
-							</div>
+							<ValueEditor node={node} value={compact([value])} />
 						</div>
 					))}
 				</li>

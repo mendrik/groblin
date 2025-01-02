@@ -64,7 +64,6 @@
 		border-right: .5px solid hsl(var(--background));
 		padding: 0px 5px;
 
-		.editor,
 		.label {
 			height: 28px;
 		}
