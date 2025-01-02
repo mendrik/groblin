@@ -10,9 +10,11 @@ import { updateSignal } from '@/lib/signals'
 import { notNil } from '@/lib/signals'
 import { signal } from '@preact/signals-react'
 import { assertThat } from '@shared/asserts'
+import { toDate } from 'date-fns'
 import {
 	assoc,
 	groupBy,
+	head,
 	isEmpty,
 	isNotNil,
 	keys,
@@ -24,7 +26,8 @@ import {
 	propOr,
 	sortBy,
 	unless,
-	values
+	values,
+	when
 } from 'ramda'
 import { isNilOrEmpty, isNonEmptyArray } from 'ramda-adjunct'
 import { $project } from './project'
@@ -37,12 +40,24 @@ export type ActiveLists = Record<NodeId, Value>
 export const $values = signal<Value[]>([])
 export const $valueMap = signal<Record<NodeId, Value[]>>({})
 export const $activeListItems = signal<ActiveLists>({})
+export const $lastValueUpdate = signal<Date>(new Date())
+
+$lastValueUpdate.subscribe(console.log)
 
 $values.subscribe(
 	pipe(
 		groupBy(propOr(0, 'node_id')),
 		map(sortBy<Value>(propOr(0, 'order'))),
 		setSignal($valueMap)
+	)
+)
+
+$values.subscribe(
+	pipe(
+		pluck('updated_at'),
+		sortBy(toDate),
+		head,
+		when(d => d !== $lastValueUpdate.peek(), setSignal($lastValueUpdate))
 	)
 )
 
