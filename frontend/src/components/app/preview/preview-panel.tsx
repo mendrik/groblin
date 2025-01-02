@@ -26,7 +26,7 @@ export const PreviewPanel = () => {
 
 	return (
 		<div
-			className="flex flex-1 min-h-svh w-full"
+			className="flex flex-1 min-h-svh w-full items-start"
 			key={JSON.stringify($activeListItems.value)}
 		>
 			<ErrorBoundary fallback={<SelectInfo />} onError={console.error}>

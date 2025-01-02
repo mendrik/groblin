@@ -28,19 +28,17 @@ const node = ({ node_id }: Value) => notNil($nodesMap, node_id)
 export const ListPreview = ({ node: currentNode }: OwnProps) => {
 	const data = useLoadItems(currentNode).map(evolveAlt({ children: { node } }))
 	return (
-		<ol className="w-full table">
+		<ol className="w-full table grid-lines">
 			{data.map(({ id, children }) => (
 				<li key={id} className="item">
-					{children.slice(0, 10).map(({ node, value, id }) => {
-						return (
-							<div key={id} className={cn('key-value', node.type)}>
-								<div className="label">{node.name}</div>
-								<div className="editor">
-									<ValueEditor node={node} value={[value]} />
-								</div>
+					{children.slice(0, 10).map(({ node, ...value }) => (
+						<div key={value.id} className={cn('key-value', node.type)}>
+							<div className="label">{node.name}</div>
+							<div className="editor">
+								<ValueEditor node={node} value={[value]} />
 							</div>
-						)
-					})}
+						</div>
+					))}
 				</li>
 			))}
 		</ol>

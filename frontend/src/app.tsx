@@ -44,6 +44,7 @@ export function App() {
 						defaultSize={$panelSizes.value[2]}
 						className="container-size"
 					>
+						<div className="w-full shrink-0 h-10 p-1" />
 						<ErrorBoundary fallback={<div>Preview panel has crashed</div>}>
 							<PreviewPanel />
 						</ErrorBoundary>

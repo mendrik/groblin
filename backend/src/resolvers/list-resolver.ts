@@ -81,7 +81,7 @@ export class ListResolver {
 			.where('v.list_path', '=', sql.val(request.list_path ?? null))
 			.where('v.node_id', '=', request.node_id)
 			.groupBy(['v.id', 'v2.id', 'n.order', 'n.depth'])
-			.orderBy('v2.list_path')
+			.orderBy('v.order')
 			.orderBy('n.order')
 			.orderBy('n.depth')
 			.select([
