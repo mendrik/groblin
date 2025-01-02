@@ -25,8 +25,6 @@ export const ColorEditor = ({ node, value, listPath }: OwnProps) => {
 	const chroma = rgb.apply(null, value?.value.rgba ?? [0, 0, 0, 1])
 	const backgroundColor = chroma.css()
 
-	console.log(listPath)
-
 	return (
 		<KeyListener onArrowLeft={stopPropagation} onArrowRight={stopPropagation}>
 			<div className="flex flex-row gap-2 mt-1">
