@@ -17,6 +17,8 @@ export const saveInput = (node: TreeNode, value?: StringValue) =>
 	pipeAsync(inputValue, objOf('content'), save(node, value))
 
 export const StringEditor = ({ node, value }: OwnProps) => {
+	console.log('StringEditor', value?.value?.content)
+
 	return (
 		<KeyListener onArrowLeft={stopPropagation} onArrowRight={stopPropagation}>
 			<input

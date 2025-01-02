@@ -68,6 +68,22 @@ $$;
 
 ALTER FUNCTION public.set_node_depth() OWNER TO groblin;
 
+--
+-- Name: update_timestamp(); Type: FUNCTION; Schema: public; Owner: groblin
+--
+
+CREATE FUNCTION public.update_timestamp() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  NEW.updated_at = CURRENT_TIMESTAMP;  -- set updated_at to current timestamp
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION public.update_timestamp() OWNER TO groblin;
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -119,7 +135,9 @@ CREATE TABLE public.node_settings (
     id integer NOT NULL,
     node_id integer NOT NULL,
     settings jsonb,
-    project_id integer NOT NULL
+    project_id integer NOT NULL,
+    required boolean DEFAULT false,
+    priority boolean DEFAULT false
 );
 
 
@@ -243,7 +261,8 @@ CREATE TABLE public."values" (
     project_id integer NOT NULL,
     "order" integer DEFAULT 0 NOT NULL,
     list_path integer[],
-    external_id text
+    external_id text,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -480,6 +499,13 @@ CREATE TRIGGER cascade_delete_on_list_path AFTER DELETE ON public."values" FOR E
 --
 
 CREATE TRIGGER set_node_depth_trg BEFORE INSERT ON public.node FOR EACH ROW EXECUTE FUNCTION public.set_node_depth();
+
+
+--
+-- Name: values set_values_updated_at; Type: TRIGGER; Schema: public; Owner: groblin
+--
+
+CREATE TRIGGER set_values_updated_at BEFORE UPDATE ON public."values" FOR EACH ROW EXECUTE FUNCTION public.update_timestamp();
 
 
 --
