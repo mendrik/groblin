@@ -10,6 +10,7 @@ import useSWR, { useSWRConfig } from 'swr'
 
 import './list-preview.css'
 import { useSignalEffect } from '@preact/signals-react'
+import { ListItemActions } from './list-item-actions'
 
 type Request = {
 	node_id: number
@@ -33,7 +34,9 @@ export const ListPreview = ({ node: currentNode }: OwnProps) => {
 		list_path: activePath(currentNode)
 	}
 	const { mutate } = useSWRConfig()
-	const data = useLoadItems(request).map(evolveAlt({ children: { node } }))
+	const data = useLoadItems(request).map(
+		evolveAlt({ node, children: { node } })
+	)
 	useSignalEffect(() => {
 		if ($values.value) {
 			mutate(request)
@@ -42,8 +45,11 @@ export const ListPreview = ({ node: currentNode }: OwnProps) => {
 
 	return (
 		<ol className="w-full table grid-lines">
-			{data.map(({ id, children }) => (
+			{data.map(({ id, value, node, children }) => (
 				<li key={id} className="item">
+					<div className="options">
+						<ListItemActions node={node} id={id} value={value} />
+					</div>
 					{children.slice(0, 10).map(({ node, ...value }) => (
 						<div key={value.id} className={cn('key-value', node.type)}>
 							<div className="label">{node.name}</div>

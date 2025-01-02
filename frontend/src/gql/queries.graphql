@@ -141,6 +141,7 @@ mutation UploadUrl($filename: String!) {
 query GetListItems($request: ListRequest!) {
   getListItems(request: $request) {
     id
+    node_id
     value
     order
     children {

@@ -30,10 +30,14 @@
 
 .table {
 	width: 100%;
+	padding: 0 5px;
 	display: grid;
 	font-size: 0.875em;
 	display: grid;
-	grid-template-columns: repeat(var(--columns, 1), minmax(min-content, 1fr));
+	grid-template-columns: 16px repeat(
+			var(--columns, 1),
+			minmax(min-content, 1fr)
+		);
 	grid-auto-rows: auto;
 	border: .5px solid hsl(var(--background));
 
@@ -45,6 +49,13 @@
 		overflow: hidden;
 		max-height: 28px;
 		width: 100%;
+	}
+
+	.options {
+		display: flex;
+		align-items: flex-end;
+		justify-content: center;
+		padding-bottom: 6px;
 	}
 
 	.key-value {
