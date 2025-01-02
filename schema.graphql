@@ -49,6 +49,7 @@ input JsonArrayImportInput {
 type ListItem {
   children: [Value!]!
   id: Int!
+  list_path: [Int!]
   node_id: Int!
   order: Int!
   value: JSONObject!

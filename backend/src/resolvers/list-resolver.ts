@@ -44,6 +44,9 @@ export class ListItem {
 	@Field(type => Int)
 	order: number
 
+	@Field(type => [Int], { nullable: true })
+	list_path: number[] | null
+
 	@Field(type => [Value])
 	children: Value[]
 }
@@ -86,6 +89,7 @@ export class ListResolver {
 				'v.id',
 				'v.value',
 				'v.node_id',
+				'v.list_path',
 				'v.order',
 				'v2.id as child_id',
 				'v2.value as child_value',

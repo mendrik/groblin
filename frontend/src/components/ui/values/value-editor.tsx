@@ -30,9 +30,10 @@ type OwnProps = {
 	node: TreeNode
 	view?: ViewContext
 	value: Value[]
+	listPath: number[] | undefined
 }
 
-type Args = readonly [TreeNode, Value[] | undefined, ViewContext]
+type Args = readonly [TreeNode, Value[] | undefined, number[], ViewContext]
 const isList: Pred<[TreeNode]> = node => node.type === NodeType.List
 
 const notActive: Pred<[TreeNode]> = node =>
@@ -53,29 +54,29 @@ const isBlank: Pred<[TreeNode]> = ifElse(isList, isBlankList, isBlankField)
 
 const matcher = match<Args, ReactNode>(
 	caseOf([isBlank, _], () => null),
-	caseOf([{ type: NodeType.List }, _, ViewContext.Tree], (node, value) => (
+	caseOf([{ type: NodeType.List }, _, _, ViewContext.Tree], (node, value) => (
 		<ListEditor node={node} value={value} />
 	)),
-	caseOf([{ type: NodeType.Object }, _], () => null),
-	caseOf([{ type: NodeType.Boolean }, _], (node, value) => (
-		<BooleanEditor node={node} value={head(value ?? [])} />
+	caseOf([{ type: NodeType.Object }, _, _, _], () => null),
+	caseOf([{ type: NodeType.Boolean }, _, _, _], (node, value, listPath) => (
+		<BooleanEditor node={node} value={head(value ?? [])} listPath={listPath} />
 	)),
-	caseOf([{ type: NodeType.String }, _], (node, value) => (
-		<StringEditor node={node} value={head(value ?? [])} />
+	caseOf([{ type: NodeType.String }, _, _, _], (node, value, listPath) => (
+		<StringEditor node={node} value={head(value ?? [])} listPath={listPath} />
 	)),
-	caseOf([{ type: NodeType.Color }, _], (node, value) => (
-		<ColorEditor node={node} value={head(value ?? [])} />
+	caseOf([{ type: NodeType.Color }, _, _, _], (node, value, listPath) => (
+		<ColorEditor node={node} value={head(value ?? [])} listPath={listPath} />
 	)),
-	caseOf([{ type: NodeType.Number }, _], (node, value) => (
-		<NumberEditor node={node} value={head(value ?? [])} />
+	caseOf([{ type: NodeType.Number }, _, _, _], (node, value, listPath) => (
+		<NumberEditor node={node} value={head(value ?? [])} listPath={listPath} />
 	)),
-	caseOf([{ type: NodeType.Date }, _], (node, value) => (
-		<DateEditor node={node} value={head(value ?? [])} />
+	caseOf([{ type: NodeType.Date }, _, _, _], (node, value, listPath) => (
+		<DateEditor node={node} value={head(value ?? [])} listPath={listPath} />
 	)),
-	caseOf([_, _, ViewContext.Tree], node => (
+	caseOf([_, _, _, ViewContext.Tree], node => (
 		<div className="ml-1">{node.name}</div>
 	)),
-	caseOf([_, _, ViewContext.List], null)
+	caseOf([_, _, _, ViewContext.List], null)
 )
 
 export const editorKey = (node: TreeNode, value?: Value) =>
@@ -83,13 +84,17 @@ export const editorKey = (node: TreeNode, value?: Value) =>
 		? `${value.id}-${value.updated_at}`
 		: `${node.id}-${activePath(node)?.join('-')}`
 
-export const save = <T extends Value>(node: TreeNode, value?: T) =>
+export const save = <T extends Value>(
+	node: TreeNode,
+	listPath: number[],
+	value?: T
+) =>
 	pipeAsync(
 		<C,>(typeValue?: C) => ({
 			value: typeValue,
 			node_id: node.id,
 			id: value?.id,
-			list_path: activePath(node)
+			list_path: listPath
 		}),
 		saveValue
 	)
@@ -97,5 +102,6 @@ export const save = <T extends Value>(node: TreeNode, value?: T) =>
 export const ValueEditor = ({
 	node,
 	value,
-	view = ViewContext.Tree
-}: OwnProps) => matcher(node, value, view)
+	view = ViewContext.Tree,
+	listPath = []
+}: OwnProps) => matcher(node, value, listPath, view)

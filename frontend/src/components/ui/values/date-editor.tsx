@@ -20,11 +20,12 @@ type DateValue = Value & {
 type OwnProps = {
 	node: TreeNode
 	value?: DateValue
+	listPath: number[]
 }
 
 const safeParse: (date?: string) => Date | undefined = when(isString, parseJSON)
 
-export const DateEditor = ({ node, value }: OwnProps) => {
+export const DateEditor = ({ node, value, listPath }: OwnProps) => {
 	const date = safeParse(value?.value.date)
 
 	return (
@@ -36,7 +37,7 @@ export const DateEditor = ({ node, value }: OwnProps) => {
 					onClick={() =>
 						openDatePicker({
 							date,
-							callback: pipe(objOf('date'), save(node, value))
+							callback: pipe(objOf('date'), save(node, listPath, value))
 						})
 					}
 				/>

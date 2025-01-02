@@ -55,6 +55,7 @@ export type JsonArrayImportInput = {
 export type ListItem = {
   children: Array<Value>;
   id: Scalars['Int']['output'];
+  list_path?: Maybe<Array<Scalars['Int']['output']>>;
   node_id: Scalars['Int']['output'];
   order: Scalars['Int']['output'];
   value: Scalars['JSONObject']['output'];
@@ -433,7 +434,7 @@ export type GetListItemsQueryVariables = Exact<{
 }>;
 
 
-export type GetListItemsQuery = { getListItems: Array<{ id: number, node_id: number, value: any, order: number, children: Array<{ id: number, node_id: number, order: number, value: any, list_path?: Array<number> | null, updated_at: any }> }> };
+export type GetListItemsQuery = { getListItems: Array<{ id: number, node_id: number, value: any, order: number, list_path?: Array<number> | null, children: Array<{ id: number, node_id: number, order: number, value: any, list_path?: Array<number> | null, updated_at: any }> }> };
 
 export type GetListColumnsQueryVariables = Exact<{
   node_id: Scalars['Int']['input'];
@@ -613,6 +614,7 @@ export const GetListItemsDocument = `
     node_id
     value
     order
+    list_path
     children {
       ...Value
     }

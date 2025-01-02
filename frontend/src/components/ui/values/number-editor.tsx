@@ -13,10 +13,11 @@ type NumberValue = Value & { value: { figure: number } }
 type OwnProps = {
 	node: TreeNode
 	value?: NumberValue
+	listPath: number[]
 }
 
-export const NumberEditor = ({ node, value }: OwnProps) => {
-	const saveNewValue = pipe(objOf('figure'), save(node, value))
+export const NumberEditor = ({ node, value, listPath }: OwnProps) => {
+	const saveNewValue = pipe(objOf('figure'), save(node, listPath, value))
 	const settings = $nodeSettingsMap.value[node.id]?.settings as
 		| NumberProps
 		| undefined

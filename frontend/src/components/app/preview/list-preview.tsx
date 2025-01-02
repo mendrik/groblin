@@ -12,7 +12,7 @@ import './list-preview.css'
 import type { Node } from '@/gql/graphql.ts'
 import { $nodeSettings } from '@/state/node-settings'
 import { useSignalEffect } from '@preact/signals-react'
-import { propEq } from 'ramda'
+import { append, propEq } from 'ramda'
 import { compact } from 'ramda-adjunct'
 import { ListItemActions } from './list-item-actions'
 type Request = {
@@ -65,7 +65,7 @@ export const ListPreview = ({ node: currentNode }: OwnProps) => {
 					</div>
 				))}
 			</li>
-			{data.map(({ id, value, node, children }) => (
+			{data.map(({ id, value, node, children, list_path }) => (
 				<li key={id} className="item">
 					<div className="options">
 						<ListItemActions node={node} id={id} value={value} />
@@ -81,6 +81,7 @@ export const ListPreview = ({ node: currentNode }: OwnProps) => {
 									node={asNode(node.id)}
 									value={compact([value])}
 									view={ViewContext.List}
+									listPath={append(id, list_path ?? [])}
 								/>
 							</div>
 						)

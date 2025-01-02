@@ -9,10 +9,11 @@ type BooleanValue = Value & { value: { state: boolean } }
 type OwnProps = {
 	node: TreeNode
 	value?: BooleanValue
+	listPath: number[]
 }
 
-export const BooleanEditor = ({ node, value }: OwnProps) => {
-	const saveNewValue = pipe(objOf('state'), save(node, value))
+export const BooleanEditor = ({ node, value, listPath }: OwnProps) => {
+	const saveNewValue = pipe(objOf('state'), save(node, listPath, value))
 	return (
 		<Switch
 			key={editorKey(node, value)}

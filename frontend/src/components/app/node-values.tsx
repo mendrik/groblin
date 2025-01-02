@@ -1,5 +1,5 @@
 import { $openNodes } from '@/state/tree'
-import { $valueMap } from '@/state/value'
+import { $valueMap, activePath } from '@/state/value'
 import { ColorPicker } from '../ui/color-picker'
 import { DatePicker } from '../ui/date-picker/date-picker-dialog'
 import { ListItemCreate } from '../ui/values/list-item-create'
@@ -15,7 +15,11 @@ export const NodeValues = () => {
 				<ol className="flex flex-col text-sm px-2 grid-lines">
 					{$openNodes.value.map(node => (
 						<li key={node.id} className="h-7 flex flex-row items-center">
-							<ValueEditor node={node} value={$valueMap.value[node.id]} />
+							<ValueEditor
+								node={node}
+								value={$valueMap.value[node.id]}
+								listPath={activePath(node)}
+							/>
 						</li>
 					))}
 				</ol>
