@@ -30,7 +30,7 @@ export const DateEditor = ({ node, value }: OwnProps) => {
 	return (
 		<KeyListener onArrowLeft={stopPropagation} onArrowRight={stopPropagation}>
 			<div className="flex items-center flex-row gap-1 h-7 whitespace-nowrap">
-				{date && <span>{relativeTime({})(date)}</span>}
+				{date ? <span>{relativeTime({})(date)}</span> : date}
 				<MicroIcon
 					icon={IconCalendar}
 					onClick={() =>

@@ -33,7 +33,7 @@ export const NodeActions = ({ node }: OwnProps) => {
 					className="w-4 h-4 shrink-0 text-muted-foreground"
 					focusable={false}
 					tabIndex={-1}
-					stroke={0.5}
+					stroke={1}
 				/>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent

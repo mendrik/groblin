@@ -11,8 +11,8 @@ import {
 	IconClipboardCopy,
 	IconCursorText,
 	IconDotsVertical,
-	IconTarget,
-	IconTrash
+	IconTrash,
+	IconViewfinder
 } from '@tabler/icons-react'
 
 type OwnProps = {
@@ -29,7 +29,7 @@ export const ListItemActions = ({ id, node, value }: OwnProps) => {
 					className="w-4 h-4 shrink-0 text-muted-foreground"
 					focusable={false}
 					tabIndex={-1}
-					stroke={0.5}
+					stroke={1}
 				/>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent
@@ -46,7 +46,7 @@ export const ListItemActions = ({ id, node, value }: OwnProps) => {
 					<span>Rename</span>
 				</DropdownMenuItem>
 				<DropdownMenuItem className="flex gap-2 items-center">
-					<IconTarget className="w-4 h-4" />
+					<IconViewfinder className="w-4 h-4" />
 					<span>Focus</span>
 				</DropdownMenuItem>
 				<DropdownMenuItem className="flex gap-2 items-center">
