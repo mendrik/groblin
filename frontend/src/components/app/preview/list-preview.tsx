@@ -4,17 +4,19 @@ import type { Value } from '@/gql/graphql'
 import { notNil } from '@/lib/signals'
 import { cn } from '@/lib/utils'
 import { $nodesMap, type TreeNode } from '@/state/tree'
-import { activePath } from '@/state/value'
+import { $values, activePath } from '@/state/value'
 import { evolveAlt } from '@shared/utils/evolve-alt'
-import useSWR from 'swr'
+import useSWR, { useSWRConfig } from 'swr'
 
 import './list-preview.css'
+import { useSignalEffect } from '@preact/signals-react'
 
-const useLoadItems = (node: TreeNode) => {
-	const request = {
-		node_id: node.id,
-		list_path: activePath(node)
-	}
+type Request = {
+	node_id: number
+	list_path?: number[]
+}
+
+const useLoadItems = (request: Request) => {
 	const { data } = useSWR(request, () => Api.GetListItems({ request }))
 	return data as Exclude<typeof data, undefined>
 }
@@ -26,7 +28,18 @@ type OwnProps = {
 const node = ({ node_id }: Value) => notNil($nodesMap, node_id)
 
 export const ListPreview = ({ node: currentNode }: OwnProps) => {
-	const data = useLoadItems(currentNode).map(evolveAlt({ children: { node } }))
+	const request = {
+		node_id: currentNode.id,
+		list_path: activePath(currentNode)
+	}
+	const { mutate } = useSWRConfig()
+	const data = useLoadItems(request).map(evolveAlt({ children: { node } }))
+	useSignalEffect(() => {
+		if ($values.value) {
+			mutate(request)
+		}
+	})
+
 	return (
 		<ol className="w-full table grid-lines">
 			{data.map(({ id, children }) => (

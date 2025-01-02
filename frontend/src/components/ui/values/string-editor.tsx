@@ -16,15 +16,14 @@ type OwnProps = {
 export const saveInput = (node: TreeNode, value?: StringValue) =>
 	pipeAsync(inputValue, objOf('content'), save(node, value))
 
-export const StringEditor = ({ node, value }: OwnProps) => {
-	return (
-		<KeyListener onArrowLeft={stopPropagation} onArrowRight={stopPropagation}>
-			<input
-				key={editorKey(node, value)}
-				className="h-7 w-full bg-transparent border-none appearance-none outline-none ring-0"
-				defaultValue={value?.value?.content ?? undefined}
-				onBlur={saveInput(node, value)}
-			/>
-		</KeyListener>
-	)
-}
+export const StringEditor = ({ node, value }: OwnProps) => (
+	<KeyListener onArrowLeft={stopPropagation} onArrowRight={stopPropagation}>
+		<input
+			id={editorKey(node, value)}
+			key={editorKey(node, value)}
+			className="h-7 w-full bg-transparent border-none appearance-none outline-none ring-0"
+			defaultValue={value?.value?.content ?? undefined}
+			onBlur={saveInput(node, value)}
+		/>
+	</KeyListener>
+)
