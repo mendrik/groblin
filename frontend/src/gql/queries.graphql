@@ -149,3 +149,9 @@ query GetListItems($request: ListRequest!) {
     }
   }
 }
+
+query GetListColumns($node_id: Int!) {
+  getListColumns(node_id: $node_id) {
+    ...Node
+  }
+}

@@ -1,18 +1,20 @@
-import { ValueEditor } from '@/components/ui/values/value-editor'
+import { ValueEditor, ViewContext } from '@/components/ui/values/value-editor'
 import { Api } from '@/gql-client'
 import type { Value } from '@/gql/graphql'
 import { notNil } from '@/lib/signals'
 import { cn } from '@/lib/utils'
-import { $nodesMap, type TreeNode } from '@/state/tree'
+import { $nodes, $nodesMap, type TreeNode, asNode } from '@/state/tree'
 import { $values, activePath } from '@/state/value'
 import { evolveAlt } from '@shared/utils/evolve-alt'
 import useSWR, { useSWRConfig } from 'swr'
 
 import './list-preview.css'
+import type { Node } from '@/gql/graphql.ts'
+import { $nodeSettings } from '@/state/node-settings'
 import { useSignalEffect } from '@preact/signals-react'
+import { propEq } from 'ramda'
 import { compact } from 'ramda-adjunct'
 import { ListItemActions } from './list-item-actions'
-
 type Request = {
 	node_id: number
 	list_path?: number[]
@@ -20,7 +22,14 @@ type Request = {
 
 const useLoadItems = (request: Request) => {
 	const { data } = useSWR(request, () => Api.GetListItems({ request }))
-	return data as Exclude<typeof data, undefined>
+	return data ?? []
+}
+
+const useLoadColumns = (nodeId: number): Node[] => {
+	const { data } = useSWR(`columns-${nodeId}`, () =>
+		Api.GetListColumns({ node_id: nodeId })
+	)
+	return data ?? []
 }
 
 type OwnProps = {
@@ -38,25 +47,44 @@ export const ListPreview = ({ node: currentNode }: OwnProps) => {
 	const data = useLoadItems(request).map(
 		evolveAlt({ node, children: { node } })
 	)
+	const columns = useLoadColumns(currentNode.id)
 	useSignalEffect(() => {
-		if ($values.value) {
+		if ($values.value || $nodes.value || $nodeSettings.value) {
 			mutate(request)
+			mutate(`columns-${currentNode.id}`)
 		}
 	})
 
 	return (
 		<ol className="w-full table grid-lines">
+			<li className="item">
+				<div />
+				{columns.map(({ id, type, name }) => (
+					<div key={id} className={cn('label', type)}>
+						{name}
+					</div>
+				))}
+			</li>
 			{data.map(({ id, value, node, children }) => (
 				<li key={id} className="item">
 					<div className="options">
 						<ListItemActions node={node} id={id} value={value} />
 					</div>
-					{children.slice(0, 10).map(({ node, ...value }) => (
-						<div key={value.id} className={cn('key-value', node.type)}>
-							<div className="label">{node.name}</div>
-							<ValueEditor node={node} value={compact([value])} />
-						</div>
-					))}
+					{columns.map(node => {
+						const value = children.find(propEq(node.id, 'node_id'))
+						return (
+							<div
+								key={value?.id ?? node.id}
+								className={cn('key-value', node.type)}
+							>
+								<ValueEditor
+									node={asNode(node.id)}
+									value={compact([value])}
+									view={ViewContext.List}
+								/>
+							</div>
+						)
+					})}
 				</li>
 			))}
 		</ol>

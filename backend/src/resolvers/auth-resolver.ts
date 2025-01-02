@@ -1,7 +1,6 @@
 import { type BinaryLike, scrypt } from 'node:crypto'
 import { assertThat } from '@shared/asserts.ts'
 import { evolveAlt } from '@shared/utils/evolve-alt.ts'
-import {} from '@shared/utils/ramda.ts'
 import { resolveObj } from '@shared/utils/resolve-obj.ts'
 import { inject, injectable } from 'inversify'
 import jwt from 'jsonwebtoken'

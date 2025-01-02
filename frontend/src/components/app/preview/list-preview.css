@@ -47,7 +47,7 @@
 		grid-column: 1 / -1;
 		grid-template-columns: subgrid;
 		overflow: hidden;
-		max-height: 28px;
+		height: 28px;
 		width: 100%;
 	}
 
@@ -58,28 +58,16 @@
 		padding-bottom: 6px;
 	}
 
-	.key-value {
+	.key-value,
+	.label {
 		flex: auto;
 		min-width: min-content;
 		border-right: .5px solid hsl(var(--background));
 		padding: 0px 5px;
-
-		.label {
-			height: 28px;
-		}
-
-		.label {
-			display: flex;
-			align-items: center;
-			color: hsl(var(--muted-foreground));
-		}
+		height: 28px;
 	}
 
-	.item:not(:first-child) .key-value .label {
-		display: none;
-	}
-
-	.item:first-child {
-		max-height: 56px;
+	.label {
+		color: hsl(var(--muted-foreground));
 	}
 }

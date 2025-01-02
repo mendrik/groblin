@@ -49,6 +49,7 @@ input JsonArrayImportInput {
 type ListItem {
   children: [Value!]!
   id: Int!
+  node_id: Int!
   order: Int!
   value: JSONObject!
 }
@@ -131,6 +132,7 @@ type ProjectData {
 }
 
 type Query {
+  getListColumns(node_id: Int!): [Node!]!
   getListItems(request: ListRequest!): [ListItem!]!
   getNodeSettings: [NodeSettings!]!
   getNodes: [Node!]!

@@ -1,17 +1,14 @@
-import {} from '@shared/utils/list-to-tree.ts'
 import { GraphQLJSONObject } from 'graphql-scalars'
 import { inject, injectable } from 'inversify'
 import { Kysely, sql } from 'kysely'
-import {} from 'ramda'
+import { propEq, reject } from 'ramda'
 import type { DB, JsonValue } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
-import type { Context } from 'src/types.ts'
 import { Role } from 'src/types.ts'
 import { mergeProps } from 'src/utils/merge-props.ts'
 import {
 	Arg,
 	Authorized,
-	Ctx,
 	Field,
 	InputType,
 	Int,
@@ -21,6 +18,7 @@ import {
 	Resolver,
 	UseMiddleware
 } from 'type-graphql'
+import { Node } from './node-resolver.ts'
 import { Value } from './value-resolver.ts'
 
 @InputType()
@@ -36,6 +34,9 @@ export class ListRequest {
 export class ListItem {
 	@Field(type => Int)
 	id: number
+
+	@Field(type => Int)
+	node_id: number
 
 	@Field(type => GraphQLJSONObject)
 	value: JsonValue
@@ -69,8 +70,7 @@ export class ListResolver {
 
 	@Query(returns => [ListItem])
 	async getListItems(
-		@Arg('request', () => ListRequest) request: ListRequest,
-		@Ctx() ctx: Context
+		@Arg('request', () => ListRequest) request: ListRequest
 	): Promise<ListItem[]> {
 		const result = await this.db
 			.selectFrom('values as v')
@@ -78,16 +78,14 @@ export class ListResolver {
 				j.on(sql`v2.list_path = array_append(v.list_path, v.id)`)
 			)
 			.leftJoin('node as n', 'v2.node_id', 'n.id')
-			.leftJoin('node_settings as ns', 'n.id', 'ns.node_id')
 			.where('v.list_path', '=', sql.val(request.list_path ?? null))
 			.where('v.node_id', '=', request.node_id)
-			.groupBy(['v.id', 'v2.id', 'n.order', 'n.depth'])
+			.groupBy(['v.id', 'v2.id'])
 			.orderBy('v.order')
-			.orderBy('n.order')
-			.orderBy('n.depth')
 			.select([
 				'v.id',
 				'v.value',
+				'v.node_id',
 				'v.order',
 				'v2.id as child_id',
 				'v2.value as child_value',
@@ -98,5 +96,30 @@ export class ListResolver {
 			])
 			.execute()
 		return mergeProps('id', renameMap, 'children', result)
+	}
+
+	@Query(returns => [Node])
+	async getListColumns(@Arg('node_id', () => Int) node_id: number) {
+		return this.db
+			.withRecursive('node_tree', qb =>
+				qb
+					.selectFrom('node')
+					.where('node.id', '=', node_id)
+					.selectAll('node')
+					.unionAll(qb =>
+						qb
+							.selectFrom('node as n')
+							.innerJoin('node_tree as nt', 'n.parent_id', 'nt.id')
+							.selectAll('n')
+					)
+			)
+			.selectFrom('node_tree')
+			.selectAll('node_tree')
+			.leftJoin('node_settings as ns', 'node_tree.id', 'ns.node_id')
+			.orderBy('depth')
+			.orderBy('order')
+			.limit(8)
+			.execute()
+			.then(reject(propEq(node_id, 'id')))
 	}
 }

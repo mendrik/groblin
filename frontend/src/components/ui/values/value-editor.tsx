@@ -21,12 +21,18 @@ import { ListEditor } from './list-editor'
 import { NumberEditor } from './number-editor'
 import { StringEditor } from './string-editor'
 
+export enum ViewContext {
+	Tree = 'tree',
+	List = 'list'
+}
+
 type OwnProps = {
 	node: TreeNode
+	view?: ViewContext
 	value: Value[]
 }
 
-type Args = readonly [TreeNode, Value[] | undefined]
+type Args = readonly [TreeNode, Value[] | undefined, ViewContext]
 const isList: Pred<[TreeNode]> = node => node.type === NodeType.List
 
 const notActive: Pred<[TreeNode]> = node =>
@@ -47,7 +53,7 @@ const isBlank: Pred<[TreeNode]> = ifElse(isList, isBlankList, isBlankField)
 
 const matcher = match<Args, ReactNode>(
 	caseOf([isBlank, _], () => null),
-	caseOf([{ type: NodeType.List }, _], (node, value) => (
+	caseOf([{ type: NodeType.List }, _, ViewContext.Tree], (node, value) => (
 		<ListEditor node={node} value={value} />
 	)),
 	caseOf([{ type: NodeType.Object }, _], () => null),
@@ -66,7 +72,10 @@ const matcher = match<Args, ReactNode>(
 	caseOf([{ type: NodeType.Date }, _], (node, value) => (
 		<DateEditor node={node} value={head(value ?? [])} />
 	)),
-	caseOf([_, _], node => <div className="ml-1">{node.name}</div>)
+	caseOf([_, _, ViewContext.Tree], node => (
+		<div className="ml-1">{node.name}</div>
+	)),
+	caseOf([_, _, ViewContext.List], null)
 )
 
 export const editorKey = (node: TreeNode, value?: Value) =>
@@ -85,4 +94,8 @@ export const save = <T extends Value>(node: TreeNode, value?: T) =>
 		saveValue
 	)
 
-export const ValueEditor = ({ node, value }: OwnProps) => matcher(node, value)
+export const ValueEditor = ({
+	node,
+	value,
+	view = ViewContext.Tree
+}: OwnProps) => matcher(node, value, view)

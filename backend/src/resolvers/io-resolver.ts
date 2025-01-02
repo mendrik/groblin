@@ -1,14 +1,11 @@
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { pluckPath } from '@shared/utils/pluck-path.ts'
 import { inject, injectable } from 'inversify'
 import { Kysely, type Transaction, sql } from 'kysely'
-import {} from 'ramda'
 import type { DB, JsonArray } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import { Topic } from 'src/services/Topic.ts'
 import { importJson } from 'src/services/importer.ts'
-import type { Difference } from 'src/services/json.ts'
 import { S3Client } from 'src/services/s3-client.ts'
 import type { Context } from 'src/types.ts'
 import { Role } from 'src/types.ts'
@@ -54,9 +51,6 @@ export class Upload {
 	@Field(type => String)
 	object: string
 }
-
-const pluckParentIds = (l: Difference[]) =>
-	pluckPath(['parent', 'id'] as const, l)
 
 @injectable()
 @UseMiddleware(LogAccess)

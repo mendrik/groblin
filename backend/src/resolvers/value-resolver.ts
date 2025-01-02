@@ -1,4 +1,3 @@
-import {} from 'graphql'
 import { GraphQLJSONObject } from 'graphql-scalars'
 import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'

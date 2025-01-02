@@ -55,6 +55,7 @@ export type JsonArrayImportInput = {
 export type ListItem = {
   children: Array<Value>;
   id: Scalars['Int']['output'];
+  node_id: Scalars['Int']['output'];
   order: Scalars['Int']['output'];
   value: Scalars['JSONObject']['output'];
 };
@@ -200,11 +201,17 @@ export type ProjectData = {
 };
 
 export type Query = {
+  getListColumns: Array<Node>;
   getListItems: Array<ListItem>;
   getNodeSettings: Array<NodeSettings>;
   getNodes: Array<Node>;
   getProject: ProjectData;
   getValues: Array<Value>;
+};
+
+
+export type QueryGetListColumnsArgs = {
+  node_id: Scalars['Int']['input'];
 };
 
 
@@ -426,7 +433,14 @@ export type GetListItemsQueryVariables = Exact<{
 }>;
 
 
-export type GetListItemsQuery = { getListItems: Array<{ id: number, value: any, order: number, children: Array<{ id: number, node_id: number, order: number, value: any, list_path?: Array<number> | null, updated_at: any }> }> };
+export type GetListItemsQuery = { getListItems: Array<{ id: number, node_id: number, value: any, order: number, children: Array<{ id: number, node_id: number, order: number, value: any, list_path?: Array<number> | null, updated_at: any }> }> };
+
+export type GetListColumnsQueryVariables = Exact<{
+  node_id: Scalars['Int']['input'];
+}>;
+
+
+export type GetListColumnsQuery = { getListColumns: Array<{ id: number, name: string, order: number, type: NodeType, parent_id?: number | null }> };
 
 export const ValueFragmentDoc = `
     fragment Value on Value {
@@ -596,6 +610,7 @@ export const GetListItemsDocument = `
     query GetListItems($request: ListRequest!) {
   getListItems(request: $request) {
     id
+    node_id
     value
     order
     children {
@@ -604,6 +619,13 @@ export const GetListItemsDocument = `
   }
 }
     ${ValueFragmentDoc}`;
+export const GetListColumnsDocument = `
+    query GetListColumns($node_id: Int!) {
+  getListColumns(node_id: $node_id) {
+    ...Node
+  }
+}
+    ${NodeFragmentDoc}`;
 export type Requester<C = {}, E = unknown> = <R, V>(doc: string, vars?: V, options?: C) => Promise<ExecutionResult<R, E>> | AsyncIterable<ExecutionResult<R, E>>
 export function getSdk<C, E>(requester: Requester<C, E>) {
   return {
@@ -669,6 +691,9 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     },
     GetListItems(variables: GetListItemsQueryVariables, options?: C): Promise<ExecutionResult<GetListItemsQuery, E>> {
       return requester<GetListItemsQuery, GetListItemsQueryVariables>(GetListItemsDocument, variables, options) as Promise<ExecutionResult<GetListItemsQuery, E>>;
+    },
+    GetListColumns(variables: GetListColumnsQueryVariables, options?: C): Promise<ExecutionResult<GetListColumnsQuery, E>> {
+      return requester<GetListColumnsQuery, GetListColumnsQueryVariables>(GetListColumnsDocument, variables, options) as Promise<ExecutionResult<GetListColumnsQuery, E>>;
     }
   };
 }
