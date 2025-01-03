@@ -36,15 +36,6 @@ const Main = () => (
 	</StrictMode>
 )
 
-const formatRelativeLocale = {
-	lastWeek: "'Last' eeee",
-	yesterday: "'Yesterday'",
-	today: "'Today'",
-	tomorrow: "'Tomorrow'",
-	nextWeek: "'Next' eeee",
-	other: 'dd.MM.yyyy'
-}
-
 setDefaultOptions({
 	locale: enGB,
 	weekStartsOn: 1

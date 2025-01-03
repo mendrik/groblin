@@ -11,9 +11,8 @@ export enum NodeType {
 	enum = 'Enum',
 	date = 'Date',
 	color = 'Color',
-	location = 'Location',
 	media = 'Media',
-	event = 'Event'
+	reference = 'Reference'
 }
 
 export enum Role {

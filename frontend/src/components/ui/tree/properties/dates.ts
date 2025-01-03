@@ -3,9 +3,9 @@ import { type TypeOf, boolean, object } from 'zod'
 import { asField } from '../../zod-form/utils'
 import { hideColumnHead, required } from './common'
 
-export const ColorProps = object({
-	colorRows: asField(boolean().default(false), {
-		label: 'Color rows',
+export const DateProps = object({
+	relative: asField(boolean().default(false), {
+		label: 'Relative',
 		editor: EditorType.Switch,
 		span: 2
 	}),
@@ -13,4 +13,4 @@ export const ColorProps = object({
 	required
 })
 
-export type ColorProps = TypeOf<typeof ColorProps>
+export type DateProps = TypeOf<typeof DateProps>

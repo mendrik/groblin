@@ -4,11 +4,10 @@ import { asField } from '../../zod-form/utils'
 
 export const required = asField(boolean().default(false), {
 	label: 'Required',
-	editor: EditorType.Switch,
-	span: 2
+	editor: EditorType.Switch
 })
 
-export const columnHead = asField(boolean().default(false), {
-	label: 'Column',
+export const hideColumnHead = asField(boolean().default(false), {
+	label: 'Hide in list view',
 	editor: EditorType.Switch
 })

@@ -178,12 +178,11 @@ export enum NodeType {
   Color = 'color',
   Date = 'date',
   Enum = 'enum',
-  Event = 'event',
   List = 'list',
-  Location = 'location',
   Media = 'media',
   Number = 'number',
   Object = 'object',
+  Reference = 'reference',
   Root = 'root',
   String = 'string'
 }

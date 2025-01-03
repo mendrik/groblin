@@ -109,12 +109,11 @@ enum NodeType {
   color
   date
   enum
-  event
   list
-  location
   media
   number
   object
+  reference
   root
   string
 }

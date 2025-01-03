@@ -1,4 +1,4 @@
-import { NodeType, type Value } from '@/gql/graphql'
+import { type NodeSettings, NodeType, type Value } from '@/gql/graphql'
 import { type TreeNode, pathTo } from '@/state/tree'
 import { $activeListItems, activePath, saveValue } from '@/state/value'
 import { caseOf, match } from '@shared/utils/match'
@@ -23,6 +23,7 @@ import { NumberEditor } from './number-editor'
 import { StringEditor } from './string-editor'
 
 import './value-editor.css'
+import { $nodeSettingsMap } from '@/state/node-settings'
 
 export enum ViewContext {
 	Tree = 'tree',
@@ -31,13 +32,16 @@ export enum ViewContext {
 
 type InnerValue<T> = T extends { value: infer V } ? V : never
 
-type ValueEditorProps<T> = {
+type ValueEditorProps<T, S = NodeSettings['settings']> = {
 	node: TreeNode
+	settings?: S
 	value?: T
 	save: (value: InnerValue<T>) => Promise<number>
 }
 
-export type ValueEditor<T> = (props: ValueEditorProps<T>) => ReactNode
+export type ValueEditor<T, S = NodeSettings['settings']> = (
+	props: ValueEditorProps<T, S>
+) => ReactNode
 
 type Args = readonly [TreeNode, ViewContext]
 const isList: Pred<[TreeNode]> = node => node.type === NodeType.List
@@ -91,6 +95,8 @@ export const ValueEditor = ({
 	view = ViewContext.Tree,
 	listPath = []
 }: OwnProps) => {
+	const settings = $nodeSettingsMap.value[node.id]?.settings
+
 	const save: ValueEditorProps<any>['save'] = unless(
 		equals(value?.[0]?.value),
 		pipeAsync(
@@ -111,6 +117,7 @@ export const ValueEditor = ({
 				node={node}
 				value={isList(node) ? value : value?.[0]}
 				save={save}
+				settings={settings}
 			/>
 		)
 	)

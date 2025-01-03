@@ -1,7 +1,6 @@
 import KeyListener from '@/components/utils/key-listener'
 import type { Value } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
-import { $nodeSettingsMap } from '@/state/node-settings'
 import { objOf, pipe } from 'ramda'
 import { MaskedInput } from '../random/masked-input'
 import type { NumberProps } from '../tree/properties/numbers'
@@ -9,15 +8,13 @@ import { type ValueEditor, editorKey } from './value-editor'
 
 type NumberValue = Value & { value: { figure: number } }
 
-export const NumberEditor: ValueEditor<NumberValue> = ({
+export const NumberEditor: ValueEditor<NumberValue, NumberProps> = ({
 	node,
 	value,
+	settings,
 	save
 }) => {
 	const saveNewValue = pipe(objOf('figure'), save)
-	const settings = $nodeSettingsMap.value[node.id]?.settings as
-		| NumberProps
-		| undefined
 
 	return (
 		<KeyListener
