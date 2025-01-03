@@ -8,6 +8,7 @@ import {
 import { preventDefault, stopPropagation } from '@/lib/dom-events'
 import { type TreeNode, startEditing } from '@/state/tree'
 import {
+	IconAdjustmentsHorizontal,
 	IconCopyPlus,
 	IconCursorText,
 	IconDots,
@@ -84,7 +85,7 @@ export const NodeActions = ({ node }: OwnProps) => {
 					className="flex gap-2 items-center"
 					onSelect={() => openNodeProperties(node)}
 				>
-					<IconTrash className="w-4 h-4" />
+					<IconAdjustmentsHorizontal className="w-4 h-4" />
 					<span>Properties…</span>
 				</DropdownMenuItem>
 				<NodeExtraActions node={node} />

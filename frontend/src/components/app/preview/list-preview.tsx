@@ -59,7 +59,7 @@ export const ListPreview = ({ node: currentNode, width }: OwnProps) => {
 	return (
 		<FocusTravel autoFocus={false}>
 			<ol
-				className="w-full table grid-lines"
+				className="w-full table grid-lines mr-2"
 				style={{ '--columns': maxColumns }}
 			>
 				<li className="item">
