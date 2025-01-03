@@ -12,6 +12,7 @@ import { MaskedInput } from '../random/masked-input'
 import {} from '../select'
 import { SimpleSelect } from '../simple/select'
 import { Switch } from '../switch'
+import { TagsInput } from '../tags-input'
 import type { FieldMeta, FieldSelectMeta } from './types'
 import { innerType, isZodType } from './utils'
 
@@ -138,6 +139,19 @@ const matcher = match<Args, ReactNode>(
 					onChange={pipe(path(['target', 'files', 0]), onChange)}
 					className="p-2"
 					type="file"
+					placeholder={desc.placeholder}
+				/>
+			</FormControl>
+		)
+	),
+	caseOf(
+		[{ editor: EditorType.Tags }, _, _],
+		(desc, _, { value, onChange, ...field }) => (
+			<FormControl>
+				<TagsInput
+					{...field}
+					value={value}
+					onValueChange={onChange}
 					placeholder={desc.placeholder}
 				/>
 			</FormControl>

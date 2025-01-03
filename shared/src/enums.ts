@@ -1,12 +1,10 @@
 export enum EditorType {
-	Select = 'select',
 	Radios = 'radios',
-	Multiselect = 'multiselect',
+	Tags = 'tags',
 	Input = 'input',
 	File = 'file',
 	Number = 'number',
 	Password = 'password',
 	Email = 'email',
-	Switch = 'switch',
-	Textarea = 'textarea'
+	Switch = 'switch'
 }

@@ -6,6 +6,7 @@ import { type ZodObject, object } from 'zod'
 import { ColorProps } from './colors'
 import { DateProps } from './dates'
 import { ListProps } from './list'
+import { MediaProps } from './media'
 import { NumberProps } from './numbers'
 import { StringProps } from './strings'
 
@@ -15,5 +16,6 @@ export const propSchema: (node: TreeNode) => ZodObject<any> = match(
 	caseOf([{ type: NodeType.Color }], () => ColorProps),
 	caseOf([{ type: NodeType.Date }], () => DateProps),
 	caseOf([{ type: NodeType.String }], () => StringProps),
+	caseOf([{ type: NodeType.Media }], () => MediaProps),
 	caseOf([_], () => object({}))
 )

@@ -19,7 +19,6 @@
 		overflow: hidden;
 		height: 28px;
 		width: 100%;
-		border-left: 3px solid var(--row-color);
 	}
 
 	.item:has(.label) {
