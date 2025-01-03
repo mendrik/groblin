@@ -1,34 +1,4 @@
 .table {
-	@container (min-width: 300px) {
-		--columns: 2;
-	}
-	@container (min-width: 450px) {
-		--columns: 3;
-	}
-	@container (min-width: 600px) {
-		--columns: 4;
-	}
-	@container (min-width: 750px) {
-		--columns: 5;
-	}
-	@container (min-width: 900px) {
-		--columns: 6;
-	}
-	@container (min-width: 1050px) {
-		--columns: 7;
-	}
-	@container (min-width: 1200px) {
-		--columns: 8;
-	}
-	@container (min-width: 1350px) {
-		--columns: 9;
-	}
-	@container (min-width: 1500px) {
-		--columns: 10;
-	}
-}
-
-.table {
 	width: 100%;
 	padding: 0 5px;
 	display: grid;

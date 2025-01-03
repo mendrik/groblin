@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 
 type UseResizeReturn = {
 	width: number
@@ -8,6 +8,8 @@ type UseResizeReturn = {
 const useResize = (
 	ref: React.RefObject<HTMLElement | null>
 ): UseResizeReturn => {
+	console.log(ref.current)
+
 	const [size, setSize] = useState<{ width: number; height: number }>({
 		width: 0,
 		height: 0
@@ -15,9 +17,11 @@ const useResize = (
 
 	const handleResize = useCallback(() => {
 		if (ref.current) {
+			const rect = ref.current.getBoundingClientRect()
+
 			setSize({
-				width: ref.current.offsetWidth,
-				height: ref.current.offsetHeight
+				width: rect.width,
+				height: rect.height
 			})
 		}
 	}, [ref])
@@ -36,6 +40,10 @@ const useResize = (
 			}
 		}
 	}, [ref, handleResize])
+
+	useLayoutEffect(() => {
+		handleResize()
+	}, [handleResize])
 
 	return size
 }

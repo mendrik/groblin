@@ -1,5 +1,6 @@
 import { ErrorBoundary } from 'react-error-boundary'
 import './app.css'
+import { useRef } from 'react'
 import { DocumentTree } from './components/app/document-tree'
 import { NodeValues } from './components/app/node-values'
 import { PreviewPanel } from './components/app/preview/preview-panel'
@@ -10,12 +11,15 @@ import {
 	ResizablePanelGroup
 } from './components/ui/resizable'
 import { ScrollArea } from './components/ui/scroll-area'
+import useResize from './hooks/use-resize'
 import { setSignal } from './lib/signals'
 import { notNil } from './lib/signals'
 import { $panelSizes } from './state/panels'
 import { $project } from './state/project'
 
 export function App() {
+	const ref = useRef<HTMLDivElement>(null)
+	const { width } = useResize(ref)
 	return (
 		<Layout>
 			<ScrollArea className="w-full h-full">
@@ -44,9 +48,9 @@ export function App() {
 						defaultSize={$panelSizes.value[2]}
 						className="container-size"
 					>
-						<div className="w-full shrink-0 h-10 p-1" />
+						<div className="w-full shrink-0 h-10 p-1" ref={ref} />
 						<ErrorBoundary fallback={<div>Preview panel has crashed</div>}>
-							<PreviewPanel />
+							<PreviewPanel width={width} />
 						</ErrorBoundary>
 					</ResizablePanel>
 				</ResizablePanelGroup>

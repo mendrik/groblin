@@ -20,7 +20,6 @@ const safeParse: (date?: string) => Date | undefined = when(isString, parseJSON)
 
 export const DateEditor: ValueEditor<DateValue> = ({ node, value, save }) => {
 	const date = safeParse(value?.value.date)
-
 	return (
 		<KeyListener onArrowLeft={stopPropagation} onArrowRight={stopPropagation}>
 			<div className="flex items-center flex-row gap-1 h-7 whitespace-nowrap">

@@ -1,8 +1,6 @@
 import { NodeType } from '@/gql/graphql'
 import { $focusedNode, type TreeNode, asNode } from '@/state/tree'
-import { $activeListItems } from '@/state/value'
 import { caseOf, match } from '@shared/utils/match'
-import { Maybe } from 'purify-ts'
 import { T as _ } from 'ramda'
 import { type ReactNode, Suspense } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -13,22 +11,23 @@ import { NoSupport } from './no-support'
 import { PreviewLoader } from './preview-loader'
 import { SelectInfo } from './select-info'
 
-const toPreviewPanel = match<[TreeNode], ReactNode>(
-	caseOf([{ type: NodeType.List }], node => <ListPreview node={node} />),
-	caseOf([_], () => <NoSupport />)
+const toPreviewPanel = match<[TreeNode], (a: any) => ReactNode>(
+	caseOf([{ type: NodeType.List }], () => ListPreview),
+	caseOf([_], () => NoSupport)
 )
 
-export const PreviewPanel = () => {
-	const Panel = Maybe.fromNullable($focusedNode.value)
-		.map(asNode)
-		.map(toPreviewPanel)
-		.extract()
+type OwnProps = {
+	width: number
+}
+
+export const PreviewPanel = ({ width }: OwnProps) => {
+	const nodeId = $focusedNode.value
+	if (!nodeId) return <SelectInfo />
+	const node = asNode(nodeId)
+	const Panel = toPreviewPanel(node)
 
 	return (
-		<div
-			className="flex flex-1 min-h-svh w-full items-start"
-			key={JSON.stringify($activeListItems.value)}
-		>
+		<div className="flex flex-1 min-h-svh w-full items-start">
 			<ErrorBoundary fallback={<SelectInfo />} onError={console.error}>
 				<SWRConfig
 					value={{
@@ -38,7 +37,9 @@ export const PreviewPanel = () => {
 						}
 					}}
 				>
-					<Suspense fallback={<PreviewLoader />}>{Panel}</Suspense>
+					<Suspense fallback={<PreviewLoader />}>
+						{width !== 0 && <Panel node={node} width={width} />}
+					</Suspense>
 				</SWRConfig>
 			</ErrorBoundary>
 		</div>

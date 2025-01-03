@@ -42,8 +42,6 @@ export const $valueMap = signal<Record<NodeId, Value[]>>({})
 export const $activeListItems = signal<ActiveLists>({})
 export const $lastValueUpdate = signal<Date>(new Date())
 
-$lastValueUpdate.subscribe(console.log)
-
 $values.subscribe(
 	pipe(
 		groupBy(propOr(0, 'node_id')),
