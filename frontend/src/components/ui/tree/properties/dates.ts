@@ -9,7 +9,7 @@ export const DateProps = object({
 		editor: EditorType.Switch,
 		span: 2
 	}),
-	columnHead: hideColumnHead,
+	hideColumnHead,
 	required
 })
 

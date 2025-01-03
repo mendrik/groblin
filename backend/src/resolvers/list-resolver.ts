@@ -104,6 +104,7 @@ export class ListResolver {
 
 	@Query(returns => [Node])
 	async getListColumns(@Arg('node_id', () => Int) node_id: number) {
+		const { coalesce, jsonAgg } = this.db.fn
 		return this.db
 			.withRecursive('node_tree', qb =>
 				qb
@@ -120,6 +121,11 @@ export class ListResolver {
 			.selectFrom('node_tree')
 			.selectAll('node_tree')
 			.leftJoin('node_settings as ns', 'node_tree.id', 'ns.node_id')
+			.where(
+				sql`COALESCE(ns.settings ->> 'hideColumnHead', 'false')`,
+				'=',
+				false
+			)
 			.orderBy('order')
 			.orderBy('depth')
 			.limit(8)

@@ -1,7 +1,7 @@
 import { EditorType } from '@shared/enums'
 import { type TypeOf, number, object, string } from 'zod'
 import { asField } from '../../zod-form/utils'
-import { required } from './common'
+import { hideColumnHead, required } from './common'
 
 export const NumberProps = object({
 	unit: asField(string().optional(), {
@@ -33,6 +33,7 @@ export const NumberProps = object({
 			scale: 0
 		}
 	}),
+	hideColumnHead,
 	required
 })
 
