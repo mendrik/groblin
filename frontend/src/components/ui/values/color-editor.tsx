@@ -8,9 +8,9 @@ import { Button } from '../button'
 import { openColorPicker } from '../color-picker'
 import { type ValueEditor, editorKey } from './value-editor'
 
-type ColorValue = Value & {
+export type ColorValue = Omit<Value, 'value'> & {
 	value: {
-		rgba: number[]
+		rgba: [number, number, number, number?]
 	}
 }
 

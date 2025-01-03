@@ -1,6 +1,6 @@
 .table {
 	width: 100%;
-	padding: 0 5px;
+	padding: 0 5px 0 0;
 	display: grid;
 	font-size: 0.875em;
 	display: grid;
@@ -19,6 +19,7 @@
 		overflow: hidden;
 		height: 28px;
 		width: 100%;
+		border-left: 3px solid var(--row-color);
 	}
 
 	.item:has(.label) {

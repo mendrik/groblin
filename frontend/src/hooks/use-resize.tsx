@@ -8,8 +8,6 @@ type UseResizeReturn = {
 const useResize = (
 	ref: React.RefObject<HTMLElement | null>
 ): UseResizeReturn => {
-	console.log(ref.current)
-
 	const [size, setSize] = useState<{ width: number; height: number }>({
 		width: 0,
 		height: 0

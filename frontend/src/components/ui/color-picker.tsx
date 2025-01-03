@@ -14,7 +14,7 @@ import PickerLib, { useColorPicker } from 'react-best-gradient-color-picker'
 import { Button } from './button'
 
 type OpenProps = {
-	callback: (color: number[]) => any
+	callback: (color: [number, number, number, number?]) => any
 	color: string
 }
 
@@ -64,7 +64,9 @@ export const ColorPicker = () => {
 					<Button
 						type="button"
 						onClick={() => {
-							notNil($props).callback(rgbaArr)
+							notNil($props).callback(
+								rgbaArr as [number, number, number, number?]
+							)
 							close()
 						}}
 					>

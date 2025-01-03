@@ -1,6 +1,6 @@
 import { ValueEditor, ViewContext } from '@/components/ui/values/value-editor'
 import { Api } from '@/gql-client'
-import type { Value } from '@/gql/graphql'
+import type { ListItem, Value } from '@/gql/graphql'
 import { notNil } from '@/lib/signals'
 import { cn } from '@/lib/utils'
 import { $nodes, $nodesMap, type TreeNode, asNode } from '@/state/tree'
@@ -8,23 +8,34 @@ import { $values, activePath } from '@/state/value'
 import { evolveAlt } from '@shared/utils/evolve-alt'
 import useSWR, { useSWRConfig } from 'swr'
 
-import './list-preview.css'
+import type { ColorValue } from '@/components/ui/values/color-editor'
 import FocusTravel from '@/components/utils/focus-travel'
 import type { Node } from '@/gql/graphql.ts'
-import { $nodeSettings } from '@/state/node-settings'
+import { $nodeSettingsMap } from '@/state/node-settings'
 import { useSignalEffect } from '@preact/signals-react'
+import { rgb } from 'chroma-js'
 import { append, propEq, take } from 'ramda'
 import { compact } from 'ramda-adjunct'
 import { ListItemActions } from './list-item-actions'
+import './list-preview.css'
 type Request = {
 	node_id: number
 	list_path?: number[]
 }
 
+const rowColor = ({ children }: ListItem) => {
+	const rowColorChild: ColorValue | undefined = children.find(
+		({ node_id }) =>
+			$nodeSettingsMap.value[node_id]?.settings?.colorRows === true
+	)
+	const rgba = rowColorChild?.value.rgba
+	return rgba ? rgb.apply(null, rgba ?? [0, 0, 0]).css() : 'transparent'
+}
+
 const useLoadItems = (request: Request) => {
 	const node = ({ node_id }: Value) => notNil($nodesMap, node_id)
 	const { data } = useSWR(request, () => Api.GetListItems({ request }))
-	return (data ?? []).map(evolveAlt({ node, children: { node } }))
+	return (data ?? []).map(evolveAlt({ node, rowColor, children: { node } }))
 }
 
 const useLoadColumns = (nodeId: number, columns: number): Node[] => {
@@ -42,7 +53,6 @@ type OwnProps = {
 export const ListPreview = ({ node: currentNode, width }: OwnProps) => {
 	const { mutate } = useSWRConfig()
 	const maxColumns = Math.floor(width / 150)
-	console.log(maxColumns)
 	const request = {
 		node_id: currentNode.id,
 		list_path: activePath(currentNode)
@@ -50,7 +60,9 @@ export const ListPreview = ({ node: currentNode, width }: OwnProps) => {
 	const data = useLoadItems(request)
 	const columns = useLoadColumns(currentNode.id, maxColumns)
 	useSignalEffect(() => {
-		if ($values.value || $nodes.value || $nodeSettings.value) {
+		if ($values.value || $nodes.value || $nodeSettingsMap.value) {
+			console.log('mutating')
+
 			mutate(request)
 			mutate(`columns-${currentNode.id}`)
 		}
@@ -70,8 +82,8 @@ export const ListPreview = ({ node: currentNode, width }: OwnProps) => {
 						</div>
 					))}
 				</li>
-				{data.map(({ id, value, node, children, list_path }) => (
-					<li key={id} className="item">
+				{data.map(({ id, value, node, rowColor, children, list_path }) => (
+					<li key={id} className="item" style={{ '--row-color': rowColor }}>
 						<div className="options">
 							<ListItemActions node={node} id={id} value={value} />
 						</div>
