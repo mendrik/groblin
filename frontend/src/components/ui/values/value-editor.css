@@ -1,0 +1,10 @@
+.fade-tab-line:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 100%;
+    width: 70px;
+    height: 1px;
+    background: linear-gradient(to right, hsl(var(--muted-foreground)), transparent);
+
+}

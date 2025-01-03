@@ -22,38 +22,40 @@ export function App() {
 	const { width } = useResize(ref)
 	return (
 		<Layout>
-			<ScrollArea className="w-full h-full">
-				<ResizablePanelGroup
-					direction="horizontal"
-					className="w-full"
-					onLayout={setSignal($panelSizes)}
-				>
-					<ResizablePanel defaultSize={$panelSizes.value[0]}>
-						<div className="w-full h-8 shrink-0">
-							<h1 className="px-2 py-1 text-xl font-normal text-muted-foreground tracking-tight transition-colors truncate  w-full overflow-hidden">
-								{notNil($project).name}
-							</h1>
-						</div>
-						<DocumentTree />
-					</ResizablePanel>
-					<ResizableHandle />
-					<ResizablePanel defaultSize={$panelSizes.value[1]}>
-						<div className="w-full shrink-0 h-8 p-1" />
-						<div className="flex-1 py-2">
-							<NodeValues />
-						</div>
-					</ResizablePanel>
-					<ResizableHandle />
-					<ResizablePanel
-						defaultSize={$panelSizes.value[2]}
-						className="container-size"
+			<ScrollArea>
+				<div className="w-full max-h-svh">
+					<ResizablePanelGroup
+						direction="horizontal"
+						className="w-full min-h-svh "
+						onLayout={setSignal($panelSizes)}
 					>
-						<div className="w-full shrink-0 h-10 p-1" ref={ref} />
-						<ErrorBoundary fallback={<div>Preview panel has crashed</div>}>
-							<PreviewPanel width={width} />
-						</ErrorBoundary>
-					</ResizablePanel>
-				</ResizablePanelGroup>
+						<ResizablePanel defaultSize={$panelSizes.value[0]}>
+							<div className="w-full h-8 shrink-0">
+								<h1 className="px-2 py-1 text-xl font-normal text-muted-foreground tracking-tight transition-colors truncate  w-full overflow-hidden">
+									{notNil($project).name}
+								</h1>
+							</div>
+							<DocumentTree />
+						</ResizablePanel>
+						<ResizableHandle />
+						<ResizablePanel defaultSize={$panelSizes.value[1]}>
+							<div className="w-full shrink-0 h-8 p-1" />
+							<div className="flex-1 py-2">
+								<NodeValues />
+							</div>
+						</ResizablePanel>
+						<ResizableHandle />
+						<ResizablePanel
+							defaultSize={$panelSizes.value[2]}
+							className="container-size"
+						>
+							<div className="w-full shrink-0 h-10 p-1" ref={ref} />
+							<ErrorBoundary fallback={<div>Preview panel has crashed</div>}>
+								<PreviewPanel width={width} />
+							</ErrorBoundary>
+						</ResizablePanel>
+					</ResizablePanelGroup>
+				</div>
 			</ScrollArea>
 		</Layout>
 	)

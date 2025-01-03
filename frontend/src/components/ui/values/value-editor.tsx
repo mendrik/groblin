@@ -22,6 +22,8 @@ import { ListEditor } from './list-editor'
 import { NumberEditor } from './number-editor'
 import { StringEditor } from './string-editor'
 
+import './value-editor.css'
+
 export enum ViewContext {
 	Tree = 'tree',
 	List = 'list'

@@ -45,7 +45,7 @@ type ListItemActionsProps = {
 const ListItemActions = ({ node, item }: ListItemActionsProps) => (
 	<DropdownMenu>
 		<DropdownMenuTrigger className="h-7" onKeyDown={stopPropagation}>
-			<IconDotsVertical className="w-4 h-4" />
+			<IconDotsVertical className="w-4 h-4 text-muted-foreground" stroke={1} />
 		</DropdownMenuTrigger>
 		<DropdownMenuContent
 			onFocus={stopPropagation}
@@ -93,7 +93,7 @@ export const TabEditor: ValueEditor<ListItemValue[]> = ({
 		>
 			<ol
 				className={cn(
-					'flex flex-row gap-1 ml-1 items-end',
+					'flex flex-row gap-1 ml-1 items-end fade-tab-line',
 					!items.length && 'hidden'
 				)}
 			>
@@ -101,17 +101,16 @@ export const TabEditor: ValueEditor<ListItemValue[]> = ({
 					<li
 						key={`${item.id}`}
 						className={cn(
-							'transform duration-100 flex flex-row items-center h-7 border border-border border-b-0 rounded-md',
+							'transform duration-100 flex flex-row items-center h-7 border border-muted-foreground border-b-0 rounded-md',
 							'rounded-b-none text-muted-foreground pr-1',
-							$activeItem?.id === item.id &&
-								'border-muted-foreground bg-black text-foreground',
+							$activeItem?.id === item.id && 'bg-background text-foreground',
 							$activeItem?.id !== item.id &&
 								'translate-y-[-1px] translate-z-[-1px] h-6 bg-background'
 						)}
 					>
 						<button
 							type="button"
-							className="py-0 pl-3 pr-1 text-md whitespace-nowrap"
+							className="py-0 pl-2 pr-1 text-md whitespace-nowrap"
 							onClick={() => activateListItem(item)}
 						>
 							{item.value.name ?? 'Unnamed'}
