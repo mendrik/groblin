@@ -1,7 +1,7 @@
 import { EditorType } from '@shared/enums'
 import { type TypeOf, number, object, string } from 'zod'
 import { asField } from '../../zod-form/utils'
-import { required } from './required'
+import { required } from './common'
 
 export const NumberProps = object({
 	unit: asField(string().optional(), {

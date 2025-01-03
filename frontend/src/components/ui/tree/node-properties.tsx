@@ -17,7 +17,7 @@ import type { ZodRawShape } from 'zod'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
 import { ZodForm } from '../zod-form/zod-form'
-import { nodePropertiesForm } from './utils'
+import { propSchema } from './properties/props-schema'
 
 const $dialogOpen = signal(false)
 const $node = signal<TreeNode>()
@@ -41,7 +41,7 @@ export const NodeProperties = <T extends ZodRawShape>() => {
 					<DialogDescription>Configure node type editor</DialogDescription>
 				</DialogHeader>
 				<ZodForm
-					schema={nodePropertiesForm($node.value)}
+					schema={propSchema($node.value)}
 					columns={2}
 					defaultValues={oldValue?.settings}
 					onSubmit={pipeAsync(
