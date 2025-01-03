@@ -3,7 +3,17 @@ import { type TreeNode, pathTo } from '@/state/tree'
 import { $activeListItems, activePath, saveValue } from '@/state/value'
 import { caseOf, match } from '@shared/utils/match'
 import { pipeAsync } from '@shared/utils/pipe-async'
-import { type Pred, T as _, any, dropLast, filter, ifElse, pipe } from 'ramda'
+import {
+	type Pred,
+	T as _,
+	any,
+	dropLast,
+	equals,
+	filter,
+	ifElse,
+	pipe,
+	unless
+} from 'ramda'
 import type { ReactNode } from 'react'
 import { BooleanEditor } from './boolean-editor'
 import { ColorEditor } from './color-editor'
@@ -79,14 +89,17 @@ export const ValueEditor = ({
 	view = ViewContext.Tree,
 	listPath = []
 }: OwnProps) => {
-	const save: ValueEditorProps<any>['save'] = pipeAsync(
-		<C,>(typeValue?: C) => ({
-			value: typeValue,
-			node_id: node.id,
-			id: value?.[0]?.id,
-			list_path: listPath
-		}),
-		saveValue
+	const save: ValueEditorProps<any>['save'] = unless(
+		equals(value?.[0]?.value),
+		pipeAsync(
+			<C,>(typeValue?: C) => ({
+				value: typeValue,
+				node_id: node.id,
+				id: value?.[0]?.id,
+				list_path: listPath
+			}),
+			saveValue
+		)
 	)
 
 	const EditorCmp = matcher(node, view)
