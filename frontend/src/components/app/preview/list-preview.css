@@ -21,6 +21,11 @@
 		width: 100%;
 	}
 
+	.item:has(.label) {
+		position: sticky;
+		top: 0px;
+	}
+
 	.options {
 		display: flex;
 		align-items: flex-end;

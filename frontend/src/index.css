@@ -68,7 +68,7 @@ flex
 
 @layer components {
   body {
-    @apply bg-background text-foreground overflow-hidden min-h-[100svh] min-w-[100svw] flex items-stretch flex-row;
+    @apply bg-background text-foreground min-h-[100svh] min-w-[100svw] flex items-stretch flex-row;
   }
 
   #app {

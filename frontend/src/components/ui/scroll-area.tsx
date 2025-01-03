@@ -39,7 +39,7 @@ const ScrollArea = React.forwardRef<
 	) => (
 		<ScrollAreaPrimitive.Root
 			ref={ref}
-			className={cn('relative overflow-hidden scroll-fade', className)}
+			className={cn('relative scroll-fade', className)}
 			{...props}
 		>
 			<ScrollAreaPrimitive.Viewport

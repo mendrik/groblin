@@ -26,7 +26,7 @@ export function App() {
 				<div className="w-full max-h-svh">
 					<ResizablePanelGroup
 						direction="horizontal"
-						className="w-full min-h-svh "
+						className="w-full min-h-svh"
 						onLayout={setSignal($panelSizes)}
 					>
 						<ResizablePanel defaultSize={$panelSizes.value[0]}>
