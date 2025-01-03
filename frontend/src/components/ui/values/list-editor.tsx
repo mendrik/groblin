@@ -29,16 +29,12 @@ import { MicroIcon } from '../random/micro-icon'
 import { openListItemCreate } from './list-item-create'
 import { openListItemDelete } from './list-item-delete'
 import { openListItemEdit } from './list-item-edit'
+import type { ValueEditor } from './value-editor'
 
 export type ListItemValue = Value & {
 	value: {
 		name: string
 	}
-}
-
-type OwnProps = {
-	node: TreeNode
-	value?: ListItemValue[]
 }
 
 type ListItemActionsProps = {
@@ -74,7 +70,10 @@ const ListItemActions = ({ node, item }: ListItemActionsProps) => (
 	</DropdownMenu>
 )
 
-export const TabEditor = ({ node, value: items = [] }: OwnProps) => {
+export const TabEditor: ValueEditor<ListItemValue[]> = ({
+	node,
+	value: items = []
+}) => {
 	const $activeItem = notNil($activeListItems)[node.id]
 	const itemInList =
 		isNotNil($activeItem) && items.some(i => i.id === $activeItem.id)
@@ -130,7 +129,10 @@ export const TabEditor = ({ node, value: items = [] }: OwnProps) => {
 	)
 }
 
-export const PagedEditor = ({ node, value: items = [] }: OwnProps) => {
+export const PagedEditor: ValueEditor<ListItemValue[]> = ({
+	node,
+	value: items = []
+}) => {
 	const step = (items.length / 10) | 0
 	const $activeItem = notNil($activeListItems)[node.id]
 	const page = findIndex(item => item.id === $activeItem?.id, items)
@@ -194,10 +196,14 @@ export const PagedEditor = ({ node, value: items = [] }: OwnProps) => {
 	)
 }
 
-export const ListEditor = ({ node, value = [] }: OwnProps) => {
+export const ListEditor: ValueEditor<ListItemValue[]> = ({
+	node,
+	value = [],
+	save
+}) => {
 	return value.length <= 5 ? (
-		<TabEditor node={node} value={value} />
+		<TabEditor node={node} value={value} save={save} />
 	) : (
-		<PagedEditor node={node} value={value} />
+		<PagedEditor node={node} value={value} save={save} />
 	)
 }

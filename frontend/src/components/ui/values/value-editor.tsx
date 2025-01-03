@@ -3,16 +3,7 @@ import { type TreeNode, pathTo } from '@/state/tree'
 import { $activeListItems, activePath, saveValue } from '@/state/value'
 import { caseOf, match } from '@shared/utils/match'
 import { pipeAsync } from '@shared/utils/pipe-async'
-import {
-	type Pred,
-	T as _,
-	any,
-	dropLast,
-	filter,
-	head,
-	ifElse,
-	pipe
-} from 'ramda'
+import { type Pred, T as _, any, dropLast, filter, ifElse, pipe } from 'ramda'
 import type { ReactNode } from 'react'
 import { BooleanEditor } from './boolean-editor'
 import { ColorEditor } from './color-editor'
@@ -26,14 +17,17 @@ export enum ViewContext {
 	List = 'list'
 }
 
-type OwnProps = {
+type InnerValue<T> = T extends { value: infer V } ? V : never
+
+type ValueEditorProps<T> = {
 	node: TreeNode
-	view?: ViewContext
-	value: Value[]
-	listPath: number[] | undefined
+	value?: T
+	save: (value: InnerValue<T>) => Promise<number>
 }
 
-type Args = readonly [TreeNode, Value[] | undefined, number[], ViewContext]
+export type ValueEditor<T> = (props: ValueEditorProps<T>) => ReactNode
+
+type Args = readonly [TreeNode, ViewContext]
 const isList: Pred<[TreeNode]> = node => node.type === NodeType.List
 
 const notActive: Pred<[TreeNode]> = node =>
@@ -44,39 +38,27 @@ const isBlankField: Pred<[TreeNode]> = pipe(
 	filter(isList),
 	any(notActive)
 )
+
 const isBlankList: Pred<[TreeNode]> = pipe(
 	pathTo,
 	filter(isList),
 	dropLast(1),
 	any(notActive)
 )
+
 const isBlank: Pred<[TreeNode]> = ifElse(isList, isBlankList, isBlankField)
 
-const matcher = match<Args, ReactNode>(
-	caseOf([isBlank, _], () => null),
-	caseOf([{ type: NodeType.List }, _, _, ViewContext.Tree], (node, value) => (
-		<ListEditor node={node} value={value} />
-	)),
-	caseOf([{ type: NodeType.Object }, _, _, _], () => null),
-	caseOf([{ type: NodeType.Boolean }, _, _, _], (node, value, listPath) => (
-		<BooleanEditor node={node} value={head(value ?? [])} listPath={listPath} />
-	)),
-	caseOf([{ type: NodeType.String }, _, _, _], (node, value, listPath) => (
-		<StringEditor node={node} value={head(value ?? [])} listPath={listPath} />
-	)),
-	caseOf([{ type: NodeType.Color }, _, _, _], (node, value, listPath) => (
-		<ColorEditor node={node} value={head(value ?? [])} listPath={listPath} />
-	)),
-	caseOf([{ type: NodeType.Number }, _, _, _], (node, value, listPath) => (
-		<NumberEditor node={node} value={head(value ?? [])} listPath={listPath} />
-	)),
-	caseOf([{ type: NodeType.Date }, _, _, _], (node, value, listPath) => (
-		<DateEditor node={node} value={head(value ?? [])} listPath={listPath} />
-	)),
-	caseOf([_, _, _, ViewContext.Tree], node => (
-		<div className="ml-1">{node.name}</div>
-	)),
-	caseOf([_, _, _, ViewContext.List], null)
+const matcher = match<Args, ValueEditor<any> | null>(
+	caseOf([isBlank, _], null),
+	caseOf([{ type: NodeType.List }, ViewContext.Tree], () => ListEditor),
+	caseOf([{ type: NodeType.List }, ViewContext.List], () => null),
+	caseOf([{ type: NodeType.Object }, _], () => null),
+	caseOf([{ type: NodeType.Boolean }, _], () => BooleanEditor),
+	caseOf([{ type: NodeType.String }, _], () => StringEditor),
+	caseOf([{ type: NodeType.Color }, _], () => ColorEditor),
+	caseOf([{ type: NodeType.Number }, _], () => NumberEditor),
+	caseOf([{ type: NodeType.Date }, _], () => DateEditor),
+	caseOf([_, _], () => null)
 )
 
 export const editorKey = (node: TreeNode, value?: Value) =>
@@ -84,24 +66,37 @@ export const editorKey = (node: TreeNode, value?: Value) =>
 		? `${value.id}-${value.updated_at}`
 		: `${node.id}-${activePath(node)?.join('-')}`
 
-export const save = <T extends Value>(
-	node: TreeNode,
-	listPath: number[],
-	value?: T
-) =>
-	pipeAsync(
-		<C,>(typeValue?: C) => ({
-			value: typeValue,
-			node_id: node.id,
-			id: value?.id,
-			list_path: listPath
-		}),
-		saveValue
-	)
+type OwnProps = {
+	node: TreeNode
+	view?: ViewContext
+	value: Value[]
+	listPath: number[] | undefined
+}
 
 export const ValueEditor = ({
 	node,
 	value,
 	view = ViewContext.Tree,
 	listPath = []
-}: OwnProps) => matcher(node, value, listPath, view)
+}: OwnProps) => {
+	const save: ValueEditorProps<any>['save'] = pipeAsync(
+		<C,>(typeValue?: C) => ({
+			value: typeValue,
+			node_id: node.id,
+			id: value?.[0]?.id,
+			list_path: listPath
+		}),
+		saveValue
+	)
+
+	const EditorCmp = matcher(node, view)
+	return (
+		EditorCmp && (
+			<EditorCmp
+				node={node}
+				value={isList(node) ? value : value?.[0]}
+				save={save}
+			/>
+		)
+	)
+}

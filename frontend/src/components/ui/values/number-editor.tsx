@@ -2,22 +2,19 @@ import KeyListener from '@/components/utils/key-listener'
 import type { Value } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
 import { $nodeSettingsMap } from '@/state/node-settings'
-import type { TreeNode } from '@/state/tree'
 import { objOf, pipe } from 'ramda'
 import { MaskedInput } from '../random/masked-input'
 import type { NumberProps } from '../tree/properties/numbers'
-import { editorKey, save } from './value-editor'
+import { type ValueEditor, editorKey } from './value-editor'
 
 type NumberValue = Value & { value: { figure: number } }
 
-type OwnProps = {
-	node: TreeNode
-	value?: NumberValue
-	listPath: number[]
-}
-
-export const NumberEditor = ({ node, value, listPath }: OwnProps) => {
-	const saveNewValue = pipe(objOf('figure'), save(node, listPath, value))
+export const NumberEditor: ValueEditor<NumberValue> = ({
+	node,
+	value,
+	save
+}) => {
+	const saveNewValue = pipe(objOf('figure'), save)
 	const settings = $nodeSettingsMap.value[node.id]?.settings as
 		| NumberProps
 		| undefined

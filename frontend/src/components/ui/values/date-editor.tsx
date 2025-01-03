@@ -2,14 +2,13 @@ import KeyListener from '@/components/utils/key-listener'
 import type { Value } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
 import { relativeTime } from '@/lib/relative-time'
-import type { TreeNode } from '@/state/tree'
 import { IconCalendar } from '@tabler/icons-react'
 import { parseJSON } from 'date-fns'
 import { objOf, pipe, when } from 'ramda'
 import { isString } from 'ramda-adjunct'
 import { openDatePicker } from '../date-picker/date-picker-dialog'
 import { MicroIcon } from '../random/micro-icon'
-import { save } from './value-editor'
+import type { ValueEditor } from './value-editor'
 
 type DateValue = Value & {
 	value: {
@@ -17,15 +16,9 @@ type DateValue = Value & {
 	}
 }
 
-type OwnProps = {
-	node: TreeNode
-	value?: DateValue
-	listPath: number[]
-}
-
 const safeParse: (date?: string) => Date | undefined = when(isString, parseJSON)
 
-export const DateEditor = ({ node, value, listPath }: OwnProps) => {
+export const DateEditor: ValueEditor<DateValue> = ({ node, value, save }) => {
 	const date = safeParse(value?.value.date)
 
 	return (
@@ -37,7 +30,7 @@ export const DateEditor = ({ node, value, listPath }: OwnProps) => {
 					onClick={() =>
 						openDatePicker({
 							date,
-							callback: pipe(objOf('date'), save(node, listPath, value))
+							callback: pipe(objOf('date'), save)
 						})
 					}
 				/>

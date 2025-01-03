@@ -21,8 +21,9 @@ type Request = {
 }
 
 const useLoadItems = (request: Request) => {
+	const node = ({ node_id }: Value) => notNil($nodesMap, node_id)
 	const { data } = useSWR(request, () => Api.GetListItems({ request }))
-	return data ?? []
+	return (data ?? []).map(evolveAlt({ node, children: { node } }))
 }
 
 const useLoadColumns = (nodeId: number): Node[] => {
@@ -36,17 +37,13 @@ type OwnProps = {
 	node: TreeNode
 }
 
-const node = ({ node_id }: Value) => notNil($nodesMap, node_id)
-
 export const ListPreview = ({ node: currentNode }: OwnProps) => {
+	const { mutate } = useSWRConfig()
 	const request = {
 		node_id: currentNode.id,
 		list_path: activePath(currentNode)
 	}
-	const { mutate } = useSWRConfig()
-	const data = useLoadItems(request).map(
-		evolveAlt({ node, children: { node } })
-	)
+	const data = useLoadItems(request)
 	const columns = useLoadColumns(currentNode.id)
 	useSignalEffect(() => {
 		if ($values.value || $nodes.value || $nodeSettings.value) {

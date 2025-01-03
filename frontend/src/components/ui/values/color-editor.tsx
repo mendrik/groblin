@@ -2,12 +2,11 @@ import KeyListener from '@/components/utils/key-listener'
 import type { Value } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
 import { cn } from '@/lib/utils'
-import type { TreeNode } from '@/state/tree'
 import { rgb } from 'chroma-js'
 import { objOf, pipe } from 'ramda'
 import { Button } from '../button'
 import { openColorPicker } from '../color-picker'
-import { editorKey, save } from './value-editor'
+import { type ValueEditor, editorKey } from './value-editor'
 
 type ColorValue = Value & {
 	value: {
@@ -15,13 +14,7 @@ type ColorValue = Value & {
 	}
 }
 
-type OwnProps = {
-	node: TreeNode
-	value?: ColorValue
-	listPath: number[]
-}
-
-export const ColorEditor = ({ node, value, listPath }: OwnProps) => {
+export const ColorEditor: ValueEditor<ColorValue> = ({ node, value, save }) => {
 	const chroma = rgb.apply(null, value?.value.rgba ?? [0, 0, 0, 1])
 	const backgroundColor = chroma.css()
 
@@ -39,7 +32,7 @@ export const ColorEditor = ({ node, value, listPath }: OwnProps) => {
 					style={{ backgroundColor }}
 					onClick={() =>
 						openColorPicker({
-							callback: pipe(objOf('rgba'), save(node, listPath, value)),
+							callback: pipe(objOf('rgba'), save),
 							color: backgroundColor
 						})
 					}
