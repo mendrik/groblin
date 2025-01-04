@@ -1,24 +1,32 @@
 import type { Key } from 'ts-key-enum'
 
+import {
+	type ReactNode,
+	type RefObject,
+	type KeyboardEvent as,
+	forwardRef,
+	useEffect,
+	useRef
+} from 'react'
+
 type KeyHandlers = {
-	[K in `on${Capitalize<keyof typeof Key>}`]?: (event: KeyboardEvent) => void
+	[K in `on${Capitalize<keyof typeof Key>}`]?: (
+		event: KeyboardEvent | React.KeyboardEvent
+	) => void
 }
 
 interface KeyListenerProps extends KeyHandlers {
-	children?: React.ReactNode
+	children?: ReactNode
 }
 
-import type React from 'react'
-import { type MutableRefObject, forwardRef, useEffect, useRef } from 'react'
-
 interface KeyListenerProps extends KeyHandlers {
-	children?: React.ReactNode
+	children?: ReactNode
 }
 
 const KeyListener = forwardRef<HTMLDivElement, KeyListenerProps>(
 	({ children, ...handlers }, forwardRef) => {
 		const innerRef = useRef<HTMLDivElement>(null)
-		const ref = (forwardRef || innerRef) as MutableRefObject<HTMLDivElement>
+		const ref = (forwardRef || innerRef) as RefObject<HTMLDivElement>
 
 		useEffect(() => {
 			const handleKeyDown = (e: KeyboardEvent) => {
