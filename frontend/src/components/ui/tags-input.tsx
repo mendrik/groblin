@@ -1,15 +1,15 @@
-import { inputValue, stopPropagation } from '@/lib/dom-events'
+import { inputValue, preventDefault, stopPropagation } from '@/lib/dom-events'
 import { cn } from '@/lib/utils'
 import { assertExists } from '@shared/asserts'
-import { isEmpty, last, nth, objOf, pipe, when } from 'ramda'
+import { isEmpty, last, nth, objOf, pipe, unless, when } from 'ramda'
 import {
 	type HTMLAttributes,
+	type RefObject,
 	forwardRef,
-	useEffect,
 	useRef,
 	useState
 } from 'react'
-import { useList } from 'react-use'
+import { useDeepCompareEffect, useList } from 'react-use'
 import FocusTravel from '../utils/focus-travel'
 import KeyListener from '../utils/key-listener'
 import { SortContext } from '../utils/sort-context'
@@ -22,49 +22,46 @@ interface TagsInputProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export const TagsInput = forwardRef<HTMLDivElement, TagsInputProps>(
-	({ className, value, placeholder, onValueChange, ...props }, ref) => {
+	({ className, value, placeholder, onValueChange, ...props }, fref) => {
 		const containerRef = useRef<HTMLDivElement>(null)
 		const inputRef = useRef<HTMLInputElement>(null)
 		const measureRef = useRef<HTMLDivElement>(null)
 		const [values, { push, removeAt }] = useList<string>(value)
 		const [active, setActive] = useState<number>(-1)
-		const clearInput = () => {
-			const inp = inputRef.current
-			assertExists(inp, 'inputRef.current')
-			inp.value = ''
-		}
-		const adjustWidth = (value: string) => {
-			const mDiv = measureRef.current
-			assertExists(mDiv, 'measureRef.current')
-			const inp = inputRef.current
-			assertExists(inp, 'inp.current')
-			mDiv.innerText = value
-			const { width } = mDiv.getBoundingClientRect()
-			inp.style.maxWidth = `${Math.max(width, 40)}px`
-		}
-		const badges = () => {
-			assertExists(containerRef.current, 'containerRef.current')
-			return Array.from(
-				containerRef.current.querySelectorAll<HTMLElement>('.badge')
-			)
-		}
-		const deleteAt = (idx: number) => {
-			const b = badges()
-			removeAt(idx)
-			if (b.length === 1) {
-				const inp = inputRef.current
-				assertExists(inp, 'inputRef.current')
-				inp.focus()
-			} else {
-				nth(idx - 1, b)?.focus()
-			}
-		}
-		const deleteLast = () => deleteAt(values.length - 1)
-		const focusLast = () => {
-			last(badges())?.focus()
+
+		const ref = <T,>(ref: RefObject<T | null>): T => {
+			const inp = ref.current
+			assertExists(inp, 'ref.current missing')
+			return inp
 		}
 
-		useEffect(() => onValueChange(values), [values, onValueChange])
+		const clearInput = () => (ref(inputRef).value = '')
+
+		const adjustWidth = (value: string) => {
+			const mDiv = ref(measureRef)
+			mDiv.innerText = value
+			const { width } = mDiv.getBoundingClientRect()
+			ref(inputRef).style.maxWidth = `${Math.max(width, 40)}px`
+		}
+
+		const badges = () =>
+			Array.from(ref(containerRef).querySelectorAll<HTMLElement>('.badge'))
+
+		const deleteAt = (idx: number) => {
+			console.log('d-at', values)
+			const b = nth(idx - 1, badges())
+			removeAt(idx)
+			b?.focus() ?? ref(inputRef).focus()
+		}
+
+		const deleteLast = () => {
+			console.log('d', values)
+			deleteAt(values.length - 1)
+		}
+
+		const focusLast = () => last(badges())?.focus()
+
+		useDeepCompareEffect(() => void onValueChange(values), [values])
 
 		return (
 			<SortContext
@@ -72,11 +69,11 @@ export const TagsInput = forwardRef<HTMLDivElement, TagsInputProps>(
 				onDragEnd={() => console.log('drag end')}
 			>
 				<div
-					ref={ref}
+					ref={fref}
 					// biome-ignore lint/a11y/useSemanticElements: <explanation>
 					role="textbox"
 					tabIndex={0}
-					onFocus={e => inputRef.current?.focus()}
+					onFocus={e => ref(inputRef).focus()}
 					onKeyDown={e => void 0}
 					className={cn(
 						'bg-background border border-input rounded-sm flex flex-wrap flex-row gap-1 p-1',
@@ -98,19 +95,21 @@ export const TagsInput = forwardRef<HTMLDivElement, TagsInputProps>(
 									)}
 									id={item}
 									onFocus={pipe(stopPropagation, () => setActive(index))}
-									onBlur={() => setActive(-1)}
 									tabIndex={0}
 									renderer={() => <span className="text-sm">{item}</span>}
-									key={`${
-										// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-										index
-									}`}
+									key={`${index}-${item}`}
 								/>
 							))}
 						</FocusTravel>
 					</KeyListener>
 					<KeyListener
-						onEnter={pipe(inputValue, push, clearInput)}
+						onEnter={pipe(
+							preventDefault,
+							stopPropagation,
+							inputValue,
+							unless(isEmpty, push),
+							clearInput
+						)}
 						onBackspace={pipe(inputValue, when(isEmpty, deleteLast))}
 						onArrowLeft={pipe(inputValue, when(isEmpty, focusLast))}
 					>

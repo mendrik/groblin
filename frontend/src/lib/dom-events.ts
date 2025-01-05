@@ -38,11 +38,15 @@ export const target = <E extends SyntheticEvent>(e: E): string => {
 	return ''
 }
 
-export const stopPropagation = <E extends SyntheticEvent | Event>(e: E): void =>
+export const stopPropagation = <E extends SyntheticEvent | Event>(e: E): E => {
 	e.stopPropagation()
+	return e
+}
 
-export const preventDefault = <E extends SyntheticEvent | Event>(e: E): void =>
+export const preventDefault = <E extends SyntheticEvent | Event>(e: E): E => {
 	e.preventDefault()
+	return e
+}
 
 export const focusOn =
 	<EL extends HTMLElement>(ref: RefObject<EL | null>) =>
