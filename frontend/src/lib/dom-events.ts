@@ -24,7 +24,7 @@ export const safeDataInt = (
 export const focusWithin = (container: HTMLElement | null): boolean =>
 	container?.matches(':focus-within') ?? false
 
-export const inputValue = <E extends SyntheticEvent>(e: E): string => {
+export const inputValue = <E extends SyntheticEvent | Event>(e: E): string => {
 	if (e.target instanceof HTMLInputElement) {
 		return e.target.value
 	}

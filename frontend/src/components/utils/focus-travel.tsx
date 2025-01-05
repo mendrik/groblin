@@ -11,7 +11,7 @@ import {
 	sort
 } from 'ramda'
 import { type PropsWithChildren, useEffect, useRef } from 'react'
-import KeyListener from './key-listener'
+import KeyListener, { type KeyEvent } from './key-listener'
 
 type OwnProps = PropsWithChildren<{
 	focusableSelector?: string
@@ -84,9 +84,9 @@ const FocusTravel = ({
 }: OwnProps) => {
 	const ref = useRef<HTMLDivElement>(null)
 
-	const focus = (dir: Direction) => (ev: Event) => {
+	const focus = (dir: Direction) => (ev: KeyEvent) => {
 		ev.preventDefault() // Prevent default scrolling behavior
-		ev.stopImmediatePropagation()
+		ev.stopPropagation()
 		focusNext(dir, focusableSelector, document.activeElement)(ref.current)
 	}
 

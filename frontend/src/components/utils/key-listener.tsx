@@ -1,18 +1,18 @@
 import type { Key } from 'ts-key-enum'
 
+import type React from 'react'
 import {
 	type ReactNode,
 	type RefObject,
-	type KeyboardEvent as,
 	forwardRef,
 	useEffect,
 	useRef
 } from 'react'
 
+export type KeyEvent = KeyboardEvent | React.KeyboardEvent
+
 type KeyHandlers = {
-	[K in `on${Capitalize<keyof typeof Key>}`]?: (
-		event: KeyboardEvent | React.KeyboardEvent
-	) => void
+	[K in `on${Capitalize<keyof typeof Key>}`]?: (event: KeyEvent) => void
 }
 
 interface KeyListenerProps extends KeyHandlers {
@@ -29,7 +29,7 @@ const KeyListener = forwardRef<HTMLDivElement, KeyListenerProps>(
 		const ref = (forwardRef || innerRef) as RefObject<HTMLDivElement>
 
 		useEffect(() => {
-			const handleKeyDown = (e: KeyboardEvent) => {
+			const handleKeyDown = (e: KeyEvent) => {
 				const handlerName = `on${e.key}` as keyof KeyHandlers
 				if (handlerName in handlers) {
 					handlers[handlerName]?.(e)
