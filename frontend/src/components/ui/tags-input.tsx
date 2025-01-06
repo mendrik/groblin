@@ -117,6 +117,7 @@ export const TagsInput = forwardRef<HTMLDivElement, TagsInputProps>(
 							ref={inputRef}
 							placeholder={placeholder}
 							onChange={pipe(tagName, adjustWidth)}
+							onBlur={pipe(tagName, when(isNotEmpty, push), clearInput)}
 							className={cn(
 								'border-none',
 								'flex-grow appearance-none flex-1 bg-transparent text-sm p-1 w-fit',
