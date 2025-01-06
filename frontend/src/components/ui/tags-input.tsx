@@ -72,6 +72,7 @@ export const TagsInput = forwardRef<HTMLDivElement, TagsInputProps>(
 			>
 				<div
 					ref={fref}
+					{...props}
 					// biome-ignore lint/a11y/useSemanticElements: <explanation>
 					role="textbox"
 					tabIndex={0}

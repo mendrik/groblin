@@ -119,13 +119,9 @@ const matcher = match<Args, ReactNode>(
 	),
 	caseOf(
 		[{ editor: EditorType.Switch }, _, _],
-		(desc, _, { value, ...field }) => (
+		(desc, _, { value, onChange, ...field }) => (
 			<FormControl className="block">
-				<Switch
-					{...field}
-					onCheckedChange={field.onChange}
-					defaultChecked={value}
-				/>
+				<Switch {...field} onCheckedChange={onChange} defaultChecked={value} />
 			</FormControl>
 		)
 	),
@@ -146,11 +142,10 @@ const matcher = match<Args, ReactNode>(
 	),
 	caseOf(
 		[{ editor: EditorType.Tags }, _, _],
-		(desc, _, { value, onChange, ...field }) => (
+		(desc, _, { onChange, ...field }) => (
 			<FormControl>
 				<TagsInput
 					{...field}
-					value={value}
 					onValueChange={onChange}
 					placeholder={desc.placeholder}
 				/>
