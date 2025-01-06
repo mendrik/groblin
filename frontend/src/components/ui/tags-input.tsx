@@ -1,15 +1,16 @@
 import { inputValue, preventDefault, stopPropagation } from '@/lib/dom-events'
 import { cn } from '@/lib/utils'
 import { assertExists } from '@shared/asserts'
-import { isEmpty, last, nth, objOf, pipe, unless, when } from 'ramda'
+import { isEmpty, isNotEmpty, last, nth, objOf, pipe, when } from 'ramda'
 import {
 	type HTMLAttributes,
 	type RefObject,
 	forwardRef,
+	useEffect,
 	useRef,
 	useState
 } from 'react'
-import { useDeepCompareEffect, useList } from 'react-use'
+import { useList } from 'react-use'
 import FocusTravel from '../utils/focus-travel'
 import KeyListener from '../utils/key-listener'
 import { SortContext } from '../utils/sort-context'
@@ -20,6 +21,8 @@ interface TagsInputProps extends HTMLAttributes<HTMLDivElement> {
 	onValueChange: (value: string[]) => void
 	placeholder?: string
 }
+
+const tagName = pipe(preventDefault, stopPropagation, inputValue)
 
 export const TagsInput = forwardRef<HTMLDivElement, TagsInputProps>(
 	({ className, value, placeholder, onValueChange, ...props }, fref) => {
@@ -48,20 +51,19 @@ export const TagsInput = forwardRef<HTMLDivElement, TagsInputProps>(
 			Array.from(ref(containerRef).querySelectorAll<HTMLElement>('.badge'))
 
 		const deleteAt = (idx: number) => {
-			console.log('d-at', values)
 			const b = nth(idx - 1, badges())
 			removeAt(idx)
 			b?.focus() ?? ref(inputRef).focus()
 		}
 
-		const deleteLast = () => {
-			console.log('d', values)
-			deleteAt(values.length - 1)
-		}
+		// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+		useEffect(() => {
+			onValueChange(values)
+		}, [values])
+
+		const deleteLast = () => deleteAt(values.length - 1)
 
 		const focusLast = () => last(badges())?.focus()
-
-		useDeepCompareEffect(() => void onValueChange(values), [values])
 
 		return (
 			<SortContext
@@ -102,21 +104,15 @@ export const TagsInput = forwardRef<HTMLDivElement, TagsInputProps>(
 							))}
 						</FocusTravel>
 					</KeyListener>
+					<div
+						className="text-sm px-1 opacity-0 pointer-events-none absolute"
+						ref={measureRef}
+					/>
 					<KeyListener
-						onEnter={pipe(
-							preventDefault,
-							stopPropagation,
-							inputValue,
-							unless(isEmpty, push),
-							clearInput
-						)}
-						onBackspace={pipe(inputValue, when(isEmpty, deleteLast))}
-						onArrowLeft={pipe(inputValue, when(isEmpty, focusLast))}
+						onEnter={pipe(tagName, when(isNotEmpty, push), clearInput)}
+						onBackspace={pipe(tagName, when(isEmpty, deleteLast))}
+						onArrowLeft={pipe(tagName, when(isEmpty, focusLast))}
 					>
-						<div
-							className="text-sm px-1 opacity-0 pointer-events-none absolute"
-							ref={measureRef}
-						/>
 						<input
 							ref={inputRef}
 							placeholder={placeholder}
@@ -135,6 +131,3 @@ export const TagsInput = forwardRef<HTMLDivElement, TagsInputProps>(
 )
 
 TagsInput.displayName = 'TagsInput'
-function useActive<T>(value: string[]): [any, { push: any; removeAt: any }] {
-	throw new Error('Function not implemented.')
-}
