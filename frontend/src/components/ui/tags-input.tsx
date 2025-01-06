@@ -110,13 +110,13 @@ export const TagsInput = forwardRef<HTMLDivElement, TagsInputProps>(
 					/>
 					<KeyListener
 						onEnter={pipe(tagName, when(isNotEmpty, push), clearInput)}
-						onBackspace={pipe(tagName, when(isEmpty, deleteLast))}
+						onBackspace={pipe(inputValue, when(isEmpty, deleteLast))}
 						onArrowLeft={pipe(tagName, when(isEmpty, focusLast))}
 					>
 						<input
 							ref={inputRef}
 							placeholder={placeholder}
-							onChange={pipe(inputValue, adjustWidth)}
+							onChange={pipe(tagName, adjustWidth)}
 							className={cn(
 								'border-none',
 								'flex-grow appearance-none flex-1 bg-transparent text-sm p-1 w-fit',
