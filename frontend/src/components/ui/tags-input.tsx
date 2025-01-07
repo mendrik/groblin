@@ -79,7 +79,7 @@ export const TagsInput = forwardRef<HTMLDivElement, TagsInputProps>(
 					onFocus={e => ref(inputRef).focus()}
 					onKeyDown={e => void 0}
 					className={cn(
-						'bg-background border border-input rounded-sm flex flex-wrap flex-row gap-1 p-1',
+						'bg-background border border-input rounded-sm flex flex-wrap flex-row gap-1 p-1 cursor-text',
 						className
 					)}
 				>
@@ -120,8 +120,7 @@ export const TagsInput = forwardRef<HTMLDivElement, TagsInputProps>(
 							onChange={pipe(tagName, adjustWidth)}
 							onBlur={pipe(tagName, when(isNotEmpty, push), clearInput)}
 							className={cn(
-								'border-none',
-								'flex-grow appearance-none flex-1 bg-transparent text-sm p-1 w-fit',
+								'border-none appearance-none bg-transparent text-sm p-1 min-w-0 flex-grow basis-5',
 								'placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50'
 							)}
 						/>
