@@ -188,7 +188,7 @@ export const PagedEditor: ValueEditor<ListItemValue[]> = ({
 					onClick={() => activate(Number.MAX_SAFE_INTEGER)}
 				/>
 			</li>
-			<li className="mx-2 text-muted-foreground">
+			<li className="mx-2 text-muted-foreground whitespace-nowrap">
 				<span className="text-foreground">{page + 1}</span> of {items.length}
 			</li>
 		</ol>

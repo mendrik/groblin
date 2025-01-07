@@ -45,7 +45,11 @@ const upload = async (ev: React.ChangeEvent): Promise<Media> => {
 export const MediaEditor: ValueEditor<MediaValue> = ({ node, value, save }) => {
 	const id = editorKey(node, value)
 	return (
-		<div className="flex flex-row gap-1 items-center" id={id} key={id}>
+		<div
+			className="max-w-full flex flex-row gap-1 items-center"
+			id={id}
+			key={id}
+		>
 			<label
 				className="myLabel h-5 w-5 -ml-1 cursor-pointer"
 				// biome-ignore lint/a11y/noNoninteractiveTabindex: <explanation>
@@ -59,7 +63,9 @@ export const MediaEditor: ValueEditor<MediaValue> = ({ node, value, save }) => {
 					onChange={pipeAsync(upload, save)}
 				/>
 			</label>
-			<span>{value?.value.name}</span>
+			<span className="text-ellipsis overflow-hidden truncate">
+				{value?.value.name}
+			</span>
 		</div>
 	)
 }
