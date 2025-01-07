@@ -7,16 +7,24 @@ export class S3Client extends AwsS3 {
 		super({ region: process.env.AWS_REGION })
 	}
 
-	async getContent(Key: string) {
+	async getBody(key: string) {
 		const response = await this.send(
 			new GetObjectCommand({
 				Bucket: process.env.AWS_BUCKET,
-				Key
+				Key: key
 			})
 		)
 		if (response.Body === undefined) {
 			throw new Error('No body in response')
 		}
-		return response.Body.transformToString()
+		return response.Body
+	}
+
+	async getContent(key: string) {
+		return this.getBody(key).then(b => b.transformToString())
+	}
+
+	async getBytes(key: string) {
+		return this.getBody(key).then(b => b.transformToByteArray())
 	}
 }

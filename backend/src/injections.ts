@@ -16,6 +16,7 @@ import { ProjectResolver } from './resolvers/project-resolver.ts'
 import { ValueResolver } from './resolvers/value-resolver.ts'
 import { db } from './services/database.ts'
 import { EmailService } from './services/email-service.ts'
+import { ImageService } from './services/image-service.ts'
 import { ProjectService } from './services/project-service.ts'
 import { S3Client } from './services/s3-client.ts'
 
@@ -35,5 +36,6 @@ container.bind(S3Client).toSelf()
 container.bind(AuthChecker).toSelf()
 container.bind<PubSub>('PubSub').toConstantValue(pubSub)
 container.bind(EmailService).toSelf()
+container.bind(ImageService).toSelf()
 container.bind(Kysely<DB>).toConstantValue(db)
 export { container }

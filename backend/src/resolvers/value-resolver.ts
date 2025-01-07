@@ -18,6 +18,7 @@ import {
 	type PubSub,
 	Query,
 	Resolver,
+	Root,
 	Subscription,
 	UseMiddleware
 } from 'type-graphql'
@@ -94,12 +95,15 @@ export class ValueResolver {
 	@inject('PubSub')
 	private pubSub: PubSub
 
-	@Subscription(returns => Boolean, {
+	@Subscription(returns => Value, {
 		topics: Topic.ValuesUpdated,
 		filter: matchesLastProject
 	})
-	valuesUpdated(@Arg('projectId', () => Int) _: number) {
-		return true
+	valuesUpdated(
+		@Root() valuePayload: Value,
+		@Arg('projectId', () => Int) _: number
+	) {
+		return valuePayload
 	}
 
 	@Query(returns => [Value])
@@ -140,16 +144,15 @@ export class ValueResolver {
 				list_path: data.list_path,
 				order: max_order + 1
 			})
-			.returning('id as id')
+			.returning(['id', 'node_id', 'order', 'list_path', 'value', 'updated_at'])
 			.executeTakeFirstOrThrow()
 
-		this.pubSub.publish(Topic.ValuesUpdated, true)
+		this.pubSub.publish(Topic.ValuesUpdated, res)
 		return res.id
 	}
 
 	@Mutation(returns => Boolean)
 	async deleteListItem(@Arg('id', () => Int) id: number, @Ctx() ctx: Context) {
-		const { user } = ctx
 		const { numDeletedRows } = await this.db
 			.transaction()
 			.execute(async trx => {
@@ -174,7 +177,7 @@ export class ValueResolver {
 		@Ctx() ctx: Context
 	) {
 		const { user } = ctx
-		const { id } = await this.db
+		const res = await this.db
 			.insertInto('values')
 			.values({
 				id: data.id,
@@ -188,10 +191,10 @@ export class ValueResolver {
 					value: e.ref('excluded.value')
 				}))
 			)
-			.returning('id as id')
+			.returning(['id', 'node_id', 'order', 'list_path', 'value', 'updated_at'])
 			.executeTakeFirstOrThrow()
-		this.pubSub.publish(Topic.ValuesUpdated, true)
-		return id
+		this.pubSub.publish(Topic.ValuesUpdated, res)
+		return res.id
 	}
 
 	@Mutation(returns => Boolean)

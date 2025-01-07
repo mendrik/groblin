@@ -149,7 +149,7 @@ input Registration {
 type Subscription {
   nodeSettingsUpdated(projectId: Int!): Boolean!
   nodesUpdated(projectId: Int!): Boolean!
-  valuesUpdated(projectId: Int!): Boolean!
+  valuesUpdated(projectId: Int!): Value!
 }
 
 type Token {
