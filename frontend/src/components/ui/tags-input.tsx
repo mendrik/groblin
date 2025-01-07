@@ -1,16 +1,25 @@
 import { inputValue, preventDefault, stopPropagation } from '@/lib/dom-events'
+import { mergeRefs } from '@/lib/react'
 import { cn } from '@/lib/utils'
 import { assertExists } from '@shared/asserts'
-import { isEmpty, isNotEmpty, last, nth, objOf, pipe, when } from 'ramda'
+import {
+	dropLast,
+	isEmpty,
+	isNotEmpty,
+	last,
+	nth,
+	objOf,
+	pipe,
+	when
+} from 'ramda'
 import {
 	type HTMLAttributes,
 	type RefObject,
 	forwardRef,
-	useEffect,
 	useRef,
 	useState
 } from 'react'
-import { useList } from 'react-use'
+import { useDeepCompareEffect, useList } from 'react-use'
 import FocusTravel from '../utils/focus-travel'
 import KeyListener from '../utils/key-listener'
 import { SortContext } from '../utils/sort-context'
@@ -29,7 +38,7 @@ export const TagsInput = forwardRef<HTMLDivElement, TagsInputProps>(
 		const containerRef = useRef<HTMLDivElement>(null)
 		const inputRef = useRef<HTMLInputElement>(null)
 		const measureRef = useRef<HTMLDivElement>(null)
-		const [values, { push, removeAt }] = useList<string>(value)
+		const [values, { push, removeAt, set }] = useList<string>(value)
 		const [active, setActive] = useState<number>(-1)
 
 		const ref = <T,>(ref: RefObject<T | null>): T => {
@@ -57,11 +66,13 @@ export const TagsInput = forwardRef<HTMLDivElement, TagsInputProps>(
 		}
 
 		// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-		useEffect(() => {
+		useDeepCompareEffect(() => {
 			onValueChange(values)
 		}, [values])
 
-		const deleteLast = () => deleteAt(values.length - 1)
+		const deleteLast = () => {
+			set(dropLast(1))
+		}
 
 		const focusLast = () => last(badges())?.focus()
 
@@ -115,11 +126,12 @@ export const TagsInput = forwardRef<HTMLDivElement, TagsInputProps>(
 						onArrowLeft={pipe(tagName, when(isEmpty, focusLast))}
 					>
 						<input
-							ref={inputRef}
+							ref={mergeRefs(fref, inputRef)}
 							placeholder={placeholder}
 							onChange={pipe(tagName, adjustWidth)}
 							onBlur={pipe(tagName, when(isNotEmpty, push), clearInput)}
 							className={cn(
+								'[&[style]]:placeholder-transparent',
 								'border-none appearance-none bg-transparent text-sm p-1 min-w-0 flex-grow basis-5',
 								'placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50'
 							)}
