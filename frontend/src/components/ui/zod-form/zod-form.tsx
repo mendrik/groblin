@@ -68,9 +68,7 @@ function* schemaIterator<T extends ZodRawShape>(schema: AllowedTypes<T>) {
 				<FormItem className={colSpan(fieldData.span ?? 1)}>
 					<FormLabel>{fieldData.label}</FormLabel>
 					<Editor desc={fieldData} type={zodSchema} field={field} />
-					{fieldData.description && (
-						<FormDescription>{fieldData.description}</FormDescription>
-					)}
+					<FormDescription>{fieldData.description}</FormDescription>
 					<FormMessage />
 				</FormItem>
 			)

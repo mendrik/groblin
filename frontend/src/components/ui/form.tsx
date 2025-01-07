@@ -12,6 +12,8 @@ import {
 
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
+import { head } from 'ramda'
+import { compact } from 'ramda-adjunct'
 
 const Form = FormProvider
 
@@ -123,20 +125,25 @@ const FormControl = React.forwardRef<
 })
 FormControl.displayName = 'FormControl'
 
+const useError = () => {
+	const { error } = useFormField()
+	return Array.isArray(error) ? head(compact(error)) : error
+}
+
 const FormDescription = React.forwardRef<
 	HTMLParagraphElement,
 	React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => {
 	const { formDescriptionId } = useFormField()
-
-	return (
+	const e = useError()
+	return !e ? (
 		<p
 			ref={ref}
 			id={formDescriptionId}
 			className={cn('text-[0.8rem] text-muted-foreground', className)}
 			{...props}
 		/>
-	)
+	) : null
 })
 FormDescription.displayName = 'FormDescription'
 
@@ -145,7 +152,8 @@ const FormMessage = React.forwardRef<
 	React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, children, ...props }, ref) => {
 	const { error, formMessageId } = useFormField()
-	const body = error ? String(error?.message) : children
+	const e = useError()
+	const body = e ? String(e?.message) : children
 
 	if (!body) {
 		return null
