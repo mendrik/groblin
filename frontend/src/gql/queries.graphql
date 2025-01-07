@@ -102,7 +102,9 @@ mutation Logout {
 }
 
 subscription ValuesUpdated($projectId: Int!) {
-  valuesUpdated(projectId: $projectId)
+  valuesUpdated(projectId: $projectId) {
+    ...Value
+  }
 }
 
 query GetValues($data: GetValues!) {

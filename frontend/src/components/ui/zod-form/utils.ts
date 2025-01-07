@@ -140,36 +140,41 @@ export const stringField = (
 export const enumToMap = <T extends Record<string, string>>(enumRef: T) =>
 	Object.entries(enumRef)
 
+export const uploadToS3 = async (file: File) => {
+	const { signedUrl, object } = await Api.UploadUrl({ filename: file.name })
+	const response = await fetch(signedUrl, {
+		method: 'PUT',
+		headers: {
+			'Content-Type': file.type
+		},
+		body: file
+	})
+	if (!response.ok) {
+		throw new Error(response.statusText)
+	}
+	return object
+}
+
 export const fileUpload = (
 	label: string,
 	accept: string,
 	description: string
 ) =>
 	asField(
-		isA(File).transform(async (file, ctx) => {
-			const { signedUrl, object } = await Api.UploadUrl({ filename: file.name })
-			const response = await fetch(signedUrl, {
-				method: 'PUT',
-				headers: {
-					'Content-Type': file.type
-				},
-				body: file
-			})
-			if (!response.ok) {
-				ctx.addIssue({
-					code: z.ZodIssueCode.custom,
-					message: response.statusText
+		isA(File).transform(
+			async (file, ctx) =>
+				await uploadToS3(file).catch((err: Error) => {
+					ctx.addIssue({
+						code: z.ZodIssueCode.custom,
+						message: err.message
+					})
+					return z.NEVER
 				})
-				return z.NEVER
-			}
-			return object
-		}),
+		),
 		{
 			label,
 			editor: EditorType.File,
-			extra: {
-				accept
-			},
+			extra: accept,
 			description
 		}
 	)

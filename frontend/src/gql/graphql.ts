@@ -233,7 +233,7 @@ export type Registration = {
 export type Subscription = {
   nodeSettingsUpdated: Scalars['Boolean']['output'];
   nodesUpdated: Scalars['Boolean']['output'];
-  valuesUpdated: Scalars['Boolean']['output'];
+  valuesUpdated: Value;
 };
 
 
@@ -377,7 +377,7 @@ export type ValuesUpdatedSubscriptionVariables = Exact<{
 }>;
 
 
-export type ValuesUpdatedSubscription = { valuesUpdated: boolean };
+export type ValuesUpdatedSubscription = { valuesUpdated: { id: number, node_id: number, order: number, value: any, list_path?: Array<number> | null, updated_at: any } };
 
 export type GetValuesQueryVariables = Exact<{
   data: GetValues;
@@ -563,9 +563,11 @@ export const LogoutDocument = `
     `;
 export const ValuesUpdatedDocument = `
     subscription ValuesUpdated($projectId: Int!) {
-  valuesUpdated(projectId: $projectId)
+  valuesUpdated(projectId: $projectId) {
+    ...Value
+  }
 }
-    `;
+    ${ValueFragmentDoc}`;
 export const GetValuesDocument = `
     query GetValues($data: GetValues!) {
   getValues(data: $data) {
