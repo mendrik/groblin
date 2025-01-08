@@ -202,7 +202,9 @@ export class ValueResolver {
 			)
 			.returning(['id', 'node_id', 'order', 'list_path', 'value', 'updated_at'])
 			.executeTakeFirstOrThrow()
-		this.pubSub.publish(Topic.ValueReplaced, prev)
+		if (prev != null) {
+			this.pubSub.publish(Topic.ValueReplaced, prev)
+		}
 		this.pubSub.publish(Topic.ValuesUpdated, res)
 		return res.id
 	}

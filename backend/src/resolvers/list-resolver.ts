@@ -2,6 +2,7 @@ import { GraphQLJSONObject } from 'graphql-scalars'
 import { inject, injectable } from 'inversify'
 import { Kysely, sql } from 'kysely'
 import { propEq, reject } from 'ramda'
+import { isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
 import type { DB, JsonValue } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import { Role } from 'src/types.ts'
@@ -81,7 +82,12 @@ export class ListResolver {
 				j.on(sql`v2.list_path = array_append(v.list_path, v.id)`)
 			)
 			.leftJoin('node as n', 'v2.node_id', 'n.id')
-			.where('v.list_path', '=', sql.val(request.list_path ?? null))
+			.$if(isNilOrEmpty(request.list_path), qb =>
+				qb.where('v.list_path', 'is', null)
+			)
+			.$if(isNotNilOrEmpty(request.list_path), qb =>
+				qb.where('v.list_path', '=', sql.val(request.list_path))
+			)
 			.where('v.node_id', '=', request.node_id)
 			.groupBy(['v.id', 'v2.id'])
 			.orderBy('v.order')
