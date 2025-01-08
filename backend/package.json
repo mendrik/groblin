@@ -24,14 +24,15 @@
 	"dependencies": {
 		"@aws-sdk/client-s3": "3.714.0",
 		"@aws-sdk/s3-request-presigner": "3.714.0",
-		"@graphql-tools/schema": "10.0.13",
+		"@graphql-tools/schema": "10.0.16",
 		"chroma-js": "3.1.2",
+		"date-fns": "4.1.0",
 		"graphql": "16.10.0",
 		"graphql-fields": "2.0.3",
 		"graphql-scalars": "1.24.0",
-		"graphql-ws": "5.16.0",
-		"graphql-yoga": "5.10.6",
-		"inversify": "6.2.0",
+		"graphql-ws": "5.16.1",
+		"graphql-yoga": "5.10.9",
+		"inversify": "6.2.1",
 		"jsonwebtoken": "9.0.2",
 		"kysely": "0.27.5",
 		"ms": "2.1.3",
@@ -39,7 +40,7 @@
 		"reflect-metadata": "0.2.2",
 		"sharp": "^0.33.5",
 		"type-graphql": "2.0.0-rc.2",
-		"uuid": "11.0.3",
+		"uuid": "11.0.4",
 		"ws": "8.18.0",
 		"zod": "3.24.1"
 	}

@@ -1,4 +1,4 @@
-import { GraphQLJSONObject } from 'graphql-scalars'
+import { GraphQLDateTime, GraphQLJSONObject } from 'graphql-scalars'
 import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
 import type { DB, JsonValue } from 'src/database/schema.ts'
@@ -41,7 +41,7 @@ export class Value {
 	@Field(type => GraphQLJSONObject, { nullable: true })
 	value: JsonValue
 
-	@Field(type => Date)
+	@Field(type => GraphQLDateTime)
 	updated_at: Date
 }
 

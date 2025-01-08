@@ -211,11 +211,11 @@ export const importJson =
 	async (trx: Transaction<DB>): Promise<void> => {
 		assertExists(lastProjectId, 'lastProjectId missing')
 		/**
-		 * The generator is something that climbs down the json and generates
-		 * either values or nodes that need to be inserted into the database.
-		 * if nodes already exist they are used instead. This whole process
-		 * runs inside a locking transaction, because we need to fetch the
-		 * ids ahead of the execution.
+		 * The generator climbs down a json structure and generates
+		 * either values, nodes or node settings that need to be inserted
+		 * into the database. if a node already exists it is used instead.
+		 * The whole process runs inside a locking transaction, because we
+		 * need to fetch referencing ids ahead of the execution.
 		 */
 		const generator = processJson(
 			lastProjectId,

@@ -1,11 +1,12 @@
+import { evolveAlt } from '@shared/utils/evolve-alt.ts'
+import { toDate } from 'date-fns'
 import { inject, injectable } from 'inversify'
 import { Kysely, sql } from 'kysely'
 import { propEq, reject } from 'ramda'
-import { isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
+import { isNilOrEmpty, isNotNilOrEmpty, spreadProp } from 'ramda-adjunct'
 import type { DB } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import { Role } from 'src/types.ts'
-import { mergeProps } from 'src/utils/merge-props.ts'
 import {
 	Arg,
 	Authorized,
@@ -13,7 +14,6 @@ import {
 	InputType,
 	Int,
 	ObjectType,
-	type PubSub,
 	Query,
 	Resolver,
 	UseMiddleware
@@ -45,6 +45,11 @@ const renameMap = {
 	child_list_path: 'list_path'
 } as const
 
+const fixDates = {
+	updated_at: toDate,
+	children: { updated_at: toDate }
+} as const
+
 @injectable()
 @UseMiddleware(LogAccess)
 @Authorized(Role.Admin, Role.Viewer)
@@ -53,17 +58,15 @@ export class ListResolver {
 	@inject(Kysely)
 	private db: Kysely<DB>
 
-	@inject('PubSub')
-	private pubSub: PubSub
-
 	@Query(returns => [ListItem])
 	async getListItems(
 		@Arg('request', () => ListRequest) request: ListRequest
 	): Promise<ListItem[]> {
 		const result = await this.db
 			.selectFrom('values as v')
-			.innerJoin('values as v2', j =>
-				j.on(sql`v2.list_path = array_append(v.list_path, v.id)`)
+			.select([sql`to_jsonb(v.*)`.as('v'), sql`jsonb_agg(v2.*)`.as('children')])
+			.innerJoin('values as v2', join =>
+				join.on(sql`v2.list_path = array_append(v.list_path, v.id)`)
 			)
 			.leftJoin('node as n', 'v2.node_id', 'n.id')
 			.$if(isNilOrEmpty(request.list_path), qb =>
@@ -73,29 +76,17 @@ export class ListResolver {
 				qb.where('v.list_path', '=', sql.val(request.list_path))
 			)
 			.where('v.node_id', '=', request.node_id)
-			.groupBy(['v.id', 'v2.id'])
-			.orderBy('v.order')
-			.select([
-				'v.id',
-				'v.value',
-				'v.node_id',
-				'v.list_path',
-				'v.order',
-				'v.updated_at',
-				'v2.id as child_id',
-				'v2.value as child_value',
-				'v2.node_id as child_node_id',
-				'v2.updated_at as child_updated_at',
-				'v2.list_path as child_list_path',
-				'v2.order as child_order'
-			])
+			.groupBy('v.id')
+			.orderBy('v.order', 'asc')
 			.execute()
-		return mergeProps('id', renameMap, 'children', result)
+
+		return result
+			.map(spreadProp('v'))
+			.map<unknown>(evolveAlt(fixDates)) as ListItem[]
 	}
 
 	@Query(returns => [Node])
 	async getListColumns(@Arg('node_id', () => Int) node_id: number) {
-		const { coalesce, jsonAgg } = this.db.fn
 		return this.db
 			.withRecursive('node_tree', qb =>
 				qb
