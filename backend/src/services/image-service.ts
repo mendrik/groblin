@@ -8,7 +8,7 @@ import type { PubSub } from 'type-graphql'
 import { Topic } from './Topic.ts'
 import { S3Client } from './s3-client.ts'
 
-const isJsonObject: (json: JsonValue) => json is JsonObject = isObject
+const isJsonObject: (json: JsonValue) => json is JsonObject = isObject as any
 
 @injectable()
 export class ImageService {
