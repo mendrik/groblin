@@ -6,9 +6,11 @@ import { execute, subscribe } from 'graphql'
 import { useServer } from 'graphql-ws/lib/use/ws'
 import { prop } from 'ramda'
 import { WebSocketServer } from 'ws'
+import { container } from './injections.ts'
 import { onConnect } from './middleware/on-connect.ts'
 import { onError } from './middleware/on-errors.ts'
 import { schema as gqlSchema } from './schema.ts'
+import { EmailService } from './services/email-service.ts'
 import { ImageService } from './services/image-service.ts'
 
 const schema = makeExecutableSchema({ typeDefs: gqlSchema })
@@ -34,4 +36,5 @@ useServer(
 
 console.log(cyan(`Started server on ${lightGreen(port)}`))
 
-new ImageService()
+void container.get(EmailService).waitForRegistration()
+void container.get(ImageService).waitForImageUpload()

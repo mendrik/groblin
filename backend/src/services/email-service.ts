@@ -8,6 +8,8 @@ export class EmailService {
 	private pubSub: PubSub
 
 	async waitForRegistration() {
+		console.log('Waiting for registration')
+
 		for await (const reg of this.pubSub.subscribe(Topic.UserRegistered)) {
 			console.log(reg)
 		}

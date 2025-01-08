@@ -38,7 +38,7 @@ export class Value {
 	@Field(type => [Int], { nullable: true })
 	list_path: number[] | null
 
-	@Field(type => GraphQLJSONObject)
+	@Field(type => GraphQLJSONObject, { nullable: true })
 	value: JsonValue
 
 	@Field(type => Date)
@@ -123,6 +123,14 @@ export class ValueResolver {
 			.execute()
 	}
 
+	async getValue(id: number): Promise<Value | undefined> {
+		return this.db
+			.selectFrom('values')
+			.where('id', '=', id)
+			.selectAll()
+			.executeTakeFirst()
+	}
+
 	@Mutation(returns => Int)
 	async insertListItem(
 		@Arg('listItem', () => InsertListItem) data: InsertListItem,
@@ -177,6 +185,7 @@ export class ValueResolver {
 		@Ctx() ctx: Context
 	) {
 		const { user } = ctx
+		const prev = data.id ? await this.getValue(data.id) : undefined
 		const res = await this.db
 			.insertInto('values')
 			.values({
@@ -193,6 +202,7 @@ export class ValueResolver {
 			)
 			.returning(['id', 'node_id', 'order', 'list_path', 'value', 'updated_at'])
 			.executeTakeFirstOrThrow()
+		this.pubSub.publish(Topic.ValueReplaced, prev)
 		this.pubSub.publish(Topic.ValuesUpdated, res)
 		return res.id
 	}

@@ -185,5 +185,5 @@ type Value {
   node_id: Int!
   order: Int!
   updated_at: DateTimeISO!
-  value: JSONObject!
+  value: JSONObject
 }

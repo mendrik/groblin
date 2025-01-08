@@ -1,5 +1,4 @@
 import 'reflect-metadata'
-import 'reflect-metadata'
 import { createPubSub } from 'graphql-yoga'
 import { Container } from 'inversify'
 import { Kysely } from 'kysely'
@@ -36,6 +35,6 @@ container.bind(S3Client).toSelf()
 container.bind(AuthChecker).toSelf()
 container.bind<PubSub>('PubSub').toConstantValue(pubSub)
 container.bind(EmailService).toSelf()
-container.bind(ImageService).toSelf()
+container.bind(ImageService).to(ImageService).inSingletonScope()
 container.bind(Kysely<DB>).toConstantValue(db)
 export { container }
