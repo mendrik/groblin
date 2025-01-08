@@ -1,4 +1,5 @@
 import { inject, injectable } from 'inversify'
+import { container } from 'src/injections.ts'
 import type { Value } from 'src/resolvers/value-resolver.ts'
 import {} from 'src/types.ts'
 import type { PubSub } from 'type-graphql'
@@ -10,7 +11,10 @@ export class ImageService {
 	private pubSub: PubSub
 
 	constructor() {
-		this.pubSub.subscribe(Topic.ValuesUpdated, this.createThumbnails.bind(this))
+		console.log('image service created')
+		container
+			.get<PubSub>('PubSub')
+			.subscribe(Topic.ValuesUpdated, this.createThumbnails.bind(this))
 	}
 
 	async createThumbnails(value: Value): Promise<void> {

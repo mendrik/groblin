@@ -6,5 +6,4 @@
     width: 70px;
     height: 1px;
     background: linear-gradient(to right, hsl(var(--muted-foreground)), transparent);
-
 }

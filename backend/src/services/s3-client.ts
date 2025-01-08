@@ -1,4 +1,8 @@
-import { S3Client as AwsS3, GetObjectCommand } from '@aws-sdk/client-s3'
+import {
+	S3Client as AwsS3,
+	DeleteObjectCommand,
+	GetObjectCommand
+} from '@aws-sdk/client-s3'
 import { injectable } from 'inversify'
 
 @injectable()
@@ -22,6 +26,16 @@ export class S3Client extends AwsS3 {
 
 	async getContent(key: string) {
 		return this.getBody(key).then(b => b.transformToString())
+	}
+
+	async deleteFile(key: string) {
+		const response = await this.send(
+			new DeleteObjectCommand({
+				Bucket: process.env.AWS_BUCKET,
+				Key: key
+			})
+		)
+		return response
 	}
 
 	async getBytes(key: string) {

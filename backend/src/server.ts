@@ -9,6 +9,7 @@ import { WebSocketServer } from 'ws'
 import { onConnect } from './middleware/on-connect.ts'
 import { onError } from './middleware/on-errors.ts'
 import { schema as gqlSchema } from './schema.ts'
+import { ImageService } from './services/image-service.ts'
 
 const schema = makeExecutableSchema({ typeDefs: gqlSchema })
 
@@ -32,3 +33,5 @@ useServer(
 )
 
 console.log(cyan(`Started server on ${lightGreen(port)}`))
+
+new ImageService()
