@@ -3,7 +3,7 @@ import { toDate } from 'date-fns'
 import { inject, injectable } from 'inversify'
 import { Kysely, sql } from 'kysely'
 import { propEq, reject } from 'ramda'
-import { isNilOrEmpty, isNotNilOrEmpty, spreadProp } from 'ramda-adjunct'
+import { isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
 import type { DB } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import { Role } from 'src/types.ts'
@@ -45,10 +45,8 @@ const renameMap = {
 	child_list_path: 'list_path'
 } as const
 
-const fixDates = {
-	updated_at: toDate,
-	children: { updated_at: toDate }
-} as const
+// we need this because json_agg bypassed kysely's column type handlers
+const fixDates = { children: { updated_at: toDate } } as const
 
 @injectable()
 @UseMiddleware(LogAccess)
@@ -64,7 +62,8 @@ export class ListResolver {
 	): Promise<ListItem[]> {
 		const result = await this.db
 			.selectFrom('values as v')
-			.select([sql`to_jsonb(v.*)`.as('v'), sql`jsonb_agg(v2.*)`.as('children')])
+			.selectAll('v')
+			.select(sql`jsonb_agg(v2.*)`.as('children'))
 			.innerJoin('values as v2', join =>
 				join.on(sql`v2.list_path = array_append(v.list_path, v.id)`)
 			)
@@ -80,9 +79,7 @@ export class ListResolver {
 			.orderBy('v.order', 'asc')
 			.execute()
 
-		return result
-			.map(spreadProp('v'))
-			.map<unknown>(evolveAlt(fixDates)) as ListItem[]
+		return result.map<unknown>(evolveAlt(fixDates)) as ListItem[]
 	}
 
 	@Query(returns => [Node])
