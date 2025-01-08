@@ -36,5 +36,5 @@ useServer(
 
 console.log(cyan(`Started server on ${lightGreen(port)}`))
 
-void container.get(EmailService).waitForRegistration()
-void container.get(ImageService).waitForImageUpload()
+void container.get(EmailService).init()
+void container.get(ImageService).init()

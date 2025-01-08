@@ -21,8 +21,12 @@ export class ImageService {
 	@inject(S3Client)
 	private s3: S3Client
 
-	async waitForImageUpload() {
-		console.log('Waiting for image upload')
+	init() {
+		void this.waitForImageReplacement()
+	}
+
+	async waitForImageReplacement() {
+		console.log('Waiting for image replacement')
 		for await (const value of this.pubSub.subscribe(
 			Topic.ValueReplaced
 		) as AsyncIterable<Value>) {
@@ -32,7 +36,6 @@ export class ImageService {
 				isJsonObject(value.value) &&
 				isString(value.value.file)
 			) {
-				console.log('Deleting image', value.value.file, value.value.name)
 				this.s3.deleteFile(value.value.file)
 			}
 		}

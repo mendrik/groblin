@@ -7,9 +7,12 @@ export class EmailService {
 	@inject('PubSub')
 	private pubSub: PubSub
 
-	async waitForRegistration() {
-		console.log('Waiting for registration')
+	async init() {
+		void this.waitForUserRegistered()
+	}
 
+	async waitForUserRegistered() {
+		console.log('Waiting for registration')
 		for await (const reg of this.pubSub.subscribe(Topic.UserRegistered)) {
 			console.log(reg)
 		}
