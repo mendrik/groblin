@@ -147,6 +147,7 @@ query GetListItems($request: ListRequest!) {
     value
     order
     list_path
+    updated_at
     children {
       ...Value
     }

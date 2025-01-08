@@ -61,7 +61,7 @@ const ListItemActions = ({ node, item }: ListItemActionsProps) => (
 			</DropdownMenuItem>
 			<DropdownMenuItem
 				className="flex gap-2 items-center"
-				onClick={() => openListItemDelete(node)}
+				onClick={() => openListItemDelete(item)}
 			>
 				<IconTrash className="w-4 h-4" />
 				<span>Delete...</span>

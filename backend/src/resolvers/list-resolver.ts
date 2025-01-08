@@ -1,9 +1,8 @@
-import { GraphQLJSONObject } from 'graphql-scalars'
 import { inject, injectable } from 'inversify'
 import { Kysely, sql } from 'kysely'
 import { propEq, reject } from 'ramda'
 import { isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
-import type { DB, JsonValue } from 'src/database/schema.ts'
+import type { DB } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import { Role } from 'src/types.ts'
 import { mergeProps } from 'src/utils/merge-props.ts'
@@ -32,22 +31,7 @@ export class ListRequest {
 }
 
 @ObjectType()
-export class ListItem {
-	@Field(type => Int)
-	id: number
-
-	@Field(type => Int)
-	node_id: number
-
-	@Field(type => GraphQLJSONObject)
-	value: JsonValue
-
-	@Field(type => Int)
-	order: number
-
-	@Field(type => [Int], { nullable: true })
-	list_path: number[] | null
-
+export class ListItem extends Value {
 	@Field(type => [Value])
 	children: Value[]
 }
@@ -97,6 +81,7 @@ export class ListResolver {
 				'v.node_id',
 				'v.list_path',
 				'v.order',
+				'v.updated_at',
 				'v2.id as child_id',
 				'v2.value as child_value',
 				'v2.node_id as child_node_id',

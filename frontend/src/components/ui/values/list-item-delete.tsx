@@ -8,26 +8,26 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle
 } from '@/components/ui/alert-dialog'
+import type { Value } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
-import { setSignal } from '@/lib/signals'
-import { notNil } from '@/lib/signals'
-import type { TreeNode } from '@/state/tree'
+import { notNil, setSignal } from '@/lib/signals'
 import { deleteListItem, selectAnyListItem } from '@/state/value'
 import { signal } from '@preact/signals-react'
 import { pipeTap } from '@shared/utils/pipe-tap'
-import { pipe } from 'ramda'
-import { delayP } from 'ramda-adjunct'
+import { T, pipe } from 'ramda'
 
 export const $deleteListItemOpen = signal(false)
-export const $node = signal<TreeNode>()
-export const openListItemDelete = (node: TreeNode) => {
-	setSignal($node, node)
-	setSignal($deleteListItemOpen, true)
-}
+export const $value = signal<Value>()
+export const openListItemDelete: (value: Value) => unknown = pipe(
+	setSignal($value),
+	T,
+	setSignal($deleteListItemOpen)
+)
+
 const close = () => setSignal($deleteListItemOpen, false)
 
 export const deleteTagCommand = () =>
-	pipeTap(deleteListItem, x => delayP(100), selectAnyListItem)(notNil($node))
+	pipeTap(deleteListItem, selectAnyListItem)(notNil($value))
 
 export const ListItemDelete = () => (
 	<AlertDialog open={$deleteListItemOpen.value}>

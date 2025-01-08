@@ -15,15 +15,23 @@ import { compact } from 'ramda-adjunct'
 import useSWR, { useSWRConfig } from 'swr'
 import { ListItemActions } from './list-item-actions'
 import './list-preview.css'
+import type { ListItemValue } from '@/components/ui/values/list-editor'
 type Request = {
 	node_id: number
 	list_path?: number[]
 }
 
+type EnhancedListValue = ListItemValue & {
+	node: TreeNode
+	children: Value[]
+}
+
 const useLoadItems = (request: Request) => {
 	const node = ({ node_id }: Value) => notNil($nodesMap, node_id)
 	const { data } = useSWR(request, () => Api.GetListItems({ request }))
-	return (data ?? []).map(evolveAlt({ node, children: { node } }))
+	return (data ?? []).map(
+		evolveAlt({ node, children: { node } })
+	) as EnhancedListValue[]
 }
 
 const useLoadColumns = (nodeId: number, columns: number): Node[] => {
@@ -48,7 +56,7 @@ export const ListPreview = ({ node: currentNode, width }: OwnProps) => {
 	const data = useLoadItems(request)
 	const columns = useLoadColumns(currentNode.id, maxColumns)
 	useSignalEffect(() => {
-		const _ = [$values.value, $nodes.value, $nodeSettingsMap.value] // does not
+		const _ = [$values.value, $nodes.value, $nodeSettingsMap.value]
 		mutate(request)
 		mutate(`columns-${currentNode.id}`)
 	})
@@ -67,10 +75,14 @@ export const ListPreview = ({ node: currentNode, width }: OwnProps) => {
 						</div>
 					))}
 				</li>
-				{data.map(({ id, value, node, children, list_path }) => (
-					<li key={id} className="item">
+				{data.map(({ node, children, ...listValue }) => (
+					<li key={listValue.id} className="item">
 						<div className="options">
-							<ListItemActions node={node} id={id} value={value} />
+							<ListItemActions
+								node={node}
+								id={listValue.id}
+								value={listValue}
+							/>
 						</div>
 						{columns.map(node => {
 							const value = children.find(propEq(node.id, 'node_id'))
@@ -83,7 +95,7 @@ export const ListPreview = ({ node: currentNode, width }: OwnProps) => {
 										node={asNode(node.id)}
 										value={compact([value])}
 										view={ViewContext.List}
-										listPath={append(id, list_path ?? [])}
+										listPath={append(listValue.id, listValue.list_path ?? [])}
 									/>
 								</div>
 							)

@@ -97,20 +97,21 @@ export const insertListItem = (listItem: InsertListItem) =>
 
 export const focusListItem = (params: any) => {}
 
-export const deleteListItem = (node: TreeNode): Promise<boolean> => {
-	const selected = notNil($activeListItems, node.id)
-	return Api.DeleteListItem({ id: selected.id })
+export const deleteListItem = (value: Value): Promise<boolean> => {
+	return Api.DeleteListItem({ id: value.id })
 }
 
 export const truncateList = (node: TreeNode): Promise<number> =>
 	Api.TruncateList({ data: { node_id: node.id } }).then(() => node.id)
 
-export const selectAnyListItem = (node: TreeNode) => {
-	const current = $activeListItems.value[node.id]
+export const selectAnyListItem = (value: Value) => {
+	const current = $activeListItems.value[value.node_id]
 	if (!current) {
 		return
 	}
-	const values = $valueMap.value[node.id]?.filter(({ id }) => id !== current.id)
+	const values = $valueMap.value[value.node_id]?.filter(
+		({ id }) => id !== current.id
+	)
 	if (isNonEmptyArray(values)) {
 		activateListItem(values[0])
 	}

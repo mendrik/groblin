@@ -6,6 +6,7 @@ import {
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import type { ListItemValue } from '@/components/ui/values/list-editor'
+import { openListItemDelete } from '@/components/ui/values/list-item-delete'
 import { preventDefault, stopPropagation } from '@/lib/dom-events'
 import type { TreeNode } from '@/state/tree'
 import {
@@ -57,7 +58,10 @@ export const ListItemActions = ({ id, node, value }: OwnProps) => {
 					<span>Insert below…</span>
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem className="flex gap-2 items-center">
+				<DropdownMenuItem
+					className="flex gap-2 items-center"
+					onSelect={() => openListItemDelete(value)}
+				>
 					<IconTrash className="w-4 h-4" />
 					<span>Delete...</span>
 				</DropdownMenuItem>
