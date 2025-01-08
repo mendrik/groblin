@@ -6,7 +6,6 @@ import {
 import { assertExists } from '@shared/asserts'
 import type { Fn } from '@tp/functions'
 import { curry, prop } from 'ramda'
-import {} from 'react'
 
 export const setSignal = curry(<T>(signal: Signal<T>, value: T): T => {
 	signal.value = value

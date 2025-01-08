@@ -5,7 +5,6 @@ import { notNil } from '@/lib/signals'
 import { signal } from '@preact/signals-react'
 import { groupBy, head, map, pipe, propOr } from 'ramda'
 import { $project } from './project'
-import {} from './tree'
 
 export type NodeId = number
 

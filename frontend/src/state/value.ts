@@ -78,6 +78,7 @@ export const subscribeToValues = () =>
 $activeListItems.subscribe(unless(isEmpty, fetchValues))
 
 export const activateListItem = (item: Value) => {
+	// todo resolve also parent list items
 	const node = asNode(item.node_id)
 	assertThat(propEq(NodeType.List, 'type'), node, 'Value is not a list item')
 	updateSignal($activeListItems, assoc(item.node_id, item))

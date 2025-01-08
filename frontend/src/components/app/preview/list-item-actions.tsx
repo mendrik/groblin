@@ -9,6 +9,7 @@ import type { ListItemValue } from '@/components/ui/values/list-editor'
 import { openListItemDelete } from '@/components/ui/values/list-item-delete'
 import { preventDefault, stopPropagation } from '@/lib/dom-events'
 import type { TreeNode } from '@/state/tree'
+import { activateListItem } from '@/state/value'
 import {
 	IconClipboardCopy,
 	IconDotsVertical,
@@ -40,7 +41,10 @@ export const ListItemActions = ({ id, node, value }: OwnProps) => {
 				onCloseAutoFocus={preventDefault}
 				onKeyDown={stopPropagation}
 			>
-				<DropdownMenuItem className="flex gap-2 items-center">
+				<DropdownMenuItem
+					className="flex gap-2 items-center"
+					onSelect={() => activateListItem(value)}
+				>
 					<IconViewfinder className="w-4 h-4" />
 					<span>Focus</span>
 				</DropdownMenuItem>
