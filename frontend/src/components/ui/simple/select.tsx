@@ -14,6 +14,7 @@ type OwnProps<T> = {
 	render: (item: T) => ReactNode
 	placeholder?: string
 	optional?: boolean
+	allowEmpty?: boolean
 	value: T | undefined
 	className?: string
 	onChange: (value: T | undefined) => void
@@ -43,6 +44,7 @@ export const SimpleSelect = <T,>({
 	optional = false,
 	placeholder,
 	onChange,
+	allowEmpty = true, // todo
 	value,
 	className,
 	render
