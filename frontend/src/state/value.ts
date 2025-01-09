@@ -8,7 +8,7 @@ import {
 import { setSignal } from '@/lib/signals'
 import { updateSignal } from '@/lib/signals'
 import { notNil } from '@/lib/signals'
-import { signal } from '@preact/signals-react'
+import { computed, signal } from '@preact/signals-react'
 import { assertThat } from '@shared/asserts'
 import { toDate } from 'date-fns'
 import {
@@ -31,7 +31,7 @@ import {
 } from 'ramda'
 import { isNilOrEmpty, isNonEmptyArray } from 'ramda-adjunct'
 import { $project } from './project'
-import { type TreeNode, asNode, pathTo } from './tree'
+import { $focusedNode, type TreeNode, asNode, pathTo } from './tree'
 
 export type NodeId = number
 export type ParentListId = number
@@ -78,7 +78,6 @@ export const subscribeToValues = () =>
 $activeListItems.subscribe(unless(isEmpty, fetchValues))
 
 export const activateListItem = (item: Value) => {
-	// todo resolve also parent list items
 	const node = asNode(item.node_id)
 	assertThat(propEq(NodeType.List, 'type'), node, 'Value is not a list item')
 	updateSignal($activeListItems, assoc(item.node_id, item))
@@ -92,6 +91,14 @@ export const activePath = (node: TreeNode): number[] | undefined => {
 		.filter(isNotNil)
 	return isEmpty(res) ? undefined : res
 }
+
+export const $activePath = computed(() => {
+	if (!$focusedNode.value) {
+		return undefined
+	}
+	const node = asNode($focusedNode.value)
+	return activePath(node)
+})
 
 export const insertListItem = (listItem: InsertListItem) =>
 	Api.InsertListItem({ listItem })

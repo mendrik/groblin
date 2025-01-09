@@ -7,7 +7,7 @@ import { notNil } from '@/lib/signals'
 import { cn } from '@/lib/utils'
 import { $nodeSettingsMap } from '@/state/node-settings'
 import { $nodes, $nodesMap, type TreeNode, asNode } from '@/state/tree'
-import { $values, activePath } from '@/state/value'
+import { $activePath, $values } from '@/state/value'
 import { useSignalEffect } from '@preact/signals-react'
 import { evolveAlt } from '@shared/utils/evolve-alt'
 import { append, propEq, take } from 'ramda'
@@ -16,6 +16,7 @@ import useSWR, { useSWRConfig } from 'swr'
 import { ListItemActions } from './list-item-actions'
 import './list-preview.css'
 import type { ListItemValue } from '@/components/ui/values/list-editor'
+import { useDeepCompareEffect } from 'react-use'
 type Request = {
 	node_id: number
 	list_path?: number[]
@@ -49,9 +50,11 @@ type OwnProps = {
 export const ListPreview = ({ node: currentNode, width }: OwnProps) => {
 	const { mutate } = useSWRConfig()
 	const maxColumns = Math.floor(width / 150)
+	const list_path = $activePath.value
+
 	const request = {
 		node_id: currentNode.id,
-		list_path: activePath(currentNode)
+		list_path
 	}
 	const data = useLoadItems(request)
 	const columns = useLoadColumns(currentNode.id, maxColumns)
@@ -60,6 +63,9 @@ export const ListPreview = ({ node: currentNode, width }: OwnProps) => {
 		mutate(request)
 		mutate(`columns-${currentNode.id}`)
 	})
+	useDeepCompareEffect(() => {
+		mutate(request)
+	}, [list_path])
 
 	return (
 		<FocusTravel autoFocus={false}>
