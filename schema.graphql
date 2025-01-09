@@ -112,9 +112,9 @@ type NodeSettings {
 enum NodeType {
   article
   boolean
+  choice
   color
   date
-  enum
   list
   media
   number

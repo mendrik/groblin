@@ -5,7 +5,7 @@ import { pipeAsync } from '@shared/utils/pipe-async'
 import { objOf } from 'ramda'
 import { type ValueEditor, editorKey } from './value-editor'
 
-type StringValue = Value & { value: { content: string } }
+type StringValue = Omit<Value, 'value'> & { value: { content: string } }
 
 export const StringEditor: ValueEditor<StringValue> = ({
 	node,

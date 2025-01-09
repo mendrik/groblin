@@ -24,6 +24,7 @@ import { StringEditor } from './string-editor'
 
 import './value-editor.css'
 import { $nodeSettingsMap } from '@/state/node-settings'
+import { ChoiceEditor } from './choice-editor'
 import { MediaEditor } from './media-editor'
 
 export enum ViewContext {
@@ -76,6 +77,7 @@ const matcher = match<Args, ValueEditor<any> | null>(
 	caseOf([{ type: NodeType.Number }, _], () => NumberEditor),
 	caseOf([{ type: NodeType.Date }, _], () => DateEditor),
 	caseOf([{ type: NodeType.Media }, _], () => MediaEditor),
+	caseOf([{ type: NodeType.Choice }, _], () => ChoiceEditor),
 	caseOf([_, _], () => null)
 )
 

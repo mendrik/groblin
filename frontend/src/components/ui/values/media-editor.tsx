@@ -16,7 +16,7 @@ type Media = {
 	size: Bytes
 }
 
-type MediaValue = Value & {
+type MediaValue = Omit<Value, 'value'> & {
 	value: {
 		media: Media
 	}

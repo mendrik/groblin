@@ -11,7 +11,7 @@ import { MicroIcon } from '../random/micro-icon'
 import type { DateProps } from '../tree/properties/dates'
 import type { ValueEditor } from './value-editor'
 
-type DateValue = Value & {
+type DateValue = Omit<Value, 'value'> & {
 	value: {
 		date: Date
 	}

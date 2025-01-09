@@ -8,7 +8,7 @@ export enum NodeType {
 	number = 'Number',
 	boolean = 'Boolean',
 	list = 'List',
-	enum = 'Enum',
+	choice = 'Choice',
 	date = 'Date',
 	color = 'Color',
 	media = 'Media',

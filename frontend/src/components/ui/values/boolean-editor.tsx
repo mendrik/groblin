@@ -3,7 +3,7 @@ import { objOf, pipe } from 'ramda'
 import { Switch } from '../switch'
 import { type ValueEditor, editorKey } from './value-editor'
 
-type BooleanValue = Value & { value: { state: boolean } }
+type BooleanValue = Omit<Value, 'value'> & { value: { state: boolean } }
 
 export const BooleanEditor: ValueEditor<BooleanValue> = ({
 	node,

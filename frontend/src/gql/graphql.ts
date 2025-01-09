@@ -13,6 +13,8 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
+  DateTime: { input: any; output: any; }
   /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.This scalar is serialized to a string in ISO 8601 format and parsed from a string in ISO 8601 format. */
   DateTimeISO: { input: any; output: any; }
   /** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
@@ -58,7 +60,7 @@ export type ListItem = {
   list_path?: Maybe<Array<Scalars['Int']['output']>>;
   node_id: Scalars['Int']['output'];
   order: Scalars['Int']['output'];
-  updated_at: Scalars['DateTimeISO']['output'];
+  updated_at: Scalars['DateTime']['output'];
   value?: Maybe<Scalars['JSONObject']['output']>;
 };
 
@@ -176,9 +178,9 @@ export type NodeSettings = {
 export enum NodeType {
   Article = 'article',
   Boolean = 'boolean',
+  Choice = 'choice',
   Color = 'color',
   Date = 'date',
-  Enum = 'enum',
   List = 'list',
   Media = 'media',
   Number = 'number',
@@ -284,7 +286,7 @@ export type Value = {
   list_path?: Maybe<Array<Scalars['Int']['output']>>;
   node_id: Scalars['Int']['output'];
   order: Scalars['Int']['output'];
-  updated_at: Scalars['DateTimeISO']['output'];
+  updated_at: Scalars['DateTime']['output'];
   value?: Maybe<Scalars['JSONObject']['output']>;
 };
 

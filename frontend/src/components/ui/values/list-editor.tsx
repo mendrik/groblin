@@ -31,7 +31,7 @@ import { openListItemDelete } from './list-item-delete'
 import { openListItemEdit } from './list-item-edit'
 import type { ValueEditor } from './value-editor'
 
-export type ListItemValue = Value & {
+export type ListItemValue = Omit<Value, 'value'> & {
 	value: {
 		name: string
 	}

@@ -6,7 +6,7 @@ import { MaskedInput } from '../random/masked-input'
 import type { NumberProps } from '../tree/properties/numbers'
 import { type ValueEditor, editorKey } from './value-editor'
 
-type NumberValue = Value & { value: { figure: number } }
+type NumberValue = Omit<Value, 'value'> & { value: { figure: number } }
 
 export const NumberEditor: ValueEditor<NumberValue, NumberProps> = ({
 	node,
