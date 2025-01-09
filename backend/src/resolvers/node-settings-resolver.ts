@@ -87,7 +87,7 @@ export class NodeSettingsResolver {
 		@Ctx() ctx: Context
 	) {
 		const { user } = ctx
-		const { id } = await this.db
+		const res = await this.db
 			.insertInto('node_settings')
 			.values({
 				id: data.id,
@@ -100,9 +100,9 @@ export class NodeSettingsResolver {
 					settings: e.ref('excluded.settings')
 				}))
 			)
-			.returning('id as id')
+			.returning(['id', 'node_id', 'settings'])
 			.executeTakeFirstOrThrow()
-		this.pubSub.publish(Topic.NodeSettingsUpdated, true)
-		return id
+		this.pubSub.publish(Topic.NodeSettingsUpdated, res)
+		return res.id
 	}
 }

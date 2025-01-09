@@ -1,14 +1,13 @@
 import { inject, injectable } from 'inversify'
-import { isObject, isString } from 'ramda-adjunct'
-import type { JsonObject, JsonValue } from 'src/database/schema.ts'
+import { isString } from 'ramda-adjunct'
+import type {} from 'src/database/schema.ts'
 import { NodeResolver } from 'src/resolvers/node-resolver.ts'
 import type { Value } from 'src/resolvers/value-resolver.ts'
 import { NodeType } from 'src/types.ts'
+import { isJsonObject } from 'src/utils/json.ts'
 import type { PubSub } from 'type-graphql'
 import { Topic } from './Topic.ts'
 import { S3Client } from './s3-client.ts'
-
-const isJsonObject: (json: JsonValue) => json is JsonObject = isObject as any
 
 @injectable()
 export class ImageService {
