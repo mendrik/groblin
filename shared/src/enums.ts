@@ -6,6 +6,5 @@ export enum EditorType {
 	Number = 'number',
 	Password = 'password',
 	Email = 'email',
-	Switch = 'switch',
-	Select = 'select'
+	Switch = 'switch'
 }

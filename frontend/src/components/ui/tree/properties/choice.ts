@@ -8,7 +8,7 @@ export const ChoiceProps = object({
 		label: 'Choices',
 		description: 'Enter a list of choices',
 		span: 2,
-		editor: EditorType.Select
+		editor: EditorType.Tags
 	}),
 	hideColumnHead,
 	required

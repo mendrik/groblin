@@ -15,6 +15,7 @@ type OwnProps<T> = {
 	placeholder?: string
 	optional?: boolean
 	value: T | undefined
+	className?: string
 	onChange: (value: T | undefined) => void
 }
 
@@ -43,6 +44,7 @@ export const SimpleSelect = <T,>({
 	placeholder,
 	onChange,
 	value,
+	className,
 	render
 }: OwnProps<T>) => {
 	const [open, setOpen] = useState(false)
@@ -51,7 +53,9 @@ export const SimpleSelect = <T,>({
 
 	return (
 		<Select onOpenChange={setOpen} open={open}>
-			<SelectTrigger>{currentItem ?? placeholder}</SelectTrigger>
+			<SelectTrigger className={className}>
+				{currentItem ?? placeholder}
+			</SelectTrigger>
 			<SelectContent>
 				<FocusTravel>
 					{optional && (

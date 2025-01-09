@@ -1,5 +1,5 @@
 import type { Value } from '@/gql/graphql'
-import { $nodeSettings } from '@/state/node-settings'
+import { $nodeSettingsMap } from '@/state/node-settings'
 import { identity, objOf, pipe, when } from 'ramda'
 import { isNotNilOrEmpty } from 'ramda-adjunct'
 import { SimpleSelect } from '../simple/select'
@@ -14,7 +14,8 @@ export const ChoiceEditor: ValueEditor<ChoiceValue> = ({
 	save
 }) => {
 	const settings: ChoiceProps | undefined =
-		$nodeSettings.value[node.id]?.settings
+		$nodeSettingsMap.value[node.id]?.settings
+
 	return (
 		<SimpleSelect<string>
 			options={settings?.choices ?? []}
