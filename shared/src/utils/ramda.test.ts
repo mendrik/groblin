@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { addOrder, capitalize, entriesWithIndex, fork } from './ramda.ts'
+import {
+	addOrder,
+	capitalize,
+	entriesWithIndex,
+	fork,
+	removeAt
+} from './ramda.ts'
 
 describe('addOrder', () => {
 	it('should add an order property to each object in the array', () => {
@@ -152,6 +158,38 @@ describe('entriesWithIndex', () => {
 				[1, 3, 5],
 				[4, 5, 6]
 			])
+		})
+
+		describe('removeAt', () => {
+			it('should remove the element at the specified index', () => {
+				const input = [1, 2, 3, 4, 5]
+				const result = removeAt(2)(input)
+				expect(result).toEqual([1, 2, 4, 5])
+			})
+
+			it('should return the same array if the index is out of bounds', () => {
+				const input = [1, 2, 3]
+				const result = removeAt(5)(input)
+				expect(result).toEqual([1, 2, 3])
+			})
+
+			it('should handle negative indices by removing from the end', () => {
+				const input = [1, 2, 3, 4, 5]
+				const result = removeAt(-2)(input)
+				expect(result).toEqual([1, 2, 3, 5])
+			})
+
+			it('should return an empty array when removing the only element', () => {
+				const input = [1]
+				const result = removeAt(0)(input)
+				expect(result).toEqual([])
+			})
+
+			it('should handle an empty array', () => {
+				const input: number[] = []
+				const result = removeAt(0)(input)
+				expect(result).toEqual([])
+			})
 		})
 	})
 })

@@ -5,12 +5,15 @@ import {
 	compose,
 	concat,
 	head,
+	identity,
 	juxt,
 	pipe,
 	range,
+	splitAt,
 	tail,
 	tap,
 	toUpper,
+	useWith,
 	zipWith
 } from 'ramda'
 
@@ -51,3 +54,6 @@ export const fork =
 	<T, G extends Array<GP<any, any>>>(...preds: G) =>
 	<T2 extends T>(v: T2[]): [...INF<G>] =>
 		preds.map(pred => v.filter(pred)) as [...INF<G>]
+
+export const removeAt = <T>(idx: number): ((list: T[]) => T[]) =>
+	pipe(splitAt(idx) as AnyFn, apply(useWith(concat, [identity, tail]) as AnyFn))

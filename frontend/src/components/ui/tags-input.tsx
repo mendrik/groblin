@@ -2,7 +2,9 @@ import { inputValue, preventDefault, stopPropagation } from '@/lib/dom-events'
 import { mergeRefs } from '@/lib/react'
 import { cn } from '@/lib/utils'
 import { assertExists } from '@shared/asserts'
+import { removeAt } from '@shared/utils/ramda'
 import {
+	append,
 	dropLast,
 	isEmpty,
 	isNotEmpty,
@@ -19,7 +21,7 @@ import {
 	useRef,
 	useState
 } from 'react'
-import { useDeepCompareEffect, useList } from 'react-use'
+import { useDeepCompareEffect } from 'react-use'
 import FocusTravel from '../utils/focus-travel'
 import KeyListener from '../utils/key-listener'
 import { SortContext } from '../utils/sort-context'
@@ -38,8 +40,8 @@ export const TagsInput = forwardRef<HTMLDivElement, TagsInputProps>(
 		const containerRef = useRef<HTMLDivElement>(null)
 		const inputRef = useRef<HTMLInputElement>(null)
 		const measureRef = useRef<HTMLDivElement>(null)
-		const [values, { push, removeAt, set }] = useList<string>(value)
-		const [active, setActive] = useState<number>(-1)
+		const [list, setList] = useState<string[]>(value)
+		const [focused, setFocused] = useState<number>(-1)
 
 		const ref = <T,>(ref: RefObject<T | null>): T => {
 			const inp = ref.current
@@ -59,48 +61,45 @@ export const TagsInput = forwardRef<HTMLDivElement, TagsInputProps>(
 		const badges = () =>
 			Array.from(ref(containerRef).querySelectorAll<HTMLElement>('.badge'))
 
-		const deleteAt = (idx: number) => {
-			const b = nth(idx - 1, badges())
-			removeAt(idx)
+		const deleteActive = () => {
+			console.log(focused)
+			const b = nth(focused - 1, badges())
+			setList(removeAt(focused))
 			b?.focus() ?? ref(inputRef).focus()
 		}
 
-		// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 		useDeepCompareEffect(() => {
-			onValueChange(values)
-		}, [values])
+			onValueChange(list)
+		}, [list])
 
-		const deleteLast = () => {
-			set(dropLast(1))
-		}
-
+		const deleteLast = () => setList(dropLast(1))
+		const push = (el: string) => setList(append(el))
 		const focusLast = () => last(badges())?.focus()
 
 		return (
-			<SortContext
-				values={values.map(objOf('id'))}
-				onDragEnd={() => console.log('drag end')}
+			<div
+				ref={fref}
+				{...props}
+				// biome-ignore lint/a11y/useSemanticElements: <explanation>
+				role="textbox"
+				tabIndex={0}
+				onFocus={pipe(stopPropagation, e => ref(inputRef).focus())}
+				className={cn(
+					'bg-background border border-input rounded-sm flex flex-wrap flex-row gap-1 p-1 cursor-text',
+					className
+				)}
 			>
-				<div
-					ref={fref}
-					{...props}
-					// biome-ignore lint/a11y/useSemanticElements: <explanation>
-					role="textbox"
-					tabIndex={0}
-					onFocus={e => ref(inputRef).focus()}
-					onKeyDown={e => void 0}
-					className={cn(
-						'bg-background border border-input rounded-sm flex flex-wrap flex-row gap-1 p-1 cursor-text',
-						className
-					)}
+				<SortContext
+					values={list.map(objOf('id'))}
+					onDragEnd={() => console.log('drag end')}
 				>
 					<KeyListener
-						onDelete={() => deleteAt(active)}
-						onBackspace={() => deleteAt(active)}
+						onDelete={deleteActive}
+						onBackspace={deleteActive}
 						ref={containerRef}
 					>
 						<FocusTravel>
-							{values.map((item, index) => (
+							{list.map((item, index) => (
 								<SortableItem
 									className={cn(
 										'badge rounded flex grow-0 select-none items-center gap-1',
@@ -108,7 +107,12 @@ export const TagsInput = forwardRef<HTMLDivElement, TagsInputProps>(
 										'focus-visible:outline-none focus-visible:ring-1 focus:ring-offset-0 focus:ring-1 focus-visible:ring-ring focus:ring-ring'
 									)}
 									id={item}
-									onFocus={pipe(stopPropagation, () => setActive(index))}
+									onFocus={pipe(stopPropagation, () => {
+										console.log(focused)
+
+										console.log(index)
+										setFocused(index)
+									})}
 									tabIndex={0}
 									renderer={() => <span className="text-sm">{item}</span>}
 									key={`${index}-${item}`}
@@ -116,29 +120,29 @@ export const TagsInput = forwardRef<HTMLDivElement, TagsInputProps>(
 							))}
 						</FocusTravel>
 					</KeyListener>
-					<div
-						className="text-sm px-1 opacity-0 pointer-events-none absolute"
-						ref={measureRef}
+				</SortContext>
+				<div
+					className="text-sm px-1 opacity-0 pointer-events-none absolute"
+					ref={measureRef}
+				/>
+				<KeyListener
+					onEnter={pipe(tagName, when(isNotEmpty, push), clearInput)}
+					onBackspace={pipe(inputValue, when(isEmpty, deleteLast))}
+					onArrowLeft={pipe(tagName, when(isEmpty, focusLast))}
+				>
+					<input
+						ref={mergeRefs(fref, inputRef)}
+						placeholder={placeholder}
+						onChange={pipe(tagName, adjustWidth)}
+						onBlur={pipe(tagName, when(isNotEmpty, push), clearInput)}
+						className={cn(
+							'[&[style]]:placeholder-transparent',
+							'border-none appearance-none bg-transparent text-sm p-1 min-w-0 flex-grow basis-5',
+							'placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50'
+						)}
 					/>
-					<KeyListener
-						onEnter={pipe(tagName, when(isNotEmpty, push), clearInput)}
-						onBackspace={pipe(inputValue, when(isEmpty, deleteLast))}
-						onArrowLeft={pipe(tagName, when(isEmpty, focusLast))}
-					>
-						<input
-							ref={mergeRefs(fref, inputRef)}
-							placeholder={placeholder}
-							onChange={pipe(tagName, adjustWidth)}
-							onBlur={pipe(tagName, when(isNotEmpty, push), clearInput)}
-							className={cn(
-								'[&[style]]:placeholder-transparent',
-								'border-none appearance-none bg-transparent text-sm p-1 min-w-0 flex-grow basis-5',
-								'placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50'
-							)}
-						/>
-					</KeyListener>
-				</div>
-			</SortContext>
+				</KeyListener>
+			</div>
 		)
 	}
 )

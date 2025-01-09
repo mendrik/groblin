@@ -1,9 +1,8 @@
 import { inputValue } from '@/lib/dom-events'
 import { EditorType } from '@shared/enums'
 import { caseOf, match } from '@shared/utils/match'
-import type { Fn } from '@tp/functions.ts'
-import { path, T as _, apply, nth, pipe } from 'ramda'
-import type { FC, ReactNode } from 'react'
+import { path, T as _, nth, pipe } from 'ramda'
+import type { ReactNode } from 'react'
 import type { ControllerRenderProps } from 'react-hook-form'
 import { ZodNativeEnum, ZodNumber, type ZodTypeAny } from 'zod'
 import { FormControl } from '../form'
@@ -161,10 +160,6 @@ const matcher = match<Args, ReactNode>(
 	})
 )
 
-const propsToArgs = ({ desc, type, field }: OwnProps) =>
-	[desc, type, field] as Args
-
-export const Editor: FC<OwnProps> = pipe(
-	propsToArgs as Fn<OwnProps, [...Args]>,
-	apply(matcher)
-)
+export const Editor = ({ desc, field, type }: OwnProps) => {
+	return matcher(desc, type, field)
+}
