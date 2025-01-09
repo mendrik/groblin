@@ -18,6 +18,7 @@ export const ChoiceEditor: ValueEditor<ChoiceValue> = ({
 
 	return (
 		<SimpleSelect<string>
+			className="h-7 border-none p-1"
 			options={settings?.choices ?? []}
 			render={identity}
 			onChange={when(isNotNilOrEmpty, pipe(objOf('selected'), save))}
