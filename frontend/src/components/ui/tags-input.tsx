@@ -1,7 +1,7 @@
 import { inputValue, preventDefault, stopPropagation } from '@/lib/dom-events'
 import { setSignal, updateSignal } from '@/lib/signals'
 import { cn } from '@/lib/utils'
-import { useSignal } from '@preact/signals-react'
+import { useSignal, useSignalEffect } from '@preact/signals-react'
 import { assertExists } from '@shared/asserts'
 import { removeAt } from '@shared/utils/ramda'
 import { append, dropLast, isEmpty, isNotEmpty, objOf, pipe, when } from 'ramda'
@@ -11,7 +11,6 @@ import {
 	useLayoutEffect,
 	useRef
 } from 'react'
-import { useDeepCompareEffect } from 'react-use'
 import KeyListener from '../utils/key-listener'
 import { SortContext } from '../utils/sort-context'
 import { SortableItem } from '../utils/sortable-item'
@@ -73,9 +72,9 @@ export const TagsInput = ({
 		}
 	}, [toFocus.value])
 
-	useDeepCompareEffect(() => {
+	useSignalEffect(() => {
 		onValueChange(list.value)
-	}, [list])
+	})
 
 	const deleteLast = () => updateSignal(list, dropLast(1))
 	const push = (el: string) => updateSignal(list, append(el))
