@@ -58,7 +58,7 @@ export const TagsInput = ({
 		setSignal(toFocus, idx)
 	}
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	// biome-ignore lint/correctness/useExhaustiveDependencies: we cannot useSignalEffect here
 	useLayoutEffect(() => {
 		if (toFocus.value === -1) return
 		const foc = containerRef.current
