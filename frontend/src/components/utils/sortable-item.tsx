@@ -14,7 +14,6 @@ export const SortableItem = ({ renderer, id, ...props }: OwnProps) => {
 		transform: CSS.Translate.toString(transform),
 		transition
 	}
-
 	return (
 		<div style={style} {...attributes} ref={setNodeRef} {...props}>
 			{renderer(sortable)}

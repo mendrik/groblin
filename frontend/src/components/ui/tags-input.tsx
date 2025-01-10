@@ -102,16 +102,16 @@ export const TagsInput = ({
 				className
 			)}
 		>
-			<SortContext
-				values={list.value.map(objOf('id'))}
-				onDragEnd={() => console.log('drag end')}
+			<KeyListener
+				onDelete={deleteActive}
+				onBackspace={deleteActive}
+				onArrowLeft={moveLeft}
+				onArrowRight={moveRight}
+				ref={containerRef}
 			>
-				<KeyListener
-					onDelete={deleteActive}
-					onBackspace={deleteActive}
-					onArrowLeft={moveLeft}
-					onArrowRight={moveRight}
-					ref={containerRef}
+				<SortContext
+					values={list.value.map(objOf('id'))}
+					onDragEnd={() => console.log('drag end')}
 				>
 					{list.value.map((item, index) => (
 						<SortableItem
@@ -127,8 +127,8 @@ export const TagsInput = ({
 							key={`${index}-${item}`}
 						/>
 					))}
-				</KeyListener>
-			</SortContext>
+				</SortContext>
+			</KeyListener>
 			<div
 				className="text-sm px-1 opacity-0 pointer-events-none absolute"
 				ref={measureRef}
