@@ -10,10 +10,10 @@
 		"test": "vitest"
 	},
 	"devDependencies": {
-		"@types/chroma-js": "2.4.5",
+		"@types/chroma-js": "3.1.0",
 		"@types/jsonwebtoken": "9.0.7",
 		"@types/ms": "0.7.34",
-		"@types/node": "22.10.2",
+		"@types/node": "22.10.5",
 		"@types/pg": "8.11.10",
 		"@types/ws": "8.5.13",
 		"ansicolor": "2.0.3",
@@ -22,15 +22,15 @@
 		"vitest": "2.1.8"
 	},
 	"dependencies": {
-		"@aws-sdk/client-s3": "3.714.0",
-		"@aws-sdk/s3-request-presigner": "3.714.0",
+		"@aws-sdk/client-s3": "3.726.0",
+		"@aws-sdk/s3-request-presigner": "3.726.0",
 		"@graphql-tools/schema": "10.0.16",
 		"chroma-js": "3.1.2",
 		"date-fns": "4.1.0",
 		"graphql": "16.10.0",
 		"graphql-fields": "2.0.3",
 		"graphql-scalars": "1.24.0",
-		"graphql-ws": "5.16.1",
+		"graphql-ws": "5.16.2",
 		"graphql-yoga": "5.10.9",
 		"inversify": "6.2.1",
 		"jsonwebtoken": "9.0.2",
@@ -40,7 +40,7 @@
 		"reflect-metadata": "0.2.2",
 		"sharp": "^0.33.5",
 		"type-graphql": "2.0.0-rc.2",
-		"uuid": "11.0.4",
+		"uuid": "11.0.5",
 		"ws": "8.18.0",
 		"zod": "3.24.1"
 	}
