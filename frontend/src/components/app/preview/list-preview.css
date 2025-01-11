@@ -34,6 +34,11 @@
 		width: 20px;
 	}
 
+	.key-value {
+		display: flex;
+		align-items: center;
+	}
+	
 	.key-value,
 	.label {
 		flex: auto;

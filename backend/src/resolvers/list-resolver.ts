@@ -69,7 +69,12 @@ export class ListResolver {
 			)
 			.leftJoin('node as n', 'v2.node_id', 'n.id')
 			.$if(isNilOrEmpty(request.list_path), qb =>
-				qb.where('v.list_path', 'is', null)
+				qb.where(eb =>
+					eb.or([
+						eb('v.list_path', 'is', null),
+						eb('v.list_path', '=', sql.val([]))
+					])
+				)
 			)
 			.$if(isNotNilOrEmpty(request.list_path), qb =>
 				qb.where('v.list_path', '=', sql.val(request.list_path))
@@ -100,13 +105,18 @@ export class ListResolver {
 			.selectFrom('node_tree')
 			.selectAll('node_tree')
 			.leftJoin('node_settings as ns', 'node_tree.id', 'ns.node_id')
-			.where(
-				sql`COALESCE(ns.settings ->> 'hideColumnHead', 'false')`,
-				'=',
-				false
+			.where(eb =>
+				eb.and([
+					eb(
+						sql`COALESCE(ns.settings ->> 'hideColumnHead', 'false')`,
+						'=',
+						false
+					),
+					eb('node_tree.type', 'not in', ['List', 'Object'])
+				])
 			)
-			.orderBy('order')
 			.orderBy('depth')
+			.orderBy('order')
 			.limit(8)
 			.execute()
 			.then(reject(propEq(node_id, 'id')))

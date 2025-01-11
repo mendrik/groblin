@@ -9,13 +9,19 @@ type OwnProps = {
 
 export const SortableItem = ({ renderer, id, ...props }: OwnProps) => {
 	const sortable = useSortable({ id })
-	const { attributes, transform, transition, setNodeRef } = sortable
+	const { attributes, transform, transition, setNodeRef, listeners } = sortable
 	const style = {
 		transform: CSS.Translate.toString(transform),
 		transition
 	}
 	return (
-		<div style={style} {...attributes} ref={setNodeRef} {...props}>
+		<div
+			style={style}
+			ref={setNodeRef}
+			{...attributes}
+			{...props}
+			{...listeners}
+		>
 			{renderer(sortable)}
 		</div>
 	)

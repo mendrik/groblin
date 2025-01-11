@@ -30,6 +30,7 @@ type EnhancedListValue = ListItemValue & {
 const useLoadItems = (request: Request) => {
 	const node = ({ node_id }: Value) => notNil($nodesMap, node_id)
 	const { data } = useSWR(request, () => Api.GetListItems({ request }))
+	console.table(data)
 	return (data ?? []).map(
 		evolveAlt({ node, children: { node } })
 	) as EnhancedListValue[]
@@ -65,7 +66,7 @@ export const ListPreview = ({ node: currentNode, width }: OwnProps) => {
 	})
 	useDeepCompareEffect(() => {
 		mutate(request)
-	}, [list_path])
+	}, [list_path ?? []])
 
 	return (
 		<FocusTravel autoFocus={false}>
