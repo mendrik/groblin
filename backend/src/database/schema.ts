@@ -23,6 +23,17 @@ export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
+export interface ApiKey {
+  created_at: Generated<Timestamp>;
+  expires_at: Timestamp | null;
+  id: Generated<number>;
+  is_active: Generated<boolean>;
+  key: string;
+  last_used: Generated<Timestamp | null>;
+  name: string;
+  project_id: number;
+}
+
 export interface Node {
   depth: Generated<number | null>;
   id: Generated<number>;
@@ -74,6 +85,7 @@ export interface Values {
 }
 
 export interface DB {
+  api_key: ApiKey;
   node: Node;
   node_settings: NodeSettings;
   project: Project;
