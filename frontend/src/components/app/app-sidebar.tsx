@@ -11,11 +11,14 @@ import { pipeAsync } from '@shared/utils/pipe-async'
 import {
 	IconDatabaseExport,
 	IconDatabaseImport,
+	IconHome,
+	IconKey,
 	IconLogin2,
 	IconSettings,
 	IconUserCog
 } from '@tabler/icons-react'
 import type { ButtonHTMLAttributes, PropsWithChildren } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 type OwnProps = {
 	icon: Icon
@@ -48,11 +51,18 @@ const IconLink = ({
 )
 
 export const AppSidebar = () => {
+	const navigate = useNavigate()
 	return (
 		<div className="p-2 border-r">
 			<TooltipProvider>
 				<ul className="flex flex-col gap-y-2 text-muted-foreground">
+					<IconLink icon={IconHome} onClick={() => navigate('/')}>
+						Home
+					</IconLink>
 					<IconLink icon={IconSettings}>Settings</IconLink>
+					<IconLink icon={IconKey} onClick={() => navigate('/api-keys')}>
+						Api keys
+					</IconLink>
 					<IconLink icon={IconDatabaseExport}>Export</IconLink>
 					<IconLink icon={IconDatabaseImport}>Import</IconLink>
 					<IconLink icon={IconUserCog}>Profile</IconLink>
