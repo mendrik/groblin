@@ -18,6 +18,14 @@ import {
 } from 'ramda'
 
 export const debug = tap(console.log)
+export const debugFn =
+	<F extends AnyFn>(fn: F) =>
+	async (...args: Parameters<F>) => {
+		console.log('Calling', fn.name, 'with', args)
+		const result = await fn.apply(null, args)
+		console.log('Result', result)
+		return result
+	}
 
 export const addOrder =
 	<T, P extends string>(prop: P) =>
@@ -55,5 +63,5 @@ export const fork =
 	<T2 extends T>(v: T2[]): [...INF<G>] =>
 		preds.map(pred => v.filter(pred)) as [...INF<G>]
 
-export const removeAt = (idx: number): <T>(list: T[]) => T[] =>
+export const removeAt = (idx: number): (<T>(list: T[]) => T[]) =>
 	pipe(splitAt(idx) as AnyFn, apply(useWith(concat, [identity, tail]) as AnyFn))

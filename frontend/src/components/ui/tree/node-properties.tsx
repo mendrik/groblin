@@ -56,7 +56,7 @@ export const NodeProperties = <T extends ZodRawShape>() => {
 					ref={ref}
 				>
 					<DialogFooter className="gap-y-2">
-						<Button onClick={close} variant="secondary">
+						<Button type="button" onClick={close} variant="secondary">
 							Cancel
 						</Button>
 						<Button type="submit" disabled={formApi.isSubmitting}>

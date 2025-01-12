@@ -160,6 +160,5 @@ const matcher = match<Args, ReactNode>(
 	})
 )
 
-export const Editor = ({ desc, field, type }: OwnProps) => {
-	return matcher(desc, type, field)
-}
+export const Editor = ({ desc, field, type }: OwnProps) =>
+	matcher(desc, type, field)
