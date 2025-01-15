@@ -1,5 +1,6 @@
-import type { IconProps, Icon as TIcon } from '@tabler/icons-react'
+import type { LucideProps } from 'lucide-react'
+import type { ForwardRefExoticComponent } from 'react'
 
-export type Icon = React.ForwardRefExoticComponent<
-	IconProps & React.RefAttributes<TIcon>
+export type Icon = ForwardRefExoticComponent<
+	Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>
 >

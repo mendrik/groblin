@@ -9,14 +9,13 @@ import {
 } from '@radix-ui/react-tooltip'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import {
-	IconDatabaseExport,
-	IconDatabaseImport,
-	IconHome,
-	IconKey,
-	IconLogin2,
-	IconSettings,
-	IconUserCog
-} from '@tabler/icons-react'
+	Database,
+	House,
+	Key,
+	LogIn,
+	Settings,
+	UserCircleIcon
+} from 'lucide-react'
 import type { ButtonHTMLAttributes, PropsWithChildren } from 'react'
 import { useLocation } from 'wouter'
 
@@ -37,7 +36,13 @@ const IconLink = ({
 	<li>
 		<Tooltip delayDuration={0}>
 			<TooltipTrigger {...button}>
-				<Icon className="w-6 h-6 hover:text-foreground" stroke={1} />
+				<Icon
+					size={20}
+					color="currentColor"
+					className="hover:text-foreground"
+					strokeWidth={1}
+					absoluteStrokeWith
+				/>
 			</TooltipTrigger>
 			<TooltipContent
 				sideOffset={5}
@@ -56,17 +61,16 @@ export const AppSidebar = () => {
 		<div className="p-2 border-r">
 			<TooltipProvider>
 				<ul className="flex flex-col gap-y-2 text-muted-foreground">
-					<IconLink icon={IconHome} onClick={() => navigate('/')}>
+					<IconLink icon={House} onClick={() => navigate('/')}>
 						Home
 					</IconLink>
-					<IconLink icon={IconSettings}>Settings</IconLink>
-					<IconLink icon={IconKey} onClick={() => navigate('/api-keys')}>
+					<IconLink icon={Settings}>Settings</IconLink>
+					<IconLink icon={Key} onClick={() => navigate('/api-keys')}>
 						Api keys
 					</IconLink>
-					<IconLink icon={IconDatabaseExport}>Export</IconLink>
-					<IconLink icon={IconDatabaseImport}>Import</IconLink>
-					<IconLink icon={IconUserCog}>Profile</IconLink>
-					<IconLink icon={IconLogin2} onClick={logoutCommand}>
+					<IconLink icon={Database}>Export</IconLink>
+					<IconLink icon={UserCircleIcon}>Profile</IconLink>
+					<IconLink icon={LogIn} onClick={logoutCommand}>
 						Logout
 					</IconLink>
 				</ul>
