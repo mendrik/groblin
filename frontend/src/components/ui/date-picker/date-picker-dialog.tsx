@@ -9,11 +9,13 @@ import { updateSignalFn } from '@/lib/signals'
 import { cn } from '@/lib/utils'
 import { signal } from '@preact/signals-react'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { IconCalendarX } from '@tabler/icons-react'
+
 import { formatDate } from 'date-fns'
 import { setDate, setMonth, setYear } from 'date-fns/fp'
+import { CalendarX } from 'lucide-react'
 import { F, pipe, range } from 'ramda'
 import { Button } from '../button'
+import { Icon } from '../simple/icon'
 import { MaskedDateInput } from './masked-date-input'
 import { ScrollCalendar } from './scroll-calendar'
 
@@ -78,7 +80,7 @@ export const DatePicker = () => {
 						onClick={() => setSignal($viewDate, new Date())}
 						title="Today"
 					>
-						<IconCalendarX stroke={1.5} />
+						<Icon icon={CalendarX} />
 					</Button>
 					<Button onClick={close} variant="secondary">
 						Cancel

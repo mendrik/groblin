@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import type { Icon, IconProps } from '@tabler/icons-react'
+import type { Icon, IconProps } from '@/type-patches/icons'
 import { Button, type ButtonProps } from '../button'
 
 type ListButtonProps = {
@@ -9,7 +9,8 @@ type ListButtonProps = {
 
 export const MicroIcon = ({
 	icon: Icon,
-	stroke = 2,
+	strokeWidth = 1,
+	absoluteStrokeWidth = true,
 	onClick,
 	className,
 	...rest
@@ -22,7 +23,8 @@ export const MicroIcon = ({
 	>
 		<Icon
 			className="h-4 w-4 shrink-0 text-muted-foreground"
-			stroke={stroke}
+			strokeWidth={strokeWidth}
+			absoluteStrokeWidth
 			{...rest}
 		/>
 	</Button>

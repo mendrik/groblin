@@ -9,7 +9,7 @@ import {
 import './month.css'
 import { setSignal } from '@/lib/signals'
 import { cn } from '@/lib/utils'
-import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
+
 import { forwardRef } from 'react'
 import { Button } from '../button'
 import { $viewDate, updateMonth } from './date-picker-dialog'

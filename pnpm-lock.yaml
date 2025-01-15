@@ -226,9 +226,6 @@ importers:
       '@radix-ui/react-visually-hidden':
         specifier: 1.1.1
         version: 1.1.1(@types/react-dom@19.0.3(@types/react@19.0.5))(@types/react@19.0.5)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      '@tabler/icons-react':
-        specifier: 3.17.0
-        version: 3.17.0(react@19.0.0)
       chroma-js:
         specifier: 3.1.2
         version: 3.1.2
@@ -298,6 +295,9 @@ importers:
       ts-key-enum:
         specifier: 3.0.13
         version: 3.0.13
+      wouter:
+        specifier: ^3.3.5
+        version: 3.3.5(react@19.0.0)
       zod:
         specifier: 3.24.1
         version: 3.24.1
@@ -380,9 +380,6 @@ importers:
       vitest-localstorage-mock:
         specifier: 0.1.2
         version: 0.1.2(vitest@2.1.8(@types/node@22.10.5)(@vitest/browser@2.1.8)(happy-dom@16.5.3)(msw@2.6.6(@types/node@22.10.5)(typescript@5.7.2)))
-      wouter:
-        specifier: ^3.3.5
-        version: 3.3.5(react@19.0.0)
 
   shared:
     devDependencies:
@@ -2859,14 +2856,6 @@ packages:
   '@smithy/util-waiter@4.0.2':
     resolution: {integrity: sha512-piUTHyp2Axx3p/kc2CIJkYSv0BAaheBQmbACZgQSSfWUumWNW+R1lL+H9PDBxKJkvOeEX+hKYEFiwO8xagL8AQ==}
     engines: {node: '>=18.0.0'}
-
-  '@tabler/icons-react@3.17.0':
-    resolution: {integrity: sha512-Ndm9Htv7KpIU1PYYrzs5EMhyA3aZGcgaxUp9Q1XOxcRZ+I0X+Ub2WS5f4bkRyDdL1s0++k2T9XRgmg2pG113sw==}
-    peerDependencies:
-      react: '>= 16'
-
-  '@tabler/icons@3.17.0':
-    resolution: {integrity: sha512-sCSfAQ0w93KSnSL7tS08n73CdIKpuHP8foeLMWgDKiZaCs8ZE//N3ytazCk651ZtruTtByI3b+ZDj7nRf+hHvA==}
 
   '@tailwindcss/typography@0.5.16':
     resolution: {integrity: sha512-0wDLwCVF5V3x3b1SGXPCDcdsbDHMBe+lkFzBRaHeLvNi+nrrnZ1lA18u+OTWO8iSWU2GxUOCvlXtDuqftc1oiA==}
@@ -8907,13 +8896,6 @@ snapshots:
       '@smithy/abort-controller': 4.0.1
       '@smithy/types': 4.1.0
       tslib: 2.8.1
-
-  '@tabler/icons-react@3.17.0(react@19.0.0)':
-    dependencies:
-      '@tabler/icons': 3.17.0
-      react: 19.0.0
-
-  '@tabler/icons@3.17.0': {}
 
   '@tailwindcss/typography@0.5.16(tailwindcss@3.4.17(ts-node@10.9.2(@types/node@22.10.5)(typescript@5.7.2)))':
     dependencies:

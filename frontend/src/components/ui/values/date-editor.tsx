@@ -3,7 +3,8 @@ import type { Value } from '@/gql/graphql'
 import { safeFormat, safeParse } from '@/lib/date'
 import { stopPropagation } from '@/lib/dom-events'
 import { relativeTime } from '@/lib/relative-time'
-import { IconCalendar } from '@tabler/icons-react'
+
+import { Calendar } from 'lucide-react'
 import { isNil, objOf, pipe, unless } from 'ramda'
 import { openDatePicker } from '../date-picker/date-picker-dialog'
 import { MicroIcon } from '../random/micro-icon'
@@ -43,7 +44,7 @@ export const DateEditor: ValueEditor<DateValue, DateProps> = ({
 						<AbsoluteDate date={date} />
 					))}
 				<MicroIcon
-					icon={IconCalendar}
+					icon={Calendar}
 					onClick={() =>
 						openDatePicker({
 							date,

@@ -4,12 +4,14 @@ import { stopPropagation } from '@/lib/dom-events'
 import { cn } from '@/lib/utils'
 import { type TreeNode, notEditing, startEditing } from '@/state/tree'
 import { pipeTap } from '@shared/utils/pipe-tap'
-import { IconFolder } from '@tabler/icons-react'
+
+import { Folder } from 'lucide-react'
 import { isNotEmpty, pipe, when } from 'ramda'
 import { forwardRef } from 'react'
 import { Button } from '../button'
+import { Icon } from '../simple/icon'
 import { openNodeDelete } from './node-delete'
-import { NodeIcon } from './node-icon'
+import { nodeIcon } from './node-icon'
 
 type OwnProps = {
 	node: TreeNode
@@ -35,20 +37,9 @@ export const NodeText = forwardRef<HTMLButtonElement, OwnProps>(
 					ref={ref}
 				>
 					{hasChildren && node.type === NodeType.Object ? (
-						<IconFolder
-							focusable={false}
-							tabIndex={-1}
-							className="w-4 h-4 shrink-0 text-muted-foreground"
-							stroke={0.5}
-						/>
+						<Icon icon={Folder} />
 					) : (
-						<NodeIcon
-							node={node}
-							focusable={false}
-							tabIndex={-1}
-							className="w-4 h-4 shrink-0 text-muted-foreground"
-							stroke={1}
-						/>
+						<Icon icon={nodeIcon(node)} />
 					)}
 					<div className={cn('p-1 truncate font-light')}>{node.name}</div>
 				</Button>

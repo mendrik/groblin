@@ -8,14 +8,14 @@ import {
 import { preventDefault, stopPropagation } from '@/lib/dom-events'
 import { type TreeNode, startEditing } from '@/state/tree'
 import {
-	IconAdjustmentsHorizontal,
-	IconCopyPlus,
-	IconCursorText,
-	IconDots,
-	IconRowInsertBottom,
-	IconRowInsertTop,
-	IconTrash
-} from '@tabler/icons-react'
+	BetweenHorizonalStart,
+	CirclePlus,
+	Ellipsis,
+	Settings2,
+	TextCursor,
+	Trash
+} from 'lucide-react'
+import { Icon } from '../simple/icon'
 import { openNodeCreate } from './node-create'
 import { openNodeDelete } from './node-delete'
 import { NodeExtraActions } from './node-extra-actions'
@@ -30,12 +30,7 @@ export const NodeActions = ({ node }: OwnProps) => {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger className="no-focus" onKeyDown={stopPropagation}>
-				<IconDots
-					className="w-4 h-4 shrink-0 text-muted-foreground"
-					focusable={false}
-					tabIndex={-1}
-					stroke={1}
-				/>
+				<Icon icon={Ellipsis} />
 			</DropdownMenuTrigger>
 			<DropdownMenuContent
 				onFocus={stopPropagation}
@@ -47,7 +42,7 @@ export const NodeActions = ({ node }: OwnProps) => {
 						className="flex gap-2 items-center"
 						onClick={() => openNodeCreate(node, 'child')}
 					>
-						<IconCopyPlus className="w-4 h-4" />
+						<Icon icon={CirclePlus} />
 						<span>Add child…</span>
 					</DropdownMenuItem>
 				)}
@@ -55,14 +50,14 @@ export const NodeActions = ({ node }: OwnProps) => {
 					className="flex gap-2 items-center"
 					onClick={() => openNodeCreate(node, 'sibling-above')}
 				>
-					<IconRowInsertTop className="w-4 h-4" />
+					<Icon icon={BetweenHorizonalStart} />
 					<span>Insert above…</span>
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					className="flex gap-2 items-center"
 					onClick={() => openNodeCreate(node, 'sibling-below')}
 				>
-					<IconRowInsertBottom className="w-4 h-4" />
+					<Icon icon={BetweenHorizonalStart} />
 					<span>Insert below…</span>
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
@@ -70,14 +65,14 @@ export const NodeActions = ({ node }: OwnProps) => {
 					className="flex gap-2 items-center"
 					onClick={() => startEditing(node.id)}
 				>
-					<IconCursorText className="w-4 h-4" />
+					<Icon icon={TextCursor} />
 					<span>Rename</span>
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					className="flex gap-2 items-center"
 					onSelect={() => openNodeDelete(node)}
 				>
-					<IconTrash className="w-4 h-4" />
+					<Icon icon={Trash} />
 					<span>Delete…</span>
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
@@ -85,7 +80,7 @@ export const NodeActions = ({ node }: OwnProps) => {
 					className="flex gap-2 items-center"
 					onSelect={() => openNodeProperties(node)}
 				>
-					<IconAdjustmentsHorizontal className="w-4 h-4" />
+					<Icon icon={Settings2} />
 					<span>Properties…</span>
 				</DropdownMenuItem>
 				<NodeExtraActions node={node} />

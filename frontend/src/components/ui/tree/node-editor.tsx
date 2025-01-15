@@ -3,7 +3,7 @@ import { focusOn, inputValue, stopPropagation } from '@/lib/dom-events'
 import { isActiveRef } from '@/lib/react'
 import { type TreeNode, confirmNodeName, stopEditing } from '@/state/tree'
 import { pipeTap } from '@shared/utils/pipe-tap'
-import { IconPencil } from '@tabler/icons-react'
+
 import { pipe } from 'ramda'
 import { type RefObject, forwardRef, useLayoutEffect } from 'react'
 import { Input } from '../input'

@@ -1,9 +1,11 @@
 import type { Value } from '@/gql/graphql'
 import { assertExists, assertThat } from '@shared/asserts'
 import { pipeAsync } from '@shared/utils/pipe-async'
-import { IconFileUpload } from '@tabler/icons-react'
+
+import { Paperclip } from 'lucide-react'
 import { is } from 'ramda'
 import { toast } from 'sonner'
+import { Icon } from '../simple/icon'
 import { uploadToS3 } from '../zod-form/utils'
 import { type ValueEditor, editorKey } from './value-editor'
 
@@ -56,7 +58,7 @@ export const MediaEditor: ValueEditor<MediaValue> = ({ node, value, save }) => {
 				tabIndex={0}
 				title="Upload file"
 			>
-				<IconFileUpload stroke={0.5} className="w-5 h-5" />
+				<Icon icon={Paperclip} />
 				<input
 					type="file"
 					className="hidden"

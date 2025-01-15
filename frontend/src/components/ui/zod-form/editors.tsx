@@ -2,7 +2,8 @@ import { safeFormat } from '@/lib/date'
 import { inputValue } from '@/lib/dom-events'
 import { EditorType } from '@shared/enums'
 import { caseOf, match } from '@shared/utils/match'
-import { IconCalendar } from '@tabler/icons-react'
+
+import { Calendar } from 'lucide-react'
 import { path, T as _, nth, pipe } from 'ramda'
 import type { ReactNode } from 'react'
 import type { ControllerRenderProps } from 'react-hook-form'
@@ -161,7 +162,7 @@ const matcher = match<Args, ReactNode>(
 				<div className="flex h-9 items-center gap-1">
 					<span>{value ? safeFormat(value, 'dd.MM.yyyy') : 'not set'}</span>
 					<MicroIcon
-						icon={IconCalendar}
+						icon={Calendar}
 						onClick={() =>
 							openDatePicker({
 								date: value,

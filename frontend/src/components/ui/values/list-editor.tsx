@@ -5,17 +5,17 @@ import { cn } from '@/lib/utils'
 import type { TreeNode } from '@/state/tree'
 import { $activeListItems, activateListItem } from '@/state/value'
 import {
-	IconChevronLeft,
-	IconChevronLeftPipe,
-	IconChevronRight,
-	IconChevronRightPipe,
-	IconChevronsLeft,
-	IconChevronsRight,
-	IconCursorText,
-	IconDotsVertical,
-	IconTrash,
-	IconSquareRoundedPlus as Plus
-} from '@tabler/icons-react'
+	ChevronFirst,
+	ChevronLast,
+	ChevronLeft,
+	ChevronRight,
+	ChevronsLeft,
+	ChevronsRight,
+	EllipsisVertical,
+	Plus,
+	TextCursor,
+	Trash
+} from 'lucide-react'
 import { clamp, findIndex, isNotNil } from 'ramda'
 import { useEffect } from 'react'
 import { useEffectOnce } from 'react-use'
@@ -26,6 +26,7 @@ import {
 	DropdownMenuTrigger
 } from '../dropdown-menu'
 import { MicroIcon } from '../random/micro-icon'
+import { Icon } from '../simple/icon'
 import { openListItemCreate } from './list-item-create'
 import { openListItemDelete } from './list-item-delete'
 import { openListItemEdit } from './list-item-edit'
@@ -45,7 +46,7 @@ type ListItemActionsProps = {
 const ListItemActions = ({ node, item }: ListItemActionsProps) => (
 	<DropdownMenu>
 		<DropdownMenuTrigger className="h-7" onKeyDown={stopPropagation}>
-			<IconDotsVertical className="w-4 h-4 text-muted-foreground" stroke={1} />
+			<Icon icon={EllipsisVertical} />
 		</DropdownMenuTrigger>
 		<DropdownMenuContent
 			onFocus={stopPropagation}
@@ -56,14 +57,14 @@ const ListItemActions = ({ node, item }: ListItemActionsProps) => (
 				className="flex gap-2 items-center"
 				onClick={() => openListItemEdit(item)}
 			>
-				<IconCursorText className="w-4 h-4" />
+				<Icon icon={TextCursor} />
 				<span>Rename...</span>
 			</DropdownMenuItem>
 			<DropdownMenuItem
 				className="flex gap-2 items-center"
 				onClick={() => openListItemDelete(item)}
 			>
-				<IconTrash className="w-4 h-4" />
+				<Icon icon={Trash} />
 				<span>Delete...</span>
 			</DropdownMenuItem>
 		</DropdownMenuContent>
@@ -148,43 +149,25 @@ export const PagedEditor: ValueEditor<ListItemValue[]> = ({
 		<ol className="flex flex-row items-center h-5 mt-1 -ml-2 px-2 divider-x-1 divider-border">
 			<li>
 				<MicroIcon
-					icon={IconChevronLeftPipe}
-					stroke={2}
+					icon={ChevronFirst}
 					onClick={() => activate(Number.MIN_SAFE_INTEGER)}
 				/>
 			</li>
 			<li>
-				<MicroIcon
-					icon={IconChevronsLeft}
-					stroke={2}
-					onClick={() => activate(-step)}
-				/>
+				<MicroIcon icon={ChevronsLeft} onClick={() => activate(-step)} />
+			</li>
+			<li>
+				<MicroIcon icon={ChevronLeft} onClick={() => activate(-1)} />
+			</li>
+			<li>
+				<MicroIcon icon={ChevronRight} onClick={() => activate(1)} />
+			</li>
+			<li>
+				<MicroIcon icon={ChevronsRight} onClick={() => activate(step)} />
 			</li>
 			<li>
 				<MicroIcon
-					icon={IconChevronLeft}
-					stroke={2}
-					onClick={() => activate(-1)}
-				/>
-			</li>
-			<li>
-				<MicroIcon
-					icon={IconChevronRight}
-					stroke={2}
-					onClick={() => activate(1)}
-				/>
-			</li>
-			<li>
-				<MicroIcon
-					icon={IconChevronsRight}
-					stroke={2}
-					onClick={() => activate(step)}
-				/>
-			</li>
-			<li>
-				<MicroIcon
-					icon={IconChevronRightPipe}
-					stroke={2}
+					icon={ChevronLast}
 					onClick={() => activate(Number.MAX_SAFE_INTEGER)}
 				/>
 			</li>

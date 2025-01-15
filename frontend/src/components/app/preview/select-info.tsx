@@ -1,5 +1,4 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { IconAlertCircle } from '@tabler/icons-react'
 
 export const SelectInfo = () => (
 	<Alert variant="default" className="max-w-sm m-auto">
