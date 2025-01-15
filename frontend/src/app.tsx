@@ -12,9 +12,8 @@ import {
 } from './components/ui/resizable'
 import { ScrollArea } from './components/ui/scroll-area'
 import useResize from './hooks/use-resize'
-import { setSignal } from './lib/signals'
 import { notNil } from './lib/signals'
-import { $panelSizes } from './state/panels'
+import { $panelSizes, setPanelSizes } from './state/panels'
 import { $project } from './state/project'
 
 export function App() {
@@ -27,7 +26,7 @@ export function App() {
 					<ResizablePanelGroup
 						direction="horizontal"
 						className="w-full min-h-svh"
-						onLayout={setSignal($panelSizes)}
+						onLayout={setPanelSizes}
 					>
 						<ResizablePanel defaultSize={$panelSizes.value[0]}>
 							<div className="w-full h-8 shrink-0">
