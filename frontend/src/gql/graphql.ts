@@ -245,24 +245,10 @@ export type Registration = {
 };
 
 export type Subscription = {
+  apiKeysUpdated: Scalars['Boolean']['output'];
   nodeSettingsUpdated: Scalars['Boolean']['output'];
   nodesUpdated: Scalars['Boolean']['output'];
   valuesUpdated: Value;
-};
-
-
-export type SubscriptionNodeSettingsUpdatedArgs = {
-  projectId: Scalars['Int']['input'];
-};
-
-
-export type SubscriptionNodesUpdatedArgs = {
-  projectId: Scalars['Int']['input'];
-};
-
-
-export type SubscriptionValuesUpdatedArgs = {
-  projectId: Scalars['Int']['input'];
 };
 
 export type Token = {
@@ -312,9 +298,7 @@ export type NodeFragment = { id: number, name: string, order: number, type: Node
 
 export type NodeSettingsFragment = { id: number, node_id: number, settings: any };
 
-export type NodesUpdatedSubscriptionVariables = Exact<{
-  projectId: Scalars['Int']['input'];
-}>;
+export type NodesUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
 export type NodesUpdatedSubscription = { nodesUpdated: boolean };
@@ -360,9 +344,7 @@ export type UpsertNodeSettingsMutationVariables = Exact<{
 
 export type UpsertNodeSettingsMutation = { upsertNodeSettings: number };
 
-export type NodeSettingsUpdatedSubscriptionVariables = Exact<{
-  projectId: Scalars['Int']['input'];
-}>;
+export type NodeSettingsUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
 export type NodeSettingsUpdatedSubscription = { nodeSettingsUpdated: boolean };
@@ -386,9 +368,7 @@ export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
 export type LogoutMutation = { logout: boolean };
 
-export type ValuesUpdatedSubscriptionVariables = Exact<{
-  projectId: Scalars['Int']['input'];
-}>;
+export type ValuesUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
 export type ValuesUpdatedSubscription = { valuesUpdated: { id: number, node_id: number, order: number, value?: any | null, list_path?: Array<number> | null, updated_at: any } };
@@ -461,6 +441,11 @@ export type GetApiKeysQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type GetApiKeysQuery = { getApiKeys: Array<{ name: string, key: string, is_active: boolean, created_at: any, expires_at?: any | null, last_used?: any | null }> };
 
+export type ApiKeysUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ApiKeysUpdatedSubscription = { apiKeysUpdated: boolean };
+
 export const ValueFragmentDoc = `
     fragment Value on Value {
   id
@@ -515,8 +500,8 @@ export const GetProjectDocument = `
 ${ValueFragmentDoc}
 ${NodeSettingsFragmentDoc}`;
 export const NodesUpdatedDocument = `
-    subscription NodesUpdated($projectId: Int!) {
-  nodesUpdated(projectId: $projectId)
+    subscription NodesUpdated {
+  nodesUpdated
 }
     `;
 export const GetNodesDocument = `
@@ -558,8 +543,8 @@ export const UpsertNodeSettingsDocument = `
 }
     `;
 export const NodeSettingsUpdatedDocument = `
-    subscription NodeSettingsUpdated($projectId: Int!) {
-  nodeSettingsUpdated(projectId: $projectId)
+    subscription NodeSettingsUpdated {
+  nodeSettingsUpdated
 }
     `;
 export const RegisterDocument = `
@@ -581,8 +566,8 @@ export const LogoutDocument = `
 }
     `;
 export const ValuesUpdatedDocument = `
-    subscription ValuesUpdated($projectId: Int!) {
-  valuesUpdated(projectId: $projectId) {
+    subscription ValuesUpdated {
+  valuesUpdated {
     ...Value
   }
 }
@@ -661,13 +646,18 @@ export const GetApiKeysDocument = `
   }
 }
     `;
+export const ApiKeysUpdatedDocument = `
+    subscription ApiKeysUpdated {
+  apiKeysUpdated
+}
+    `;
 export type Requester<C = {}, E = unknown> = <R, V>(doc: string, vars?: V, options?: C) => Promise<ExecutionResult<R, E>> | AsyncIterable<ExecutionResult<R, E>>
 export function getSdk<C, E>(requester: Requester<C, E>) {
   return {
     GetProject(variables?: GetProjectQueryVariables, options?: C): Promise<ExecutionResult<GetProjectQuery, E>> {
       return requester<GetProjectQuery, GetProjectQueryVariables>(GetProjectDocument, variables, options) as Promise<ExecutionResult<GetProjectQuery, E>>;
     },
-    NodesUpdated(variables: NodesUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<NodesUpdatedSubscription, E>> {
+    NodesUpdated(variables?: NodesUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<NodesUpdatedSubscription, E>> {
       return requester<NodesUpdatedSubscription, NodesUpdatedSubscriptionVariables>(NodesUpdatedDocument, variables, options) as AsyncIterable<ExecutionResult<NodesUpdatedSubscription, E>>;
     },
     GetNodes(variables?: GetNodesQueryVariables, options?: C): Promise<ExecutionResult<GetNodesQuery, E>> {
@@ -688,7 +678,7 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     UpsertNodeSettings(variables: UpsertNodeSettingsMutationVariables, options?: C): Promise<ExecutionResult<UpsertNodeSettingsMutation, E>> {
       return requester<UpsertNodeSettingsMutation, UpsertNodeSettingsMutationVariables>(UpsertNodeSettingsDocument, variables, options) as Promise<ExecutionResult<UpsertNodeSettingsMutation, E>>;
     },
-    NodeSettingsUpdated(variables: NodeSettingsUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<NodeSettingsUpdatedSubscription, E>> {
+    NodeSettingsUpdated(variables?: NodeSettingsUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<NodeSettingsUpdatedSubscription, E>> {
       return requester<NodeSettingsUpdatedSubscription, NodeSettingsUpdatedSubscriptionVariables>(NodeSettingsUpdatedDocument, variables, options) as AsyncIterable<ExecutionResult<NodeSettingsUpdatedSubscription, E>>;
     },
     Register(variables: RegisterMutationVariables, options?: C): Promise<ExecutionResult<RegisterMutation, E>> {
@@ -700,7 +690,7 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     Logout(variables?: LogoutMutationVariables, options?: C): Promise<ExecutionResult<LogoutMutation, E>> {
       return requester<LogoutMutation, LogoutMutationVariables>(LogoutDocument, variables, options) as Promise<ExecutionResult<LogoutMutation, E>>;
     },
-    ValuesUpdated(variables: ValuesUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<ValuesUpdatedSubscription, E>> {
+    ValuesUpdated(variables?: ValuesUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<ValuesUpdatedSubscription, E>> {
       return requester<ValuesUpdatedSubscription, ValuesUpdatedSubscriptionVariables>(ValuesUpdatedDocument, variables, options) as AsyncIterable<ExecutionResult<ValuesUpdatedSubscription, E>>;
     },
     GetValues(variables: GetValuesQueryVariables, options?: C): Promise<ExecutionResult<GetValuesQuery, E>> {
@@ -732,6 +722,9 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     },
     GetApiKeys(variables?: GetApiKeysQueryVariables, options?: C): Promise<ExecutionResult<GetApiKeysQuery, E>> {
       return requester<GetApiKeysQuery, GetApiKeysQueryVariables>(GetApiKeysDocument, variables, options) as Promise<ExecutionResult<GetApiKeysQuery, E>>;
+    },
+    ApiKeysUpdated(variables?: ApiKeysUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<ApiKeysUpdatedSubscription, E>> {
+      return requester<ApiKeysUpdatedSubscription, ApiKeysUpdatedSubscriptionVariables>(ApiKeysUpdatedDocument, variables, options) as AsyncIterable<ExecutionResult<ApiKeysUpdatedSubscription, E>>;
     }
   };
 }

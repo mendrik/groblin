@@ -164,9 +164,10 @@ input Registration {
 }
 
 type Subscription {
-  nodeSettingsUpdated(projectId: Int!): Boolean!
-  nodesUpdated(projectId: Int!): Boolean!
-  valuesUpdated(projectId: Int!): Value!
+  apiKeysUpdated: Boolean!
+  nodeSettingsUpdated: Boolean!
+  nodesUpdated: Boolean!
+  valuesUpdated: Value!
 }
 
 type Token {

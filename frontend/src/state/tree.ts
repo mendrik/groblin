@@ -34,7 +34,6 @@ import {
 	reverse,
 	unless
 } from 'ramda'
-import { $user } from './user'
 
 /** ---- types ---- **/
 export type TreeNode = TreeOf<Node, 'nodes'>
@@ -68,14 +67,13 @@ export const $focusedNode = signal<number>()
 export const $nextNode = signal<number>()
 export const $parentNode = signal<number>()
 export const $editingNode = signal<number | undefined>()
-const $subscription = signal<AbortController>()
+const $abort = signal<AbortController>()
 
 /** ---- subscriptions ---- **/
 export const subscribeToNodes = () => {
-	$subscription.value?.abort()
-	$subscription.value = Subscribe.NodesUpdated(
-		{ projectId: notNil($user, 'lastProjectId') },
-		() => Api.GetNodes().then(setSignal($nodes))
+	$abort.value?.abort()
+	$abort.value = Subscribe.NodesUpdated({}, () =>
+		Api.GetNodes().then(setSignal($nodes))
 	)
 }
 

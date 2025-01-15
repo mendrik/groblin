@@ -3,7 +3,7 @@ import { Kysely } from 'kysely'
 import type { DB } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import type { Context } from 'src/types.ts'
-import { Role } from 'src/types.ts'
+import { Role, Topic } from 'src/types.ts'
 
 import { randomBytes } from 'node:crypto'
 
@@ -13,8 +13,10 @@ import {
 	Field,
 	Mutation,
 	ObjectType,
+	type PubSub,
 	Query,
 	Resolver,
+	Subscription,
 	UseMiddleware
 } from 'type-graphql'
 
@@ -46,6 +48,16 @@ export class ApiKey {
 export class ApiKeyResolver {
 	@inject(Kysely)
 	private db: Kysely<DB>
+
+	@inject('PubSub')
+	private pubSub: PubSub
+
+	@Subscription(returns => Boolean, {
+		topics: Topic.ApiKeysUpdated
+	})
+	apiKeysUpdated() {
+		return true
+	}
 
 	@Query(returns => [ApiKey])
 	async getApiKeys(@Ctx() ctx: Context): Promise<ApiKey[]> {
@@ -86,6 +98,7 @@ export class ApiKeyResolver {
 				'expires_at'
 			])
 			.executeTakeFirstOrThrow()
+		this.pubSub.publish(Topic.ApiKeysUpdated)
 		return result
 	}
 }

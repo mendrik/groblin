@@ -45,8 +45,8 @@ fragment NodeSettings on NodeSettings {
   settings
 }
 
-subscription NodesUpdated($projectId: Int!) {
-  nodesUpdated(projectId: $projectId)
+subscription NodesUpdated {
+  nodesUpdated
 }
 
 query GetNodes {
@@ -81,8 +81,8 @@ mutation UpsertNodeSettings($data: UpsertNodeSettings!) {
   upsertNodeSettings(data: $data)
 }
 
-subscription NodeSettingsUpdated($projectId: Int!) {
-  nodeSettingsUpdated(projectId: $projectId)
+subscription NodeSettingsUpdated {
+  nodeSettingsUpdated
 }
 
 
@@ -101,8 +101,8 @@ mutation Logout {
   logout
 }
 
-subscription ValuesUpdated($projectId: Int!) {
-  valuesUpdated(projectId: $projectId) {
+subscription ValuesUpdated {
+  valuesUpdated {
     ...Value
   }
 }
@@ -169,4 +169,8 @@ query GetApiKeys {
     expires_at
     last_used
   }
+}
+
+subscription ApiKeysUpdated {
+  apiKeysUpdated
 }

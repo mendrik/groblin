@@ -22,7 +22,6 @@ import {
 	UseMiddleware,
 	registerEnumType
 } from 'type-graphql'
-import { matchesLastProject } from './filters.ts'
 
 registerEnumType(NodeType, {
 	name: 'NodeType'
@@ -64,10 +63,9 @@ export class NodeSettingsResolver {
 	private pubSub: PubSub
 
 	@Subscription(returns => Boolean, {
-		topics: Topic.NodeSettingsUpdated,
-		filter: matchesLastProject
+		topics: Topic.NodeSettingsUpdated
 	})
-	nodeSettingsUpdated(@Arg('projectId', () => Int) _: number) {
+	nodeSettingsUpdated() {
 		return true
 	}
 

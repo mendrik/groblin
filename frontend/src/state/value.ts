@@ -30,7 +30,6 @@ import {
 	when
 } from 'ramda'
 import { isNilOrEmpty, isNonEmptyArray } from 'ramda-adjunct'
-import { $project } from './project'
 import { $focusedNode, type TreeNode, asNode, pathTo } from './tree'
 
 export type NodeId = number
@@ -72,8 +71,7 @@ const fetchValues = () => {
 	Api.GetValues({ data: { ids } }).then(setSignal($values))
 }
 
-export const subscribeToValues = () =>
-	Subscribe.ValuesUpdated({ projectId: notNil($project, 'id') }, fetchValues)
+export const subscribeToValues = () => Subscribe.ValuesUpdated({}, fetchValues)
 
 $activeListItems.subscribe(unless(isEmpty, fetchValues))
 

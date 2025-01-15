@@ -1,10 +1,8 @@
 import { Api, Subscribe } from '@/gql-client'
 import type { NodeSettings, UpsertNodeSettings } from '@/gql/graphql'
 import { setSignal } from '@/lib/signals'
-import { notNil } from '@/lib/signals'
 import { signal } from '@preact/signals-react'
 import { groupBy, head, map, pipe, propOr } from 'ramda'
-import { $project } from './project'
 
 export type NodeId = number
 
@@ -19,10 +17,7 @@ export const fetchNodeSettings = () =>
 	Api.GetNodeSttings().then(setSignal($nodeSettings))
 
 export const subscribeToNodeSettings = () =>
-	Subscribe.NodeSettingsUpdated(
-		{ projectId: notNil($project, 'id') },
-		fetchNodeSettings
-	)
+	Subscribe.NodeSettingsUpdated({}, fetchNodeSettings)
 
 export const saveNodeSettings = (data: UpsertNodeSettings) =>
 	Api.UpsertNodeSettings({ data })

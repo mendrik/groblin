@@ -22,7 +22,6 @@ import {
 	Subscription,
 	UseMiddleware
 } from 'type-graphql'
-import { matchesLastProject } from './filters.ts'
 
 @ObjectType()
 export class Value {
@@ -96,13 +95,9 @@ export class ValueResolver {
 	private pubSub: PubSub
 
 	@Subscription(returns => Value, {
-		topics: Topic.ValuesUpdated,
-		filter: matchesLastProject
+		topics: Topic.ValuesUpdated
 	})
-	valuesUpdated(
-		@Root() valuePayload: Value,
-		@Arg('projectId', () => Int) _: number
-	) {
+	valuesUpdated(@Root() valuePayload: Value) {
 		return valuePayload
 	}
 
