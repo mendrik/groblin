@@ -17,14 +17,11 @@ type KeyHandlers = {
 
 interface KeyListenerProps extends KeyHandlers {
 	children?: ReactNode
-}
-
-interface KeyListenerProps extends KeyHandlers {
-	children?: ReactNode
+	className?: string
 }
 
 const KeyListener = forwardRef<HTMLDivElement, KeyListenerProps>(
-	({ children, ...handlers }, forwardRef) => {
+	({ children, className = 'contents', ...handlers }, forwardRef) => {
 		const innerRef = useRef<HTMLDivElement>(null)
 		const ref = (forwardRef || innerRef) as RefObject<HTMLDivElement>
 
@@ -40,7 +37,7 @@ const KeyListener = forwardRef<HTMLDivElement, KeyListenerProps>(
 		})
 
 		return (
-			<div className="contents" ref={ref}>
+			<div className={className} ref={ref}>
 				{children}
 			</div>
 		)
