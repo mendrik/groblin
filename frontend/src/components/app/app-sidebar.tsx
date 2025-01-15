@@ -18,7 +18,7 @@ import {
 	IconUserCog
 } from '@tabler/icons-react'
 import type { ButtonHTMLAttributes, PropsWithChildren } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation } from 'wouter'
 
 type OwnProps = {
 	icon: Icon
@@ -51,7 +51,7 @@ const IconLink = ({
 )
 
 export const AppSidebar = () => {
-	const navigate = useNavigate()
+	const [_, navigate] = useLocation()
 	return (
 		<div className="p-2 border-r">
 			<TooltipProvider>

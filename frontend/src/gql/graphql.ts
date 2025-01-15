@@ -38,7 +38,7 @@ export type ChangeNodeInput = {
   type?: InputMaybe<NodeType>;
 };
 
-export type CreateApiKeyInput = {
+export type CreateApiKey = {
   expires_at?: InputMaybe<Scalars['DateTimeISO']['input']>;
   name: Scalars['String']['input'];
 };
@@ -115,7 +115,7 @@ export type Mutation = {
 
 
 export type MutationCreateApiKeyArgs = {
-  data: CreateApiKeyInput;
+  data: CreateApiKey;
 };
 
 
@@ -454,7 +454,7 @@ export type GetApiKeysQueryVariables = Exact<{ [key: string]: never; }>;
 export type GetApiKeysQuery = { getApiKeys: Array<{ name: string, key: string, is_active: boolean, created_at: any, expires_at?: any | null, last_used?: any | null }> };
 
 export type CreateApiKeyMutationVariables = Exact<{
-  data: CreateApiKeyInput;
+  data: CreateApiKey;
 }>;
 
 
@@ -671,7 +671,7 @@ export const GetApiKeysDocument = `
 }
     ${ApiKeyFragmentDoc}`;
 export const CreateApiKeyDocument = `
-    mutation CreateApiKey($data: CreateApiKeyInput!) {
+    mutation CreateApiKey($data: CreateApiKey!) {
   createApiKey(data: $data) {
     ...ApiKey
   }

@@ -16,8 +16,8 @@ import { EditorType } from '@shared/enums'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import type { Fn } from '@tp/functions.ts'
 import { omit } from 'ramda'
-import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
+import { Link } from 'wouter'
 import { type TypeOf, strictObject } from 'zod'
 
 const registrationSchema = strictObject({

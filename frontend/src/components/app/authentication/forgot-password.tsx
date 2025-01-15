@@ -13,7 +13,7 @@ import { EditorType } from '@shared/enums'
 import { pipeTap } from '@shared/utils/pipe-tap'
 import type { Fn } from '@tp/functions.ts'
 import { pipe } from 'ramda'
-import { Link } from 'react-router-dom'
+import { Link } from 'wouter'
 import { type TypeOf, strictObject } from 'zod'
 
 const forgotPasswordSchema = strictObject({

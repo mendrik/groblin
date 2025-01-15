@@ -1,7 +1,6 @@
 import { Maybe } from 'purify-ts'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
 import { ThemeProvider } from './components/theme-provider'
 import { Toaster } from './components/ui/sonner'
 import './index.css'
@@ -10,6 +9,7 @@ import { LoggedOut } from './routing/logged-out'
 import './state/project'
 import { setDefaultOptions } from 'date-fns'
 import { enGB } from 'date-fns/locale'
+import { Router } from 'wouter'
 import { loadProject } from './state/project'
 import { $user } from './state/user'
 
@@ -29,9 +29,7 @@ const Main = () => (
 					}
 				}}
 			/>
-			<BrowserRouter basename="/">
-				{$user.value ? <LoggedIn /> : <LoggedOut />}
-			</BrowserRouter>
+			<Router base="/">{$user.value ? <LoggedIn /> : <LoggedOut />}</Router>
 		</ThemeProvider>
 	</StrictMode>
 )

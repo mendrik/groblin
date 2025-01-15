@@ -20,7 +20,7 @@ input ChangeNodeInput {
   type: NodeType
 }
 
-input CreateApiKeyInput {
+input CreateApiKey {
   expires_at: DateTimeISO
   name: String!
 }
@@ -94,7 +94,7 @@ input Login {
 }
 
 type Mutation {
-  createApiKey(data: CreateApiKeyInput!): ApiKey!
+  createApiKey(data: CreateApiKey!): ApiKey!
   deleteListItem(id: Int!): Boolean!
   deleteNodeById(id: Int!, order: Int!, parent_id: Int!): Boolean!
   importArray(data: JsonArrayImportInput!): Boolean!

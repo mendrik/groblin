@@ -6,7 +6,7 @@ import { Form, FormControl } from '@/components/ui/form'
 import { TagsInput } from '@/components/ui/tags-input'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Route, Routes } from 'react-router-dom'
+import { Route } from 'wouter'
 
 const Test = () => {
 	const [tags, setTags] = useState<string[]>(['tag1', 'tag2', 'tag3'])
@@ -27,11 +27,11 @@ const Test = () => {
 }
 
 export const LoggedOut = () => (
-	<Routes>
-		<Route path="/tags" Component={Test} />
-		<Route path="/reset-password" Component={PasswordResetDialog} />
-		<Route path="/password" Component={ForgotPasswordDialog} />
-		<Route path="/register" Component={RegistrationDialog} />
-		<Route path="/" Component={LoginDialog} />
-	</Routes>
+	<>
+		<Route path="/tags" component={Test} />
+		<Route path="/reset-password" component={PasswordResetDialog} />
+		<Route path="/password" component={ForgotPasswordDialog} />
+		<Route path="/register" component={RegistrationDialog} />
+		<Route path="/" component={LoginDialog} />
+	</>
 )

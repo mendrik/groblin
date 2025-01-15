@@ -175,7 +175,7 @@ query GetApiKeys {
   }
 }
 
-mutation CreateApiKey($data: CreateApiKeyInput!) {
+mutation CreateApiKey($data: CreateApiKey!) {
   createApiKey(data: $data) {
     ...ApiKey
   }

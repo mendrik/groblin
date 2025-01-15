@@ -11,8 +11,8 @@ import { asField, stringField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { login } from '@/state/user'
 import { EditorType } from '@shared/enums'
-import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
+import { Link } from 'wouter'
 import { type TypeOf, boolean, strictObject } from 'zod'
 
 const loginSchema = strictObject({
