@@ -8,8 +8,9 @@ import {
 import { preventDefault, stopPropagation } from '@/lib/dom-events'
 import { type TreeNode, startEditing } from '@/state/tree'
 import {
-	BetweenHorizonalStart,
 	CirclePlus,
+	CornerDownRight,
+	CornerUpRight,
 	Ellipsis,
 	Settings2,
 	TextCursor,
@@ -50,14 +51,14 @@ export const NodeActions = ({ node }: OwnProps) => {
 					className="flex gap-2 items-center"
 					onClick={() => openNodeCreate(node, 'sibling-above')}
 				>
-					<Icon icon={BetweenHorizonalStart} />
+					<Icon icon={CornerUpRight} />
 					<span>Insert above…</span>
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					className="flex gap-2 items-center"
 					onClick={() => openNodeCreate(node, 'sibling-below')}
 				>
-					<Icon icon={BetweenHorizonalStart} />
+					<Icon icon={CornerDownRight} />
 					<span>Insert below…</span>
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />

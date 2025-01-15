@@ -3,10 +3,12 @@ import { $nodeSettingsMap } from '@/state/node-settings'
 import type { TreeNode } from '@/state/tree'
 import { caseOf, match } from '@shared/utils/match'
 
+import { Import, Trash } from 'lucide-react'
 import { T as _, isEmpty } from 'ramda'
 import type { ReactNode } from 'react'
 import { DropdownMenuItem } from '../dropdown-menu'
 import { openImportJson } from '../io/import-array-dialog'
+import { Icon } from '../simple/icon'
 import { openNodeTruncate } from './node-truncate'
 
 type OwnProps = {
@@ -19,14 +21,14 @@ const ImportArray = ({ node }: OwnProps) => (
 			className="flex gap-2 items-center"
 			onSelect={() => openImportJson(node)}
 		>
-			<IconPackageImport className="w-4 h-4" />
+			<Icon icon={Import} />
 			<span>Import...</span>
 		</DropdownMenuItem>
 		<DropdownMenuItem
 			className="flex gap-2 items-center"
 			onSelect={() => openNodeTruncate(node)}
 		>
-			<IconTrash className="w-4 h-4" />
+			<Icon icon={Trash} />
 			<span>Truncate...</span>
 		</DropdownMenuItem>
 	</>
@@ -37,7 +39,7 @@ const ImportObject = ({ node }: OwnProps) => (
 		className="flex gap-2 items-center"
 		onSelect={() => openImportJson(node)}
 	>
-		<IconPackageImport className="w-4 h-4" />
+		<Icon icon={Import} />
 		<span>Import...</span>
 	</DropdownMenuItem>
 )

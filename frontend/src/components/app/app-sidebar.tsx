@@ -1,6 +1,6 @@
 import { removeItems } from '@/lib/local-storage'
 import { logout } from '@/state/user'
-import type { Icon } from '@/type-patches/icons'
+import type { Icon as IconImg } from '@/type-patches/icons'
 import {
 	Tooltip,
 	TooltipContent,
@@ -18,9 +18,10 @@ import {
 } from 'lucide-react'
 import type { ButtonHTMLAttributes, PropsWithChildren } from 'react'
 import { useLocation } from 'wouter'
+import { Icon } from '../ui/simple/icon'
 
 type OwnProps = {
-	icon: Icon
+	icon: IconImg
 } & ButtonHTMLAttributes<HTMLButtonElement>
 
 export const logoutCommand = pipeAsync(
@@ -29,7 +30,7 @@ export const logoutCommand = pipeAsync(
 )
 
 const IconLink = ({
-	icon: Icon,
+	icon,
 	children,
 	...button
 }: PropsWithChildren<OwnProps>) => (
@@ -37,11 +38,10 @@ const IconLink = ({
 		<Tooltip delayDuration={0}>
 			<TooltipTrigger {...button}>
 				<Icon
+					icon={icon}
 					size={20}
 					color="currentColor"
 					className="hover:text-foreground"
-					strokeWidth={1}
-					absoluteStrokeWith
 				/>
 			</TooltipTrigger>
 			<TooltipContent

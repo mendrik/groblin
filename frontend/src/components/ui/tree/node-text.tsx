@@ -1,11 +1,8 @@
 import KeyListener from '@/components/utils/key-listener'
-import { NodeType } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
 import { cn } from '@/lib/utils'
 import { type TreeNode, notEditing, startEditing } from '@/state/tree'
 import { pipeTap } from '@shared/utils/pipe-tap'
-
-import { Folder } from 'lucide-react'
 import { isNotEmpty, pipe, when } from 'ramda'
 import { forwardRef } from 'react'
 import { Button } from '../button'
@@ -36,11 +33,7 @@ export const NodeText = forwardRef<HTMLButtonElement, OwnProps>(
 					id={`node-${node.id}`}
 					ref={ref}
 				>
-					{hasChildren && node.type === NodeType.Object ? (
-						<Icon icon={Folder} />
-					) : (
-						<Icon icon={nodeIcon(node)} />
-					)}
+					<Icon icon={nodeIcon(node)} />
 					<div className={cn('p-1 truncate font-light')}>{node.name}</div>
 				</Button>
 			</KeyListener>

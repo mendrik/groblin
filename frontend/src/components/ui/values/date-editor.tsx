@@ -4,7 +4,7 @@ import { safeFormat, safeParse } from '@/lib/date'
 import { stopPropagation } from '@/lib/dom-events'
 import { relativeTime } from '@/lib/relative-time'
 
-import { Calendar } from 'lucide-react'
+import { CalendarDays } from 'lucide-react'
 import { isNil, objOf, pipe, unless } from 'ramda'
 import { openDatePicker } from '../date-picker/date-picker-dialog'
 import { MicroIcon } from '../random/micro-icon'
@@ -22,10 +22,10 @@ type DateRenderProps = {
 }
 
 const RelativeDate = ({ date }: DateRenderProps) => (
-	<span className="mt-1">{relativeTime({})(date)}</span>
+	<span>{relativeTime({})(date)}</span>
 )
 const AbsoluteDate = ({ date }: DateRenderProps) => (
-	<span className="mt-1">{safeFormat(date, 'dd.MM.yyyy')}</span>
+	<span>{safeFormat(date, 'dd.MM.yyyy')}</span>
 )
 
 export const DateEditor: ValueEditor<DateValue, DateProps> = ({
@@ -44,7 +44,7 @@ export const DateEditor: ValueEditor<DateValue, DateProps> = ({
 						<AbsoluteDate date={date} />
 					))}
 				<MicroIcon
-					icon={Calendar}
+					icon={CalendarDays}
 					onClick={() =>
 						openDatePicker({
 							date,

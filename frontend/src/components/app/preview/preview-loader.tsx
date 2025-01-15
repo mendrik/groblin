@@ -1,5 +1,8 @@
+import { Icon } from '@/components/ui/simple/icon'
+import { Settings } from 'lucide-react'
+
 export const PreviewLoader = () => (
 	<div className="flex w-full justify-center items-center">
-		<IconSettings className="h-8 w-8 animate-spin" stroke={0.5} />
+		<Icon icon={Settings} className="animate-spin" size={28} />
 	</div>
 )

@@ -19,9 +19,7 @@ type Media = {
 }
 
 type MediaValue = Omit<Value, 'value'> & {
-	value: {
-		media: Media
-	}
+	value: Media
 }
 
 const upload = async (ev: React.ChangeEvent): Promise<Media> => {
@@ -53,7 +51,7 @@ export const MediaEditor: ValueEditor<MediaValue> = ({ node, value, save }) => {
 			key={id}
 		>
 			<label
-				className="myLabel h-5 w-5 -ml-1 cursor-pointer"
+				className="myLabel h-5 w-5 p-1 -ml-1 cursor-pointer"
 				// biome-ignore lint/a11y/noNoninteractiveTabindex: <explanation>
 				tabIndex={0}
 				title="Upload file"

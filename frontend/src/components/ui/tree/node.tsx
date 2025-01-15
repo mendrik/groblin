@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 import { $editingNode, type TreeNode, isOpen } from '@/state/tree'
 import { always } from 'ramda'
-import { type LegacyRef, useRef } from 'react'
+import { useRef } from 'react'
 import { NodeActions } from './node-actions'
 import { NodeChevron } from './node-chevron'
 import { NodeEditor } from './node-editor'
@@ -20,15 +20,12 @@ export const Node = ({ node, depth }: OwnProps) => {
 	return (
 		<ol className={cn(`list-none m-0`)} style={{ paddingLeft: depth * 8 }}>
 			<li data-node_id={node.id}>
-				<div className="flex flex-row items-center justify-start w-full gap-1">
+				<div className="flex flex-row items-center justify-start w-full">
 					<NodeChevron node={node} />
 					{node.id === $editingNode.value ? (
 						<NodeEditor node={node} ref={editor} textBtn={textBtn} />
 					) : (
-						<NodeText
-							node={node}
-							ref={textBtn as LegacyRef<HTMLButtonElement>}
-						/>
+						<NodeText node={node} ref={textBtn} />
 					)}
 					<NodeActions node={node} />
 				</div>
