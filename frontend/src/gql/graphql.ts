@@ -38,6 +38,11 @@ export type ChangeNodeInput = {
   type?: InputMaybe<NodeType>;
 };
 
+export type CreateApiKeyInput = {
+  expires_at?: InputMaybe<Scalars['DateTimeISO']['input']>;
+  name: Scalars['String']['input'];
+};
+
 export type GetValues = {
   ids: Array<Scalars['Int']['input']>;
 };
@@ -106,6 +111,11 @@ export type Mutation = {
   uploadUrl: Upload;
   upsertNodeSettings: Scalars['Int']['output'];
   upsertValue: Scalars['Int']['output'];
+};
+
+
+export type MutationCreateApiKeyArgs = {
+  data: CreateApiKeyInput;
 };
 
 
@@ -436,10 +446,19 @@ export type GetListColumnsQueryVariables = Exact<{
 
 export type GetListColumnsQuery = { getListColumns: Array<{ id: number, name: string, order: number, type: NodeType, parent_id?: number | null }> };
 
+export type ApiKeyFragment = { name: string, key: string, is_active: boolean, created_at: any, expires_at?: any | null, last_used?: any | null };
+
 export type GetApiKeysQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetApiKeysQuery = { getApiKeys: Array<{ name: string, key: string, is_active: boolean, created_at: any, expires_at?: any | null, last_used?: any | null }> };
+
+export type CreateApiKeyMutationVariables = Exact<{
+  data: CreateApiKeyInput;
+}>;
+
+
+export type CreateApiKeyMutation = { createApiKey: { name: string, key: string, is_active: boolean, created_at: any, expires_at?: any | null, last_used?: any | null } };
 
 export type ApiKeysUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
@@ -470,6 +489,16 @@ export const NodeSettingsFragmentDoc = `
   id
   node_id
   settings
+}
+    `;
+export const ApiKeyFragmentDoc = `
+    fragment ApiKey on ApiKey {
+  name
+  key
+  is_active
+  created_at
+  expires_at
+  last_used
 }
     `;
 export const GetProjectDocument = `
@@ -637,15 +666,17 @@ export const GetListColumnsDocument = `
 export const GetApiKeysDocument = `
     query GetApiKeys {
   getApiKeys {
-    name
-    key
-    is_active
-    created_at
-    expires_at
-    last_used
+    ...ApiKey
   }
 }
-    `;
+    ${ApiKeyFragmentDoc}`;
+export const CreateApiKeyDocument = `
+    mutation CreateApiKey($data: CreateApiKeyInput!) {
+  createApiKey(data: $data) {
+    ...ApiKey
+  }
+}
+    ${ApiKeyFragmentDoc}`;
 export const ApiKeysUpdatedDocument = `
     subscription ApiKeysUpdated {
   apiKeysUpdated
@@ -722,6 +753,9 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     },
     GetApiKeys(variables?: GetApiKeysQueryVariables, options?: C): Promise<ExecutionResult<GetApiKeysQuery, E>> {
       return requester<GetApiKeysQuery, GetApiKeysQueryVariables>(GetApiKeysDocument, variables, options) as Promise<ExecutionResult<GetApiKeysQuery, E>>;
+    },
+    CreateApiKey(variables: CreateApiKeyMutationVariables, options?: C): Promise<ExecutionResult<CreateApiKeyMutation, E>> {
+      return requester<CreateApiKeyMutation, CreateApiKeyMutationVariables>(CreateApiKeyDocument, variables, options) as Promise<ExecutionResult<CreateApiKeyMutation, E>>;
     },
     ApiKeysUpdated(variables?: ApiKeysUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<ApiKeysUpdatedSubscription, E>> {
       return requester<ApiKeysUpdatedSubscription, ApiKeysUpdatedSubscriptionVariables>(ApiKeysUpdatedDocument, variables, options) as AsyncIterable<ExecutionResult<ApiKeysUpdatedSubscription, E>>;

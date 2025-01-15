@@ -1,5 +1,5 @@
 import { Api, Subscribe } from '@/gql-client'
-import type { ApiKey } from '@/gql/graphql'
+import type { ApiKey, CreateApiKeyInput } from '@/gql/graphql'
 import { setSignal } from '@/lib/signals'
 import { signal } from '@preact/signals-react'
 
@@ -12,3 +12,6 @@ export const subscribeToApiKeys = () => {
 		Api.GetApiKeys().then(setSignal($apiKeys))
 	)
 }
+
+export const createApiKey = (data: CreateApiKeyInput) =>
+	Api.CreateApiKey({ data })

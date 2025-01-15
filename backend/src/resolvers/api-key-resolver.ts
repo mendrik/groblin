@@ -8,9 +8,11 @@ import { Role, Topic } from 'src/types.ts'
 import { randomBytes } from 'node:crypto'
 
 import {
+	Arg,
 	Authorized,
 	Ctx,
 	Field,
+	InputType,
 	Mutation,
 	ObjectType,
 	type PubSub,
@@ -39,6 +41,15 @@ export class ApiKey {
 
 	@Field(type => Date, { nullable: true })
 	last_used: Date | null
+}
+
+@InputType()
+export class CreateApiKey {
+	@Field(type => String)
+	name: string
+
+	@Field(type => Date, { nullable: true })
+	expires_at: Date | null
 }
 
 @injectable()
@@ -77,13 +88,16 @@ export class ApiKeyResolver {
 	}
 
 	@Mutation(returns => ApiKey)
-	async createApiKey(@Ctx() ctx: Context, name: string): Promise<ApiKey> {
+	async createApiKey(
+		@Ctx() ctx: Context,
+		@Arg('data', () => CreateApiKey) data: CreateApiKey
+	): Promise<ApiKey> {
 		const { user } = ctx
 		const key = randomBytes(32).toString('hex')
 		const result = await this.db
 			.insertInto('api_key')
 			.values({
-				name,
+				...data,
 				key,
 				project_id: user.lastProjectId,
 				is_active: true,

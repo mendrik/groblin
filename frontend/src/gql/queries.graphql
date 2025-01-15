@@ -160,14 +160,24 @@ query GetListColumns($node_id: Int!) {
   }
 }
 
+fragment ApiKey on ApiKey {
+  name
+  key
+  is_active
+  created_at
+  expires_at
+  last_used
+}
+
 query GetApiKeys {
   getApiKeys {
-    name
-    key
-    is_active
-    created_at
-    expires_at
-    last_used
+    ...ApiKey
+  }
+}
+
+mutation CreateApiKey($data: CreateApiKeyInput!) {
+  createApiKey(data: $data) {
+    ...ApiKey
   }
 }
 

@@ -20,6 +20,11 @@ input ChangeNodeInput {
   type: NodeType
 }
 
+input CreateApiKeyInput {
+  expires_at: DateTimeISO
+  name: String!
+}
+
 """
 A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
 """
@@ -89,7 +94,7 @@ input Login {
 }
 
 type Mutation {
-  createApiKey: ApiKey!
+  createApiKey(data: CreateApiKeyInput!): ApiKey!
   deleteListItem(id: Int!): Boolean!
   deleteNodeById(id: Int!, order: Int!, parent_id: Int!): Boolean!
   importArray(data: JsonArrayImportInput!): Boolean!

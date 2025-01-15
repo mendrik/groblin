@@ -10,9 +10,9 @@ import { useFormState } from '@/components/ui/zod-form/use-form-state'
 import { asField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { setSignal } from '@/lib/signals'
+import { createApiKey } from '@/state/apikeys'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
-import { evolveAlt } from '@shared/utils/evolve-alt'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import { F, pipe } from 'ramda'
 import { type TypeOf, date, strictObject, string } from 'zod'
@@ -30,7 +30,7 @@ const newApiKeySchema = strictObject({
 		editor: EditorType.Input,
 		description: 'Name the key'
 	}),
-	expires: asField(date(), {
+	expires: asField(date().optional(), {
 		label: 'Expires',
 		description:
 			'You can limit the validity of the key by setting an expiration date.',
@@ -40,9 +40,8 @@ const newApiKeySchema = strictObject({
 
 export type NewApiKeySchema = TypeOf<typeof newApiKeySchema>
 
-const createApiKeyCommand: (data: NewApiKeySchema) => Promise<any> = pipeAsync(
-	evolveAlt({})
-)
+const createApiKeyCommand: (data: NewApiKeySchema) => Promise<any> =
+	pipeAsync(createApiKey)
 
 export const ApiKeyCreate = () => {
 	const [formApi, ref] = useFormState<NewApiKeySchema>()
