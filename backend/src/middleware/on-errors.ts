@@ -1,11 +1,11 @@
-import type { GraphQLError } from 'graphql'
-import type { Context, ErrorMessage } from 'graphql-ws'
+import type { ServerOptions } from 'graphql-ws'
 import type { LoggedInUser } from 'src/resolvers/auth-resolver.ts'
 
-export const onError = (
-	ctx: Context,
-	message: ErrorMessage,
-	errors: readonly GraphQLError[]
+export const onError: ServerOptions['onError'] = (
+	ctx,
+	message,
+	_payload,
+	errors
 ) => {
 	const { extra } = ctx
 	const user = extra as LoggedInUser
