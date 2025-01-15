@@ -10,8 +10,10 @@ import './month.css'
 import { setSignal } from '@/lib/signals'
 import { cn } from '@/lib/utils'
 
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { forwardRef } from 'react'
 import { Button } from '../button'
+import { Icon } from '../simple/icon'
 import { $viewDate, updateMonth } from './date-picker-dialog'
 
 type OwnProps = {
@@ -36,7 +38,7 @@ export const Month = forwardRef<HTMLDivElement, OwnProps>(
 						className="mr-auto"
 						onClick={() => updateMonth(month - 1)}
 					>
-						<IconChevronLeft stroke={1.5} />
+						<Icon icon={ChevronLeft} />
 					</Button>
 					<h2 className="headline">{formatDate(first, 'LLLL')}</h2>
 					<Button
@@ -45,7 +47,7 @@ export const Month = forwardRef<HTMLDivElement, OwnProps>(
 						className="ml-auto"
 						onClick={() => updateMonth(month + 1)}
 					>
-						<IconChevronRight stroke={1.5} />
+						<Icon icon={ChevronRight} />
 					</Button>
 				</div>
 				<ol className="weekdays">

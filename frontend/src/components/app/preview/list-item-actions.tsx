@@ -12,8 +12,9 @@ import { preventDefault, stopPropagation } from '@/lib/dom-events'
 import type { TreeNode } from '@/state/tree'
 import { activateListItem } from '@/state/value'
 import {
-	BetweenHorizonalStart,
 	Copy,
+	CornerDownRight,
+	CornerUpRight,
 	Crosshair,
 	EllipsisVertical,
 	Trash
@@ -49,11 +50,11 @@ export const ListItemActions = ({ id, node, value }: OwnProps) => {
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem className="flex gap-2 items-center">
-					<Icon icon={BetweenHorizonalStart} />
+					<Icon icon={CornerUpRight} />
 					<span>Insert above…</span>
 				</DropdownMenuItem>
 				<DropdownMenuItem className="flex gap-2 items-center">
-					<Icon icon={BetweenHorizonalStart} />
+					<Icon icon={CornerDownRight} />
 					<span>Insert below…</span>
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
