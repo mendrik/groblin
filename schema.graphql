@@ -3,6 +3,15 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+type ApiKey {
+  created_at: DateTimeISO!
+  expires_at: DateTimeISO
+  is_active: Boolean!
+  key: String!
+  last_used: DateTimeISO
+  name: String!
+}
+
 input ChangeNodeInput {
   id: Int!
   name: String!
@@ -80,6 +89,7 @@ input Login {
 }
 
 type Mutation {
+  createApiKey: ApiKey!
   deleteListItem(id: Int!): Boolean!
   deleteNodeById(id: Int!, order: Int!, parent_id: Int!): Boolean!
   importArray(data: JsonArrayImportInput!): Boolean!
@@ -138,6 +148,7 @@ type ProjectData {
 }
 
 type Query {
+  getApiKeys: [ApiKey!]!
   getListColumns(node_id: Int!): [Node!]!
   getListItems(request: ListRequest!): [ListItem!]!
   getNodeSettings: [NodeSettings!]!

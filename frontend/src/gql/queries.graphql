@@ -159,3 +159,14 @@ query GetListColumns($node_id: Int!) {
     ...Node
   }
 }
+
+query GetApiKeys {
+  getApiKeys {
+    name
+    key
+    is_active
+    created_at
+    expires_at
+    last_used
+  }
+}

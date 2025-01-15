@@ -8,8 +8,8 @@ import { NodeResolver } from './resolvers/node-resolver.ts'
 import { NodeSettingsResolver } from './resolvers/node-settings-resolver.ts'
 import { ProjectResolver } from './resolvers/project-resolver.ts'
 import { ValueResolver } from './resolvers/value-resolver.ts'
-import { createPubSub } from 'graphql-yoga'
 import { ListResolver } from './resolvers/list-resolver.ts'
+import { ApiKeyResolver } from './resolvers/api-key-resolver.ts'
 
 export const schema = await buildSchema({
 	resolvers: [
@@ -19,7 +19,8 @@ export const schema = await buildSchema({
 		NodeSettingsResolver,
 		ValueResolver,
 		IoResolver,
-		ListResolver
+		ListResolver,
+		ApiKeyResolver
 	],
 	pubSub: container.get<PubSub>('PubSub'),
 	authChecker: AuthChecker,

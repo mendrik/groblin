@@ -21,6 +21,15 @@ export type Scalars = {
   JSONObject: { input: any; output: any; }
 };
 
+export type ApiKey = {
+  created_at: Scalars['DateTimeISO']['output'];
+  expires_at?: Maybe<Scalars['DateTimeISO']['output']>;
+  is_active: Scalars['Boolean']['output'];
+  key: Scalars['String']['output'];
+  last_used?: Maybe<Scalars['DateTimeISO']['output']>;
+  name: Scalars['String']['output'];
+};
+
 export type ChangeNodeInput = {
   id: Scalars['Int']['input'];
   name: Scalars['String']['input'];
@@ -83,6 +92,7 @@ export type Login = {
 };
 
 export type Mutation = {
+  createApiKey: ApiKey;
   deleteListItem: Scalars['Boolean']['output'];
   deleteNodeById: Scalars['Boolean']['output'];
   importArray: Scalars['Boolean']['output'];
@@ -204,6 +214,7 @@ export type ProjectData = {
 };
 
 export type Query = {
+  getApiKeys: Array<ApiKey>;
   getListColumns: Array<Node>;
   getListItems: Array<ListItem>;
   getNodeSettings: Array<NodeSettings>;
@@ -445,6 +456,11 @@ export type GetListColumnsQueryVariables = Exact<{
 
 export type GetListColumnsQuery = { getListColumns: Array<{ id: number, name: string, order: number, type: NodeType, parent_id?: number | null }> };
 
+export type GetApiKeysQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetApiKeysQuery = { getApiKeys: Array<{ name: string, key: string, is_active: boolean, created_at: any, expires_at?: any | null, last_used?: any | null }> };
+
 export const ValueFragmentDoc = `
     fragment Value on Value {
   id
@@ -633,6 +649,18 @@ export const GetListColumnsDocument = `
   }
 }
     ${NodeFragmentDoc}`;
+export const GetApiKeysDocument = `
+    query GetApiKeys {
+  getApiKeys {
+    name
+    key
+    is_active
+    created_at
+    expires_at
+    last_used
+  }
+}
+    `;
 export type Requester<C = {}, E = unknown> = <R, V>(doc: string, vars?: V, options?: C) => Promise<ExecutionResult<R, E>> | AsyncIterable<ExecutionResult<R, E>>
 export function getSdk<C, E>(requester: Requester<C, E>) {
   return {
@@ -701,6 +729,9 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     },
     GetListColumns(variables: GetListColumnsQueryVariables, options?: C): Promise<ExecutionResult<GetListColumnsQuery, E>> {
       return requester<GetListColumnsQuery, GetListColumnsQueryVariables>(GetListColumnsDocument, variables, options) as Promise<ExecutionResult<GetListColumnsQuery, E>>;
+    },
+    GetApiKeys(variables?: GetApiKeysQueryVariables, options?: C): Promise<ExecutionResult<GetApiKeysQuery, E>> {
+      return requester<GetApiKeysQuery, GetApiKeysQueryVariables>(GetApiKeysDocument, variables, options) as Promise<ExecutionResult<GetApiKeysQuery, E>>;
     }
   };
 }

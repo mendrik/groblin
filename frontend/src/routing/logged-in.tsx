@@ -1,5 +1,5 @@
 import { App } from '@/app'
-import { ApiKeys } from '@/components/pages/apikeys'
+import { ApiKeys } from '@/components/pages/apikeys/apikeys'
 import { Route, Routes } from 'react-router-dom'
 
 export const LoggedIn = () => {

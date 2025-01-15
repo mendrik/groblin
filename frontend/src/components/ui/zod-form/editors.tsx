@@ -1,13 +1,17 @@
+import { safeFormat } from '@/lib/date'
 import { inputValue } from '@/lib/dom-events'
 import { EditorType } from '@shared/enums'
 import { caseOf, match } from '@shared/utils/match'
+import { IconCalendar } from '@tabler/icons-react'
 import { path, T as _, nth, pipe } from 'ramda'
 import type { ReactNode } from 'react'
 import type { ControllerRenderProps } from 'react-hook-form'
 import { ZodNativeEnum, ZodNumber, type ZodTypeAny } from 'zod'
+import { openDatePicker } from '../date-picker/date-picker-dialog'
 import { FormControl } from '../form'
 import { Input } from '../input'
 import { MaskedInput } from '../random/masked-input'
+import { MicroIcon } from '../random/micro-icon'
 import { SimpleSelect } from '../simple/select'
 import { Switch } from '../switch'
 import { TagsInput } from '../tags-input'
@@ -147,6 +151,25 @@ const matcher = match<Args, ReactNode>(
 					onValueChange={onChange}
 					placeholder={desc.placeholder}
 				/>
+			</FormControl>
+		)
+	),
+	caseOf(
+		[{ editor: EditorType.Date }, _, _],
+		(_desc, _, { onChange, value }) => (
+			<FormControl>
+				<div className="flex h-9 items-center gap-1">
+					<span>{value ? safeFormat(value, 'dd.MM.yyyy') : 'not set'}</span>
+					<MicroIcon
+						icon={IconCalendar}
+						onClick={() =>
+							openDatePicker({
+								date: value,
+								callback: onChange
+							})
+						}
+					/>
+				</div>
 			</FormControl>
 		)
 	),

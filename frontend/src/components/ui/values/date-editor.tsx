@@ -1,12 +1,10 @@
 import KeyListener from '@/components/utils/key-listener'
 import type { Value } from '@/gql/graphql'
+import { safeFormat, safeParse } from '@/lib/date'
 import { stopPropagation } from '@/lib/dom-events'
 import { relativeTime } from '@/lib/relative-time'
-import { caseOf, match } from '@shared/utils/match'
 import { IconCalendar } from '@tabler/icons-react'
-import { formatDate, parseJSON } from 'date-fns'
-import { T as _, isNil, objOf, pipe, tryCatch, unless } from 'ramda'
-import { isDate, isString, isValidDate } from 'ramda-adjunct'
+import { isNil, objOf, pipe, unless } from 'ramda'
 import { openDatePicker } from '../date-picker/date-picker-dialog'
 import { MicroIcon } from '../random/micro-icon'
 import type { DateProps } from '../tree/properties/dates'
@@ -18,25 +16,15 @@ type DateValue = Omit<Value, 'value'> & {
 	}
 }
 
-const validDate = unless(isValidDate, () => undefined)
-
-const safeParse = match<[Date | string | undefined], Date | undefined>(
-	caseOf([isDate], validDate),
-	caseOf([isString], pipe(parseJSON, validDate)),
-	caseOf([_], () => undefined)
-)
-
-const safeFormat = tryCatch(formatDate, () => undefined)
-
 type DateRenderProps = {
 	date: Date
 }
 
 const RelativeDate = ({ date }: DateRenderProps) => (
-	<span>{relativeTime({})(date)}</span>
+	<span className="mt-1">{relativeTime({})(date)}</span>
 )
 const AbsoluteDate = ({ date }: DateRenderProps) => (
-	<span>{safeFormat(date, 'dd.MM.yyyy')}</span>
+	<span className="mt-1">{safeFormat(date, 'dd.MM.yyyy')}</span>
 )
 
 export const DateEditor: ValueEditor<DateValue, DateProps> = ({
