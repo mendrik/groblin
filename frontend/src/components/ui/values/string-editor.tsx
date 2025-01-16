@@ -13,20 +13,20 @@ export const StringEditor: ValueEditor<StringValue> = ({
 	value,
 	save
 }) => {
-	const [text, setText] = useState(() => value?.value?.content)
+	const [text, setText] = useState(value?.value?.content)
 	return (
 		<KeyListener
 			onArrowLeft={stopPropagation}
 			onArrowRight={stopPropagation}
-			className="relative w-min"
+			className="max-w-[200px]"
+			key={editorKey(node, value)}
 		>
-			<div className="relative opacity-0 pointer-events-none top-0 h-0 w-fit">
+			<div className="pointer-events-none opacity-0 h-0 min-w-fit whitespace-nowrap">
 				{text}
 			</div>
 			<input
 				id={editorKey(node, value)}
-				key={editorKey(node, value)}
-				className="h-7 w-full bg-transparent border-none appearance-none outline-none ring-0"
+				className="h-7 w-full bg-transparent border-none appearance-none outline-none ring-0 min-w-[30px]"
 				defaultValue={value?.value?.content}
 				onChange={pipe(inputValue, setText)}
 				onBlur={pipeAsync(inputValue, objOf('content'), save)}

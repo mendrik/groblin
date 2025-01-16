@@ -2,6 +2,7 @@ import KeyListener from '@/components/utils/key-listener'
 import type { Value } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
 import { nthArg, objOf, pipe, prop } from 'ramda'
+import { useState } from 'react'
 import { MaskedInput } from '../random/masked-input'
 import type { NumberProps } from '../tree/properties/numbers'
 import { type ValueEditor, editorKey } from './value-editor'
@@ -15,12 +16,13 @@ export const NumberEditor: ValueEditor<NumberValue, NumberProps> = ({
 	save
 }) => {
 	const saveNewValue = pipe(objOf('figure'), save)
+	const [ok, setOk] = useState(value?.value.figure)
 
 	return (
 		<KeyListener
 			onArrowLeft={stopPropagation}
 			onArrowRight={stopPropagation}
-			key={editorKey(node, value, false)}
+			key={editorKey(node, value)}
 		>
 			<MaskedInput
 				mask={
@@ -31,7 +33,8 @@ export const NumberEditor: ValueEditor<NumberValue, NumberProps> = ({
 				defaultValue={value?.value.figure}
 				lazy={false}
 				className="h-7 w-full bg-transparent border-none appearance-none outline-none ring-0"
-				onAccept={pipe(nthArg(1), prop('typedValue'), saveNewValue)}
+				onAccept={pipe(nthArg(1), prop('typedValue'), setOk)}
+				onBlur={() => saveNewValue(ok)}
 				blocks={{
 					num: {
 						scale: settings?.precision ?? 0,
