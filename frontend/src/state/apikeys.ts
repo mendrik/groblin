@@ -24,7 +24,4 @@ $location.subscribe(loc => {
 	}
 })
 
-export const createApiKey = (data: CreateApiKey) => {
-	console.log(data)
-	return Api.CreateApiKey({ data })
-}
+export const createApiKey = (data: CreateApiKey) => Api.CreateApiKey({ data })
