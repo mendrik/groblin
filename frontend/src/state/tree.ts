@@ -9,7 +9,6 @@ import { getItem, setItem } from '@/lib/local-storage'
 import { setSignal } from '@/lib/signals'
 import { notNil } from '@/lib/signals'
 import { computeSignal } from '@/lib/signals'
-import { waitForId } from '@/lib/wait-for-id'
 import { computed, signal } from '@preact/signals-react'
 import { assertExists } from '@shared/asserts'
 import { type TreeOf, listToTree } from '@shared/utils/list-to-tree'
@@ -136,9 +135,6 @@ export const focusedNode = (): number => {
 	assertExists($focusedNode.value, 'Focused node is missing')
 	return $focusedNode.value
 }
-
-export const waitForNode = (id: number) =>
-	waitForId(`node-${id}`).then(() => id)
 
 export const asNode = (nodeId: number): TreeNode => {
 	const res = notNil($nodesMap, nodeId)

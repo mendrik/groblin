@@ -1,11 +1,12 @@
 import * as React from 'react'
 
 import { cn } from '@/lib/utils'
-import type { Icon } from '@/type-patches/icons'
+import type { Icon as IconProps } from '@/type-patches/icons'
+import { Icon } from './simple/icon'
 
 export interface InputProps
 	extends React.InputHTMLAttributes<HTMLInputElement> {
-	icon?: Icon
+	icon?: IconProps
 }
 
 const Inp = React.forwardRef<HTMLInputElement, InputProps>(
@@ -26,13 +27,10 @@ const Inp = React.forwardRef<HTMLInputElement, InputProps>(
 Inp.displayName = 'NativeInput'
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-	({ className, icon: Icon, ...props }, ref) => {
-		return Icon ? (
+	({ className, icon, ...props }, ref) => {
+		return icon ? (
 			<div className="flex flex-row relative items-center w-full">
-				<Icon
-					className="absolute translate-x-1 shrink-0 w-4 h-4"
-					stroke={0.5}
-				/>
+				<Icon icon={icon} className="absolute translate-x-1" />
 				<Inp
 					{...props}
 					className={cn(className, 'pl-[24px] flex-1')}
