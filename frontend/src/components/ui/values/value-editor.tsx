@@ -81,9 +81,9 @@ const matcher = match<Args, ValueEditor<any> | null>(
 	caseOf([_, _], () => null)
 )
 
-export const editorKey = (node: TreeNode, value?: Value) =>
+export const editorKey = (node: TreeNode, value?: Value, unmount?: boolean) =>
 	value
-		? `${value.id}-${value.updated_at}`
+		? `${value.id}-${unmount ? value.updated_at : 'lock'}`
 		: `${node.id}-${activePath(node)?.join('-')}`
 
 type OwnProps = {
