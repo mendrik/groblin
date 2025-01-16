@@ -18,11 +18,14 @@ export const MicroIcon = ({
 	<Button
 		size="icon"
 		variant="ghost"
-		className={cn('h-[20px] w-[20px]', className)}
+		className={cn(
+			'h-[20px] w-[20px] text-muted-foreground hover:text-primary',
+			className
+		)}
 		onClick={onClick}
 	>
 		<Icon
-			className="shrink-0 text-muted-foreground"
+			className="shrink-0"
 			strokeWidth={strokeWidth}
 			size={16}
 			absoluteStrokeWidth
