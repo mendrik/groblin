@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify'
-import { Kysely } from 'kysely'
+import { Kysely, sql } from 'kysely'
 import type { DB } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import type { Context } from 'src/types.ts'
@@ -84,6 +84,7 @@ export class ApiKeyResolver {
 				'expires_at',
 				'last_used'
 			])
+			.orderBy('created_at', 'desc')
 			.execute()
 	}
 
@@ -114,5 +115,34 @@ export class ApiKeyResolver {
 			.executeTakeFirstOrThrow()
 		this.pubSub.publish(Topic.ApiKeysUpdated)
 		return result
+	}
+
+	@Mutation(returns => Boolean)
+	async deleteApiKey(
+		@Ctx() ctx: Context,
+		@Arg('key', () => String) key: string
+	): Promise<boolean> {
+		const result = await this.db
+			.deleteFrom('api_key')
+			.where('key', '=', key)
+			.where('project_id', '=', ctx.user.lastProjectId)
+			.executeTakeFirstOrThrow()
+		this.pubSub.publish(Topic.ApiKeysUpdated)
+		return result.numDeletedRows > 0
+	}
+
+	@Mutation(returns => Boolean)
+	async toggleApiKey(
+		@Ctx() ctx: Context,
+		@Arg('key', () => String) key: string
+	): Promise<boolean> {
+		const result = await this.db
+			.updateTable('api_key')
+			.where('key', '=', key)
+			.where('project_id', '=', ctx.user.lastProjectId)
+			.set('is_active', sql`NOT is_active`)
+			.executeTakeFirstOrThrow()
+		this.pubSub.publish(Topic.ApiKeysUpdated)
+		return result.numUpdatedRows > 0
 	}
 }

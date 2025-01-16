@@ -95,6 +95,7 @@ input Login {
 
 type Mutation {
   createApiKey(data: CreateApiKey!): ApiKey!
+  deleteApiKey(key: String!): Boolean!
   deleteListItem(id: Int!): Boolean!
   deleteNodeById(id: Int!, order: Int!, parent_id: Int!): Boolean!
   importArray(data: JsonArrayImportInput!): Boolean!
@@ -103,6 +104,7 @@ type Mutation {
   login(data: Login!): Token!
   logout: Boolean!
   register(data: Registration!): Boolean!
+  toggleApiKey(key: String!): Boolean!
   truncate(data: TruncateValue!): Boolean!
   updateNode(data: ChangeNodeInput!): Boolean!
   uploadUrl(filename: String!): Upload!

@@ -98,6 +98,7 @@ export type Login = {
 
 export type Mutation = {
   createApiKey: ApiKey;
+  deleteApiKey: Scalars['Boolean']['output'];
   deleteListItem: Scalars['Boolean']['output'];
   deleteNodeById: Scalars['Boolean']['output'];
   importArray: Scalars['Boolean']['output'];
@@ -106,6 +107,7 @@ export type Mutation = {
   login: Token;
   logout: Scalars['Boolean']['output'];
   register: Scalars['Boolean']['output'];
+  toggleApiKey: Scalars['Boolean']['output'];
   truncate: Scalars['Boolean']['output'];
   updateNode: Scalars['Boolean']['output'];
   uploadUrl: Upload;
@@ -116,6 +118,11 @@ export type Mutation = {
 
 export type MutationCreateApiKeyArgs = {
   data: CreateApiKey;
+};
+
+
+export type MutationDeleteApiKeyArgs = {
+  key: Scalars['String']['input'];
 };
 
 
@@ -154,6 +161,11 @@ export type MutationLoginArgs = {
 
 export type MutationRegisterArgs = {
   data: Registration;
+};
+
+
+export type MutationToggleApiKeyArgs = {
+  key: Scalars['String']['input'];
 };
 
 
@@ -460,6 +472,20 @@ export type CreateApiKeyMutationVariables = Exact<{
 
 export type CreateApiKeyMutation = { createApiKey: { name: string, key: string, is_active: boolean, created_at: any, expires_at?: any | null, last_used?: any | null } };
 
+export type DeleteApiKeyMutationVariables = Exact<{
+  key: Scalars['String']['input'];
+}>;
+
+
+export type DeleteApiKeyMutation = { deleteApiKey: boolean };
+
+export type ToggleApiKeyMutationVariables = Exact<{
+  key: Scalars['String']['input'];
+}>;
+
+
+export type ToggleApiKeyMutation = { toggleApiKey: boolean };
+
 export type ApiKeysUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -677,6 +703,16 @@ export const CreateApiKeyDocument = `
   }
 }
     ${ApiKeyFragmentDoc}`;
+export const DeleteApiKeyDocument = `
+    mutation DeleteApiKey($key: String!) {
+  deleteApiKey(key: $key)
+}
+    `;
+export const ToggleApiKeyDocument = `
+    mutation ToggleApiKey($key: String!) {
+  toggleApiKey(key: $key)
+}
+    `;
 export const ApiKeysUpdatedDocument = `
     subscription ApiKeysUpdated {
   apiKeysUpdated
@@ -756,6 +792,12 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     },
     CreateApiKey(variables: CreateApiKeyMutationVariables, options?: C): Promise<ExecutionResult<CreateApiKeyMutation, E>> {
       return requester<CreateApiKeyMutation, CreateApiKeyMutationVariables>(CreateApiKeyDocument, variables, options) as Promise<ExecutionResult<CreateApiKeyMutation, E>>;
+    },
+    DeleteApiKey(variables: DeleteApiKeyMutationVariables, options?: C): Promise<ExecutionResult<DeleteApiKeyMutation, E>> {
+      return requester<DeleteApiKeyMutation, DeleteApiKeyMutationVariables>(DeleteApiKeyDocument, variables, options) as Promise<ExecutionResult<DeleteApiKeyMutation, E>>;
+    },
+    ToggleApiKey(variables: ToggleApiKeyMutationVariables, options?: C): Promise<ExecutionResult<ToggleApiKeyMutation, E>> {
+      return requester<ToggleApiKeyMutation, ToggleApiKeyMutationVariables>(ToggleApiKeyDocument, variables, options) as Promise<ExecutionResult<ToggleApiKeyMutation, E>>;
     },
     ApiKeysUpdated(variables?: ApiKeysUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<ApiKeysUpdatedSubscription, E>> {
       return requester<ApiKeysUpdatedSubscription, ApiKeysUpdatedSubscriptionVariables>(ApiKeysUpdatedDocument, variables, options) as AsyncIterable<ExecutionResult<ApiKeysUpdatedSubscription, E>>;

@@ -1,4 +1,5 @@
 import { MicroIcon } from '@/components/ui/random/micro-icon'
+import { WiggleMicroIcon } from '@/components/ui/random/wiggle-micro-icon'
 import {
 	Table,
 	TableBody,
@@ -9,7 +10,7 @@ import {
 	TableRow
 } from '@/components/ui/table'
 import { formatIsoDate } from '@/lib/date'
-import { $apiKeys } from '@/state/apikeys'
+import { $apiKeys, deleteApiKey, toggleApiKey } from '@/state/apikeys'
 import { Check, Copy, Trash, X } from 'lucide-react'
 
 export const ApiKeyTable = () => {
@@ -31,9 +32,9 @@ export const ApiKeyTable = () => {
 					<TableRow key={key.key}>
 						<TableCell className="font-medium">
 							{key.is_active ? (
-								<MicroIcon icon={Check} />
+								<MicroIcon icon={Check} onClick={() => toggleApiKey(key.key)} />
 							) : (
-								<MicroIcon icon={X} />
+								<MicroIcon icon={X} onClick={() => toggleApiKey(key.key)} />
 							)}
 						</TableCell>
 						<TableCell>{key.name}</TableCell>
@@ -44,7 +45,10 @@ export const ApiKeyTable = () => {
 						<TableCell>{formatIsoDate(key.expires_at)}</TableCell>
 						<TableCell>{formatIsoDate(key.last_used)}</TableCell>
 						<TableCell>
-							<MicroIcon icon={Trash} />
+							<WiggleMicroIcon
+								icon={Trash}
+								onClick={() => deleteApiKey(key.key)}
+							/>
 						</TableCell>
 					</TableRow>
 				))}

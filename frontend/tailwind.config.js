@@ -6,6 +6,15 @@ export default {
 	content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
 	theme: {
 		extend: {
+			keyframes: {
+				wiggle: {
+					'0%, 100%': { transform: 'rotate(-7deg)' },
+					'50%': { transform: 'rotate(7deg)' }
+				}
+			},
+			animation: {
+				wiggle: 'wiggle .5s ease-in-out infinite'
+			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',

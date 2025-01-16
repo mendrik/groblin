@@ -181,6 +181,14 @@ mutation CreateApiKey($data: CreateApiKey!) {
   }
 }
 
+mutation DeleteApiKey($key: String!) {
+  deleteApiKey(key: $key)
+}
+
+mutation ToggleApiKey($key: String!) {
+  toggleApiKey(key: $key)
+}
+
 subscription ApiKeysUpdated {
   apiKeysUpdated
 }

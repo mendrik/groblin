@@ -25,3 +25,5 @@ $location.subscribe(loc => {
 })
 
 export const createApiKey = (data: CreateApiKey) => Api.CreateApiKey({ data })
+export const deleteApiKey = (key: string) => Api.DeleteApiKey({ key })
+export const toggleApiKey = (key: string) => Api.ToggleApiKey({ key })

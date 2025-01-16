@@ -1,25 +1,29 @@
 import { cn } from '@/lib/utils'
 import type { Icon, IconProps } from '@/type-patches/icons'
+import type { RefObject } from 'react'
 import { Button, type ButtonProps } from '../button'
 
-type ListButtonProps = {
+export type MicroIconProps = {
 	icon: Icon
 	onClick?: ButtonProps['onClick']
-} & Omit<IconProps, 'onClick'>
+	ref?: RefObject<HTMLButtonElement | null>
+} & Omit<IconProps, 'onClick' | 'ref'>
 
 export const MicroIcon = ({
 	icon: Icon,
 	strokeWidth = 1,
+	ref,
 	absoluteStrokeWidth = true,
 	onClick,
 	className,
 	...rest
-}: ListButtonProps) => (
+}: MicroIconProps) => (
 	<Button
+		ref={ref}
 		size="icon"
 		variant="ghost"
 		className={cn(
-			'h-[20px] w-[20px] text-muted-foreground hover:text-primary',
+			'h-[20px] w-[20px] p-[2px] text-muted-foreground hover:text-primary',
 			className
 		)}
 		onClick={onClick}
