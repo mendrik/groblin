@@ -1,6 +1,7 @@
 import {
 	Dialog,
 	DialogContent,
+	DialogDescription,
 	DialogFooter,
 	DialogTitle
 } from '@/components/ui/dialog'
@@ -44,6 +45,7 @@ export const ColorPicker = () => {
 			>
 				<VisuallyHidden>
 					<DialogTitle>Color picker</DialogTitle>
+					<DialogDescription>Pick a color</DialogDescription>
 				</VisuallyHidden>
 				<PickerLib
 					className="z-20"

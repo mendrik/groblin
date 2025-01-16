@@ -1,6 +1,7 @@
 import {
 	Dialog,
 	DialogContent,
+	DialogDescription,
 	DialogFooter,
 	DialogHeader,
 	DialogTitle
@@ -9,6 +10,7 @@ import { setSignal } from '@/lib/signals'
 import { notNil } from '@/lib/signals'
 import { saveValue } from '@/state/value'
 import { signal } from '@preact/signals-react'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { EditorType } from '@shared/enums'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import { mergeLeft, objOf, omit, pipe } from 'ramda'
@@ -49,6 +51,9 @@ export const ListItemEdit = () => {
 			<DialogContent close={close}>
 				<DialogHeader>
 					<DialogTitle>Rename item</DialogTitle>
+					<VisuallyHidden>
+						<DialogDescription>Rename the item</DialogDescription>
+					</VisuallyHidden>
 				</DialogHeader>
 				<ZodForm
 					schema={editListItemSchema}

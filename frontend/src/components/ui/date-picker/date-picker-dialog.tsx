@@ -1,6 +1,7 @@
 import {
 	Dialog,
 	DialogContent,
+	DialogDescription,
 	DialogFooter,
 	DialogTitle
 } from '@/components/ui/dialog'
@@ -49,6 +50,7 @@ export const DatePicker = () => {
 			>
 				<VisuallyHidden>
 					<DialogTitle>Date picker</DialogTitle>
+					<DialogDescription>Pick a date</DialogDescription>
 				</VisuallyHidden>
 				<ol
 					className={cn(

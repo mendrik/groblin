@@ -1,6 +1,7 @@
 import {
 	Dialog,
 	DialogContent,
+	DialogDescription,
 	DialogFooter,
 	DialogHeader,
 	DialogTitle
@@ -10,6 +11,7 @@ import { notNil } from '@/lib/signals'
 import { type TreeNode, importArray } from '@/state/tree'
 import { activePath } from '@/state/value'
 import { signal } from '@preact/signals-react'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { EditorType } from '@shared/enums'
 import { evolveAlt } from '@shared/utils/evolve-alt'
 import { pipeAsync } from '@shared/utils/pipe-async'
@@ -76,6 +78,9 @@ export const ImportArrayDialog = () => {
 					<DialogTitle>
 						Import array data to <strong>{$node.value?.name}</strong>
 					</DialogTitle>
+					<VisuallyHidden>
+						<DialogDescription>Import json data</DialogDescription>
+					</VisuallyHidden>
 				</DialogHeader>
 				<ZodForm
 					schema={importArraySchema()}

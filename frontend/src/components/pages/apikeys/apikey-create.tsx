@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button'
 import {
 	Dialog,
 	DialogContent,
+	DialogDescription,
 	DialogFooter,
 	DialogHeader,
 	DialogTitle
@@ -51,6 +52,9 @@ export const ApiKeyCreate = () => {
 			<DialogContent close={close}>
 				<DialogHeader>
 					<DialogTitle>Create new api key</DialogTitle>
+					<DialogDescription>
+						Allows to create a new api key for this project
+					</DialogDescription>
 				</DialogHeader>
 				<ZodForm
 					schema={newApiKeySchema}

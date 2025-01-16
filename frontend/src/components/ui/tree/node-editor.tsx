@@ -18,10 +18,8 @@ export const NodeEditor = forwardRef<HTMLInputElement, OwnProps>(
 	({ node, textBtn }, ref) => {
 		useLayoutEffect(() => {
 			if (isActiveRef(ref)) {
-				console.log(ref.current)
 				ref.current.focus()
 				ref.current.select()
-				console.log(document.activeElement)
 			}
 		}, [ref])
 
