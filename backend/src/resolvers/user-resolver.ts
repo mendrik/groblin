@@ -33,6 +33,11 @@ export class ProjectUser {
 
 	@Field(type => Boolean)
 	confirmed: boolean
+
+	/*
+	@Field(type => [String])
+	roles: string[]
+	*/
 }
 
 @InputType()

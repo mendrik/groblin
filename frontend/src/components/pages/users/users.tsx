@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button'
-import {} from '@/components/ui/table'
 import { Page } from '../page'
 import { UserTable } from './table'
 import { UserInvite, openUserInvite } from './user-invite'

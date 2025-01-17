@@ -1,5 +1,5 @@
-import { MicroIcon } from '@/components/ui/random/micro-icon'
 import { WiggleMicroIcon } from '@/components/ui/random/wiggle-micro-icon'
+import { Icon } from '@/components/ui/simple/icon'
 import {
 	Table,
 	TableBody,
@@ -9,8 +9,7 @@ import {
 	TableHeader,
 	TableRow
 } from '@/components/ui/table'
-import { deleteApiKey } from '@/state/apikeys'
-import { $users } from '@/state/users'
+import { $users, deleteUser } from '@/state/users'
 import { Check, Trash } from 'lucide-react'
 
 export const UserTable = () => {
@@ -22,7 +21,7 @@ export const UserTable = () => {
 					<TableHead className="w-[16px]" />
 					<TableHead className="align-middle p-0">Name</TableHead>
 					<TableHead className="align-middle p-0">Email</TableHead>
-					<TableHead className="w-[100px] align-middle p-0">Role</TableHead>
+					<TableHead className="w-[100px] align-middle p-0">Roles</TableHead>
 					<TableHead className="w-[16px]" />
 				</TableRow>
 			</TableHeader>
@@ -30,15 +29,15 @@ export const UserTable = () => {
 				{$users.value.map(user => (
 					<TableRow key={user.id}>
 						<TableCell className="font-medium">
-							<MicroIcon icon={Check} />
+							<Icon icon={Check} />
 						</TableCell>
 						<TableCell>{user.name}</TableCell>
 						<TableCell>{user.email}</TableCell>
-						<TableCell>{user.roles}</TableCell>
+						<TableCell>{}</TableCell>
 						<TableCell>
 							<WiggleMicroIcon
 								icon={Trash}
-								onClick={() => deleteApiKey(user.id)}
+								onClick={() => deleteUser(user.id)}
 							/>
 						</TableCell>
 					</TableRow>

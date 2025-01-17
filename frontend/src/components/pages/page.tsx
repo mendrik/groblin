@@ -1,6 +1,6 @@
 import { ScrollArea } from '@radix-ui/react-scroll-area'
-import { Layout } from 'lucide-react'
 import type { PropsWithChildren } from 'react'
+import { Layout } from '../layout'
 
 export const Page = ({ children }: PropsWithChildren<{}>) => {
 	return (

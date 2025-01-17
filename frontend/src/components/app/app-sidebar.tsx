@@ -14,7 +14,8 @@ import {
 	Key,
 	LogIn,
 	Settings,
-	UserCircleIcon
+	UserCircleIcon,
+	Users
 } from 'lucide-react'
 import type { ButtonHTMLAttributes, PropsWithChildren } from 'react'
 import { useLocation } from 'wouter'
@@ -68,7 +69,7 @@ export const AppSidebar = () => {
 					<IconLink icon={Key} onClick={() => navigate('/api-keys')}>
 						Api keys
 					</IconLink>
-					<IconLink icon={Key} onClick={() => navigate('/users')}>
+					<IconLink icon={Users} onClick={() => navigate('/users')}>
 						Users
 					</IconLink>
 					<IconLink icon={Database}>Export</IconLink>

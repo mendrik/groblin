@@ -15,7 +15,7 @@ export const subscribeToUsers = () => {
 }
 
 $location.subscribe(loc => {
-	if (loc === '/api-keys') {
+	if (loc === '/users') {
 		subscribeToUsers()
 		loadUsers()
 	} else {
