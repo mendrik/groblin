@@ -68,6 +68,9 @@ export const AppSidebar = () => {
 					<IconLink icon={Key} onClick={() => navigate('/api-keys')}>
 						Api keys
 					</IconLink>
+					<IconLink icon={Key} onClick={() => navigate('/users')}>
+						Users
+					</IconLink>
 					<IconLink icon={Database}>Export</IconLink>
 					<IconLink icon={UserCircleIcon}>Profile</IconLink>
 					<IconLink icon={LogIn} onClick={logoutCommand}>

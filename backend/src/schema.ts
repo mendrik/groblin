@@ -10,6 +10,7 @@ import { ProjectResolver } from './resolvers/project-resolver.ts'
 import { ValueResolver } from './resolvers/value-resolver.ts'
 import { ListResolver } from './resolvers/list-resolver.ts'
 import { ApiKeyResolver } from './resolvers/api-key-resolver.ts'
+import { UserResolver } from './resolvers/user-resolver.ts'
 
 export const schema = await buildSchema({
 	resolvers: [
@@ -20,7 +21,8 @@ export const schema = await buildSchema({
 		ValueResolver,
 		IoResolver,
 		ListResolver,
-		ApiKeyResolver
+		ApiKeyResolver,
+		UserResolver,
 	],
 	pubSub: container.get<PubSub>('PubSub'),
 	authChecker: AuthChecker,

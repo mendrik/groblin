@@ -26,7 +26,7 @@ export const PreviewPanel = ({ width }: OwnProps) => {
 	const Panel = toPreviewPanel(node)
 
 	return (
-		<div className="flex flex-1 h-full w-full items-start">
+		<div className="flex flex-1 h-full w-full items-start px-4">
 			<ErrorBoundary fallback={<SelectInfo />} onError={console.error}>
 				<SWRConfig
 					value={{

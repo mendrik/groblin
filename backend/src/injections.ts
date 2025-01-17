@@ -13,6 +13,7 @@ import { ListResolver } from './resolvers/list-resolver.ts'
 import { NodeResolver } from './resolvers/node-resolver.ts'
 import { NodeSettingsResolver } from './resolvers/node-settings-resolver.ts'
 import { ProjectResolver } from './resolvers/project-resolver.ts'
+import { UserResolver } from './resolvers/user-resolver.ts'
 import { ValueResolver } from './resolvers/value-resolver.ts'
 import { db } from './services/database.ts'
 import { EmailService } from './services/email-service.ts'
@@ -31,6 +32,7 @@ container.bind(AuthResolver).toSelf()
 container.bind(ListResolver).toSelf()
 container.bind(ProjectResolver).toSelf()
 container.bind(ApiKeyResolver).toSelf()
+container.bind(UserResolver).toSelf()
 container.bind(LogAccess).toSelf()
 container.bind(ProjectService).toSelf()
 container.bind(IoResolver).toSelf()

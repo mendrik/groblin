@@ -159,7 +159,7 @@ const matcher = match<Args, ReactNode>(
 		[{ editor: EditorType.Date }, _, _],
 		(_desc, _, { onChange, value }) => (
 			<FormControl>
-				<div className="flex h-9 items-center justify-between gap-1">
+				<div className="flex h-9 items-center justify-between gap-1 text-sm">
 					<span>{value ? safeFormat(value, 'dd.MM.yyyy') : 'never'}</span>
 					<MicroIcon
 						icon={Calendar}

@@ -192,3 +192,24 @@ mutation ToggleApiKey($key: String!) {
 subscription ApiKeysUpdated {
   apiKeysUpdated
 }
+
+query GetUsers {
+  getUsers {
+    id
+    name
+    email
+    confirmed
+  }
+}
+
+mutation InviteUser($email: String!) {
+  inviteUser(email: $email)
+}
+
+mutation DeleteUser(id: Int!) {
+  deleteUser(id: $id)
+}
+
+subscription UsersUpdated {
+  usersUpdated
+}
