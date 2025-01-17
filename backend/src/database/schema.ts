@@ -59,6 +59,7 @@ export interface Project {
 }
 
 export interface ProjectUser {
+  confirmed: Generated<boolean>;
   project_id: number;
   role: string;
   user_id: number;

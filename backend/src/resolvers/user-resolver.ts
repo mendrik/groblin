@@ -57,9 +57,9 @@ export class UserResolver {
 		const { user } = ctx
 		return this.db
 			.selectFrom('user')
-			.leftJoin('project_user', 'project_user.user_id', 'user.id')
+			.innerJoin('project_user', 'project_user.user_id', 'user.id')
+			.select(['id', 'name', 'email', 'project_user.confirmed'])
 			.where('project_id', '=', user.lastProjectId)
-			.select(['id', 'name', 'email', 'confirmed'])
 			.orderBy('name', 'desc')
 			.execute()
 	}

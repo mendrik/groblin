@@ -206,7 +206,7 @@ mutation InviteUser($email: String!) {
   inviteUser(email: $email)
 }
 
-mutation DeleteUser(id: Int!) {
+mutation DeleteUser($id: Int!) {
   deleteUser(id: $id)
 }
 
