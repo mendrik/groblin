@@ -19,9 +19,9 @@ export const UserTable = () => {
 			<TableHeader>
 				<TableRow>
 					<TableHead className="w-[16px]" />
-					<TableHead className="align-middle p-0">Name</TableHead>
-					<TableHead className="align-middle p-0">Email</TableHead>
-					<TableHead className="w-[100px] align-middle p-0">Roles</TableHead>
+					<TableHead className="align-middle py-0">Name</TableHead>
+					<TableHead className="align-middle py-0">Email</TableHead>
+					<TableHead className="w-[100px] align-middle py-0">Roles</TableHead>
 					<TableHead className="w-[16px]" />
 				</TableRow>
 			</TableHeader>
