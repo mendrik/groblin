@@ -7,7 +7,7 @@ type ListButtonProps = {
 
 export const Icon = ({
 	icon: Icon,
-	size = 16,
+	size = 18,
 	strokeWidth = 1,
 	absoluteStrokeWidth = true,
 	className,

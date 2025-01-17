@@ -6,7 +6,9 @@ import { Button, type ButtonProps } from '../button'
 export type MicroIconProps = {
 	icon: Icon
 	onClick?: ButtonProps['onClick']
+	size?: number
 	ref?: RefObject<HTMLButtonElement | null>
+	title?: string
 } & Omit<IconProps, 'onClick' | 'ref'>
 
 export const MicroIcon = ({
@@ -15,6 +17,8 @@ export const MicroIcon = ({
 	ref,
 	absoluteStrokeWidth = true,
 	onClick,
+	title,
+	size = 24,
 	className,
 	...rest
 }: MicroIconProps) => (
@@ -22,16 +26,18 @@ export const MicroIcon = ({
 		ref={ref}
 		size="icon"
 		variant="ghost"
+		title={title}
 		className={cn(
-			'h-[20px] w-[20px] p-[2px] text-muted-foreground hover:text-primary',
+			'aspect-square p-[2px] text-muted-foreground hover:text-primary',
 			className
 		)}
+		style={{ height: size, width: size }}
 		onClick={onClick}
 	>
 		<Icon
 			className="shrink-0"
 			strokeWidth={strokeWidth}
-			size={16}
+			size={size - 4}
 			absoluteStrokeWidth
 			{...rest}
 		/>

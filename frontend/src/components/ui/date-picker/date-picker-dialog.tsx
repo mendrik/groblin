@@ -16,7 +16,7 @@ import { setDate, setMonth, setYear } from 'date-fns/fp'
 import { CalendarX } from 'lucide-react'
 import { F, pipe, range } from 'ramda'
 import { Button } from '../button'
-import { Icon } from '../simple/icon'
+import { MicroIcon } from '../random/micro-icon'
 import { MaskedDateInput } from './masked-date-input'
 import { ScrollCalendar } from './scroll-calendar'
 
@@ -74,16 +74,14 @@ export const DatePicker = () => {
 					))}
 				</ol>
 				<ScrollCalendar />
-				<DialogFooter className="flex flex-row gap-y-2 pt-4 border-t border-border">
+				<DialogFooter className="flex flex-row gap-y-2 pt-4 border-t border-border items-center">
 					<MaskedDateInput className="mr-auto font-mono" />
-					<Button
-						variant="ghost"
-						size="icon"
-						onClick={() => setSignal($viewDate, new Date())}
+					<MicroIcon
+						size={28}
 						title="Today"
-					>
-						<Icon icon={CalendarX} />
-					</Button>
+						icon={CalendarX}
+						onClick={() => setSignal($viewDate, new Date())}
+					/>
 					<Button onClick={close} variant="secondary">
 						Cancel
 					</Button>

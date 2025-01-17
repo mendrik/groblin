@@ -51,7 +51,7 @@ export const MediaEditor: ValueEditor<MediaValue> = ({ node, value, save }) => {
 			key={id}
 		>
 			<label
-				className="myLabel h-5 w-5 p-1 -ml-1 cursor-pointer"
+				className="myLabel h-5 w-5 p-1 -ml-1 cursor-pointer flex items-center justify-center"
 				// biome-ignore lint/a11y/noNoninteractiveTabindex: <explanation>
 				tabIndex={0}
 				title="Upload file"

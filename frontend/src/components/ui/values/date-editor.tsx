@@ -22,10 +22,10 @@ type DateRenderProps = {
 }
 
 const RelativeDate = ({ date }: DateRenderProps) => (
-	<span>{relativeTime({})(date)}</span>
+	<span className="mt-1">{relativeTime({})(date)}</span>
 )
 const AbsoluteDate = ({ date }: DateRenderProps) => (
-	<span>{safeFormat(date, 'dd.MM.yyyy')}</span>
+	<span className="mt-1">{safeFormat(date, 'dd.MM.yyyy')}</span>
 )
 
 export const DateEditor: ValueEditor<DateValue, DateProps> = ({
