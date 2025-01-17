@@ -60,6 +60,10 @@ export type InsertNode = {
   type: NodeType;
 };
 
+export type Invite = {
+  email: Scalars['String']['input'];
+};
+
 export type JsonArrayImportInput = {
   data: Scalars['String']['input'];
   external_id?: InputMaybe<Scalars['String']['input']>;
@@ -101,9 +105,11 @@ export type Mutation = {
   deleteApiKey: Scalars['Boolean']['output'];
   deleteListItem: Scalars['Boolean']['output'];
   deleteNodeById: Scalars['Boolean']['output'];
+  deleteUser: Scalars['Boolean']['output'];
   importArray: Scalars['Boolean']['output'];
   insertListItem: Scalars['Int']['output'];
   insertNode: Node;
+  inviteUser: Scalars['Boolean']['output'];
   login: Token;
   logout: Scalars['Boolean']['output'];
   register: Scalars['Boolean']['output'];
@@ -138,6 +144,11 @@ export type MutationDeleteNodeByIdArgs = {
 };
 
 
+export type MutationDeleteUserArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
 export type MutationImportArrayArgs = {
   data: JsonArrayImportInput;
 };
@@ -151,6 +162,11 @@ export type MutationInsertListItemArgs = {
 export type MutationInsertNodeArgs = {
   data: InsertNode;
   settings?: InputMaybe<Scalars['JSONObject']['input']>;
+};
+
+
+export type MutationInviteUserArgs = {
+  data: Invite;
 };
 
 
@@ -235,6 +251,13 @@ export type ProjectData = {
   values: Array<Value>;
 };
 
+export type ProjectUser = {
+  confirmed: Scalars['Boolean']['output'];
+  email: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
+};
+
 export type Query = {
   getApiKeys: Array<ApiKey>;
   getListColumns: Array<Node>;
@@ -242,6 +265,7 @@ export type Query = {
   getNodeSettings: Array<NodeSettings>;
   getNodes: Array<Node>;
   getProject: ProjectData;
+  getUsers: Array<ProjectUser>;
   getValues: Array<Value>;
 };
 
@@ -270,6 +294,7 @@ export type Subscription = {
   apiKeysUpdated: Scalars['Boolean']['output'];
   nodeSettingsUpdated: Scalars['Boolean']['output'];
   nodesUpdated: Scalars['Boolean']['output'];
+  usersUpdated: Scalars['Boolean']['output'];
   valuesUpdated: Value;
 };
 
@@ -491,6 +516,32 @@ export type ApiKeysUpdatedSubscriptionVariables = Exact<{ [key: string]: never; 
 
 export type ApiKeysUpdatedSubscription = { apiKeysUpdated: boolean };
 
+export type ProjectUserFragment = { id: number, email: string, name: string, confirmed: boolean };
+
+export type GetUsersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetUsersQuery = { getUsers: Array<{ id: number, email: string, name: string, confirmed: boolean }> };
+
+export type InviteUserMutationVariables = Exact<{
+  invite: Invite;
+}>;
+
+
+export type InviteUserMutation = { inviteUser: boolean };
+
+export type DeleteUserMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteUserMutation = { deleteUser: boolean };
+
+export type UsersUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UsersUpdatedSubscription = { usersUpdated: boolean };
+
 export const ValueFragmentDoc = `
     fragment Value on Value {
   id
@@ -525,6 +576,14 @@ export const ApiKeyFragmentDoc = `
   created_at
   expires_at
   last_used
+}
+    `;
+export const ProjectUserFragmentDoc = `
+    fragment ProjectUser on ProjectUser {
+  id
+  email
+  name
+  confirmed
 }
     `;
 export const GetProjectDocument = `
@@ -718,6 +777,28 @@ export const ApiKeysUpdatedDocument = `
   apiKeysUpdated
 }
     `;
+export const GetUsersDocument = `
+    query GetUsers {
+  getUsers {
+    ...ProjectUser
+  }
+}
+    ${ProjectUserFragmentDoc}`;
+export const InviteUserDocument = `
+    mutation InviteUser($invite: Invite!) {
+  inviteUser(data: $invite)
+}
+    `;
+export const DeleteUserDocument = `
+    mutation DeleteUser($id: Int!) {
+  deleteUser(id: $id)
+}
+    `;
+export const UsersUpdatedDocument = `
+    subscription UsersUpdated {
+  usersUpdated
+}
+    `;
 export type Requester<C = {}, E = unknown> = <R, V>(doc: string, vars?: V, options?: C) => Promise<ExecutionResult<R, E>> | AsyncIterable<ExecutionResult<R, E>>
 export function getSdk<C, E>(requester: Requester<C, E>) {
   return {
@@ -801,6 +882,18 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     },
     ApiKeysUpdated(variables?: ApiKeysUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<ApiKeysUpdatedSubscription, E>> {
       return requester<ApiKeysUpdatedSubscription, ApiKeysUpdatedSubscriptionVariables>(ApiKeysUpdatedDocument, variables, options) as AsyncIterable<ExecutionResult<ApiKeysUpdatedSubscription, E>>;
+    },
+    GetUsers(variables?: GetUsersQueryVariables, options?: C): Promise<ExecutionResult<GetUsersQuery, E>> {
+      return requester<GetUsersQuery, GetUsersQueryVariables>(GetUsersDocument, variables, options) as Promise<ExecutionResult<GetUsersQuery, E>>;
+    },
+    InviteUser(variables: InviteUserMutationVariables, options?: C): Promise<ExecutionResult<InviteUserMutation, E>> {
+      return requester<InviteUserMutation, InviteUserMutationVariables>(InviteUserDocument, variables, options) as Promise<ExecutionResult<InviteUserMutation, E>>;
+    },
+    DeleteUser(variables: DeleteUserMutationVariables, options?: C): Promise<ExecutionResult<DeleteUserMutation, E>> {
+      return requester<DeleteUserMutation, DeleteUserMutationVariables>(DeleteUserDocument, variables, options) as Promise<ExecutionResult<DeleteUserMutation, E>>;
+    },
+    UsersUpdated(variables?: UsersUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<UsersUpdatedSubscription, E>> {
+      return requester<UsersUpdatedSubscription, UsersUpdatedSubscriptionVariables>(UsersUpdatedDocument, variables, options) as AsyncIterable<ExecutionResult<UsersUpdatedSubscription, E>>;
     }
   };
 }

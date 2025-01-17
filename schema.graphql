@@ -52,6 +52,10 @@ input InsertNode {
   type: NodeType!
 }
 
+input Invite {
+  email: String!
+}
+
 """
 The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
@@ -98,9 +102,11 @@ type Mutation {
   deleteApiKey(key: String!): Boolean!
   deleteListItem(id: Int!): Boolean!
   deleteNodeById(id: Int!, order: Int!, parent_id: Int!): Boolean!
+  deleteUser(id: Int!): Boolean!
   importArray(data: JsonArrayImportInput!): Boolean!
   insertListItem(listItem: InsertListItem!): Int!
   insertNode(data: InsertNode!, settings: JSONObject): Node!
+  inviteUser(data: Invite!): Boolean!
   login(data: Login!): Token!
   logout: Boolean!
   register(data: Registration!): Boolean!
@@ -154,6 +160,13 @@ type ProjectData {
   values: [Value!]!
 }
 
+type ProjectUser {
+  confirmed: Boolean!
+  email: String!
+  id: Int!
+  name: String!
+}
+
 type Query {
   getApiKeys: [ApiKey!]!
   getListColumns(node_id: Int!): [Node!]!
@@ -161,6 +174,7 @@ type Query {
   getNodeSettings: [NodeSettings!]!
   getNodes: [Node!]!
   getProject: ProjectData!
+  getUsers: [ProjectUser!]!
   getValues(data: GetValues!): [Value!]!
 }
 
@@ -174,6 +188,7 @@ type Subscription {
   apiKeysUpdated: Boolean!
   nodeSettingsUpdated: Boolean!
   nodesUpdated: Boolean!
+  usersUpdated: Boolean!
   valuesUpdated: Value!
 }
 

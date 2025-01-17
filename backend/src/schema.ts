@@ -22,7 +22,7 @@ export const schema = await buildSchema({
 		IoResolver,
 		ListResolver,
 		ApiKeyResolver,
-		UserResolver,
+		UserResolver 
 	],
 	pubSub: container.get<PubSub>('PubSub'),
 	authChecker: AuthChecker,

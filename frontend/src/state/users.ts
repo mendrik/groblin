@@ -1,10 +1,10 @@
 import { Api, Subscribe } from '@/gql-client'
+import type { Invite, ProjectUser } from '@/gql/graphql'
 import { setSignal } from '@/lib/signals'
 import { $location } from '@/routing/route-observer'
 import { signal } from '@preact/signals-react'
-import {} from 'ramda'
 
-export const $users = signal<User[]>([])
+export const $users = signal<ProjectUser[]>([])
 export const $abort = signal<AbortController>()
 
 const loadUsers = () => Api.GetUsers().then(setSignal($users))
@@ -23,5 +23,5 @@ $location.subscribe(loc => {
 	}
 })
 
-export const inviteUser = (data: Invite) => Api.InviteUser({ data })
+export const inviteUser = (invite: Invite) => Api.InviteUser({ invite })
 export const deleteUser = (id: number) => Api.DeleteUser({ id })

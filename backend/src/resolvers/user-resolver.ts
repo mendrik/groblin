@@ -9,6 +9,7 @@ import {
 	Authorized,
 	Ctx,
 	Field,
+	InputType,
 	Int,
 	Mutation,
 	ObjectType,
@@ -20,7 +21,7 @@ import {
 } from 'type-graphql'
 
 @ObjectType()
-export class User {
+export class ProjectUser {
 	@Field(type => Int)
 	id: number
 
@@ -32,6 +33,12 @@ export class User {
 
 	@Field(type => Boolean)
 	confirmed: boolean
+}
+
+@InputType()
+export class Invite {
+	@Field(type => String)
+	email: string
 }
 
 @injectable()
@@ -52,8 +59,8 @@ export class UserResolver {
 		return true
 	}
 
-	@Query(returns => [User])
-	async getUsers(@Ctx() ctx: Context): Promise<User[]> {
+	@Query(returns => [ProjectUser])
+	async getUsers(@Ctx() ctx: Context): Promise<ProjectUser[]> {
 		const { user } = ctx
 		return this.db
 			.selectFrom('user')
@@ -81,7 +88,7 @@ export class UserResolver {
 	@Mutation(returns => Boolean)
 	async inviteUser(
 		@Ctx() ctx: Context,
-		@Arg('email', () => String) email: string
+		@Arg('data', () => Invite) email: Invite
 	): Promise<boolean> {
 		this.pubSub.publish(Topic.UsersUpdated)
 		return true

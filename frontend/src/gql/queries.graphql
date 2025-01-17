@@ -193,17 +193,21 @@ subscription ApiKeysUpdated {
   apiKeysUpdated
 }
 
+fragment ProjectUser on ProjectUser {
+  id
+  email
+  name
+  confirmed
+}
+
 query GetUsers {
   getUsers {
-    id
-    name
-    email
-    confirmed
+    ...ProjectUser
   }
 }
 
-mutation InviteUser($email: String!) {
-  inviteUser(email: $email)
+mutation InviteUser($invite: Invite!) {
+  inviteUser(data: $invite)
 }
 
 mutation DeleteUser($id: Int!) {
