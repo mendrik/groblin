@@ -4,9 +4,9 @@ import type {} from 'src/database/schema.ts'
 import { NodeResolver } from 'src/resolvers/node-resolver.ts'
 import type { Value } from 'src/resolvers/value-resolver.ts'
 import { NodeType } from 'src/types.ts'
+import { Topic } from 'src/types.ts'
 import { isJsonObject } from 'src/utils/json.ts'
 import type { PubSub } from 'type-graphql'
-import { Topic } from './Topic.ts'
 import { S3Client } from './s3-client.ts'
 
 @injectable()

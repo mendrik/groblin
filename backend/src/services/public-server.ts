@@ -5,6 +5,7 @@ import {
 	createServer
 } from 'node:http'
 import { assertExists } from '@shared/asserts.ts'
+import { cyan, lightGreen } from 'ansicolor'
 import {
 	type GraphQLSchemaWithContext,
 	type YogaInitialContext,
@@ -13,10 +14,10 @@ import {
 } from 'graphql-yoga'
 import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
+import type { DB } from 'src/database/schema.ts'
+import { Topic } from 'src/types.ts'
+import type { ProjectId } from 'src/types.ts'
 import type { PubSub } from 'type-graphql'
-import type { DB } from '../database/schema.ts'
-import type { ProjectId } from '../types.ts'
-import { Topic } from './Topic.ts'
 
 const port = 4001
 
@@ -43,7 +44,6 @@ export class PublicServer {
 		})
 		this.server = createServer(yoga)
 		this.abort = new AbortController()
-		console.log(this.pubSub)
 	}
 
 	private async listenToNodeChanges() {
@@ -96,11 +96,11 @@ export class PublicServer {
 	}
 
 	public start() {
-		this.server.listen(port, () => {
-			console.info(`Server is running on http://localhost:${port}/graphql`)
-		})
 		this.listenToNodeChanges()
 		this.listenToNodeSettingsChanges()
+		this.server.listen(port, () => {
+			console.log(cyan(`Public GQL server on ${lightGreen(port)}`))
+		})
 	}
 
 	public stop() {

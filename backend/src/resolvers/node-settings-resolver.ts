@@ -3,7 +3,7 @@ import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
 import type { DB, JsonValue } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
-import { Topic } from 'src/services/Topic.ts'
+import { Topic } from 'src/types.ts'
 import type { Context } from 'src/types.ts'
 import { NodeType, Role } from 'src/types.ts'
 import {

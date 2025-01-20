@@ -7,7 +7,6 @@
 		"schema:db": "./dump_db.sh",
 		"schema": "pnpm types:db",
 		"server": "tsx watch --include ./src --include ../shared/src --include ../type-patches src/server.ts",
-		"server:public": "tsx watch --include ./src --include ../shared/src --include ../type-patches src/public-server.ts",
 		"test": "vitest"
 	},
 	"devDependencies": {

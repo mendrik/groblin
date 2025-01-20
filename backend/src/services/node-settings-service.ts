@@ -3,9 +3,9 @@ import { Kysely, sql } from 'kysely'
 import type { DB, NodeSettings } from 'src/database/schema.ts'
 import { NodeResolver } from 'src/resolvers/node-resolver.ts'
 import { NodeType } from 'src/types.ts'
+import { Topic } from 'src/types.ts'
 import { isJsonObject } from 'src/utils/json.ts'
 import type { PubSub } from 'type-graphql'
-import { Topic } from './Topic.ts'
 
 @injectable()
 export class NodeSettingsService {

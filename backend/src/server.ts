@@ -1,17 +1,61 @@
 import 'reflect-metadata'
 import 'dotenv/config'
+import { createPubSub } from 'graphql-yoga'
+import { Container } from 'inversify'
+import { Kysely } from 'kysely'
 import { tryCatch } from 'ramda'
-import { container } from './injections.ts'
+import 'reflect-metadata'
+import { yellow } from 'ansicolor'
+import type { PubSub } from 'type-graphql'
+import type { DB } from './database/schema.ts'
+import { AuthChecker } from './middleware/auth-checker.ts'
+import { LogAccess } from './middleware/log-access.ts'
+import { ApiKeyResolver } from './resolvers/api-key-resolver.ts'
+import { AuthResolver } from './resolvers/auth-resolver.ts'
+import { IoResolver } from './resolvers/io-resolver.ts'
+import { ListResolver } from './resolvers/list-resolver.ts'
+import { NodeResolver } from './resolvers/node-resolver.ts'
+import { NodeSettingsResolver } from './resolvers/node-settings-resolver.ts'
+import { ProjectResolver } from './resolvers/project-resolver.ts'
+import { UserResolver } from './resolvers/user-resolver.ts'
+import { ValueResolver } from './resolvers/value-resolver.ts'
+import { db } from './services/database.ts'
 import { EmailService } from './services/email-service.ts'
 import { ImageService } from './services/image-service.ts'
 import { InternalServer } from './services/interal-server.ts'
 import { NodeSettingsService } from './services/node-settings-service.ts'
+import { ProjectService } from './services/project-service.ts'
 import { PublicServer } from './services/public-server.ts'
+import { S3Client } from './services/s3-client.ts'
 
+const pubSub = createPubSub()
+const container = new Container()
+container.bind<PubSub>('PubSub').toConstantValue(pubSub)
+container.bind(NodeResolver).toSelf()
+container.bind(NodeSettingsResolver).toSelf()
+container.bind(ValueResolver).toSelf()
+container.bind(AuthResolver).toSelf()
+container.bind(ListResolver).toSelf()
+container.bind(ProjectResolver).toSelf()
+container.bind(ApiKeyResolver).toSelf()
+container.bind(UserResolver).toSelf()
+container.bind(LogAccess).toSelf()
+container.bind(ProjectService).toSelf()
+container.bind(IoResolver).toSelf()
+container.bind(S3Client).toSelf()
+container.bind(AuthChecker).toSelf()
+container.bind(EmailService).toSelf()
+container.bind(Kysely<DB>).toConstantValue(db)
+container.bind(ImageService).to(ImageService).inSingletonScope()
+container.bind(NodeSettingsService).to(NodeSettingsService).inSingletonScope()
+container.bind(InternalServer).to(InternalServer).inSingletonScope()
+container.bind(PublicServer).to(PublicServer).inSingletonScope()
+
+console.log(yellow(`Starting services...`))
 void container.get(EmailService).init()
 void container.get(ImageService).init()
 void container.get(NodeSettingsService).init()
-void container.get(InternalServer).start()
+void container.get(InternalServer).start(container)
 void container.get(PublicServer).start()
 
 const shutDown = tryCatch(() => {
