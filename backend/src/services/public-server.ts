@@ -5,7 +5,7 @@ import {
 	createServer
 } from 'node:http'
 import { assertExists } from '@shared/asserts.ts'
-import { cyan, lightGreen } from 'ansicolor'
+import { cyan, lightGreen, yellow } from 'ansicolor'
 import {
 	type GraphQLSchemaWithContext,
 	type YogaInitialContext,
@@ -51,6 +51,7 @@ export class PublicServer {
 			Topic.NodesUpdated
 		) as AsyncGenerator<ProjectId>) {
 			this.schemaCache.delete(projectId)
+			console.log(yellow(`Reloading schema for project ${projectId}`))
 			if (this.abort.signal.aborted) break
 		}
 	}
@@ -60,6 +61,7 @@ export class PublicServer {
 			Topic.NodesUpdated
 		) as AsyncGenerator<ProjectId>) {
 			this.schemaCache.delete(projectId)
+			console.log(yellow(`Reloading schema for project ${projectId}`))
 			if (this.abort.signal.aborted) break
 		}
 	}
