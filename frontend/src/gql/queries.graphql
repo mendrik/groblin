@@ -198,6 +198,8 @@ fragment ProjectUser on ProjectUser {
   email
   name
   confirmed
+  roles
+  owner
 }
 
 query GetUsers {

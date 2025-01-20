@@ -9,6 +9,7 @@ import {
 	TableHeader,
 	TableRow
 } from '@/components/ui/table'
+import { cn } from '@/lib/utils'
 import { $users, deleteUser } from '@/state/users'
 import { Check, Trash } from 'lucide-react'
 
@@ -31,13 +32,16 @@ export const UserTable = () => {
 						<TableCell className="font-medium">
 							<Icon icon={Check} />
 						</TableCell>
-						<TableCell>{user.name}</TableCell>
+						<TableCell className={cn(user.owner && 'font-bold')}>
+							{user.name}
+						</TableCell>
 						<TableCell>{user.email}</TableCell>
-						<TableCell>{}</TableCell>
+						<TableCell>{user.roles}</TableCell>
 						<TableCell>
 							<WiggleMicroIcon
 								icon={Trash}
 								onClick={() => deleteUser(user.id)}
+								disabled={user.owner}
 							/>
 						</TableCell>
 					</TableRow>

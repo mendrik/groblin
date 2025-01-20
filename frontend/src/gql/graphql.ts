@@ -256,6 +256,8 @@ export type ProjectUser = {
   email: Scalars['String']['output'];
   id: Scalars['Int']['output'];
   name: Scalars['String']['output'];
+  owner: Scalars['Boolean']['output'];
+  roles: Array<Scalars['String']['output']>;
 };
 
 export type Query = {
@@ -516,12 +518,12 @@ export type ApiKeysUpdatedSubscriptionVariables = Exact<{ [key: string]: never; 
 
 export type ApiKeysUpdatedSubscription = { apiKeysUpdated: boolean };
 
-export type ProjectUserFragment = { id: number, email: string, name: string, confirmed: boolean };
+export type ProjectUserFragment = { id: number, email: string, name: string, confirmed: boolean, roles: Array<string>, owner: boolean };
 
 export type GetUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetUsersQuery = { getUsers: Array<{ id: number, email: string, name: string, confirmed: boolean }> };
+export type GetUsersQuery = { getUsers: Array<{ id: number, email: string, name: string, confirmed: boolean, roles: Array<string>, owner: boolean }> };
 
 export type InviteUserMutationVariables = Exact<{
   invite: Invite;
@@ -584,6 +586,8 @@ export const ProjectUserFragmentDoc = `
   email
   name
   confirmed
+  roles
+  owner
 }
     `;
 export const GetProjectDocument = `

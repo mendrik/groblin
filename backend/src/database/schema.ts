@@ -60,8 +60,9 @@ export interface Project {
 
 export interface ProjectUser {
   confirmed: Generated<boolean>;
+  owner: Generated<boolean>;
   project_id: number;
-  role: string;
+  roles: string[];
   user_id: number;
 }
 

@@ -34,10 +34,11 @@ export class ProjectUser {
 	@Field(type => Boolean)
 	confirmed: boolean
 
-	/*
+	@Field(type => Boolean)
+	owner: boolean
+
 	@Field(type => [String])
 	roles: string[]
-	*/
 }
 
 @InputType()
@@ -70,7 +71,14 @@ export class UserResolver {
 		return this.db
 			.selectFrom('user')
 			.innerJoin('project_user', 'project_user.user_id', 'user.id')
-			.select(['id', 'name', 'email', 'project_user.confirmed'])
+			.select([
+				'id',
+				'name',
+				'email',
+				'project_user.confirmed',
+				'project_user.roles',
+				'project_user.owner'
+			])
 			.where('project_id', '=', user.lastProjectId)
 			.orderBy('name', 'desc')
 			.execute()
@@ -85,6 +93,7 @@ export class UserResolver {
 			.deleteFrom('project_user')
 			.where('user_id', '=', id)
 			.where('project_id', '=', ctx.user.lastProjectId)
+			.where('owner', '=', false)
 			.executeTakeFirstOrThrow()
 		this.pubSub.publish(Topic.UsersUpdated)
 		return result.numDeletedRows > 0

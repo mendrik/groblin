@@ -21,12 +21,10 @@ export const ApiKeyTable = () => {
 			<TableHeader>
 				<TableRow>
 					<TableHead className="w-[16px]" />
-					<TableHead className="w-[100px] align-middle py-0">Name</TableHead>
-					<TableHead className="align-middle py-0">Key</TableHead>
-					<TableHead className="w-[100px] align-middle py-0">Expires</TableHead>
-					<TableHead className="w-[100px] align-middle py-0">
-						Last used
-					</TableHead>
+					<TableHead className="w-[100px]">Name</TableHead>
+					<TableHead>Key</TableHead>
+					<TableHead className="w-[100px]">Expires</TableHead>
+					<TableHead className="w-[100px]">Last used</TableHead>
 					<TableHead className="w-[16px]" />
 				</TableRow>
 			</TableHeader>

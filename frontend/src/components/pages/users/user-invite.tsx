@@ -45,9 +45,9 @@ export const UserInvite = () => {
 		<Dialog open={$dialogOpen.value}>
 			<DialogContent close={close}>
 				<DialogHeader>
-					<DialogTitle>Create new api key</DialogTitle>
+					<DialogTitle>Invite user</DialogTitle>
 					<DialogDescription>
-						Allows to create a new api key for this project
+						Allows to invite users to this project.
 					</DialogDescription>
 				</DialogHeader>
 				<ZodForm

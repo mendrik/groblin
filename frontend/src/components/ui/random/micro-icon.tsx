@@ -9,6 +9,7 @@ export type MicroIconProps = {
 	size?: number
 	ref?: RefObject<HTMLButtonElement | null>
 	title?: string
+	disabled?: boolean
 } & Omit<IconProps, 'onClick' | 'ref'>
 
 export const MicroIcon = ({
@@ -20,6 +21,7 @@ export const MicroIcon = ({
 	title,
 	size = 24,
 	className,
+	disabled,
 	...rest
 }: MicroIconProps) => (
 	<Button
@@ -31,6 +33,7 @@ export const MicroIcon = ({
 			'aspect-square p-[2px] text-muted-foreground hover:text-primary',
 			className
 		)}
+		disabled={disabled}
 		style={{ height: size, width: size }}
 		onClick={onClick}
 	>

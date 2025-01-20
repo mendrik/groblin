@@ -165,6 +165,8 @@ type ProjectUser {
   email: String!
   id: Int!
   name: String!
+  owner: Boolean!
+  roles: [String!]!
 }
 
 type Query {
