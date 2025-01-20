@@ -22,6 +22,7 @@ import {
 	type PubSub,
 	Query,
 	Resolver,
+	Root,
 	Subscription,
 	UseMiddleware,
 	registerEnumType
@@ -114,7 +115,7 @@ export class NodeResolver {
 	@Subscription(returns => Boolean, {
 		topics: Topic.NodesUpdated
 	})
-	nodesUpdated() {
+	nodesUpdated(@Root() _projectId: number) {
 		return true
 	}
 
@@ -171,9 +172,9 @@ export class NodeResolver {
 			}
 			return id
 		})
-		this.pubSub.publish(Topic.NodesUpdated, true)
+		this.pubSub.publish(Topic.NodesUpdated, user.lastProjectId)
 		if (settings) {
-			this.pubSub.publish(Topic.NodeSettingsUpdated, true)
+			this.pubSub.publish(Topic.NodeSettingsUpdated, user.lastProjectId)
 		}
 		return await this.getNode(id)
 	}
@@ -220,7 +221,7 @@ export class NodeResolver {
 			.where('project_id', '=', user.lastProjectId)
 			.executeTakeFirst()
 
-		this.pubSub.publish(Topic.NodesUpdated, true)
+		this.pubSub.publish(Topic.NodesUpdated, user.lastProjectId)
 		return numUpdatedRows > 0 // Returns true if at least one row was updated
 	}
 
@@ -246,7 +247,7 @@ export class NodeResolver {
 
 				return trx.deleteFrom('node').where('id', '=', id).executeTakeFirst()
 			})
-		this.pubSub.publish(Topic.NodesUpdated, { nodesUpdated: [] })
+		this.pubSub.publish(Topic.NodesUpdated, user.lastProjectId)
 		return numDeletedRows > 0
 	}
 }

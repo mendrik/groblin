@@ -33,3 +33,5 @@ export enum Topic {
 	ApiKeysUpdated = 'apiKeysUpdated',
 	UsersUpdated = 'usersUpdated'
 }
+
+export type ProjectId = number
