@@ -6,6 +6,7 @@ import type { PubSub } from 'type-graphql'
 import type { DB } from './database/schema.ts'
 import { AuthChecker } from './middleware/auth-checker.ts'
 import { LogAccess } from './middleware/log-access.ts'
+import { PublicServer } from './public-server.ts'
 import { ApiKeyResolver } from './resolvers/api-key-resolver.ts'
 import { AuthResolver } from './resolvers/auth-resolver.ts'
 import { IoResolver } from './resolvers/io-resolver.ts'
@@ -35,6 +36,7 @@ container.bind(ApiKeyResolver).toSelf()
 container.bind(UserResolver).toSelf()
 container.bind(LogAccess).toSelf()
 container.bind(ProjectService).toSelf()
+container.bind(PublicServer).toSelf()
 container.bind(IoResolver).toSelf()
 container.bind(S3Client).toSelf()
 container.bind(AuthChecker).toSelf()
