@@ -3,15 +3,22 @@ export type TreeOf<T, C extends string> = T & {
 }
 
 export const listToTree =
-	<T, S extends string>(
-		idProp: keyof T & string,
-		parentProp: keyof T & string,
+	<I extends string, P extends string, S extends string>(
+		idProp: I,
+		parentProp: P,
 		childProp: S
 	) =>
-	(list: T[]): TreeOf<T, S> =>
+	<
+		ID extends string | number,
+		T extends { [i in I]: ID } & {
+			[p in P]?: ID | undefined | null
+		}
+	>(
+		list: T[]
+	): TreeOf<T, S> =>
 		list
 			.filter(item => !item[parentProp])
-			.map(function buildTree(node: T): any {
+			.map(function buildTree(node: any): any {
 				return {
 					...node,
 					[childProp]: list

@@ -9,7 +9,6 @@ import { cyan, lightGreen, yellow } from 'ansicolor'
 import {
 	type GraphQLSchemaWithContext,
 	type YogaInitialContext,
-	createSchema,
 	createYoga
 } from 'graphql-yoga'
 import { inject, injectable } from 'inversify'
@@ -18,6 +17,7 @@ import type { DB } from 'src/database/schema.ts'
 import { Topic } from 'src/types.ts'
 import type { ProjectId } from 'src/types.ts'
 import type { PubSub } from 'type-graphql'
+import { SchemaService } from './schema-service.ts'
 
 const port = 4001
 
@@ -33,6 +33,9 @@ export class PublicServer {
 
 	@inject('PubSub')
 	private pubSub: PubSub
+
+	@inject(SchemaService)
+	private schemaService: SchemaService
 
 	private server: Server<typeof IncomingMessage, typeof ServerResponse>
 
@@ -78,18 +81,7 @@ export class PublicServer {
 			.executeTakeFirstOrThrow()
 		const cache = this.schemaCache
 		if (!cache.has(project_id)) {
-			const schema = createSchema({
-				typeDefs: /* GraphQL */ `
-					type Query {
-						greetings: String!
-					}
-				`,
-				resolvers: {
-					Query: {
-						greetings: () => 'Hello World!'
-					}
-				}
-			})
+			const schema = await this.schemaService.getSchema(project_id)
 			cache.set(project_id, schema)
 		}
 		const res = cache.get(project_id)

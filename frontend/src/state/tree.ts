@@ -53,9 +53,8 @@ export const $nodesMap = computed<Record<NodeId, TreeNode>>(() => {
 	}
 	return res
 })
-export const $root = computeSignal(
-	$nodes,
-	listToTree('id', 'parent_id', 'nodes')
+export const $root = computeSignal($nodes, (nodes: Node[]) =>
+	listToTree('id', 'parent_id', 'nodes')(nodes as Node[])
 )
 export const $nodeStates = signal<Record<string, NodeState>>(
 	getItem('tree-state', {})

@@ -91,7 +91,10 @@ export class IoResolver {
 		const { user } = ctx
 		const { node_id, data } = payload
 		const json: JsonArray = await this.s3.getContent(data).then(JSON.parse)
-		const node = await this.nodeResolver.getTreeNode(ctx, node_id)
+		const node = await this.nodeResolver.getTreeNode(
+			user.lastProjectId,
+			node_id
+		)
 		const importer = importJson(user, json, node, payload)
 
 		await this.db

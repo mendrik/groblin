@@ -1,6 +1,6 @@
 import { assertExists } from '@shared/asserts.ts'
 import { failOn } from '@shared/utils/guards.ts'
-import { type TreeOf, listToTree } from '@shared/utils/list-to-tree.ts'
+import { listToTree } from '@shared/utils/list-to-tree.ts'
 import { GraphQLJSONObject } from 'graphql-scalars'
 import { inject, injectable } from 'inversify'
 import { Kysely, type Transaction, sql } from 'kysely'
@@ -8,7 +8,7 @@ import { isNil } from 'ramda'
 import type { DB, JsonValue } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import { Topic } from 'src/types.ts'
-import type { Context } from 'src/types.ts'
+import type { Context, TreeNode } from 'src/types.ts'
 import { NodeType, Role } from 'src/types.ts'
 import {
 	Arg,
@@ -120,14 +120,13 @@ export class NodeResolver {
 	}
 
 	@Query(returns => [Node])
-	async getNodes(@Ctx() ctx: Context) {
-		const { user } = ctx
+	async getNodes(projectId: number): Promise<Node[]> {
 		return this.db
 			.selectFrom('node')
-			.where('project_id', '=', user.lastProjectId)
+			.where('project_id', '=', projectId)
 			.selectAll()
 			.orderBy('order', 'asc')
-			.execute()
+			.execute() as Promise<Node[]>
 	}
 
 	insertNodeTrx(trx: Transaction<DB>, data: InsertNode, ctx: Context) {
@@ -188,21 +187,17 @@ export class NodeResolver {
 			.then(failOn(isNil, 'Node not found')) as Promise<Node>
 	}
 
-	async getTreeNode(ctx: Context, id: number): Promise<TreeOf<Node, 'nodes'>> {
-		function* allNodes(
-			node: TreeOf<Node, 'nodes'>
-		): Generator<TreeOf<Node, 'nodes'>> {
+	async getTreeNode(projectId: number, id?: number): Promise<TreeNode> {
+		function* allNodes(node: TreeNode): Generator<TreeNode> {
 			yield node
 			for (const child of node.nodes) {
 				yield* allNodes(child)
 			}
 		}
 
-		const nodes = await this.getNodes(ctx)
-		const root = listToTree('id', 'parent_id', 'nodes')(nodes) as TreeOf<
-			Node,
-			'nodes'
-		>
+		const nodes = await this.getNodes(projectId)
+		const root = listToTree('id', 'parent_id', 'nodes')(nodes)
+		if (!id) return root
 		const node = [...allNodes(root)].find(n => n.id === id)
 		assertExists(node, 'Node not found')
 		return node

@@ -1,4 +1,6 @@
+import type { TreeOf } from '@shared/utils/list-to-tree.ts'
 import type { LoggedInUser } from './resolvers/auth-resolver.ts'
+import type { Node } from './resolvers/node-resolver.ts'
 
 export enum NodeType {
 	root = 'Root',
@@ -36,3 +38,5 @@ export enum Topic {
 }
 
 export type ProjectId = number
+
+export type TreeNode = TreeOf<Node, 'nodes'>
