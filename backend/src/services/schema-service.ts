@@ -47,7 +47,8 @@ async function* fieldsFor<TSource, TContext>(
 	for (const node of parent.nodes) {
 		const type = scalarForNode(node)
 		if (type) {
-			const isRequired = propOr(false, 'required', settings.get(node.id))
+			const settingsValue = settings.get(node.id)?.settings
+			const isRequired = propOr(false, 'required', settingsValue)
 			yield {
 				[node.name]: { type: isRequired ? new GraphQLNonNull(type) : type }
 			}
@@ -89,7 +90,7 @@ export class SchemaService {
 	): Promise<GraphQLSchemaWithContext<YogaInitialContext>> {
 		const root = await this.nodeResolver.getTreeNode(projectId)
 		const settings = await this.nodeSettingsResolver
-			.getNodeSettings(projectId)
+			.settings(projectId)
 			.then(mapBy<NodeSettings, number>(({ node_id }) => node_id))
 		const types = await toArray(typesFromTree(root, settings))
 
@@ -110,7 +111,4 @@ export class SchemaService {
 
 		return schema
 	}
-}
-function head(x: unknown): unknown {
-	throw new Error('Function not implemented.')
 }

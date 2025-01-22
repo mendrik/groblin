@@ -70,7 +70,12 @@ export class NodeSettingsResolver {
 	}
 
 	@Query(returns => [NodeSettings])
-	async getNodeSettings(projectId: number): Promise<NodeSettings[]> {
+	async getNodeSettings(@Ctx() ctx: Context): Promise<NodeSettings[]> {
+		const { user } = ctx
+		return this.settings(user.lastProjectId)
+	}
+
+	public settings(projectId: number): Promise<NodeSettings[]> {
 		return this.db
 			.selectFrom('node_settings')
 			.where('project_id', '=', projectId)
