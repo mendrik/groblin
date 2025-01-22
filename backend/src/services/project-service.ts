@@ -31,7 +31,7 @@ export class ProjectService {
 				.values({
 					project_id,
 					user_id: user.id,
-					role: Role.Admin
+					roles: [Role.Admin]
 				})
 				.executeTakeFirstOrThrow()
 

@@ -61,7 +61,7 @@ export class PublicServer {
 
 	private async listenToNodeSettingsChanges() {
 		for await (const projectId of this.pubSub.subscribe(
-			Topic.NodesUpdated
+			Topic.NodeSettingsUpdated
 		) as AsyncGenerator<ProjectId>) {
 			this.schemaCache.delete(projectId)
 			console.log(yellow(`Reloading schema for project ${projectId}`))
