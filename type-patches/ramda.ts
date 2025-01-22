@@ -64,4 +64,6 @@ declare module 'ramda' {
 	export function map<A, B>(
 		fn: (x: A) => B
 	): <U extends object>(dict: U) => Record<keyof U, B>
+
+	export function map<A>(fn: (x: any) => A): (x: any) => A
 }

@@ -70,11 +70,10 @@ export class NodeSettingsResolver {
 	}
 
 	@Query(returns => [NodeSettings])
-	async getNodeSettings(@Ctx() ctx: Context): Promise<NodeSettings[]> {
-		const { user } = ctx
+	async getNodeSettings(projectId: number): Promise<NodeSettings[]> {
 		return this.db
 			.selectFrom('node_settings')
-			.where('project_id', '=', user.lastProjectId)
+			.where('project_id', '=', projectId)
 			.selectAll()
 			.execute()
 	}

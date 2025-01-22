@@ -93,7 +93,11 @@ export class PublicServer {
 		this.listenToNodeChanges()
 		this.listenToNodeSettingsChanges()
 		this.server.listen(port, () => {
-			console.log(cyan(`Public GQL server on ${lightGreen(port)}`))
+			console.log(
+				cyan(
+					`Public GQL server on http://localhost:${lightGreen(port)}/graphql`
+				)
+			)
 		})
 	}
 

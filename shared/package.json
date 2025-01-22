@@ -6,6 +6,9 @@
 		"test": "vitest",
 		"schema": ""
 	},
+	"peerDependencies": {
+		"ts-toolbelt": "9.6.0"
+	},
 	"devDependencies": {
 		"tsx": "4.19.2",
 		"vitest": "3.0.2",
