@@ -1,14 +1,15 @@
 import { toArray } from '@shared/utils/async-generator.ts'
+import { listToTree } from '@shared/utils/list-to-tree.ts'
 import { mapBy } from '@shared/utils/map-by.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
+import type { GraphQLScalarType, GraphQLType } from 'graphql'
 import {
 	GraphQLBoolean,
 	type GraphQLFieldConfig,
 	GraphQLFloat,
-	type GraphQLNamedType,
+	GraphQLList,
 	GraphQLNonNull,
 	GraphQLObjectType,
-	type GraphQLScalarType,
 	GraphQLSchema,
 	GraphQLString,
 	type ThunkObjMap,
@@ -16,14 +17,23 @@ import {
 } from 'graphql'
 import type { GraphQLSchemaWithContext, YogaInitialContext } from 'graphql-yoga'
 import { inject, injectable } from 'inversify'
-import { T as _, mergeAll, propSatisfies as propIs, propOr } from 'ramda'
+import { Kysely } from 'kysely'
+import {
+	T as _,
+	isNotNil,
+	mergeAll,
+	prop,
+	propSatisfies as propIs,
+	propOr
+} from 'ramda'
 import { included, isNotNilOrEmpty } from 'ramda-adjunct'
-import { NodeResolver } from 'src/resolvers/node-resolver.ts'
+import type { DB } from 'src/database/schema.ts'
 import {
 	type NodeSettings,
 	NodeSettingsResolver
 } from 'src/resolvers/node-settings-resolver.ts'
 import { NodeType, type ProjectId, type TreeNode } from 'src/types.ts'
+import { allNodes } from 'src/utils/nodes.ts'
 
 const isObjectNode = propIs(included([NodeType.object, NodeType.list]), 'type')
 
@@ -33,21 +43,24 @@ type Fields<TSource, TContext> = ThunkObjMap<
 
 type Settings = Map<number, NodeSettings>
 
-const scalarForNode = match<[TreeNode], GraphQLScalarType | null>(
+const scalarForNode = match<[TreeNode, Context], GraphQLScalarType | null>(
 	caseOf([{ type: NodeType.string }], GraphQLString),
 	caseOf([{ type: NodeType.boolean }], GraphQLBoolean),
 	caseOf([{ type: NodeType.number }], GraphQLFloat),
+	caseOf([{ type: NodeType.object }], ({ name }, { types }) => types.get(name)),
+	caseOf([{ type: NodeType.article }], GraphQLString),
+	caseOf([{ type: NodeType.list }], ({ name }, { types }) => types.get(name)),
 	caseOf([_], null)
 )
 
 async function* fieldsFor<TSource, TContext>(
 	parent: TreeNode,
-	settings: Settings
+	context: Context
 ): AsyncGenerator<Fields<TSource, TContext>> {
 	for (const node of parent.nodes) {
-		const type = scalarForNode(node)
+		const type = scalarForNode(node, context)
 		if (type) {
-			const settingsValue = settings.get(node.id)?.settings
+			const settingsValue = context.settings.get(node.id)?.settings
 			const isRequired = propOr(false, 'required', settingsValue)
 			yield {
 				[node.name]: { type: isRequired ? new GraphQLNonNull(type) : type }
@@ -57,30 +70,64 @@ async function* fieldsFor<TSource, TContext>(
 }
 
 async function* typesFromTree<TSource, TContext>(
-	parent: TreeNode,
+	parent: TreeNode[],
+	context: Context
+): AsyncGenerator<GraphQLType> {
+	for (const node of parent) {
+		const fields = await toArray(fieldsFor(node, context)).then<
+			Fields<TSource, TContext>
+		>(mergeAll)
+
+		if (isNotNilOrEmpty(fields)) {
+			const type = new GraphQLObjectType({
+				name: node.name,
+				fields
+			})
+			const objectType =
+				node.type === NodeType.list ? new GraphQLList(type) : type
+			context.types.set(node.name, objectType)
+			yield objectType
+		}
+	}
+}
+
+class Context {
 	settings: Settings
-): AsyncGenerator<GraphQLNamedType> {
-	const fields = await toArray(fieldsFor(parent, settings)).then<
-		Fields<TSource, TContext>
-	>(mergeAll)
+	types: Map<string, GraphQLType>
 
-	if (isNotNilOrEmpty(fields)) {
-		yield new GraphQLObjectType({
-			name: parent.name,
-			fields
-		})
+	constructor(settings: Settings) {
+		this.settings = settings
+		this.types = new Map()
 	}
+}
 
-	const objectNodes = parent.nodes.filter(isObjectNode)
-	for (const node of objectNodes) {
-		yield* typesFromTree(node, settings)
-	}
+// to make context.type lookup work we need to reverse the order of the nodes
+const getTreeNodes = async (projectId: ProjectId, db: Kysely<DB>) => {
+	const nodeTypeIds = await db
+		.selectFrom('node')
+		.select('id')
+		.where('project_id', '=', projectId)
+		.where(eb =>
+			eb.or([eb('type', '=', NodeType.object), eb('type', '=', NodeType.list)])
+		)
+		.orderBy('depth', 'desc')
+		.orderBy('order', 'desc')
+		.execute()
+	const nodes = await db
+		.selectFrom('node')
+		.where('project_id', '=', projectId)
+		.selectAll()
+		.execute()
+	const root = listToTree('id', 'parent_id', 'nodes')(nodes) as TreeNode
+	const treeNodes = [...allNodes(root)]
+	const nodeMap = mapBy(prop('id'), treeNodes)
+	return nodeTypeIds.map(({ id }) => nodeMap.get(id)).filter(isNotNil)
 }
 
 @injectable()
 export class SchemaService {
-	@inject(NodeResolver)
-	private readonly nodeResolver: NodeResolver
+	@inject(Kysely)
+	private db: Kysely<DB>
 
 	@inject(NodeSettingsResolver)
 	private readonly nodeSettingsResolver: NodeSettingsResolver
@@ -88,14 +135,15 @@ export class SchemaService {
 	async getSchema(
 		projectId: ProjectId
 	): Promise<GraphQLSchemaWithContext<YogaInitialContext>> {
-		const root = await this.nodeResolver.getTreeNode(projectId)
+		const nodes = await getTreeNodes(projectId, this.db)
 		const settings = await this.nodeSettingsResolver
 			.settings(projectId)
 			.then(mapBy<NodeSettings, number>(({ node_id }) => node_id))
-		const types = await toArray(typesFromTree(root, settings))
+		const context = new Context(settings)
+		const types = await toArray(typesFromTree(nodes, context))
 
 		const schema = new GraphQLSchema({
-			types: types,
+			types: types as any,
 			query: new GraphQLObjectType({
 				name: 'Query',
 				fields: {

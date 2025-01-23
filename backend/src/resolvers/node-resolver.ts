@@ -10,6 +10,7 @@ import { LogAccess } from 'src/middleware/log-access.ts'
 import { Topic } from 'src/types.ts'
 import type { Context, TreeNode } from 'src/types.ts'
 import { NodeType, Role } from 'src/types.ts'
+import { allNodes } from 'src/utils/nodes.ts'
 import {
 	Arg,
 	Authorized,
@@ -188,13 +189,6 @@ export class NodeResolver {
 	}
 
 	async getTreeNode(projectId: number, id?: number): Promise<TreeNode> {
-		function* allNodes(node: TreeNode): Generator<TreeNode> {
-			yield node
-			for (const child of node.nodes) {
-				yield* allNodes(child)
-			}
-		}
-
 		const nodes = await this.getNodes(projectId)
 		const root = listToTree('id', 'parent_id', 'nodes')(nodes)
 		if (!id) return root
