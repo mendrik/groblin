@@ -133,9 +133,9 @@ export class ValueResolver {
 	) {
 		const { user } = ctx
 		const { max_order } = await this.db
-			.selectFrom('values') // Replace with your table name
+			.selectFrom('values')
 			.where('node_id', '=', data.node_id)
-			.select(this.db.fn.max('order').as('max_order')) // Replace with your column name
+			.select(this.db.fn.max('order').as('max_order'))
 			.executeTakeFirstOrThrow()
 
 		const res = await this.db

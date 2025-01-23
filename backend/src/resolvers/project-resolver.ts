@@ -67,7 +67,7 @@ export class ProjectResolver {
 
 	@Query(returns => ProjectData)
 	async getProject(@Ctx() ctx: Context): Promise<ProjectData> {
-		const nodes = await this.nodeResolver.getNodes(ctx.user.lastProjectId)
+		const nodes = await this.nodeResolver.getNodes(ctx)
 		const values = await this.valueResolver.getValues({ ids: [] }, ctx)
 		const nodeSettings = await this.nodeSettingsResolver.getNodeSettings(ctx)
 

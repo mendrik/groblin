@@ -48,7 +48,7 @@ type NodeId = number
 export const $nodes = signal<Node[]>([])
 export const $nodesMap = computed<Record<NodeId, TreeNode>>(() => {
 	const res = {} as Record<NodeId, TreeNode>
-	for (const node of iterateNodes($root.value)) {
+	for (const node of Array.from(iterateNodes($root.value))) {
 		res[node.id] = node
 	}
 	return res

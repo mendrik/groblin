@@ -40,7 +40,7 @@ const createListItemCommand: (data: NewListItemSchema) => Promise<number> =
 	pipeAsync(
 		objOf('value'),
 		n => mergeLeft(n, notNil($item)),
-		omit(['order']),
+		omit(['order', 'updated_at']),
 		saveValue
 	)
 

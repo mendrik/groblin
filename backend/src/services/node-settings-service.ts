@@ -27,18 +27,26 @@ export class NodeSettingsService {
 		for await (const setting of this.pubSub.subscribe(
 			Topic.NodeSettingsUpdated
 		) as AsyncIterable<NodeSettings>) {
-			const node = await this.nodeResolver.getNode(setting.node_id)
-			if (node.type === NodeType.choice && isJsonObject(setting.settings)) {
-				const choices = (setting.settings?.choices ?? []) as string[]
-				const res = await this.db
-					.deleteFrom('values as v')
-					.where('node_id', '=', setting.node_id)
-					.where(sql`COALESCE(v.value ->> 'selected', null)`, 'not in', choices)
-					.execute()
+			try {
+				const node = await this.nodeResolver.getNode(setting.node_id)
+				if (node.type === NodeType.choice && isJsonObject(setting.settings)) {
+					const choices = (setting.settings?.choices ?? []) as string[]
+					const res = await this.db
+						.deleteFrom('values as v')
+						.where('node_id', '=', setting.node_id)
+						.where(
+							sql`COALESCE(v.value ->> 'selected', null)`,
+							'not in',
+							choices
+						)
+						.execute()
 
-				if (res.length > 0) {
-					this.pubSub.publish(Topic.ValuesUpdated, true)
+					if (res.length > 0) {
+						this.pubSub.publish(Topic.ValuesUpdated, true)
+					}
 				}
+			} catch (e) {
+				console.error(e)
 			}
 		}
 	}

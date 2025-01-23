@@ -119,15 +119,18 @@ export class NodeResolver {
 	nodesUpdated(@Root() _projectId: number) {
 		return true
 	}
-
-	@Query(returns => [Node])
-	async getNodes(projectId: number): Promise<Node[]> {
+	async getDbNodes(projectId: number): Promise<Node[]> {
 		return this.db
 			.selectFrom('node')
 			.where('project_id', '=', projectId)
 			.selectAll()
 			.orderBy('order', 'asc')
 			.execute() as Promise<Node[]>
+	}
+
+	@Query(returns => [Node])
+	async getNodes(@Ctx() ctx: Context): Promise<Node[]> {
+		return this.getDbNodes(ctx.user.lastProjectId)
 	}
 
 	insertNodeTrx(trx: Transaction<DB>, data: InsertNode, ctx: Context) {
@@ -189,7 +192,7 @@ export class NodeResolver {
 	}
 
 	async getTreeNode(projectId: number, id?: number): Promise<TreeNode> {
-		const nodes = await this.getNodes(projectId)
+		const nodes = await this.getDbNodes(projectId)
 		const root = listToTree('id', 'parent_id', 'nodes')(nodes)
 		if (!id) return root
 		const node = [...allNodes(root)].find(n => n.id === id)
