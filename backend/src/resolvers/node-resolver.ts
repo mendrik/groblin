@@ -49,6 +49,9 @@ export class Node {
 
 	@Field(type => Int, { nullable: true })
 	parent_id?: number
+
+	@Field(type => Int)
+	depth: number
 }
 
 @InputType()

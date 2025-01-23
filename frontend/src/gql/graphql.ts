@@ -210,6 +210,7 @@ export type MutationUpsertValueArgs = {
 };
 
 export type Node = {
+  depth: Scalars['Int']['output'];
   id: Scalars['Int']['output'];
   name: Scalars['String']['output'];
   order: Scalars['Int']['output'];

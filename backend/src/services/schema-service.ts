@@ -47,9 +47,15 @@ const scalarForNode = match<[TreeNode, Context], GraphQLScalarType | null>(
 	caseOf([{ type: NodeType.string }], GraphQLString),
 	caseOf([{ type: NodeType.boolean }], GraphQLBoolean),
 	caseOf([{ type: NodeType.number }], GraphQLFloat),
-	caseOf([{ type: NodeType.object }], ({ name }, { types }) => types.get(name)),
 	caseOf([{ type: NodeType.article }], GraphQLString),
-	caseOf([{ type: NodeType.list }], ({ name }, { types }) => types.get(name)),
+	caseOf(
+		[{ type: NodeType.object }],
+		({ name }, { types }) => types.get(name)?.type
+	),
+	caseOf(
+		[{ type: NodeType.list }],
+		({ name }, { types }) => types.get(name)?.type
+	),
 	caseOf([_], null)
 )
 
@@ -63,13 +69,16 @@ async function* fieldsFor<TSource, TContext>(
 			const settingsValue = context.settings.get(node.id)?.settings
 			const isRequired = propOr(false, 'required', settingsValue)
 			yield {
-				[node.name]: { type: isRequired ? new GraphQLNonNull(type) : type }
+				[node.name]: {
+					type: isRequired ? new GraphQLNonNull(type) : type,
+					resolve: () => null
+				}
 			}
 		}
 	}
 }
 
-async function* typesFromTree<TSource, TContext>(
+async function* typesFromNodes<TSource, TContext>(
 	parent: TreeNode[],
 	context: Context
 ): AsyncGenerator<GraphQLType> {
@@ -85,15 +94,23 @@ async function* typesFromTree<TSource, TContext>(
 			})
 			const objectType =
 				node.type === NodeType.list ? new GraphQLList(type) : type
-			context.types.set(node.name, objectType)
+			context.types.set(node.name, {
+				type: objectType,
+				node
+			})
 			yield objectType
 		}
 	}
 }
 
+type NodeGraphQLType = {
+	type: GraphQLType
+	node: TreeNode
+}
+
 class Context {
 	settings: Settings
-	types: Map<string, GraphQLType>
+	types: Map<string, NodeGraphQLType>
 
 	constructor(settings: Settings) {
 		this.settings = settings
@@ -140,16 +157,16 @@ export class SchemaService {
 			.settings(projectId)
 			.then(mapBy<NodeSettings, number>(({ node_id }) => node_id))
 		const context = new Context(settings)
-		const types = await toArray(typesFromTree(nodes, context))
+		const types = await toArray(typesFromNodes(nodes, context))
 
 		const schema = new GraphQLSchema({
 			types: types as any,
 			query: new GraphQLObjectType({
 				name: 'Query',
 				fields: {
-					greeting: {
+					greetings: {
 						type: GraphQLString,
-						resolve: () => 'Hello, world!'
+						resolve: () => 'Hello world!'
 					}
 				}
 			})

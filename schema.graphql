@@ -119,6 +119,7 @@ type Mutation {
 }
 
 type Node {
+  depth: Int!
   id: Int!
   name: String!
   order: Int!
