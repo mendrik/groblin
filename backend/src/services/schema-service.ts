@@ -34,7 +34,7 @@ import {
 	propOr
 } from 'ramda'
 import { included, isNotNilOrEmpty } from 'ramda-adjunct'
-import type { DB } from 'src/database/schema.ts'
+import type { DB, JsonObject } from 'src/database/schema.ts'
 import {
 	type NodeSettings,
 	NodeSettingsResolver
@@ -44,8 +44,8 @@ import { allNodes } from 'src/utils/nodes.ts'
 
 const isObjectNode = propIs(included([NodeType.object, NodeType.list]), 'type')
 
-type Fields<TSource, TContext> = ThunkObjMap<
-	GraphQLFieldConfig<TSource, TContext>
+type Fields<TSource, TContext, TArgs> = ThunkObjMap<
+	GraphQLFieldConfig<TSource, TContext, TArgs>
 >
 
 type Settings = Map<number, NodeSettings>
@@ -66,10 +66,10 @@ const scalarForNode = match<[TreeNode, Context], GraphQLScalarType | null>(
 	caseOf([_], null)
 )
 
-async function* fieldsFor<TSource, TContext>(
+async function* fieldsFor<TSource, TContext, TArgs>(
 	parent: TreeNode,
 	context: Context
-): AsyncGenerator<Fields<TSource, TContext>> {
+): AsyncGenerator<Fields<TSource, TContext, TArgs>> {
 	for (const node of parent.nodes) {
 		const type = scalarForNode(node, context)
 		if (type) {
@@ -78,7 +78,12 @@ async function* fieldsFor<TSource, TContext>(
 			yield {
 				[node.name]: {
 					type: isRequired ? new GraphQLNonNull(type) : type,
-					resolve: () => null
+					resolve: (
+						source: TSource,
+						args: TArgs,
+						context: TContext,
+						info: GraphQLResolveInfo
+					) => node.name
 				}
 			}
 		}
@@ -105,7 +110,7 @@ async function* listNodeQuery<TSource, TContext, TArgs>(
 			},
 			resolve: (
 				source: TSource,
-				args: TArgs,
+				args: { where: JsonObject },
 				context: TContext,
 				info: GraphQLResolveInfo
 			) => []
@@ -121,12 +126,8 @@ async function* objectNodeQuery<TSource, TContext, TArgs>(
 	yield {
 		[node.name]: {
 			type,
-			resolve: (
-				source: TSource,
-				args: TArgs,
-				context: TContext,
-				info: GraphQLResolveInfo
-			) => ({})
+			resolve: (_source: TSource, _args: TArgs) =>
+				queriesFromNodes(node.nodes, context)
 		}
 	}
 }
@@ -148,13 +149,13 @@ async function* queriesFromNodes<TSource, TContext, TArgs>(
 	}
 }
 
-async function* typesFromNodes<TSource, TContext>(
+async function* typesFromNodes<TSource, TContext, TArgs>(
 	parents: TreeNode[],
 	context: Context
 ): AsyncGenerator<GraphQLType> {
 	for (const node of parents) {
 		const fields = await toArray(fieldsFor(node, context)).then<
-			Fields<TSource, TContext>
+			Fields<TSource, TContext, TArgs>
 		>(mergeAll)
 
 		if (isNotNilOrEmpty(fields)) {
