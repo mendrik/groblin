@@ -2,7 +2,11 @@ import { toArray } from '@shared/utils/async-generator.ts'
 import { listToTree } from '@shared/utils/list-to-tree.ts'
 import { mapBy } from '@shared/utils/map-by.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
-import type { GraphQLScalarType, GraphQLType } from 'graphql'
+import type {
+	GraphQLResolveInfo,
+	GraphQLScalarType,
+	GraphQLType
+} from 'graphql'
 import {
 	GraphQLBoolean,
 	type GraphQLFieldConfig,
@@ -15,6 +19,7 @@ import {
 	type ThunkObjMap,
 	printSchema
 } from 'graphql'
+import { GraphQLJSON } from 'graphql-scalars'
 import type { GraphQLSchemaWithContext, YogaInitialContext } from 'graphql-yoga'
 import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
@@ -23,6 +28,7 @@ import {
 	isNotNil,
 	mergeAll,
 	prop,
+	propEq,
 	propSatisfies as propIs,
 	propOr
 } from 'ramda'
@@ -78,11 +84,35 @@ async function* fieldsFor<TSource, TContext>(
 	}
 }
 
+async function* queriesFromNodes<TSource, TContext, TArgs>(
+	parents: TreeNode[],
+	context: Context
+): AsyncGenerator<
+	Record<string, GraphQLFieldConfig<TSource, TContext, TArgs>>
+> {
+	for (const node of parents) {
+		yield {
+			[node.name.toLowerCase()]: {
+				type: GraphQLString,
+				args: {
+					where: { type: GraphQLJSON }
+				},
+				resolve: (
+					source: TSource,
+					args: TArgs,
+					context: TContext,
+					info: GraphQLResolveInfo
+				) => 'hello world'
+			}
+		}
+	}
+}
+
 async function* typesFromNodes<TSource, TContext>(
-	parent: TreeNode[],
+	parents: TreeNode[],
 	context: Context
 ): AsyncGenerator<GraphQLType> {
-	for (const node of parent) {
+	for (const node of parents) {
 		const fields = await toArray(fieldsFor(node, context)).then<
 			Fields<TSource, TContext>
 		>(mergeAll)
@@ -111,7 +141,6 @@ type NodeGraphQLType = {
 class Context {
 	settings: Settings
 	types: Map<string, NodeGraphQLType>
-
 	constructor(settings: Settings) {
 		this.settings = settings
 		this.types = new Map()
@@ -119,7 +148,7 @@ class Context {
 }
 
 // to make context.type lookup work we need to reverse the order of the nodes
-const getTreeNodes = async (projectId: ProjectId, db: Kysely<DB>) => {
+const getNestingNodes = async (projectId: ProjectId, db: Kysely<DB>) => {
 	const nodeTypeIds = await db
 		.selectFrom('node')
 		.select('id')
@@ -152,23 +181,21 @@ export class SchemaService {
 	async getSchema(
 		projectId: ProjectId
 	): Promise<GraphQLSchemaWithContext<YogaInitialContext>> {
-		const nodes = await getTreeNodes(projectId, this.db)
+		const nodes = await getNestingNodes(projectId, this.db)
 		const settings = await this.nodeSettingsResolver
 			.settings(projectId)
 			.then(mapBy<NodeSettings, number>(({ node_id }) => node_id))
 		const context = new Context(settings)
 		const types = await toArray(typesFromNodes(nodes, context))
+		const fields = await toArray(
+			queriesFromNodes(nodes.filter(propEq(1, 'depth')), context)
+		).then<ThunkObjMap<GraphQLFieldConfig<any, any>>>(mergeAll)
 
 		const schema = new GraphQLSchema({
 			types: types as any,
 			query: new GraphQLObjectType({
 				name: 'Query',
-				fields: {
-					greetings: {
-						type: GraphQLString,
-						resolve: () => 'Hello world!'
-					}
-				}
+				fields
 			})
 		})
 
