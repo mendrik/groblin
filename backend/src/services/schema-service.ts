@@ -84,27 +84,50 @@ async function* fieldsFor<TSource, TContext>(
 	}
 }
 
+type NamedQuery<TSource, TContext> = Record<
+	string,
+	GraphQLFieldConfig<TSource, TContext>
+>
+
+async function* listNodeQuery<TSource, TContext, TArgs>(
+	node: TreeNode,
+	context: Context
+): AsyncGenerator<NamedQuery<TSource, TContext>> {
+	yield {
+		[node.name.toLowerCase()]: {
+			type: GraphQLString,
+			args: {
+				where: { type: GraphQLJSON }
+			},
+			resolve: (
+				source: TSource,
+				args: TArgs,
+				context: TContext,
+				info: GraphQLResolveInfo
+			) => 'hello world'
+		}
+	}
+}
+
+async function* objectNodeQuery<TSource, TContext, TArgs>(
+	node: TreeNode,
+	context: Context
+): AsyncGenerator<NamedQuery<TSource, TContext>> {}
+
 async function* queriesFromNodes<TSource, TContext, TArgs>(
 	parents: TreeNode[],
 	context: Context
-): AsyncGenerator<
-	Record<string, GraphQLFieldConfig<TSource, TContext, TArgs>>
-> {
+): AsyncGenerator<NamedQuery<TSource, TContext>> {
 	for (const node of parents) {
-		yield {
-			[node.name.toLowerCase()]: {
-				type: GraphQLString,
-				args: {
-					where: { type: GraphQLJSON }
-				},
-				resolve: (
-					source: TSource,
-					args: TArgs,
-					context: TContext,
-					info: GraphQLResolveInfo
-				) => 'hello world'
-			}
-		}
+		yield* match<
+			[TreeNode, Context],
+			AsyncGenerator<
+				Record<string, GraphQLFieldConfig<TSource, TContext, TArgs>>
+			>
+		>(
+			caseOf([{ type: NodeType.list }, _], listNodeQuery),
+			caseOf([{ type: NodeType.object }, _], objectNodeQuery)
+		)(node, context)
 	}
 }
 
