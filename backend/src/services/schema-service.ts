@@ -3,6 +3,7 @@ import { listToTree } from '@shared/utils/list-to-tree.ts'
 import { mapBy } from '@shared/utils/map-by.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
 import type {
+	GraphQLOutputType,
 	GraphQLResolveInfo,
 	GraphQLScalarType,
 	GraphQLType
@@ -93,9 +94,12 @@ async function* listNodeQuery<TSource, TContext, TArgs>(
 	node: TreeNode,
 	context: Context
 ): AsyncGenerator<NamedQuery<TSource, TContext>> {
+	const innerType = new GraphQLList(
+		context.types.get(node.id)?.type as GraphQLObjectType
+	)
 	yield {
-		[node.name.toLowerCase()]: {
-			type: GraphQLString,
+		[node.name]: {
+			type: innerType as GraphQLOutputType,
 			args: {
 				where: { type: GraphQLJSON }
 			},
@@ -104,7 +108,7 @@ async function* listNodeQuery<TSource, TContext, TArgs>(
 				args: TArgs,
 				context: TContext,
 				info: GraphQLResolveInfo
-			) => 'hello world'
+			) => []
 		}
 	}
 }
@@ -112,7 +116,20 @@ async function* listNodeQuery<TSource, TContext, TArgs>(
 async function* objectNodeQuery<TSource, TContext, TArgs>(
 	node: TreeNode,
 	context: Context
-): AsyncGenerator<NamedQuery<TSource, TContext>> {}
+): AsyncGenerator<NamedQuery<TSource, TContext>> {
+	const type = context.types.get(node.id)?.type as GraphQLObjectType
+	yield {
+		[node.name]: {
+			type,
+			resolve: (
+				source: TSource,
+				args: TArgs,
+				context: TContext,
+				info: GraphQLResolveInfo
+			) => ({})
+		}
+	}
+}
 
 async function* queriesFromNodes<TSource, TContext, TArgs>(
 	parents: TreeNode[],
@@ -147,7 +164,7 @@ async function* typesFromNodes<TSource, TContext>(
 			})
 			const objectType =
 				node.type === NodeType.list ? new GraphQLList(type) : type
-			context.types.set(node.name, {
+			context.types.set(node.id, {
 				type: objectType,
 				node
 			})
@@ -163,7 +180,7 @@ type NodeGraphQLType = {
 
 class Context {
 	settings: Settings
-	types: Map<string, NodeGraphQLType>
+	types: Map<number, NodeGraphQLType>
 	constructor(settings: Settings) {
 		this.settings = settings
 		this.types = new Map()
