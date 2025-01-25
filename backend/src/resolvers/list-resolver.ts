@@ -6,10 +6,11 @@ import { propEq, reject } from 'ramda'
 import { isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
 import type { DB } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
-import { Role } from 'src/types.ts'
+import { type Context, type ProjectId, Role } from 'src/types.ts'
 import {
 	Arg,
 	Authorized,
+	Ctx,
 	Field,
 	InputType,
 	Int,
@@ -56,9 +57,9 @@ export class ListResolver {
 	@inject(Kysely)
 	private db: Kysely<DB>
 
-	@Query(returns => [ListItem])
-	async getListItems(
-		@Arg('request', () => ListRequest) request: ListRequest
+	async listItems(
+		projectId: ProjectId,
+		request: ListRequest
 	): Promise<ListItem[]> {
 		const result = await this.db
 			.selectFrom('values as v')
@@ -80,6 +81,7 @@ export class ListResolver {
 				qb.where('v.list_path', '=', sql.val(request.list_path))
 			)
 			.where('v.node_id', '=', request.node_id)
+			.where('v.project_id', '=', projectId)
 			.groupBy('v.id')
 			.orderBy('v.order', 'asc')
 			.execute()
@@ -87,8 +89,19 @@ export class ListResolver {
 		return result.map<unknown>(evolveAlt(fixDates)) as ListItem[]
 	}
 
+	@Query(returns => [ListItem])
+	async getListItems(
+		@Ctx() ctx: Context,
+		@Arg('request', () => ListRequest) request: ListRequest
+	): Promise<ListItem[]> {
+		return this.listItems(ctx.user.lastProjectId, request)
+	}
+
 	@Query(returns => [Node])
-	async getListColumns(@Arg('node_id', () => Int) node_id: number) {
+	async getListColumns(
+		@Ctx() ctx: Context,
+		@Arg('node_id', () => Int) node_id: number
+	) {
 		return this.db
 			.withRecursive('node_tree', qb =>
 				qb
@@ -112,7 +125,8 @@ export class ListResolver {
 						'=',
 						false
 					),
-					eb('node_tree.type', 'not in', ['List', 'Object'])
+					eb('node_tree.type', 'not in', ['List', 'Object']),
+					eb('node_tree.project_id', '=', ctx.user.lastProjectId)
 				])
 			)
 			.orderBy('depth')

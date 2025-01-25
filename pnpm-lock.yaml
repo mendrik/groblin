@@ -87,6 +87,9 @@ importers:
       pg:
         specifier: 8.13.1
         version: 8.13.1
+      purify-ts:
+        specifier: 2.1.0
+        version: 2.1.0
       reflect-metadata:
         specifier: 0.2.2
         version: 0.2.2
