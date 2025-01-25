@@ -20,20 +20,11 @@ import {
 	type ThunkObjMap,
 	printSchema
 } from 'graphql'
-import { GraphQLJSON } from 'graphql-scalars'
 import type { GraphQLSchemaWithContext, YogaInitialContext } from 'graphql-yoga'
 import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
-import {
-	T as _,
-	isNotNil,
-	mergeAll,
-	prop,
-	propEq,
-	propSatisfies as propIs,
-	propOr
-} from 'ramda'
-import { included, isNotNilOrEmpty } from 'ramda-adjunct'
+import { T as _, isNotNil, mergeAll, prop, propEq, propOr } from 'ramda'
+import { isNotNilOrEmpty } from 'ramda-adjunct'
 import type { DB, JsonObject } from 'src/database/schema.ts'
 import {
 	type NodeSettings,
@@ -41,8 +32,7 @@ import {
 } from 'src/resolvers/node-settings-resolver.ts'
 import { NodeType, type ProjectId, type TreeNode } from 'src/types.ts'
 import { allNodes } from 'src/utils/nodes.ts'
-
-const isObjectNode = propIs(included([NodeType.object, NodeType.list]), 'type')
+import { WhereObjectScalar } from 'src/utils/where-scalar.ts'
 
 type Fields<TSource, TContext, TArgs> = ThunkObjMap<
 	GraphQLFieldConfig<TSource, TContext, TArgs>
@@ -106,7 +96,9 @@ async function* listNodeQuery<TSource, TContext, TArgs>(
 		[node.name]: {
 			type: innerType as GraphQLOutputType,
 			args: {
-				where: { type: GraphQLJSON }
+				whereEq: { type: WhereObjectScalar },
+				whereNotEq: { type: WhereObjectScalar },
+				limit: { type: GraphQLFloat }
 			},
 			resolve: (
 				source: TSource,
