@@ -25,7 +25,7 @@ import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
 import { T as _, isNotNil, mergeAll, prop, propEq, propOr } from 'ramda'
 import { isNotNilOrEmpty } from 'ramda-adjunct'
-import type { DB, JsonObject } from 'src/database/schema.ts'
+import type { DB, JsonObject, JsonValue } from 'src/database/schema.ts'
 import {
 	type NodeSettings,
 	NodeSettingsResolver
@@ -34,13 +34,11 @@ import { NodeType, type ProjectId, type TreeNode } from 'src/types.ts'
 import { allNodes } from 'src/utils/nodes.ts'
 import { WhereObjectScalar } from 'src/utils/where-scalar.ts'
 
-type Fields<TSource, TContext, TArgs> = ThunkObjMap<
-	GraphQLFieldConfig<TSource, TContext, TArgs>
->
+type Fields<S, C, A> = ThunkObjMap<GraphQLFieldConfig<S, C, A>>
 
 type Settings = Map<number, NodeSettings>
 
-const scalarForNode = match<[TreeNode, Context], GraphQLScalarType | null>(
+const scalarForNode = match<[TreeNode, TypeContext], GraphQLScalarType | null>(
 	caseOf([{ type: NodeType.string }], GraphQLString),
 	caseOf([{ type: NodeType.boolean }], GraphQLBoolean),
 	caseOf([{ type: NodeType.number }], GraphQLFloat),
@@ -56,39 +54,40 @@ const scalarForNode = match<[TreeNode, Context], GraphQLScalarType | null>(
 	caseOf([_], null)
 )
 
-async function* fieldsFor<TSource, TContext, TArgs>(
+const resolve2 = match<[TreeNode, any, any, any], Promise<JsonValue>>(
+	caseOf([{ type: NodeType.string }, _, _, _], async node => node.name),
+	caseOf([{ type: NodeType.article }, _, _, _], async node => node.name)
+)
+
+const isRequired = (nodeId: number, context: TypeContext) => {
+	const settingsValue = context.settings.get(nodeId)?.settings
+	return propOr(false, 'required', settingsValue)
+}
+
+async function* fieldsFor<S, C, A>(
 	parent: TreeNode,
-	context: Context
-): AsyncGenerator<Fields<TSource, TContext, TArgs>> {
+	context: TypeContext
+): AsyncGenerator<Fields<S, C, A>> {
 	for (const node of parent.nodes) {
 		const type = scalarForNode(node, context)
 		if (type) {
-			const settingsValue = context.settings.get(node.id)?.settings
-			const isRequired = propOr(false, 'required', settingsValue)
 			yield {
 				[node.name]: {
-					type: isRequired ? new GraphQLNonNull(type) : type,
-					resolve: (
-						source: TSource,
-						args: TArgs,
-						context: TContext,
-						info: GraphQLResolveInfo
-					) => node.name
+					type: isRequired(node.id, context) ? new GraphQLNonNull(type) : type,
+					resolve: (source, args, ctx, _info) =>
+						resolve2(node, source, args, ctx)
 				}
 			}
 		}
 	}
 }
 
-type NamedQuery<TSource, TContext> = Record<
-	string,
-	GraphQLFieldConfig<TSource, TContext>
->
+type NamedQuery<S, C> = Record<string, GraphQLFieldConfig<S, C>>
 
-async function* listNodeQuery<TSource, TContext, TArgs>(
+async function* listNodeQuery<S, C>(
 	node: TreeNode,
-	context: Context
-): AsyncGenerator<NamedQuery<TSource, TContext>> {
+	context: TypeContext
+): AsyncGenerator<NamedQuery<S, C>> {
 	const innerType = new GraphQLList(
 		context.types.get(node.id)?.type as GraphQLObjectType
 	)
@@ -101,39 +100,36 @@ async function* listNodeQuery<TSource, TContext, TArgs>(
 				limit: { type: GraphQLFloat }
 			},
 			resolve: (
-				source: TSource,
+				source: S,
 				args: { where: JsonObject },
-				context: TContext,
+				context: C,
 				info: GraphQLResolveInfo
 			) => []
 		}
 	}
 }
 
-async function* objectNodeQuery<TSource, TContext, TArgs>(
+async function* objectNodeQuery<S, C, TArgs>(
 	node: TreeNode,
-	context: Context
-): AsyncGenerator<NamedQuery<TSource, TContext>> {
+	context: TypeContext
+): AsyncGenerator<NamedQuery<S, C>> {
 	const type = context.types.get(node.id)?.type as GraphQLObjectType
 	yield {
 		[node.name]: {
 			type,
-			resolve: (_source: TSource, _args: TArgs) =>
-				queriesFromNodes(node.nodes, context)
+			resolve: () => queriesFromNodes(node.nodes, context)
 		}
 	}
 }
 
-async function* queriesFromNodes<TSource, TContext, TArgs>(
+async function* queriesFromNodes<S, C, TArgs>(
 	parents: TreeNode[],
-	context: Context
-): AsyncGenerator<NamedQuery<TSource, TContext>> {
+	context: TypeContext
+): AsyncGenerator<NamedQuery<S, C>> {
 	for (const node of parents) {
 		yield* match<
-			[TreeNode, Context],
-			AsyncGenerator<
-				Record<string, GraphQLFieldConfig<TSource, TContext, TArgs>>
-			>
+			[TreeNode, TypeContext],
+			AsyncGenerator<Record<string, GraphQLFieldConfig<S, C, TArgs>>>
 		>(
 			caseOf([{ type: NodeType.list }, _], listNodeQuery),
 			caseOf([{ type: NodeType.object }, _], objectNodeQuery)
@@ -141,13 +137,13 @@ async function* queriesFromNodes<TSource, TContext, TArgs>(
 	}
 }
 
-async function* typesFromNodes<TSource, TContext, TArgs>(
+async function* typesFromNodes<S, C, TArgs>(
 	parents: TreeNode[],
-	context: Context
+	context: TypeContext
 ): AsyncGenerator<GraphQLType> {
 	for (const node of parents) {
 		const fields = await toArray(fieldsFor(node, context)).then<
-			Fields<TSource, TContext, TArgs>
+			Fields<S, C, TArgs>
 		>(mergeAll)
 
 		if (isNotNilOrEmpty(fields)) {
@@ -171,12 +167,14 @@ type NodeGraphQLType = {
 	node: TreeNode
 }
 
-class Context {
+class TypeContext {
 	settings: Settings
 	types: Map<number, NodeGraphQLType>
-	constructor(settings: Settings) {
+	db: Kysely<DB>
+	constructor(settings: Settings, db: Kysely<DB>) {
 		this.settings = settings
 		this.types = new Map()
+		this.db = db
 	}
 }
 
@@ -218,7 +216,7 @@ export class SchemaService {
 		const settings = await this.nodeSettingsResolver
 			.settings(projectId)
 			.then(mapBy<NodeSettings, number>(({ node_id }) => node_id))
-		const context = new Context(settings)
+		const context = new TypeContext(settings, this.db)
 		const types = await toArray(typesFromNodes(nodes, context))
 		const fields = await toArray(
 			queriesFromNodes(nodes.filter(propEq(1, 'depth')), context)
