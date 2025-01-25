@@ -51,9 +51,9 @@ const scalarForNode = match<[TreeNode, TypeContext], GraphQLScalarType | null>(
 	caseOf([_], null)
 )
 
-const resolveNode = match<[TreeNode, any, any, any], Promise<JsonValue>>(
-	caseOf([{ type: NodeType.string }, _, _, _], async node => node.name),
-	caseOf([{ type: NodeType.article }, _, _, _], async node => node.name)
+const resolveNode = match<[TreeNode, TypeContext, any], Promise<JsonValue>>(
+	caseOf([{ type: NodeType.string }, _, _], (node, ctx) => ctx.getValue(node)),
+	caseOf([{ type: NodeType.article }, _, _], async node => node.name)
 )
 
 async function* fieldsFor<S, C, A>(
@@ -68,8 +68,8 @@ async function* fieldsFor<S, C, A>(
 			yield {
 				[node.name]: {
 					type: required ? new GraphQLNonNull(type) : type,
-					resolve: (source, args, ctx, _info) =>
-						resolveNode(node, source, args, ctx)
+					resolve: (_source, args, _ctx, _info) =>
+						resolveNode(node, context, args)
 				}
 			}
 		}

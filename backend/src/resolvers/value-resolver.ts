@@ -118,7 +118,7 @@ export class ValueResolver {
 			.execute()
 	}
 
-	async getValue(id: number): Promise<Value | undefined> {
+	async value(id: number): Promise<Value | undefined> {
 		return this.db
 			.selectFrom('values')
 			.where('id', '=', id)
@@ -180,7 +180,7 @@ export class ValueResolver {
 		@Ctx() ctx: Context
 	) {
 		const { user } = ctx
-		const prev = data.id ? await this.getValue(data.id) : undefined
+		const prev = data.id ? await this.value(data.id) : undefined
 		const res = await this.db
 			.insertInto('values')
 			.values({

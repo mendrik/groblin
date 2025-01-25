@@ -36,7 +36,6 @@ export class TypeContext {
 
 	types: Map<number, NodeGraphQLType>
 	projectId: ProjectId
-
 	_settings: Map<number, NodeSettings>
 
 	constructor() {
@@ -45,6 +44,16 @@ export class TypeContext {
 
 	async listItems(req: ListRequest) {
 		return this.listResolver.listItems(this.projectId, req)
+	}
+	async getValue(node: TreeNode) {
+		const fetch = () =>
+			this.db
+				.selectFrom('values')
+				.where('node_id', '=', node.id)
+				.select('values.value')
+				.executeTakeFirst()
+				.then(Maybe.fromNullable)
+		return MaybeAsync.fromPromise(fetch).map(prop('value')).orDefault(null)
 	}
 
 	async settings(nodeId: number) {
@@ -63,7 +72,10 @@ export class TypeContext {
 			.orDefault(false)
 	}
 
-	async getNestingNodes() {
+	/**
+	 * Returns a list of nodes that are either objects or lists
+	 */
+	async getNestingNodes(): Promise<TreeNode[]> {
 		const nodeTypeIds = await this.db
 			.selectFrom('node')
 			.select('id')
@@ -81,6 +93,7 @@ export class TypeContext {
 			.selectFrom('node')
 			.where('project_id', '=', this.projectId)
 			.selectAll()
+			.orderBy('order', 'desc')
 			.execute()
 		const root = listToTree('id', 'parent_id', 'nodes')(nodes) as TreeNode
 		const treeNodes = [...allNodes(root)]
