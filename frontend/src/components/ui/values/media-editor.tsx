@@ -2,6 +2,7 @@ import type { Value } from '@/gql/graphql'
 import { assertExists, assertThat } from '@shared/asserts'
 import { pipeAsync } from '@shared/utils/pipe-async'
 
+import type { MediaType } from '@shared/json-value-types'
 import { Paperclip } from 'lucide-react'
 import { is } from 'ramda'
 import { toast } from 'sonner'
@@ -9,20 +10,11 @@ import { Icon } from '../simple/icon'
 import { uploadToS3 } from '../zod-form/utils'
 import { type ValueEditor, editorKey } from './value-editor'
 
-type Bytes = number
-
-type Media = {
-	name: string
-	file: string
-	contentType: string
-	size: Bytes
-}
-
 type MediaValue = Omit<Value, 'value'> & {
-	value: Media
+	value: MediaType
 }
 
-const upload = async (ev: React.ChangeEvent): Promise<Media> => {
+const upload = async (ev: React.ChangeEvent): Promise<MediaType> => {
 	assertThat(is(HTMLInputElement), ev.target, 'ev.target')
 	assertExists(ev.target.files?.[0], 'ev.target.files missing')
 	const source = ev.target.files[0]

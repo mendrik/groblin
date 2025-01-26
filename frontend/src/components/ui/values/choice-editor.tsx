@@ -1,12 +1,13 @@
 import type { Value } from '@/gql/graphql'
 import { $nodeSettingsMap } from '@/state/node-settings'
+import type { ChoiceType } from '@shared/json-value-types'
 import { identity, objOf, pipe, when } from 'ramda'
 import { isNotNilOrEmpty } from 'ramda-adjunct'
 import { SimpleSelect } from '../simple/select'
 import type { ChoiceProps } from '../tree/properties/choice'
 import type { ValueEditor } from './value-editor'
 
-type ChoiceValue = Omit<Value, 'value'> & { value: { selected: string } }
+type ChoiceValue = Omit<Value, 'value'> & { value: ChoiceType }
 
 export const ChoiceEditor: ValueEditor<ChoiceValue> = ({
 	node,

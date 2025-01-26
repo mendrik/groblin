@@ -1,13 +1,14 @@
 import KeyListener from '@/components/utils/key-listener'
 import type { Value } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
+import type { NumberType } from '@shared/json-value-types'
 import { nthArg, objOf, pipe, prop } from 'ramda'
 import { useState } from 'react'
 import { MaskedInput } from '../random/masked-input'
 import type { NumberProps } from '../tree/properties/numbers'
 import { type ValueEditor, editorKey } from './value-editor'
 
-type NumberValue = Omit<Value, 'value'> & { value: { figure: number } }
+type NumberValue = Omit<Value, 'value'> & { value: NumberType }
 
 export const NumberEditor: ValueEditor<NumberValue, NumberProps> = ({
 	node,

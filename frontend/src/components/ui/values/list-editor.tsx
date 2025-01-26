@@ -4,6 +4,7 @@ import { notNil } from '@/lib/signals'
 import { cn } from '@/lib/utils'
 import type { TreeNode } from '@/state/tree'
 import { $activeListItems, activateListItem } from '@/state/value'
+import type { ListType } from '@shared/json-value-types'
 import {
 	ChevronFirst,
 	ChevronLast,
@@ -32,11 +33,7 @@ import { openListItemDelete } from './list-item-delete'
 import { openListItemEdit } from './list-item-edit'
 import type { ValueEditor } from './value-editor'
 
-export type ListItemValue = Omit<Value, 'value'> & {
-	value: {
-		name: string
-	}
-}
+export type ListItemValue = Omit<Value, 'value'> & { value: ListType }
 
 type ListItemActionsProps = {
 	node: TreeNode

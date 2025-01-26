@@ -40,3 +40,5 @@ export enum Topic {
 export type ProjectId = number
 
 export type TreeNode = TreeOf<Node, 'nodes'>
+
+export type ListPath = number[]

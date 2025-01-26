@@ -5,14 +5,19 @@ import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
 import { Maybe, MaybeAsync } from 'purify-ts'
 import { isNotNil, prop, propOr } from 'ramda'
-import type { DB } from 'src/database/schema.ts'
+import type { DB, JsonObject } from 'src/database/schema.ts'
 import { type ListRequest, ListResolver } from 'src/resolvers/list-resolver.ts'
 import {
 	type NodeSettings,
 	NodeSettingsResolver
 } from 'src/resolvers/node-settings-resolver.ts'
 import { ValueResolver } from 'src/resolvers/value-resolver.ts'
-import { NodeType, type ProjectId, type TreeNode } from 'src/types.ts'
+import {
+	type ListPath,
+	NodeType,
+	type ProjectId,
+	type TreeNode
+} from 'src/types.ts'
 import { allNodes } from 'src/utils/nodes.ts'
 
 type NodeGraphQLType = {
@@ -45,7 +50,10 @@ export class TypeContext {
 	async listItems(req: ListRequest) {
 		return this.listResolver.listItems(this.projectId, req)
 	}
-	async getValue(node: TreeNode) {
+	getValue<T extends JsonObject = JsonObject>(
+		node: TreeNode,
+		path: ListPath
+	): MaybeAsync<T> {
 		const fetch = () =>
 			this.db
 				.selectFrom('values')
@@ -53,7 +61,7 @@ export class TypeContext {
 				.select('values.value')
 				.executeTakeFirst()
 				.then(Maybe.fromNullable)
-		return MaybeAsync.fromPromise(fetch).map(prop('value')).orDefault(null)
+		return MaybeAsync.fromPromise(fetch).map(({ value }) => value as T)
 	}
 
 	async settings(nodeId: number) {

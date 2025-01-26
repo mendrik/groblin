@@ -4,6 +4,7 @@ import { safeFormat, safeParse } from '@/lib/date'
 import { stopPropagation } from '@/lib/dom-events'
 import { relativeTime } from '@/lib/relative-time'
 
+import type { DateType } from '@shared/json-value-types'
 import { CalendarDays } from 'lucide-react'
 import { isNil, objOf, pipe, unless } from 'ramda'
 import { openDatePicker } from '../date-picker/date-picker-dialog'
@@ -11,11 +12,7 @@ import { MicroIcon } from '../random/micro-icon'
 import type { DateProps } from '../tree/properties/dates'
 import type { ValueEditor } from './value-editor'
 
-type DateValue = Omit<Value, 'value'> & {
-	value: {
-		date: string | Date
-	}
-}
+type DateValue = Omit<Value, 'value'> & { value: DateType }
 
 type DateRenderProps = {
 	date: Date

@@ -1,13 +1,13 @@
 import KeyListener from '@/components/utils/key-listener'
 import type { Value } from '@/gql/graphql'
 import { inputValue, stopPropagation } from '@/lib/dom-events'
+import type { StringType } from '@shared/json-value-types'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import { objOf, pipe } from 'ramda'
 import { useState } from 'react'
 import { type ValueEditor, editorKey } from './value-editor'
 
-type StringValue = Omit<Value, 'value'> & { value: { content: string } }
-
+type StringValue = Omit<Value, 'value'> & { value: StringType }
 export const StringEditor: ValueEditor<StringValue> = ({
 	node,
 	value,
