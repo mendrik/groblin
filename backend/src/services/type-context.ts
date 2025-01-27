@@ -2,11 +2,12 @@ import { listToTree } from '@shared/utils/list-to-tree.ts'
 import { mapBy } from '@shared/utils/map-by.ts'
 import type { GraphQLType } from 'graphql'
 import { inject, injectable } from 'inversify'
-import { Kysely } from 'kysely'
+import { Kysely, sql } from 'kysely'
 import { Maybe, MaybeAsync } from 'purify-ts'
 import { isNotNil, prop, propOr } from 'ramda'
+import { isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
 import type { DB, JsonObject } from 'src/database/schema.ts'
-import { type ListRequest, ListResolver } from 'src/resolvers/list-resolver.ts'
+import { ListResolver } from 'src/resolvers/list-resolver.ts'
 import {
 	type NodeSettings,
 	NodeSettingsResolver
@@ -47,8 +48,24 @@ export class TypeContext {
 		this.types = new Map()
 	}
 
-	async listItems(req: ListRequest) {
-		return this.listResolver.listItems(this.projectId, req)
+	async listItems(nodeId: number, path?: ListPath) {
+		return this.db
+			.selectFrom('values')
+			.selectAll()
+			.where('node_id', '=', nodeId)
+			.$if(isNilOrEmpty(path), qb =>
+				qb.where(eb =>
+					eb.or([
+						eb('list_path', 'is', null),
+						eb('list_path', '=', sql.val([]))
+					])
+				)
+			)
+			.$if(isNotNilOrEmpty(path), qb =>
+				qb.where('list_path', '=', sql.val(path))
+			)
+			.orderBy('order', 'asc')
+			.execute()
 	}
 	getValue<T extends JsonObject = JsonObject>(
 		node: TreeNode,

@@ -1,12 +1,7 @@
 import type { StringType } from '@shared/json-value-types.ts'
 import { toArray } from '@shared/utils/async-generator.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
-import type {
-	GraphQLOutputType,
-	GraphQLResolveInfo,
-	GraphQLScalarType,
-	GraphQLType
-} from 'graphql'
+import type { GraphQLScalarType, GraphQLType } from 'graphql'
 import {
 	GraphQLBoolean,
 	type GraphQLFieldConfig,
@@ -23,7 +18,6 @@ import type { GraphQLSchemaWithContext, YogaInitialContext } from 'graphql-yoga'
 import { inject, injectable } from 'inversify'
 import { T as _, mergeAll, propEq } from 'ramda'
 import { isNotNilOrEmpty } from 'ramda-adjunct'
-import type { JsonObject } from 'src/database/schema.ts'
 import {
 	type Context,
 	type ListPath,
@@ -62,10 +56,16 @@ async function* fieldsFor<S, C, A>(
 		if (!type) continue
 		const required = await context.isRequired(node.id)
 		yield {
-			[node.name]: { type: required ? new GraphQLNonNull(type) : type }
+			[node.name]: {
+				type: required ? new GraphQLNonNull(type) : type,
+				resolve: async () => node.name
+			}
 		}
 	}
 }
+
+const toFieldMap = <S, C, A>(gen: AsyncGenerator<Fields<S, C, A>>) =>
+	toArray(gen).then(mergeAll)
 
 type NamedType = Record<string, GraphQLFieldConfig<any, Context, any>>
 
@@ -79,23 +79,17 @@ async function* resolveList<S>(
 	)
 	yield {
 		[node.name]: {
-			type: innerType as GraphQLOutputType,
+			type: innerType,
 			args: {
 				whereEq: { type: WhereObjectScalar },
 				whereNotEq: { type: WhereObjectScalar },
 				limit: { type: GraphQLFloat }
 			},
-			resolve: async (
-				source: S,
-				args: { where: JsonObject },
-				ctx: Context,
-				info: GraphQLResolveInfo
-			) => {
-				const listItems = await context.listItems({
-					node_id: node.id,
-					list_path: []
-				})
-				return []
+			resolve: async () => {
+				const listItems = await context.listItems(node.id, path)
+				return listItems.map(item =>
+					resolveObject(node, context, [...path, item.id])
+				)
 			}
 		}
 	}
@@ -110,7 +104,7 @@ async function* resolveObject(
 	yield {
 		[node.name]: {
 			type,
-			resolve: () => queriesFromNodes(node.nodes, context)
+			resolve: () => toFieldMap(queriesFromNodes(node.nodes, context))
 		}
 	}
 }
