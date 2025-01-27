@@ -9,7 +9,7 @@ import type {
 } from '@shared/json-value-types.ts'
 import { toArray } from '@shared/utils/async-generator.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
-import type { GraphQLScalarType, GraphQLType } from 'graphql'
+import type { GraphQLOutputType, GraphQLType } from 'graphql'
 import {
 	GraphQLBoolean,
 	type GraphQLFieldConfig,
@@ -22,11 +22,13 @@ import {
 	type ThunkObjMap,
 	printSchema
 } from 'graphql'
+import { GraphQLDate } from 'graphql-scalars'
 import type { GraphQLSchemaWithContext, YogaInitialContext } from 'graphql-yoga'
+import type { ObjMap } from 'graphql/jsutils/ObjMap.js'
 import { inject, injectable } from 'inversify'
-import { T as _, mergeAll, prop, propEq } from 'ramda'
+import { T as _, mergeAll, propEq } from 'ramda'
 import { isNotNilOrEmpty } from 'ramda-adjunct'
-import type { JsonObject, JsonValue } from 'src/database/schema.ts'
+import type { JsonValue } from 'src/database/schema.ts'
 import {
 	type Context,
 	type ListPath,
@@ -37,9 +39,9 @@ import {
 import { WhereObjectScalar } from 'src/utils/where-scalar.ts'
 import { TypeContext } from './type-context.ts'
 
-type Fields<S, C, A> = ThunkObjMap<GraphQLFieldConfig<S, C, A>>
+type Fields<S, C, A> = Record<string, GraphQLFieldConfig<S, C, A>>
 
-const hasValue = <T>(value: T | undefined): value is T => value != null
+const hasValue = <T>(value: T | null): value is T => value != null
 
 const isStringType = hasValue<StringType>
 const isNumberType = hasValue<NumberType>
@@ -49,11 +51,14 @@ const isMediaype = hasValue<MediaType>
 const isChoiceType = hasValue<ChoiceType>
 const isBooleanType = hasValue<BooleanType>
 
-const scalarForNode = match<[TreeNode, TypeContext], GraphQLScalarType | null>(
+const scalarForNode = match<[TreeNode, TypeContext], GraphQLOutputType | null>(
 	caseOf([{ type: NodeType.string }], GraphQLString),
 	caseOf([{ type: NodeType.boolean }], GraphQLBoolean),
 	caseOf([{ type: NodeType.number }], GraphQLFloat),
 	caseOf([{ type: NodeType.article }], GraphQLString),
+	caseOf([{ type: NodeType.date }], GraphQLDate),
+	caseOf([{ type: NodeType.media }], GraphQLString),
+	caseOf([{ type: NodeType.choice }], GraphQLString),
 	caseOf([{ type: NodeType.color }], GraphQLString),
 	caseOf(
 		[{ type: NodeType.object }],
@@ -83,17 +88,17 @@ async function* fieldsFor<S, C, A>(
 	path: ListPath = []
 ): AsyncGenerator<Fields<S, C, A>> {
 	for (const node of parent.nodes) {
-		const type = scalarForNode(node, context)
+		const type =
+			scalarForNode(node, context) ?? context.types.get(node.id)?.type
 		if (!type) continue
 		const required = await context.isRequired(node.id)
 		yield {
 			[node.name]: {
 				type: required ? new GraphQLNonNull(type) : type,
 				resolve: async () => {
-					const value = (await context
-						.getValue(node, path)
-						.map(prop('value'))
-						.orDefault(undefined)) as JsonObject
+					const value = await context.getValue(node, path)
+
+					console.log(value)
 
 					return jsonForNode(node, value)
 				}
@@ -103,7 +108,7 @@ async function* fieldsFor<S, C, A>(
 }
 
 const toFieldMap = <S, C, A>(gen: AsyncGenerator<Fields<S, C, A>>) =>
-	toArray(gen).then(mergeAll)
+	toArray(gen).then(mergeAll) as Promise<ObjMap<GraphQLFieldConfig<S, C>>>
 
 type NamedType = Record<string, GraphQLFieldConfig<any, Context, any>>
 
@@ -125,9 +130,13 @@ async function* resolveList<S>(
 			},
 			resolve: async () => {
 				const listItems = await context.listItems(node.id, path)
-				return listItems.map(item =>
-					resolveObject(node, context, [...path, item.id])
-				)
+				return listItems.map(async item => {
+					const res = await toArray(
+						resolveObject(node, context, [...path, item.id])
+					)
+					console.log(JSON.stringify(res))
+					return res
+				})
 			}
 		}
 	}
@@ -155,22 +164,21 @@ async function* queriesFromNodes<S>(
 	for (const node of parents) {
 		yield* match<[TreeNode, TypeContext, ListPath], AsyncGenerator<NamedType>>(
 			caseOf([{ type: NodeType.list }, _, _], resolveList),
-			caseOf([{ type: NodeType.object }, _, _], resolveObject)
+			caseOf([{ type: NodeType.object }, _, _], resolveObject),
+			caseOf([_, _, _], async function* () {})
 		)(node, context, path)
 	}
 }
 
-async function* typesFromNodes<S, C, TArgs>(
+async function* typesFromNodes<S, C, A>(
 	parents: TreeNode[],
 	context: TypeContext
 ): AsyncGenerator<GraphQLType> {
 	for (const node of parents) {
-		const fields = await toArray(fieldsFor(node, context)).then<
-			Fields<S, C, TArgs>
-		>(mergeAll)
+		const fields = await toFieldMap(fieldsFor<S, C, A>(node, context))
 
 		if (isNotNilOrEmpty(fields)) {
-			const type = new GraphQLObjectType({
+			const type = new GraphQLObjectType<S, C>({
 				name: node.name,
 				fields
 			})

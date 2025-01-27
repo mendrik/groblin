@@ -1,12 +1,12 @@
 import { listToTree } from '@shared/utils/list-to-tree.ts'
 import { mapBy } from '@shared/utils/map-by.ts'
-import type { GraphQLType } from 'graphql'
+import type { GraphQLOutputType } from 'graphql'
 import { inject, injectable } from 'inversify'
 import { Kysely, sql } from 'kysely'
 import { Maybe, MaybeAsync } from 'purify-ts'
 import { isNotNil, prop, propOr } from 'ramda'
 import { isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
-import type { DB, JsonObject } from 'src/database/schema.ts'
+import type { DB, JsonValue } from 'src/database/schema.ts'
 import { ListResolver } from 'src/resolvers/list-resolver.ts'
 import {
 	type NodeSettings,
@@ -22,7 +22,7 @@ import {
 import { allNodes } from 'src/utils/nodes.ts'
 
 type NodeGraphQLType = {
-	type: GraphQLType
+	type: GraphQLOutputType
 	node: TreeNode
 }
 
@@ -67,18 +67,28 @@ export class TypeContext {
 			.orderBy('order', 'asc')
 			.execute()
 	}
-	getValue<T extends JsonObject = JsonObject>(
-		node: TreeNode,
-		path: ListPath
-	): MaybeAsync<T> {
+	getValue(node: TreeNode, path: ListPath): Promise<JsonValue> {
 		const fetch = () =>
 			this.db
 				.selectFrom('values')
 				.where('node_id', '=', node.id)
 				.select('values.value')
+				.$if(isNilOrEmpty(path), qb =>
+					qb.where(eb =>
+						eb.or([
+							eb('list_path', 'is', null),
+							eb('list_path', '=', sql.val([]))
+						])
+					)
+				)
+				.$if(isNotNilOrEmpty(path), qb =>
+					qb.where('list_path', '=', sql.val(path))
+				)
 				.executeTakeFirst()
 				.then(Maybe.fromNullable)
-		return MaybeAsync.fromPromise(fetch).map(({ value }) => value as T)
+		return MaybeAsync.fromPromise(fetch)
+			.map(({ value }) => value)
+			.orDefault(null)
 	}
 
 	async settings(nodeId: number) {
