@@ -1,4 +1,3 @@
-import type { StringType } from '@shared/json-value-types.ts'
 import { toArray } from '@shared/utils/async-generator.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
 import type { GraphQLScalarType, GraphQLType } from 'graphql'
@@ -16,8 +15,9 @@ import {
 } from 'graphql'
 import type { GraphQLSchemaWithContext, YogaInitialContext } from 'graphql-yoga'
 import { inject, injectable } from 'inversify'
-import { T as _, mergeAll, propEq } from 'ramda'
+import { T as _, mergeAll, prop, propEq } from 'ramda'
 import { isNotNilOrEmpty } from 'ramda-adjunct'
+import type { JsonObject, JsonValue } from 'src/database/schema.ts'
 import {
 	type Context,
 	type ListPath,
@@ -29,6 +29,9 @@ import { WhereObjectScalar } from 'src/utils/where-scalar.ts'
 import { TypeContext } from './type-context.ts'
 
 type Fields<S, C, A> = ThunkObjMap<GraphQLFieldConfig<S, C, A>>
+
+const hasValue = (value: any): value is Record<'value', JsonValue> =>
+	'value' in value
 
 const scalarForNode = match<[TreeNode, TypeContext], GraphQLScalarType | null>(
 	caseOf([{ type: NodeType.string }], GraphQLString),
@@ -47,9 +50,15 @@ const scalarForNode = match<[TreeNode, TypeContext], GraphQLScalarType | null>(
 	caseOf([_], null)
 )
 
+const jsonForNode = match<[TreeNode, object], JsonValue | undefined>(
+	caseOf([{ type: NodeType.string }, hasValue], (_, v) => v?.value),
+	caseOf([_, _], () => null)
+)
+
 async function* fieldsFor<S, C, A>(
 	parent: TreeNode,
-	context: TypeContext
+	context: TypeContext,
+	path: ListPath = []
 ): AsyncGenerator<Fields<S, C, A>> {
 	for (const node of parent.nodes) {
 		const type = scalarForNode(node, context)
@@ -58,7 +67,14 @@ async function* fieldsFor<S, C, A>(
 		yield {
 			[node.name]: {
 				type: required ? new GraphQLNonNull(type) : type,
-				resolve: async () => node.name
+				resolve: async () => {
+					const value = (await context
+						.getValue(node, path)
+						.map(prop('value'))
+						.orDefault(undefined)) as JsonObject
+
+					return jsonForNode(node, value)
+				}
 			}
 		}
 	}
@@ -104,24 +120,7 @@ async function* resolveObject(
 	yield {
 		[node.name]: {
 			type,
-			resolve: () => toFieldMap(queriesFromNodes(node.nodes, context))
-		}
-	}
-}
-
-async function* resolveString(
-	node: TreeNode,
-	ctx: TypeContext,
-	path: ListPath
-): AsyncGenerator<NamedType> {
-	yield {
-		[node.name]: {
-			type: GraphQLString,
-			resolve: () =>
-				ctx
-					.getValue<StringType>(node, path)
-					.map(content => content)
-					.run()
+			resolve: () => toFieldMap(queriesFromNodes(node.nodes, context, path))
 		}
 	}
 }
@@ -134,8 +133,7 @@ async function* queriesFromNodes<S>(
 	for (const node of parents) {
 		yield* match<[TreeNode, TypeContext, ListPath], AsyncGenerator<NamedType>>(
 			caseOf([{ type: NodeType.list }, _, _], resolveList),
-			caseOf([{ type: NodeType.object }, _, _], resolveObject),
-			caseOf([{ type: NodeType.string }, _, _], resolveString)
+			caseOf([{ type: NodeType.object }, _, _], resolveObject)
 		)(node, context, path)
 	}
 }
