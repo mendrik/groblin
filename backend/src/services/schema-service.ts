@@ -1,3 +1,12 @@
+import type {
+	BooleanType,
+	ChoiceType,
+	ColorType,
+	DateType,
+	MediaType,
+	NumberType,
+	StringType
+} from '@shared/json-value-types.ts'
 import { toArray } from '@shared/utils/async-generator.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
 import type { GraphQLScalarType, GraphQLType } from 'graphql'
@@ -30,8 +39,15 @@ import { TypeContext } from './type-context.ts'
 
 type Fields<S, C, A> = ThunkObjMap<GraphQLFieldConfig<S, C, A>>
 
-const hasValue = (value: any): value is Record<'value', JsonValue> =>
-	'value' in value
+const hasValue = <T>(value: T | undefined): value is T => value != null
+
+const isStringType = hasValue<StringType>
+const isNumberType = hasValue<NumberType>
+const isColorType = hasValue<ColorType>
+const isDateType = hasValue<DateType>
+const isMediaype = hasValue<MediaType>
+const isChoiceType = hasValue<ChoiceType>
+const isBooleanType = hasValue<BooleanType>
 
 const scalarForNode = match<[TreeNode, TypeContext], GraphQLScalarType | null>(
 	caseOf([{ type: NodeType.string }], GraphQLString),
@@ -50,9 +66,15 @@ const scalarForNode = match<[TreeNode, TypeContext], GraphQLScalarType | null>(
 	caseOf([_], null)
 )
 
-const jsonForNode = match<[TreeNode, object], JsonValue | undefined>(
-	caseOf([{ type: NodeType.string }, hasValue], (_, v) => v?.value),
-	caseOf([_, _], () => null)
+const jsonForNode = match<[TreeNode, any], JsonValue>(
+	caseOf([{ type: NodeType.string }, isStringType], (_, v) => v.content),
+	caseOf([{ type: NodeType.color }, isColorType], (_, v) => v.rgba as number[]),
+	caseOf([{ type: NodeType.color }, isNumberType], (_, v) => v.figure),
+	caseOf([{ type: NodeType.color }, isDateType], (_, v) => v.date.toString()),
+	caseOf([{ type: NodeType.color }, isMediaype], (_, v) => v.name),
+	caseOf([{ type: NodeType.color }, isChoiceType], (_, v) => v.selected),
+	caseOf([{ type: NodeType.color }, isBooleanType], (_, v) => v.state),
+	caseOf([_, _], null)
 )
 
 async function* fieldsFor<S, C, A>(
