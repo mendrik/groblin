@@ -32,7 +32,7 @@ export const WhereObjectScalar = new GraphQLScalarType({
 
 	parseLiteral(ast: any): WhereObject | null {
 		if (ast.kind === Kind.OBJECT) {
-			const obj = ast.fields.reduce((obj: WhereObject, field: any) => {
+			return ast.fields.reduce((obj: WhereObject, field: any) => {
 				if (field.value.kind === Kind.VARIABLE) {
 					return assoc(field.name.value, field.value.name.value, obj)
 				}

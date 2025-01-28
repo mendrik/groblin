@@ -86,6 +86,7 @@ const nodeForName = async (
 		id,
 		name: capitalize(name),
 		order: 0,
+		depth: 0,
 		parent_id: parent.id,
 		type: typeForValue(value),
 		nodes: []

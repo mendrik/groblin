@@ -48,6 +48,13 @@ export class TypeContext {
 		this.types = new Map()
 	}
 
+	async init(projectId: ProjectId) {
+		this.projectId = projectId
+		this._settings = await this.nodeSettingsResolver
+			.settings(projectId)
+			.then(mapBy(prop('node_id')))
+	}
+
 	async listItems(nodeId: number, path?: ListPath) {
 		return this.db
 			.selectFrom('values')
@@ -91,17 +98,12 @@ export class TypeContext {
 			.orDefault(null)
 	}
 
-	async settings(nodeId: number) {
-		if (this._settings === undefined) {
-			this._settings = await this.nodeSettingsResolver
-				.settings(this.projectId)
-				.then(mapBy(prop('node_id')))
-		}
+	settings(nodeId: number): Maybe<JsonValue> {
 		return Maybe.fromNullable(this._settings.get(nodeId)).map(prop('settings'))
 	}
 
-	async isRequired(nodeId: number) {
-		return MaybeAsync.fromPromise(() => this.settings(nodeId))
+	isRequired(nodeId: number) {
+		return this.settings(nodeId)
 			.map(propOr(false, 'required'))
 			.map(Boolean)
 			.orDefault(false)

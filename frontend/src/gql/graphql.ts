@@ -340,11 +340,11 @@ export type Value = {
 export type GetProjectQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetProjectQuery = { getProject: { user: { id: number, email: string, name: string, lastProjectId: number }, project: { id: number, name: string }, nodes: Array<{ id: number, name: string, order: number, type: NodeType, parent_id?: number | null }>, values: Array<{ id: number, node_id: number, order: number, value?: any | null, list_path?: Array<number> | null, updated_at: any }>, nodeSettings: Array<{ id: number, node_id: number, settings: any }> } };
+export type GetProjectQuery = { getProject: { user: { id: number, email: string, name: string, lastProjectId: number }, project: { id: number, name: string }, nodes: Array<{ id: number, name: string, order: number, type: NodeType, depth: number, parent_id?: number | null }>, values: Array<{ id: number, node_id: number, order: number, value?: any | null, list_path?: Array<number> | null, updated_at: any }>, nodeSettings: Array<{ id: number, node_id: number, settings: any }> } };
 
 export type ValueFragment = { id: number, node_id: number, order: number, value?: any | null, list_path?: Array<number> | null, updated_at: any };
 
-export type NodeFragment = { id: number, name: string, order: number, type: NodeType, parent_id?: number | null };
+export type NodeFragment = { id: number, name: string, order: number, type: NodeType, depth: number, parent_id?: number | null };
 
 export type NodeSettingsFragment = { id: number, node_id: number, settings: any };
 
@@ -356,7 +356,7 @@ export type NodesUpdatedSubscription = { nodesUpdated: boolean };
 export type GetNodesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetNodesQuery = { getNodes: Array<{ id: number, name: string, order: number, type: NodeType, parent_id?: number | null }> };
+export type GetNodesQuery = { getNodes: Array<{ id: number, name: string, order: number, type: NodeType, depth: number, parent_id?: number | null }> };
 
 export type InsertNodeMutationVariables = Exact<{
   data: InsertNode;
@@ -484,7 +484,7 @@ export type GetListColumnsQueryVariables = Exact<{
 }>;
 
 
-export type GetListColumnsQuery = { getListColumns: Array<{ id: number, name: string, order: number, type: NodeType, parent_id?: number | null }> };
+export type GetListColumnsQuery = { getListColumns: Array<{ id: number, name: string, order: number, type: NodeType, depth: number, parent_id?: number | null }> };
 
 export type ApiKeyFragment = { name: string, key: string, is_active: boolean, created_at: any, expires_at?: any | null, last_used?: any | null };
 
@@ -561,6 +561,7 @@ export const NodeFragmentDoc = `
   name
   order
   type
+  depth
   parent_id
 }
     `;

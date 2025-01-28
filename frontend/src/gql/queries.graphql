@@ -36,6 +36,7 @@ fragment Node on Node {
   name
   order
   type
+  depth
   parent_id
 }
 

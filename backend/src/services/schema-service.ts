@@ -7,9 +7,9 @@ import type {
 	NumberType,
 	StringType
 } from '@shared/json-value-types.ts'
-import { toArray } from '@shared/utils/async-generator.ts'
+import { mapBy } from '@shared/utils/map-by.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
-import type { GraphQLOutputType, GraphQLType } from 'graphql'
+import type { GraphQLOutputType, ThunkObjMap } from 'graphql'
 import {
 	GraphQLBoolean,
 	type GraphQLFieldConfig,
@@ -19,16 +19,15 @@ import {
 	GraphQLObjectType,
 	GraphQLSchema,
 	GraphQLString,
-	type ThunkObjMap,
 	printSchema
 } from 'graphql'
 import { GraphQLDate } from 'graphql-scalars'
 import type { GraphQLSchemaWithContext, YogaInitialContext } from 'graphql-yoga'
-import type { ObjMap } from 'graphql/jsutils/ObjMap.js'
 import { inject, injectable } from 'inversify'
-import { T as _, mergeAll, propEq } from 'ramda'
-import { isNotNilOrEmpty } from 'ramda-adjunct'
+import { T as _, isNotNil, map, pipe, propEq } from 'ramda'
+import { compact } from 'ramda-adjunct'
 import type { JsonValue } from 'src/database/schema.ts'
+import type { Value } from 'src/resolvers/value-resolver.ts'
 import {
 	type Context,
 	type ListPath,
@@ -74,123 +73,110 @@ const scalarForNode = match<[TreeNode, TypeContext], GraphQLOutputType | null>(
 const jsonForNode = match<[TreeNode, any], JsonValue>(
 	caseOf([{ type: NodeType.string }, isStringType], (_, v) => v.content),
 	caseOf([{ type: NodeType.color }, isColorType], (_, v) => v.rgba as number[]),
-	caseOf([{ type: NodeType.color }, isNumberType], (_, v) => v.figure),
-	caseOf([{ type: NodeType.color }, isDateType], (_, v) => v.date.toString()),
-	caseOf([{ type: NodeType.color }, isMediaype], (_, v) => v.name),
-	caseOf([{ type: NodeType.color }, isChoiceType], (_, v) => v.selected),
-	caseOf([{ type: NodeType.color }, isBooleanType], (_, v) => v.state),
+	caseOf([{ type: NodeType.number }, isNumberType], (_, v) => v.figure),
+	caseOf([{ type: NodeType.date }, isDateType], (_, v) => v.date.toString()),
+	caseOf([{ type: NodeType.media }, isMediaype], (_, v) => v.name),
+	caseOf([{ type: NodeType.choice }, isChoiceType], (_, v) => v.selected),
+	caseOf([{ type: NodeType.boolean }, isBooleanType], (_, v) => v.state),
 	caseOf([_, _], null)
 )
 
-async function* fieldsFor<S, C, A>(
-	parent: TreeNode,
+type Field<S = any, A = any> = GraphQLFieldConfig<S, Context, A> & {
+	name: string
+}
+
+function fieldFor<S, A>(
+	node: TreeNode,
 	context: TypeContext,
 	path: ListPath = []
-): AsyncGenerator<Fields<S, C, A>> {
-	for (const node of parent.nodes) {
-		const type =
-			scalarForNode(node, context) ?? context.types.get(node.id)?.type
-		if (!type) continue
-		const required = await context.isRequired(node.id)
-		yield {
-			[node.name]: {
+): Field<S, A> | null {
+	const type = scalarForNode(node, context) ?? context.types.get(node.id)?.type
+	const required = context.isRequired(node.id)
+	return type
+		? {
+				name: node.name,
 				type: required ? new GraphQLNonNull(type) : type,
 				resolve: async () => {
 					const value = await context.getValue(node, path)
-
-					console.log(value)
-
 					return jsonForNode(node, value)
 				}
 			}
-		}
-	}
+		: null
 }
 
-const toFieldMap = <S, C, A>(gen: AsyncGenerator<Fields<S, C, A>>) =>
-	toArray(gen).then(mergeAll) as Promise<ObjMap<GraphQLFieldConfig<S, C>>>
-
-type NamedType = Record<string, GraphQLFieldConfig<any, Context, any>>
-
-async function* resolveList<S>(
+function typeFromNode<S, A>(
 	node: TreeNode,
-	context: TypeContext,
-	path: ListPath
-): AsyncGenerator<NamedType> {
-	const innerType = new GraphQLList(
-		context.types.get(node.id)?.type as GraphQLObjectType
+	context: TypeContext
+): GraphQLObjectType | GraphQLList<GraphQLObjectType> {
+	const fields: (
+		n: TreeNode[]
+	) => ThunkObjMap<GraphQLFieldConfig<S, Context, A>> = pipe(
+		xs => xs.map(n => fieldFor(n, context)),
+		compact,
+		mapBy(({ name }: Field) => name),
+		Object.fromEntries
 	)
-	yield {
-		[node.name]: {
-			type: innerType,
-			args: {
-				whereEq: { type: WhereObjectScalar },
-				whereNotEq: { type: WhereObjectScalar },
-				limit: { type: GraphQLFloat }
-			},
-			resolve: async () => {
-				const listItems = await context.listItems(node.id, path)
-				return listItems.map(async item => {
-					const res = await toArray(
-						resolveObject(node, context, [...path, item.id])
-					)
-					console.log(JSON.stringify(res))
-					return res
-				})
-			}
-		}
-	}
+
+	const type = new GraphQLObjectType({
+		name: node.name,
+		fields: fields(node.nodes)
+	})
+	const objectType = node.type === NodeType.list ? new GraphQLList(type) : type
+	context.types.set(node.id, {
+		type: objectType,
+		node
+	})
+	return objectType
 }
 
-async function* resolveObject(
+function resolveList<S>(
 	node: TreeNode,
 	context: TypeContext,
 	path: ListPath
-): AsyncGenerator<NamedType> {
-	const type = context.types.get(node.id)?.type as GraphQLObjectType
-	yield {
-		[node.name]: {
-			type,
-			resolve: () => toFieldMap(queriesFromNodes(node.nodes, context, path))
-		}
+): Field {
+	const innerType = context.types.get(node.id)?.type as GraphQLObjectType
+	return {
+		name: node.name,
+		type: new GraphQLList(innerType),
+		args: {
+			whereEq: { type: WhereObjectScalar },
+			whereNotEq: { type: WhereObjectScalar },
+			limit: { type: GraphQLFloat }
+		},
+		resolve: (...args) =>
+			context.listItems(node.id, path).then(
+				map((item: Value) => {
+					const res = resolveObject(node, context, [...path, item.id])
+					console.log(item.id, res)
+					return res.resolve?.(...args)
+				})
+			)
 	}
 }
 
-async function* queriesFromNodes<S>(
-	parents: TreeNode[],
+function resolveObject(
+	node: TreeNode,
+	context: TypeContext,
+	path: ListPath
+): Field {
+	const type = context.types.get(node.id)?.type as GraphQLObjectType
+	return {
+		name: node.name,
+		type,
+		resolve: () => queryForNode(node, context, path)
+	}
+}
+
+function queryForNode<S>(
+	node: TreeNode,
 	context: TypeContext,
 	path: ListPath = []
-): AsyncGenerator<NamedType> {
-	for (const node of parents) {
-		yield* match<[TreeNode, TypeContext, ListPath], AsyncGenerator<NamedType>>(
-			caseOf([{ type: NodeType.list }, _, _], resolveList),
-			caseOf([{ type: NodeType.object }, _, _], resolveObject),
-			caseOf([_, _, _], async function* () {})
-		)(node, context, path)
-	}
-}
-
-async function* typesFromNodes<S, C, A>(
-	parents: TreeNode[],
-	context: TypeContext
-): AsyncGenerator<GraphQLType> {
-	for (const node of parents) {
-		const fields = await toFieldMap(fieldsFor<S, C, A>(node, context))
-
-		if (isNotNilOrEmpty(fields)) {
-			const type = new GraphQLObjectType<S, C>({
-				name: node.name,
-				fields
-			})
-			const objectType =
-				node.type === NodeType.list ? new GraphQLList(type) : type
-			context.types.set(node.id, {
-				type: objectType,
-				node
-			})
-			yield objectType
-		}
-	}
+): Field | null {
+	return match<[TreeNode, TypeContext, ListPath], Field | null>(
+		caseOf([{ type: NodeType.list }, _, _], resolveList),
+		caseOf([{ type: NodeType.object }, _, _], resolveObject),
+		caseOf([_, _, _], () => null)
+	)(node, context, path)
 }
 
 @injectable()
@@ -201,18 +187,24 @@ export class SchemaService {
 	async getSchema(
 		projectId: ProjectId
 	): Promise<GraphQLSchemaWithContext<YogaInitialContext>> {
-		this.context.projectId = projectId
+		await this.context.init(projectId)
 		const nodes = await this.context.getNestingNodes()
-		const types = await toArray(typesFromNodes(nodes, this.context))
-		const fields = await toArray(
-			queriesFromNodes(nodes.filter(propEq(1, 'depth')), this.context)
-		).then<ThunkObjMap<GraphQLFieldConfig<any, any>>>(mergeAll)
+		const types = nodes.map(node => typeFromNode(node, this.context))
+		const fields = nodes
+			.filter(propEq(1, 'depth'))
+			.map(n => queryForNode(n, this.context))
+			.filter(isNotNil)
+
+		console.log(
+			'fields',
+			mapBy(({ name }: Field) => name, fields)
+		)
 
 		const schema = new GraphQLSchema({
 			types: types as any,
 			query: new GraphQLObjectType({
 				name: 'Query',
-				fields
+				fields: mapBy(({ name }: Field) => name, fields) as any
 			})
 		})
 
