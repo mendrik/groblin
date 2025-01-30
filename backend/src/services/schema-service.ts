@@ -7,6 +7,7 @@ import type {
 	NumberType,
 	StringType
 } from '@shared/json-value-types.ts'
+import { awaitObj } from '@shared/utils/await-obj.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
 import {
 	GraphQLBoolean,
@@ -67,25 +68,32 @@ const resolveValue = (
 	path: ListPath
 ): GraphQLFieldConfig<any, any> => ({
 	type: scalarForNode(node),
-	resolve: () =>
-		context.getValue(node, path).then(val => jsonForNode(node, val))
+	resolve() {
+		return context.getValue(node, path).then(val => jsonForNode(node, val))
+	}
 })
 
 const resolveList = (
 	node: TreeNode,
 	context: TypeContext,
 	path: ListPath
-): GraphQLFieldConfig<any, any> => ({
-	type: new GraphQLList(resolveObj(node, context, path).type),
-	resolve(a, b, c, d) {
-		return context.listItems(node.id, path).then(
-			map((item: Value) => {
-				const conf = resolveObj(node, context, [...path, item.id])
-				return conf.resolve?.(a, b, c, d)
-			})
-		)
+): GraphQLFieldConfig<any, any> => {
+	const conf = resolveObj(node, context, path)
+	return {
+		type: new GraphQLList(conf.type),
+		resolve(a, b, c, d) {
+			return context
+				.listItems(node.id, path)
+				.then(
+					map((item: Value) => {
+						const conf = resolveObj(node, context, [...path, item.id])
+						return conf.resolve?.(a, b, c, d)
+					})
+				)
+				.then(Promise.all.bind(Promise))
+		}
 	}
-})
+}
 
 const resolveObj = (
 	node: TreeNode,
@@ -101,14 +109,17 @@ const resolveObj = (
 			name: node.name,
 			fields: Object.fromEntries(fields)
 		}),
-		resolve: (a, b, c, d) =>
-			fields.reduce(
-				(acc, [name, field]) => ({
-					...acc,
-					[name]: field.resolve?.(a, b, c, d)
-				}),
-				{}
+		resolve(a, b, c, d) {
+			return awaitObj(
+				fields.reduce(
+					(acc, [name, field]) => ({
+						...acc,
+						[name]: field.resolve?.(a, b, c, d)
+					}),
+					{}
+				)
 			)
+		}
 	}
 }
 
@@ -134,10 +145,7 @@ export class SchemaService {
 		const query = resolveObj(root, this.context, [])
 
 		const schema = new GraphQLSchema({
-			query: new GraphQLObjectType({
-				name: 'Query',
-				fields: (query.type as GraphQLObjectType).getFields() as any
-			})
+			query: query.type as any
 		})
 
 		console.log(printSchema(schema))
