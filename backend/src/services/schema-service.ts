@@ -23,7 +23,7 @@ import {
 import { GraphQLDate } from 'graphql-scalars'
 import type { GraphQLSchemaWithContext, YogaInitialContext } from 'graphql-yoga'
 import { inject, injectable } from 'inversify'
-import { T as _, assoc, map } from 'ramda'
+import { T as _, append, assoc, map } from 'ramda'
 import type { JsonValue } from 'src/database/schema.ts'
 import type { Value } from 'src/resolvers/value-resolver.ts'
 import { NodeType, type ProjectId, type TreeNode } from 'src/types.ts'
@@ -77,9 +77,7 @@ const resolveList = (
 			context
 				.listItems(node.id, path)
 				.then(
-					map((item: Value) =>
-						conf.resolve?.([...(path ?? []), item.id], b, c, d)
-					)
+					map((item: Value) => conf.resolve?.(append(item.id, path), b, c, d))
 				)
 				.then(Promise.all.bind(Promise))
 	}
@@ -130,7 +128,7 @@ export class SchemaService {
 		const query = resolveObj(root, this.context)
 
 		const schema = new GraphQLSchema({
-			query: query.type as any
+			query: query.type as GraphQLObjectType
 		})
 
 		console.log(printSchema(schema))
