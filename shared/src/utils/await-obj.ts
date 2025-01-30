@@ -4,7 +4,7 @@ export type Resolved<T> = {
 	[K in keyof T]: T[K] extends Promise<infer R> ? R : T[K]
 }
 
-export async function resolveObj<T extends Record<string, any>>(
+export async function awaitObj<T extends Record<string, any>>(
 	obj: T
 ): Promise<Resolved<T>> {
 	const keys = Object.keys(obj) as (keyof T)[]

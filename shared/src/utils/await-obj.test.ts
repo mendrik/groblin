@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { resolveObj } from './resolve-obj'
+import { awaitObj } from './await-obj.ts'
 
 describe('resolveObj', () => {
 	it('should resolve promises to their values', async () => {
@@ -9,7 +9,7 @@ describe('resolveObj', () => {
 			c: Promise.resolve(3)
 		}
 
-		const result = await resolveObj(obj)
+		const result = await awaitObj(obj)
 		expect(result).toEqual({ a: 1, b: 2, c: 3 })
 	})
 
@@ -20,7 +20,7 @@ describe('resolveObj', () => {
 			z: true
 		}
 
-		const result = await resolveObj(obj)
+		const result = await awaitObj(obj)
 		expect(result).toEqual({ x: 42, y: 'Hello', z: true })
 	})
 
@@ -32,14 +32,14 @@ describe('resolveObj', () => {
 			d: false
 		}
 
-		const result = await resolveObj(obj)
+		const result = await awaitObj(obj)
 		expect(result).toEqual({ a: 1, b: 2, c: 'Hello', d: false })
 	})
 
 	it('should handle empty objects', async () => {
 		const obj = {}
 
-		const result = await resolveObj(obj)
+		const result = await awaitObj(obj)
 		expect(result).toEqual({})
 	})
 
@@ -49,7 +49,7 @@ describe('resolveObj', () => {
 			b: Promise.resolve({ age: 30 })
 		}
 
-		const result = await resolveObj(obj)
+		const result = await awaitObj(obj)
 		expect(result).toEqual({ a: { name: 'Alice' }, b: { age: 30 } })
 	})
 
@@ -59,7 +59,7 @@ describe('resolveObj', () => {
 			b: Promise.reject(new Error('Failed'))
 		}
 
-		await expect(resolveObj(obj)).rejects.toThrow('Failed')
+		await expect(awaitObj(obj)).rejects.toThrow('Failed')
 	})
 
 	it('should work with an object containing no promises', async () => {
@@ -69,7 +69,7 @@ describe('resolveObj', () => {
 			c: [1, 2, 3]
 		}
 
-		const result = await resolveObj(obj)
+		const result = await awaitObj(obj)
 		expect(result).toEqual({ a: 10, b: 'test', c: [1, 2, 3] })
 	})
 
@@ -80,7 +80,7 @@ describe('resolveObj', () => {
 			third: 3
 		}
 
-		const result = await resolveObj(obj)
+		const result = await awaitObj(obj)
 		expect(result).toEqual({ first: 'first', second: 'second', third: 3 })
 	})
 })

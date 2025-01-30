@@ -1,7 +1,7 @@
 import { type BinaryLike, scrypt } from 'node:crypto'
 import { assertThat } from '@shared/asserts.ts'
+import { awaitObj } from '@shared/utils/await-obj.ts'
 import { evolveAlt } from '@shared/utils/evolve-alt.ts'
-import { resolveObj } from '@shared/utils/resolve-obj.ts'
 import { inject, injectable } from 'inversify'
 import jwt from 'jsonwebtoken'
 import { Kysely } from 'kysely'
@@ -104,7 +104,7 @@ const spec = {
 	confirmed: F
 }
 
-const regToUser = pipe(evolveAlt<Registration, typeof spec>(spec), resolveObj)
+const regToUser = pipe(evolveAlt<Registration, typeof spec>(spec), awaitObj)
 
 @injectable()
 @UseMiddleware(LogAccess)
@@ -152,7 +152,7 @@ export class AuthResolver {
 			evolveAlt({
 				lastProjectId: pipe(x => x.last_project_id, when(isNil, init))
 			}),
-			resolveObj
+			awaitObj
 		)
 		ctx.user = await loggedInUser(user)
 		return {

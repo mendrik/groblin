@@ -4,7 +4,7 @@ import type { GraphQLOutputType } from 'graphql'
 import { inject, injectable } from 'inversify'
 import { Kysely, sql } from 'kysely'
 import { Maybe, MaybeAsync } from 'purify-ts'
-import { isNotNil, prop, propOr } from 'ramda'
+import { prop, propOr } from 'ramda'
 import { isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
 import type { DB, JsonValue } from 'src/database/schema.ts'
 import { ListResolver } from 'src/resolvers/list-resolver.ts'
@@ -13,13 +13,7 @@ import {
 	NodeSettingsResolver
 } from 'src/resolvers/node-settings-resolver.ts'
 import { ValueResolver } from 'src/resolvers/value-resolver.ts'
-import {
-	type ListPath,
-	NodeType,
-	type ProjectId,
-	type TreeNode
-} from 'src/types.ts'
-import { allNodes } from 'src/utils/nodes.ts'
+import type { ListPath, ProjectId, TreeNode } from 'src/types.ts'
 
 type NodeGraphQLType = {
 	type: GraphQLOutputType
@@ -40,13 +34,8 @@ export class TypeContext {
 	@inject(ListResolver)
 	private listResolver: ListResolver
 
-	types: Map<number, NodeGraphQLType>
 	projectId: ProjectId
 	_settings: Map<number, NodeSettings>
-
-	constructor() {
-		this.types = new Map()
-	}
 
 	async init(projectId: ProjectId) {
 		this.projectId = projectId
@@ -112,29 +101,13 @@ export class TypeContext {
 	/**
 	 * Returns a list of nodes that are either objects or lists
 	 */
-	async getNestingNodes(): Promise<TreeNode[]> {
-		const nodeTypeIds = await this.db
-			.selectFrom('node')
-			.select('id')
-			.where('project_id', '=', this.projectId)
-			.where(eb =>
-				eb.or([
-					eb('type', '=', NodeType.object),
-					eb('type', '=', NodeType.list)
-				])
-			)
-			.orderBy('depth', 'desc')
-			.orderBy('order', 'desc')
-			.execute()
+	async getRoot(): Promise<TreeNode> {
 		const nodes = await this.db
 			.selectFrom('node')
 			.where('project_id', '=', this.projectId)
 			.selectAll()
 			.orderBy('order', 'desc')
 			.execute()
-		const root = listToTree('id', 'parent_id', 'nodes')(nodes) as TreeNode
-		const treeNodes = [...allNodes(root)]
-		const nodeMap = mapBy(prop('id'), treeNodes)
-		return nodeTypeIds.map(({ id }) => nodeMap.get(id)).filter(isNotNil)
+		return listToTree('id', 'parent_id', 'nodes')(nodes) as TreeNode
 	}
 }

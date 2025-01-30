@@ -2,8 +2,8 @@ import { always, inc, isNil, map, pipe, prop, when } from 'ramda'
 import { expectType } from 'tsd'
 // Import the necessary functions from Vitest
 import { describe, expect, it } from 'vitest'
+import { awaitObj } from './await-obj'
 import { evolveAlt } from './evolve-alt' // Adjust the import path accordingly
-import { resolveObj } from './resolve-obj'
 
 describe('evolveAlt', () => {
 	it('should transform existing properties correctly', () => {
@@ -189,7 +189,7 @@ describe('evolveAlt', () => {
 				when<number, Promise<number>>(isNil, init)
 			)
 		})
-		const loggedInUser = pipe(evolver, resolveObj)
+		const loggedInUser = pipe(evolver, awaitObj)
 		const user = { name: 'test', last_project_id: null }
 		const res = await loggedInUser(user)
 		expect(res).toEqual({

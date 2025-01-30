@@ -7,16 +7,14 @@ import type {
 	NumberType,
 	StringType
 } from '@shared/json-value-types.ts'
-import { mapBy } from '@shared/utils/map-by.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
-import type { GraphQLOutputType, ThunkObjMap } from 'graphql'
 import {
 	GraphQLBoolean,
 	type GraphQLFieldConfig,
 	GraphQLFloat,
 	GraphQLList,
-	GraphQLNonNull,
 	GraphQLObjectType,
+	type GraphQLOutputType,
 	GraphQLSchema,
 	GraphQLString,
 	printSchema
@@ -24,21 +22,16 @@ import {
 import { GraphQLDate } from 'graphql-scalars'
 import type { GraphQLSchemaWithContext, YogaInitialContext } from 'graphql-yoga'
 import { inject, injectable } from 'inversify'
-import { T as _, isNotNil, map, pipe, propEq } from 'ramda'
-import { compact } from 'ramda-adjunct'
+import { T as _, map } from 'ramda'
 import type { JsonValue } from 'src/database/schema.ts'
 import type { Value } from 'src/resolvers/value-resolver.ts'
 import {
-	type Context,
 	type ListPath,
 	NodeType,
 	type ProjectId,
 	type TreeNode
 } from 'src/types.ts'
-import { WhereObjectScalar } from 'src/utils/where-scalar.ts'
 import { TypeContext } from './type-context.ts'
-
-type Fields<S, C, A> = Record<string, GraphQLFieldConfig<S, C, A>>
 
 const hasValue = <T>(value: T | null): value is T => value != null
 
@@ -50,24 +43,11 @@ const isMediaype = hasValue<MediaType>
 const isChoiceType = hasValue<ChoiceType>
 const isBooleanType = hasValue<BooleanType>
 
-const scalarForNode = match<[TreeNode, TypeContext], GraphQLOutputType | null>(
-	caseOf([{ type: NodeType.string }], GraphQLString),
+const scalarForNode = match<[TreeNode], GraphQLOutputType>(
 	caseOf([{ type: NodeType.boolean }], GraphQLBoolean),
 	caseOf([{ type: NodeType.number }], GraphQLFloat),
-	caseOf([{ type: NodeType.article }], GraphQLString),
 	caseOf([{ type: NodeType.date }], GraphQLDate),
-	caseOf([{ type: NodeType.media }], GraphQLString),
-	caseOf([{ type: NodeType.choice }], GraphQLString),
-	caseOf([{ type: NodeType.color }], GraphQLString),
-	caseOf(
-		[{ type: NodeType.object }],
-		({ name }, { types }) => types.get(name)?.type
-	),
-	caseOf(
-		[{ type: NodeType.list }],
-		({ name }, { types }) => types.get(name)?.type
-	),
-	caseOf([_], null)
+	caseOf([_], GraphQLString)
 )
 
 const jsonForNode = match<[TreeNode, any], JsonValue>(
@@ -78,106 +58,68 @@ const jsonForNode = match<[TreeNode, any], JsonValue>(
 	caseOf([{ type: NodeType.media }, isMediaype], (_, v) => v.name),
 	caseOf([{ type: NodeType.choice }, isChoiceType], (_, v) => v.selected),
 	caseOf([{ type: NodeType.boolean }, isBooleanType], (_, v) => v.state),
-	caseOf([_, _], null)
+	caseOf([_, _], () => null)
 )
 
-type Field<S = any, A = any> = GraphQLFieldConfig<S, Context, A> & {
-	name: string
-}
-
-function fieldFor<S, A>(
-	node: TreeNode,
-	context: TypeContext,
-	path: ListPath = []
-): Field<S, A> | null {
-	const type = scalarForNode(node, context) ?? context.types.get(node.id)?.type
-	const required = context.isRequired(node.id)
-	return type
-		? {
-				name: node.name,
-				type: required ? new GraphQLNonNull(type) : type,
-				resolve: async () => {
-					const value = await context.getValue(node, path)
-					return jsonForNode(node, value)
-				}
-			}
-		: null
-}
-
-function typeFromNode<S, A>(
-	node: TreeNode,
-	context: TypeContext
-): GraphQLObjectType | GraphQLList<GraphQLObjectType> {
-	const fields: (
-		n: TreeNode[]
-	) => ThunkObjMap<GraphQLFieldConfig<S, Context, A>> = pipe(
-		xs => xs.map(n => fieldFor(n, context)),
-		compact,
-		mapBy(({ name }: Field) => name),
-		Object.fromEntries
-	)
-
-	const type = new GraphQLObjectType({
-		name: node.name,
-		fields: fields(node.nodes)
-	})
-	const objectType = node.type === NodeType.list ? new GraphQLList(type) : type
-	context.types.set(node.id, {
-		type: objectType,
-		node
-	})
-	return objectType
-}
-
-function resolveList<S>(
+const resolveValue = (
 	node: TreeNode,
 	context: TypeContext,
 	path: ListPath
-): Field {
-	const innerType = context.types.get(node.id)?.type as GraphQLObjectType
+): GraphQLFieldConfig<any, any> => ({
+	type: scalarForNode(node),
+	resolve: () =>
+		context.getValue(node, path).then(val => jsonForNode(node, val))
+})
+
+const resolveList = (
+	node: TreeNode,
+	context: TypeContext,
+	path: ListPath
+): GraphQLFieldConfig<any, any> => ({
+	type: new GraphQLList(resolveObj(node, context, path).type),
+	resolve(a, b, c, d) {
+		return context.listItems(node.id, path).then(
+			map((item: Value) => {
+				const conf = resolveObj(node, context, [...path, item.id])
+				return conf.resolve?.(a, b, c, d)
+			})
+		)
+	}
+})
+
+const resolveObj = (
+	node: TreeNode,
+	context: TypeContext,
+	path: ListPath
+): GraphQLFieldConfig<any, any> => {
+	const fields = node.nodes.map(
+		n => [n.name, fieldForNode(n, context, path)] as const
+	)
+
 	return {
-		name: node.name,
-		type: new GraphQLList(innerType),
-		args: {
-			whereEq: { type: WhereObjectScalar },
-			whereNotEq: { type: WhereObjectScalar },
-			limit: { type: GraphQLFloat }
-		},
-		resolve: (...args) =>
-			context.listItems(node.id, path).then(
-				map((item: Value) => {
-					const res = resolveObject(node, context, [...path, item.id])
-					console.log(item.id, res)
-					return res.resolve?.(...args)
-				})
+		type: new GraphQLObjectType({
+			name: node.name,
+			fields: Object.fromEntries(fields)
+		}),
+		resolve: (a, b, c, d) =>
+			fields.reduce(
+				(acc, [name, field]) => ({
+					...acc,
+					[name]: field.resolve?.(a, b, c, d)
+				}),
+				{}
 			)
 	}
 }
 
-function resolveObject(
-	node: TreeNode,
-	context: TypeContext,
-	path: ListPath
-): Field {
-	const type = context.types.get(node.id)?.type as GraphQLObjectType
-	return {
-		name: node.name,
-		type,
-		resolve: () => queryForNode(node, context, path)
-	}
-}
-
-function queryForNode<S>(
-	node: TreeNode,
-	context: TypeContext,
-	path: ListPath = []
-): Field | null {
-	return match<[TreeNode, TypeContext, ListPath], Field | null>(
-		caseOf([{ type: NodeType.list }, _, _], resolveList),
-		caseOf([{ type: NodeType.object }, _, _], resolveObject),
-		caseOf([_, _, _], () => null)
-	)(node, context, path)
-}
+const fieldForNode = match<
+	[TreeNode, TypeContext, ListPath],
+	GraphQLFieldConfig<any, any>
+>(
+	caseOf([{ type: NodeType.list }, _, _], resolveList),
+	caseOf([{ type: NodeType.object }, _, _], resolveObj),
+	caseOf([_, _, _], resolveValue)
+)
 
 @injectable()
 export class SchemaService {
@@ -188,23 +130,13 @@ export class SchemaService {
 		projectId: ProjectId
 	): Promise<GraphQLSchemaWithContext<YogaInitialContext>> {
 		await this.context.init(projectId)
-		const nodes = await this.context.getNestingNodes()
-		const types = nodes.map(node => typeFromNode(node, this.context))
-		const fields = nodes
-			.filter(propEq(1, 'depth'))
-			.map(n => queryForNode(n, this.context))
-			.filter(isNotNil)
-
-		console.log(
-			'fields',
-			mapBy(({ name }: Field) => name, fields)
-		)
+		const root = await this.context.getRoot()
+		const query = resolveObj(root, this.context, [])
 
 		const schema = new GraphQLSchema({
-			types: types as any,
 			query: new GraphQLObjectType({
 				name: 'Query',
-				fields: mapBy(({ name }: Field) => name, fields) as any
+				fields: (query.type as GraphQLObjectType).getFields() as any
 			})
 		})
 
