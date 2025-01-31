@@ -70,7 +70,8 @@ interface ResolvedNode {
 // Helper to compute path from parent chain
 const pathFor = (obj?: ResolvedNode): ListPath => {
 	if (!obj) return []
-	return [...pathFor(obj.parent), obj.id].filter(Boolean) as ListPath
+	const path = [...pathFor(obj.parent), obj.id].filter(Boolean)
+	return path as ListPath
 }
 
 const resolveValue = (
@@ -93,7 +94,7 @@ const resolveList = (
 	return {
 		type: new GraphQLList(conf.type),
 		resolve: async parent => {
-			const items = await context.listItems(node.id, parent)
+			const items = await context.listItems(node.id, pathFor(parent))
 			return items.map(item => ({ id: item.id, parent }))
 		}
 	}
