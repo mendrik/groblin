@@ -23,7 +23,7 @@ import {
 import { GraphQLDate } from 'graphql-scalars'
 import type { GraphQLSchemaWithContext, YogaInitialContext } from 'graphql-yoga'
 import { inject, injectable } from 'inversify'
-import { T as _ } from 'ramda'
+import { T as _, isNotNil } from 'ramda'
 import type { JsonValue } from 'src/database/schema.ts'
 import {
 	type ListPath,
@@ -70,8 +70,7 @@ interface ResolvedNode {
 // Helper to compute path from parent chain
 const pathFor = (obj?: ResolvedNode): ListPath => {
 	if (!obj) return []
-	const path = [...pathFor(obj.parent), obj.id].filter(Boolean)
-	return path as ListPath
+	return [...pathFor(obj.parent), obj.id].filter(isNotNil)
 }
 
 const resolveValue = (
@@ -107,12 +106,11 @@ const resolveObj = (
 	const fields = node.nodes.map(
 		n => [n.name, fieldForNode(n, context)] as const
 	)
-	const obj = new GraphQLObjectType({
-		name: node.name,
-		fields: Object.fromEntries(fields)
-	})
 	return {
-		type: obj,
+		type: new GraphQLObjectType({
+			name: node.name,
+			fields: Object.fromEntries(fields)
+		}),
 		resolve: parent => ({ parent })
 	}
 }
