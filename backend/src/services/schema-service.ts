@@ -63,14 +63,14 @@ const jsonForNode = match<[TreeNode, any], JsonValue>(
 )
 
 interface ResolvedNode {
-	pathId?: number
+	id?: number
 	parent?: ResolvedNode // Parent reference
 }
 
 // Helper to compute path from parent chain
 const pathFor = (obj?: ResolvedNode): ListPath => {
 	if (!obj) return []
-	return obj.pathId ? [...pathFor(obj.parent), obj.pathId] : pathFor(obj.parent)
+	return [...pathFor(obj.parent), obj.id].filter(Boolean) as ListPath
 }
 
 const resolveValue = (
@@ -78,38 +78,33 @@ const resolveValue = (
 	context: TypeContext
 ): GraphQLFieldConfig<any, any> => ({
 	type: scalarForNode(node),
-	resolve: parent => {
+	resolve: async parent => {
 		const path = pathFor(parent)
-		return context.getValue(node, path).then(val => jsonForNode(node, val))
+		const val = await context.getValue(node, path)
+		return jsonForNode(node, val)
 	}
 })
 
 const resolveList = (
 	node: TreeNode,
-	context: TypeContext,
-	path: ListPath
+	context: TypeContext
 ): GraphQLFieldConfig<any, any> => {
-	const conf = resolveObj(node, context, path)
+	const conf = resolveObj(node, context)
 	return {
 		type: new GraphQLList(conf.type),
 		resolve: async parent => {
 			const items = await context.listItems(node.id, parent)
-			return items.map(item => ({
-				...item,
-				pathId: item.id,
-				parent
-			}))
+			return items.map(item => ({ id: item.id, parent }))
 		}
 	}
 }
 
 const resolveObj = (
 	node: TreeNode,
-	context: TypeContext,
-	path: ListPath
+	context: TypeContext
 ): GraphQLFieldConfig<any, any> => {
 	const fields = node.nodes.map(
-		n => [n.name, fieldForNode(n, context, path)] as const
+		n => [n.name, fieldForNode(n, context)] as const
 	)
 	const obj = new GraphQLObjectType({
 		name: node.name,
@@ -117,20 +112,17 @@ const resolveObj = (
 	})
 	return {
 		type: obj,
-		resolve: parent => ({
-			parent,
-			pathId: null
-		})
+		resolve: parent => ({ parent })
 	}
 }
 
 const fieldForNode = match<
-	[TreeNode, TypeContext, ListPath],
+	[TreeNode, TypeContext],
 	GraphQLFieldConfig<any, any>
 >(
-	caseOf([{ type: NodeType.list }, _, _], resolveList),
-	caseOf([{ type: NodeType.object }, _, _], resolveObj),
-	caseOf([_, _, _], resolveValue)
+	caseOf([{ type: NodeType.list }, _], resolveList),
+	caseOf([{ type: NodeType.object }, _], resolveObj),
+	caseOf([_, _], resolveValue)
 )
 
 @injectable()
@@ -143,7 +135,7 @@ export class SchemaService {
 	): Promise<GraphQLSchemaWithContext<YogaInitialContext>> {
 		await this.context.init(projectId)
 		const root = await this.context.getRoot()
-		const query = resolveObj(root, this.context, [])
+		const query = resolveObj(root, this.context)
 
 		const schema = new GraphQLSchema({
 			query: query.type as GraphQLObjectType
