@@ -7,12 +7,12 @@ import type {
 	NumberType,
 	StringType
 } from '@shared/json-value-types.ts'
-import { awaitObj } from '@shared/utils/await-obj.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
 import {
 	GraphQLBoolean,
 	type GraphQLFieldConfig,
 	GraphQLFloat,
+	GraphQLInt,
 	GraphQLList,
 	GraphQLObjectType,
 	type GraphQLOutputType,
@@ -23,9 +23,8 @@ import {
 import { GraphQLDate } from 'graphql-scalars'
 import type { GraphQLSchemaWithContext, YogaInitialContext } from 'graphql-yoga'
 import { inject, injectable } from 'inversify'
-import { T as _, assoc, map, tap } from 'ramda'
+import { T as _ } from 'ramda'
 import type { JsonValue } from 'src/database/schema.ts'
-import type { Value } from 'src/resolvers/value-resolver.ts'
 import {
 	type ListPath,
 	NodeType,
@@ -47,6 +46,7 @@ const isBooleanType = hasValue<BooleanType>
 const scalarForNode = match<[TreeNode], GraphQLOutputType>(
 	caseOf([{ type: NodeType.boolean }], GraphQLBoolean),
 	caseOf([{ type: NodeType.number }], GraphQLFloat),
+	caseOf([{ type: NodeType.color }], new GraphQLList(GraphQLInt)),
 	caseOf([{ type: NodeType.date }], GraphQLDate),
 	caseOf([_], GraphQLString)
 )
@@ -62,14 +62,24 @@ const jsonForNode = match<[TreeNode, any], JsonValue>(
 	caseOf([_, _], () => null)
 )
 
+interface ResolvedNode {
+	pathId?: number
+	parent?: ResolvedNode // Parent reference
+}
+
+// Helper to compute path from parent chain
+const pathFor = (obj?: ResolvedNode): ListPath => {
+	if (!obj) return []
+	return obj.pathId ? [...pathFor(obj.parent), obj.pathId] : pathFor(obj.parent)
+}
+
 const resolveValue = (
 	node: TreeNode,
-	context: TypeContext,
-	path: ListPath
+	context: TypeContext
 ): GraphQLFieldConfig<any, any> => ({
 	type: scalarForNode(node),
-	resolve: () => {
-		console.log('path', path)
+	resolve: parent => {
+		const path = pathFor(parent)
 		return context.getValue(node, path).then(val => jsonForNode(node, val))
 	}
 })
@@ -82,16 +92,13 @@ const resolveList = (
 	const conf = resolveObj(node, context, path)
 	return {
 		type: new GraphQLList(conf.type),
-		resolve: (a, b, c, d) => {
-			context
-				.listItems(node.id, a)
-				.then(
-					map((item: Value) =>
-						resolveObj(node, context, [...path, item.id]).resolve?.(a, b, c, d)
-					)
-				)
-				.then(Promise.all.bind(Promise))
-				.then(tap(console.table))
+		resolve: async parent => {
+			const items = await context.listItems(node.id, parent)
+			return items.map(item => ({
+				...item,
+				pathId: item.id,
+				parent
+			}))
 		}
 	}
 }
@@ -110,13 +117,10 @@ const resolveObj = (
 	})
 	return {
 		type: obj,
-		resolve: (a, b, c, d) =>
-			awaitObj(
-				fields.reduce(
-					(acc, [name, field]) => assoc(name, field.resolve?.(a, b, c, d), acc),
-					{}
-				)
-			)
+		resolve: parent => ({
+			parent,
+			pathId: null
+		})
 	}
 }
 

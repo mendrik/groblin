@@ -12,7 +12,7 @@ import {
 	type NodeSettings,
 	NodeSettingsResolver
 } from 'src/resolvers/node-settings-resolver.ts'
-import { ValueResolver } from 'src/resolvers/value-resolver.ts'
+import { type Value, ValueResolver } from 'src/resolvers/value-resolver.ts'
 import type { ListPath, ProjectId, TreeNode } from 'src/types.ts'
 
 type NodeGraphQLType = {
@@ -44,7 +44,7 @@ export class TypeContext {
 			.then(mapBy(prop('node_id')))
 	}
 
-	async listItems(nodeId: number, path?: ListPath) {
+	async listItems(nodeId: number, path?: ListPath): Promise<Value[]> {
 		return this.db
 			.selectFrom('values')
 			.selectAll()
