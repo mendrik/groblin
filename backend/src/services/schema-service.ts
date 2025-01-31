@@ -23,10 +23,15 @@ import {
 import { GraphQLDate } from 'graphql-scalars'
 import type { GraphQLSchemaWithContext, YogaInitialContext } from 'graphql-yoga'
 import { inject, injectable } from 'inversify'
-import { T as _, append, assoc, map } from 'ramda'
+import { T as _, assoc, map, tap } from 'ramda'
 import type { JsonValue } from 'src/database/schema.ts'
 import type { Value } from 'src/resolvers/value-resolver.ts'
-import { NodeType, type ProjectId, type TreeNode } from 'src/types.ts'
+import {
+	type ListPath,
+	NodeType,
+	type ProjectId,
+	type TreeNode
+} from 'src/types.ts'
 import { TypeContext } from './type-context.ts'
 
 const hasValue = <T>(value: T | null): value is T => value != null
@@ -59,47 +64,56 @@ const jsonForNode = match<[TreeNode, any], JsonValue>(
 
 const resolveValue = (
 	node: TreeNode,
-	context: TypeContext
+	context: TypeContext,
+	path: ListPath
 ): GraphQLFieldConfig<any, any> => ({
 	type: scalarForNode(node),
-	resolve: path =>
-		context.getValue(node, path).then(val => jsonForNode(node, val))
+	resolve: () => {
+		console.log('path', path)
+		return context.getValue(node, path).then(val => jsonForNode(node, val))
+	}
 })
 
 const resolveList = (
 	node: TreeNode,
-	context: TypeContext
+	context: TypeContext,
+	path: ListPath
 ): GraphQLFieldConfig<any, any> => {
-	const conf = resolveObj(node, context)
+	const conf = resolveObj(node, context, path)
 	return {
 		type: new GraphQLList(conf.type),
-		resolve: (path, b, c, d) =>
+		resolve: (a, b, c, d) => {
 			context
-				.listItems(node.id, path)
+				.listItems(node.id, a)
 				.then(
-					map((item: Value) => conf.resolve?.(append(item.id, path), b, c, d))
+					map((item: Value) =>
+						resolveObj(node, context, [...path, item.id]).resolve?.(a, b, c, d)
+					)
 				)
 				.then(Promise.all.bind(Promise))
+				.then(tap(console.table))
+		}
 	}
 }
 
 const resolveObj = (
 	node: TreeNode,
-	context: TypeContext
+	context: TypeContext,
+	path: ListPath
 ): GraphQLFieldConfig<any, any> => {
 	const fields = node.nodes.map(
-		n => [n.name, fieldForNode(n, context)] as const
+		n => [n.name, fieldForNode(n, context, path)] as const
 	)
+	const obj = new GraphQLObjectType({
+		name: node.name,
+		fields: Object.fromEntries(fields)
+	})
 	return {
-		type: new GraphQLObjectType({
-			name: node.name,
-			fields: Object.fromEntries(fields)
-		}),
-		resolve: (path, b, c, d) =>
+		type: obj,
+		resolve: (a, b, c, d) =>
 			awaitObj(
 				fields.reduce(
-					(acc, [name, field]) =>
-						assoc(name, field.resolve?.(path, b, c, d), acc),
+					(acc, [name, field]) => assoc(name, field.resolve?.(a, b, c, d), acc),
 					{}
 				)
 			)
@@ -107,12 +121,12 @@ const resolveObj = (
 }
 
 const fieldForNode = match<
-	[TreeNode, TypeContext],
+	[TreeNode, TypeContext, ListPath],
 	GraphQLFieldConfig<any, any>
 >(
-	caseOf([{ type: NodeType.list }, _], resolveList),
-	caseOf([{ type: NodeType.object }, _], resolveObj),
-	caseOf([_, _], resolveValue)
+	caseOf([{ type: NodeType.list }, _, _], resolveList),
+	caseOf([{ type: NodeType.object }, _, _], resolveObj),
+	caseOf([_, _, _], resolveValue)
 )
 
 @injectable()
@@ -125,14 +139,13 @@ export class SchemaService {
 	): Promise<GraphQLSchemaWithContext<YogaInitialContext>> {
 		await this.context.init(projectId)
 		const root = await this.context.getRoot()
-		const query = resolveObj(root, this.context)
+		const query = resolveObj(root, this.context, [])
 
 		const schema = new GraphQLSchema({
 			query: query.type as GraphQLObjectType
 		})
 
 		console.log(printSchema(schema))
-
 		return schema
 	}
 }
