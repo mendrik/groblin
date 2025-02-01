@@ -26,7 +26,7 @@ type NodeGraphQLType = {
 }
 
 @injectable()
-export class TypeContext {
+export class SchemaContext {
 	@inject(Kysely<DB>)
 	private db: Kysely<DB>
 
@@ -118,7 +118,7 @@ export class TypeContext {
 		return listToTree('id', 'parent_id', 'nodes')(nodes) as TreeNode
 	}
 
-	getEnum(nodeId: number): GraphQLEnumType | undefined {
+	getEnumType(nodeId: number): GraphQLEnumType | undefined {
 		return this._enums.get(nodeId)
 	}
 

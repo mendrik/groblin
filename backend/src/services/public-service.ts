@@ -17,8 +17,7 @@ import {
 	GraphQLObjectType,
 	type GraphQLOutputType,
 	GraphQLSchema,
-	GraphQLString,
-	printSchema
+	GraphQLString
 } from 'graphql'
 import { GraphQLDate } from 'graphql-scalars'
 import type { GraphQLSchemaWithContext, YogaInitialContext } from 'graphql-yoga'
@@ -31,7 +30,7 @@ import {
 	type ProjectId,
 	type TreeNode
 } from 'src/types.ts'
-import { TypeContext } from './type-context.ts'
+import { SchemaContext } from './schema-context.ts'
 
 const hasValue = <T>(value: T | null): value is T => value != null
 
@@ -43,14 +42,14 @@ const isMediaype = hasValue<MediaType>
 const isChoiceType = hasValue<ChoiceType>
 const isBooleanType = hasValue<BooleanType>
 
-const scalarForNode = match<[TreeNode, TypeContext], GraphQLOutputType>(
+const scalarForNode = match<[TreeNode, SchemaContext], GraphQLOutputType>(
 	caseOf([{ type: NodeType.boolean }, _], GraphQLBoolean),
 	caseOf([{ type: NodeType.number }, _], GraphQLFloat),
 	caseOf([{ type: NodeType.color }, _], new GraphQLList(GraphQLInt)),
 	caseOf([{ type: NodeType.date }, _], GraphQLDate),
 	caseOf(
 		[{ type: NodeType.choice }, _],
-		(node, c) => c.getEnum(node.id) ?? GraphQLString
+		(node, c) => c.getEnumType(node.id) ?? GraphQLString
 	),
 	caseOf([_, _], GraphQLString)
 )
@@ -79,7 +78,7 @@ const pathFor = (obj?: ResolvedNode): ListPath => {
 
 const resolveValue = (
 	node: TreeNode,
-	context: TypeContext
+	context: SchemaContext
 ): GraphQLFieldConfig<any, any> => ({
 	type: scalarForNode(node, context),
 	resolve: async parent => {
@@ -91,7 +90,7 @@ const resolveValue = (
 
 const resolveList = (
 	node: TreeNode,
-	context: TypeContext
+	context: SchemaContext
 ): GraphQLFieldConfig<any, any> => {
 	const conf = resolveObj(node, context)
 	return {
@@ -105,7 +104,7 @@ const resolveList = (
 
 const resolveObj = (
 	node: TreeNode,
-	context: TypeContext
+	context: SchemaContext
 ): GraphQLFieldConfig<any, any> => {
 	const fields = node.nodes.map(
 		n => [n.name, fieldForNode(n, context)] as const
@@ -120,7 +119,7 @@ const resolveObj = (
 }
 
 const fieldForNode = match<
-	[TreeNode, TypeContext],
+	[TreeNode, SchemaContext],
 	GraphQLFieldConfig<any, any>
 >(
 	caseOf([{ type: NodeType.list }, _], resolveList),
@@ -129,9 +128,9 @@ const fieldForNode = match<
 )
 
 @injectable()
-export class SchemaService {
-	@inject(TypeContext)
-	context: TypeContext
+export class PublicService {
+	@inject(SchemaContext)
+	context: SchemaContext
 
 	async getSchema(
 		projectId: ProjectId
@@ -139,13 +138,10 @@ export class SchemaService {
 		await this.context.init(projectId)
 		const root = await this.context.getRoot()
 		const query = resolveObj(root, this.context)
-
 		const schema = new GraphQLSchema({
 			types: [...this.context.getEnums()],
 			query: query.type as GraphQLObjectType
 		})
-
-		console.log(printSchema(schema))
 		return schema
 	}
 }

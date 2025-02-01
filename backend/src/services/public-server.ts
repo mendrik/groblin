@@ -17,7 +17,7 @@ import type { DB } from 'src/database/schema.ts'
 import { Topic } from 'src/types.ts'
 import type { ProjectId } from 'src/types.ts'
 import type { PubSub } from 'type-graphql'
-import { SchemaService } from './schema-service.ts'
+import { PublicService } from './public-service.ts'
 
 const port = 4001
 
@@ -34,8 +34,8 @@ export class PublicServer {
 	@inject('PubSub')
 	private pubSub: PubSub
 
-	@inject(SchemaService)
-	private schemaService: SchemaService
+	@inject(PublicService)
+	private schemaService: PublicService
 
 	private server: Server<typeof IncomingMessage, typeof ServerResponse>
 

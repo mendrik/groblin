@@ -26,9 +26,9 @@ import { InternalServer } from './services/interal-server.ts'
 import { NodeSettingsService } from './services/node-settings-service.ts'
 import { ProjectService } from './services/project-service.ts'
 import { PublicServer } from './services/public-server.ts'
+import { PublicService } from './services/public-service.ts'
 import { S3Client } from './services/s3-client.ts'
-import { SchemaService } from './services/schema-service.ts'
-import { TypeContext } from './services/type-context.ts'
+import { SchemaContext } from './services/schema-context.ts'
 
 const pubSub = createPubSub()
 const container = new Container()
@@ -47,8 +47,8 @@ container.bind(IoResolver).toSelf()
 container.bind(S3Client).toSelf()
 container.bind(AuthChecker).toSelf()
 container.bind(EmailService).toSelf()
-container.bind(SchemaService).toSelf()
-container.bind(TypeContext).toSelf()
+container.bind(PublicService).toSelf()
+container.bind(SchemaContext).toSelf()
 container.bind(Kysely<DB>).toConstantValue(db)
 container.bind(ImageService).to(ImageService).inSingletonScope()
 container.bind(NodeSettingsService).to(NodeSettingsService).inSingletonScope()
