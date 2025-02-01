@@ -92,26 +92,32 @@ const resolveValue = (
 const resolveList = (
 	node: TreeNode,
 	context: TypeContext
-): GraphQLFieldConfig<any, any> => ({
-	type: new GraphQLList(resolveObj(node, context).type),
-	resolve: async parent => {
-		const items = await context.listItems(node.id, pathFor(parent))
-		return items.map(item => ({ id: item.id, parent }))
+): GraphQLFieldConfig<any, any> => {
+	const conf = resolveObj(node, context)
+	return {
+		type: new GraphQLList(conf.type),
+		resolve: async parent => {
+			const items = await context.listItems(node.id, pathFor(parent))
+			return items.map(item => ({ id: item.id, parent }))
+		}
 	}
-})
+}
 
 const resolveObj = (
 	node: TreeNode,
 	context: TypeContext
-): GraphQLFieldConfig<any, any> => ({
-	type: new GraphQLObjectType({
-		name: node.name,
-		fields: Object.fromEntries(
-			node.nodes.map(n => [n.name, fieldForNode(n, context)] as const)
-		)
-	}),
-	resolve: parent => parent
-})
+): GraphQLFieldConfig<any, any> => {
+	const fields = node.nodes.map(
+		n => [n.name, fieldForNode(n, context)] as const
+	)
+	return {
+		type: new GraphQLObjectType({
+			name: node.name,
+			fields: Object.fromEntries(fields)
+		}),
+		resolve: parent => ({ parent })
+	}
+}
 
 const fieldForNode = match<
 	[TreeNode, TypeContext],
