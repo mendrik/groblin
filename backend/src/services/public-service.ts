@@ -20,7 +20,6 @@ import {
 	GraphQLString
 } from 'graphql'
 import { GraphQLDate } from 'graphql-scalars'
-import type { GraphQLSchemaWithContext, YogaInitialContext } from 'graphql-yoga'
 import { inject, injectable } from 'inversify'
 import { T as _, isNotNil } from 'ramda'
 import type { JsonValue } from 'src/database/schema.ts'
@@ -132,9 +131,7 @@ export class PublicService {
 	@inject(SchemaContext)
 	context: SchemaContext
 
-	async getSchema(
-		projectId: ProjectId
-	): Promise<GraphQLSchemaWithContext<YogaInitialContext>> {
+	async getSchema(projectId: ProjectId): Promise<GraphQLSchema> {
 		await this.context.init(projectId)
 		const root = await this.context.getRoot()
 		const query = resolveObj(root, this.context)

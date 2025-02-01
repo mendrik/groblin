@@ -6,11 +6,8 @@ import {
 } from 'node:http'
 import { assertExists } from '@shared/asserts.ts'
 import { cyan, lightGreen, yellow } from 'ansicolor'
-import {
-	type GraphQLSchemaWithContext,
-	type YogaInitialContext,
-	createYoga
-} from 'graphql-yoga'
+import type { GraphQLSchema } from 'graphql'
+import { createYoga } from 'graphql-yoga'
 import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
 import type { DB } from 'src/database/schema.ts'
@@ -23,10 +20,7 @@ const port = 4001
 
 @injectable()
 export class PublicServer {
-	private schemaCache: Map<
-		ProjectId,
-		GraphQLSchemaWithContext<YogaInitialContext>
-	> = new Map()
+	private schemaCache: Map<ProjectId, GraphQLSchema> = new Map()
 
 	@inject(Kysely)
 	private db: Kysely<DB>
@@ -69,9 +63,7 @@ export class PublicServer {
 		}
 	}
 
-	private async schema(
-		request: YogaInitialContext['request']
-	): Promise<GraphQLSchemaWithContext<YogaInitialContext>> {
+	private async schema(request: Request): Promise<GraphQLSchema> {
 		const apiKey = request.headers.get('x-api-key')
 		assertExists(apiKey, 'API key is required')
 		const { project_id } = await this.db
