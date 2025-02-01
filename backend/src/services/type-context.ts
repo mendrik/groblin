@@ -1,10 +1,10 @@
 import { listToTree } from '@shared/utils/list-to-tree.ts'
 import { mapBy } from '@shared/utils/map-by.ts'
-import type { GraphQLOutputType } from 'graphql'
+import { GraphQLEnumType, type GraphQLOutputType } from 'graphql'
 import { inject, injectable } from 'inversify'
 import { Kysely, sql } from 'kysely'
 import { Maybe, MaybeAsync } from 'purify-ts'
-import { prop, propOr } from 'ramda'
+import { assoc, prop, propOr } from 'ramda'
 import { isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
 import type { DB, JsonValue } from 'src/database/schema.ts'
 import { ListResolver } from 'src/resolvers/list-resolver.ts'
@@ -13,7 +13,12 @@ import {
 	NodeSettingsResolver
 } from 'src/resolvers/node-settings-resolver.ts'
 import { type Value, ValueResolver } from 'src/resolvers/value-resolver.ts'
-import type { ListPath, ProjectId, TreeNode } from 'src/types.ts'
+import {
+	type ListPath,
+	NodeType,
+	type ProjectId,
+	type TreeNode
+} from 'src/types.ts'
 
 type NodeGraphQLType = {
 	type: GraphQLOutputType
@@ -36,12 +41,14 @@ export class TypeContext {
 
 	projectId: ProjectId
 	_settings: Map<number, NodeSettings>
+	_enums: Map<number, GraphQLEnumType>
 
 	async init(projectId: ProjectId) {
 		this.projectId = projectId
 		this._settings = await this.nodeSettingsResolver
 			.settings(projectId)
 			.then(mapBy(prop('node_id')))
+		this._enums = await this.initEnums()
 	}
 
 	async listItems(nodeId: number, path?: ListPath): Promise<Value[]> {
@@ -109,5 +116,45 @@ export class TypeContext {
 			.orderBy('order', 'desc')
 			.execute()
 		return listToTree('id', 'parent_id', 'nodes')(nodes) as TreeNode
+	}
+
+	getEnum(nodeId: number): GraphQLEnumType | undefined {
+		return this._enums.get(nodeId)
+	}
+
+	getEnums(): GraphQLEnumType[] {
+		return Array.from(this._enums.values())
+	}
+
+	async initEnums() {
+		const enums = await this.db
+			.selectFrom('node_settings')
+			.innerJoin('node', 'node.id', 'node_settings.node_id')
+			.where('node_settings.project_id', '=', this.projectId)
+			.where('node.type', '=', NodeType.choice)
+			.select([
+				'name',
+				'node_id',
+				sql<string[]>`ARRAY(
+					SELECT jsonb_array_elements_text("node_settings"."settings"->'choices')
+				)`.as('choices')
+			])
+			.execute()
+
+		return enums
+			.filter(({ choices }) => choices.length > 0)
+			.reduce((acc, { node_id, choices, name }) => {
+				acc.set(
+					node_id,
+					new GraphQLEnumType({
+						name,
+						values: choices.reduce(
+							(acc, choice) => assoc(choice, { value: choice }, acc),
+							{}
+						)
+					})
+				)
+				return acc
+			}, new Map<number, GraphQLEnumType>())
 	}
 }

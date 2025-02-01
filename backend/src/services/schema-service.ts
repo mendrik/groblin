@@ -43,12 +43,16 @@ const isMediaype = hasValue<MediaType>
 const isChoiceType = hasValue<ChoiceType>
 const isBooleanType = hasValue<BooleanType>
 
-const scalarForNode = match<[TreeNode], GraphQLOutputType>(
-	caseOf([{ type: NodeType.boolean }], GraphQLBoolean),
-	caseOf([{ type: NodeType.number }], GraphQLFloat),
-	caseOf([{ type: NodeType.color }], new GraphQLList(GraphQLInt)),
-	caseOf([{ type: NodeType.date }], GraphQLDate),
-	caseOf([_], GraphQLString)
+const scalarForNode = match<[TreeNode, TypeContext], GraphQLOutputType>(
+	caseOf([{ type: NodeType.boolean }, _], GraphQLBoolean),
+	caseOf([{ type: NodeType.number }, _], GraphQLFloat),
+	caseOf([{ type: NodeType.color }, _], new GraphQLList(GraphQLInt)),
+	caseOf([{ type: NodeType.date }, _], GraphQLDate),
+	caseOf(
+		[{ type: NodeType.choice }, _],
+		(node, c) => c.getEnum(node.id) ?? GraphQLString
+	),
+	caseOf([_, _], GraphQLString)
 )
 
 const jsonForNode = match<[TreeNode, any], JsonValue>(
@@ -77,7 +81,7 @@ const resolveValue = (
 	node: TreeNode,
 	context: TypeContext
 ): GraphQLFieldConfig<any, any> => ({
-	type: scalarForNode(node),
+	type: scalarForNode(node, context),
 	resolve: async parent => {
 		const path = pathFor(parent)
 		const val = await context.getValue(node, path)
@@ -88,32 +92,26 @@ const resolveValue = (
 const resolveList = (
 	node: TreeNode,
 	context: TypeContext
-): GraphQLFieldConfig<any, any> => {
-	const conf = resolveObj(node, context)
-	return {
-		type: new GraphQLList(conf.type),
-		resolve: async parent => {
-			const items = await context.listItems(node.id, pathFor(parent))
-			return items.map(item => ({ id: item.id, parent }))
-		}
+): GraphQLFieldConfig<any, any> => ({
+	type: new GraphQLList(resolveObj(node, context).type),
+	resolve: async parent => {
+		const items = await context.listItems(node.id, pathFor(parent))
+		return items.map(item => ({ id: item.id, parent }))
 	}
-}
+})
 
 const resolveObj = (
 	node: TreeNode,
 	context: TypeContext
-): GraphQLFieldConfig<any, any> => {
-	const fields = node.nodes.map(
-		n => [n.name, fieldForNode(n, context)] as const
-	)
-	return {
-		type: new GraphQLObjectType({
-			name: node.name,
-			fields: Object.fromEntries(fields)
-		}),
-		resolve: parent => ({ parent })
-	}
-}
+): GraphQLFieldConfig<any, any> => ({
+	type: new GraphQLObjectType({
+		name: node.name,
+		fields: Object.fromEntries(
+			node.nodes.map(n => [n.name, fieldForNode(n, context)] as const)
+		)
+	}),
+	resolve: parent => parent
+})
 
 const fieldForNode = match<
 	[TreeNode, TypeContext],
@@ -137,6 +135,7 @@ export class SchemaService {
 		const query = resolveObj(root, this.context)
 
 		const schema = new GraphQLSchema({
+			types: [...this.context.getEnums()],
 			query: query.type as GraphQLObjectType
 		})
 
