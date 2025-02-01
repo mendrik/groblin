@@ -13,4 +13,5 @@ export type DateType = { date: string | Date }
 export type ColorType = { rgba: [number, number, number, number?] }
 export type ChoiceType = { selected: string }
 export type BooleanType = { state: boolean }
+export type ArticleType = { content: string }
 export type ListType = { name: string }

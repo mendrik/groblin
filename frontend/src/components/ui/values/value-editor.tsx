@@ -24,6 +24,7 @@ import { StringEditor } from './string-editor'
 
 import './value-editor.css'
 import { $nodeSettingsMap } from '@/state/node-settings'
+import { ArticleEditor } from './article-editor'
 import { ChoiceEditor } from './choice-editor'
 import { MediaEditor } from './media-editor'
 
@@ -78,6 +79,7 @@ const matcher = match<Args, ValueEditor<any> | null>(
 	caseOf([{ type: NodeType.Date }, _], () => DateEditor),
 	caseOf([{ type: NodeType.Media }, _], () => MediaEditor),
 	caseOf([{ type: NodeType.Choice }, _], () => ChoiceEditor),
+	caseOf([{ type: NodeType.Article }, _], () => ArticleEditor),
 	caseOf([_, _], () => null)
 )
 
