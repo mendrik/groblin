@@ -1,0 +1,3 @@
+.wmde-markdown-color {
+    --color-canvas-default: hsl(var(--background));
+}
