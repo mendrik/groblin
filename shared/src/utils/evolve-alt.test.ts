@@ -2,8 +2,8 @@ import { always, inc, isNil, map, pipe, prop, when } from 'ramda'
 import { expectType } from 'tsd'
 // Import the necessary functions from Vitest
 import { describe, expect, it } from 'vitest'
-import { awaitObj } from './await-obj'
-import { evolveAlt } from './evolve-alt' // Adjust the import path accordingly
+import { awaitObj } from './await-obj.ts'
+import { evolveAlt } from './evolve-alt.ts' // Adjust the import path accordingly
 
 describe('evolveAlt', () => {
 	it('should transform existing properties correctly', () => {
