@@ -10,7 +10,10 @@ export default defineConfig({
 		tsconfigPaths(),
 		react({
 			babel: {
-				plugins: [['module:@preact/signals-react-transform']]
+				plugins: [
+					['module:@preact/signals-react-transform']
+					//		['babel-plugin-react-compiler', { transform: 'preact' }]
+				]
 			}
 		})
 	] as ViteUserConfig['plugins'],

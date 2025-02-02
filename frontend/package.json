@@ -42,6 +42,7 @@
 		"@radix-ui/react-tooltip": "1.1.7",
 		"@radix-ui/react-visually-hidden": "1.1.1",
 		"@uiw/react-md-editor": "^4.0.5",
+		"babel-plugin-react-compiler": "19.0.0-beta-27714ef-20250124",
 		"chroma-js": "3.1.2",
 		"class-variance-authority": "0.7.1",
 		"clsx": "2.1.1",

@@ -86,3 +86,6 @@ flex
   container-type: inline-size;
 }
 
+.wmde-markdown {
+  --color-canvas-default: hsl(var(--background)) !important;
+}
