@@ -24,7 +24,7 @@
 	"dependencies": {
 		"@aws-sdk/client-s3": "3.740.0",
 		"@aws-sdk/s3-request-presigner": "3.740.0",
-		"@envelop/core": "^5.0.3",
+		"@envelop/core": "5.0.3",
 		"@graphql-tools/schema": "10.0.16",
 		"chroma-js": "3.1.2",
 		"date-fns": "4.1.0",
@@ -41,7 +41,7 @@
 		"pg": "8.13.1",
 		"purify-ts": "2.1.0",
 		"reflect-metadata": "0.2.2",
-		"sharp": "^0.33.5",
+		"sharp": "0.33.5",
 		"type-graphql": "2.0.0-rc.2",
 		"uuid": "11.0.5",
 		"ws": "8.18.0",

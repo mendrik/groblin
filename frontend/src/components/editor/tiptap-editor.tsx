@@ -2,7 +2,7 @@ import { caseOf, match } from '@shared/utils/match'
 import type { Level } from '@tiptap/extension-heading'
 import { type ChainedCommands, EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import { Bold, Italic, List, ListOrdered, X } from 'lucide-react' // Icons from Lucide (or any other icon library)
+import { Bold, Italic, X } from 'lucide-react' // Icons from Lucide (or any other icon library)
 import { invoker } from 'ramda'
 import { MicroIcon } from '../ui/random/micro-icon'
 import {
@@ -91,20 +91,18 @@ const TiptapEditor = () => {
 							<SelectItem value="h6">H6</SelectItem>
 							<SelectLabel>Miscellaneous</SelectLabel>
 							<SelectItem value="P">Paragraph</SelectItem>
+							<SelectItem value="P">Bullet list</SelectItem>
+							<SelectItem value="P">Ordered list</SelectItem>
+							<SelectItem value="P">Blockquote</SelectItem>
+							<SelectItem value="P">Code block</SelectItem>
 						</SelectGroup>
 					</SelectContent>
 				</Select>
 				<MicroIcon
 					size={20}
-					variant={variant('bulletList')}
-					onClick={() => command('toggleBulletList')}
-					icon={List}
-				/>
-				<MicroIcon
-					size={20}
-					variant={variant('orderedList')}
-					onClick={() => command('toggleOrderedList')}
-					icon={ListOrdered}
+					variant={variant('italic')}
+					icon={A}
+					onClick={() => command('toggleItalic')}
 				/>
 			</div>
 			<EditorContent editor={editor} />
