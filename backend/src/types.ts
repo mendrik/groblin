@@ -13,8 +13,10 @@ export enum NodeType {
 	choice = 'Choice',
 	date = 'Date',
 	color = 'Color',
-	media = 'Media',
-	reference = 'Reference'
+	media = 'Media'
+
+	// reference = 'Reference'
+	// tags = "Tags"
 }
 
 export enum Role {

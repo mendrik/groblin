@@ -143,7 +143,6 @@ enum NodeType {
   media
   number
   object
-  reference
   root
   string
 }

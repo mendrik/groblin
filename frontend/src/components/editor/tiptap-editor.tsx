@@ -2,7 +2,18 @@ import { caseOf, match } from '@shared/utils/match'
 import type { Level } from '@tiptap/extension-heading'
 import { type ChainedCommands, EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import { Bold, Italic, X } from 'lucide-react' // Icons from Lucide (or any other icon library)
+import {
+	Baseline,
+	Bold,
+	Image,
+	Italic,
+	PaintBucket,
+	Redo,
+	Table,
+	Underline,
+	Undo,
+	X
+} from 'lucide-react' // Icons from Lucide (or any other icon library)
 import { invoker } from 'ramda'
 import { MicroIcon } from '../ui/random/micro-icon'
 import {
@@ -62,6 +73,18 @@ const TiptapEditor = () => {
 					size={20}
 					variant="ghost"
 					onClick={() => command('unsetAllMarks')}
+					icon={Undo}
+				/>
+				<MicroIcon
+					size={20}
+					variant={variant('bold')}
+					onClick={() => command('toggleBold')}
+					icon={Redo}
+				/>
+				<MicroIcon
+					size={20}
+					variant="ghost"
+					onClick={() => command('unsetAllMarks')}
 					icon={X}
 				/>
 				<MicroIcon
@@ -76,23 +99,48 @@ const TiptapEditor = () => {
 					icon={Italic}
 					onClick={() => command('toggleItalic')}
 				/>
+				<MicroIcon
+					size={20}
+					variant={variant('italic')}
+					icon={Underline}
+					onClick={() => command('toggleItalic')}
+				/>
 				<Select onValueChange={applyMarkup} value="">
-					<SelectTrigger className="w-[180px] h-7">
-						<SelectValue placeholder="Select a fruit" />
+					<SelectTrigger className="w-fit h-7">
+						<SelectValue placeholder="Section" />
 					</SelectTrigger>
 					<SelectContent>
 						<SelectGroup>
-							<SelectLabel>Headings</SelectLabel>
+							<SelectLabel>Common</SelectLabel>
+							<SelectItem value="P">Paragraph</SelectItem>
 							<SelectItem value="h1">H1</SelectItem>
 							<SelectItem value="h2">H2</SelectItem>
-							<SelectItem value="h3">H3</SelectItem>
+							<SelectItem value="h2">H3</SelectItem>
+							<SelectItem value="P">Bullet list</SelectItem>
+							<SelectLabel>Miscellaneous</SelectLabel>
+							<SelectItem value="P">Ordered list</SelectItem>
+							<SelectItem value="P">Blockquote</SelectItem>
+							<SelectItem value="P">Code block</SelectItem>
+							<SelectLabel>Headings</SelectLabel>
 							<SelectItem value="h4">H4</SelectItem>
 							<SelectItem value="h5">H5</SelectItem>
 							<SelectItem value="h6">H6</SelectItem>
-							<SelectLabel>Miscellaneous</SelectLabel>
-							<SelectItem value="P">Paragraph</SelectItem>
-							<SelectItem value="P">Bullet list</SelectItem>
-							<SelectItem value="P">Ordered list</SelectItem>
+						</SelectGroup>
+					</SelectContent>
+				</Select>
+				<Select onValueChange={applyMarkup} value="">
+					<SelectTrigger className="w-fit h-7">
+						<SelectValue placeholder="Font" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectGroup>
+							<SelectLabel>Serif</SelectLabel>
+							<SelectItem value="h5">H5</SelectItem>
+							<SelectItem value="h6">H6</SelectItem>
+							<SelectLabel>Sans serif</SelectLabel>
+							<SelectItem value="P">Blockquote</SelectItem>
+							<SelectItem value="P">Code block</SelectItem>
+							<SelectLabel>Monospace</SelectLabel>
 							<SelectItem value="P">Blockquote</SelectItem>
 							<SelectItem value="P">Code block</SelectItem>
 						</SelectGroup>
@@ -101,7 +149,25 @@ const TiptapEditor = () => {
 				<MicroIcon
 					size={20}
 					variant={variant('italic')}
-					icon={A}
+					icon={Baseline}
+					onClick={() => command('toggleItalic')}
+				/>
+				<MicroIcon
+					size={20}
+					variant={variant('italic')}
+					icon={PaintBucket}
+					onClick={() => command('toggleItalic')}
+				/>
+				<MicroIcon
+					size={20}
+					variant={variant('italic')}
+					icon={Table}
+					onClick={() => command('toggleItalic')}
+				/>
+				<MicroIcon
+					size={20}
+					variant={variant('italic')}
+					icon={Image}
 					onClick={() => command('toggleItalic')}
 				/>
 			</div>
