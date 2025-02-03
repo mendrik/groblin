@@ -2,17 +2,17 @@ import { NodeType } from '@/gql/graphql'
 import { $focusedNode, type TreeNode, asNode } from '@/state/tree'
 import { caseOf, match } from '@shared/utils/match'
 import { T as _ } from 'ramda'
-import { type ReactNode, Suspense } from 'react'
+import { type ExoticComponent, Suspense, lazy } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { SWRConfig } from 'swr'
-
-import { ArticlePreview } from './article-preview'
-import { ListPreview } from './list-preview'
-import { NoSupport } from './no-support'
 import { PreviewLoader } from './preview-loader'
 import { SelectInfo } from './select-info'
 
-const toPreviewPanel = match<[TreeNode], (a: any) => ReactNode>(
+const ListPreview = lazy(() => import('./list-preview'))
+const ArticlePreview = lazy(() => import('./article-preview'))
+const NoSupport = lazy(() => import('./no-support'))
+
+const toPreviewPanel = match<[TreeNode], ExoticComponent<any>>(
 	caseOf([{ type: NodeType.List }], () => ListPreview),
 	caseOf([{ type: NodeType.Article }], () => ArticlePreview),
 	caseOf([_], () => NoSupport)

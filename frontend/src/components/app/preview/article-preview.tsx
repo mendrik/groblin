@@ -11,7 +11,7 @@ type OwnProps = {
 	node: TreeNode
 }
 
-export const ArticlePreview = ({ node }: OwnProps) => {
+export default function ArticlePreview({ node }: OwnProps) {
 	const value: Value | undefined = $valueMap.value[node.id]?.[0]
 	const [article, setArticle] = useState<string>(value?.value?.content ?? '')
 	const listPath = activePath(node)

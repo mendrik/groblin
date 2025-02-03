@@ -47,7 +47,7 @@ type OwnProps = {
 	width: number
 }
 
-export const ListPreview = ({ node: currentNode, width }: OwnProps) => {
+export default function ListPreview({ node: currentNode, width }: OwnProps) {
 	const { mutate } = useSWRConfig()
 	const maxColumns = Math.floor(width / 150)
 	const list_path = $activePath.value
