@@ -48,6 +48,7 @@ export function App() {
 							defaultSize={$panelSizes.value[2]}
 							className="container-size"
 						>
+							<div className="w-full h-0" ref={ref} />
 							<ErrorBoundary fallback={<div>Preview panel has crashed</div>}>
 								<PreviewPanel width={width} />
 							</ErrorBoundary>

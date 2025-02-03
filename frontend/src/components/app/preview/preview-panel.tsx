@@ -28,6 +28,8 @@ export const PreviewPanel = ({ width }: OwnProps) => {
 	const node = asNode(nodeId)
 	const Panel = toPreviewPanel(node)
 
+	console.log({ width })
+
 	return (
 		<div className="flex flex-1 h-full w-full items-start px-4">
 			<ErrorBoundary fallback={<SelectInfo />} onError={console.error}>

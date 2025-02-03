@@ -7,7 +7,7 @@ type OwnProps = {
 }
 
 export const PreviewError = ({ error }: OwnProps) => (
-	<Alert variant="default" className="max-w-sm m-auto">
+	<Alert variant="default" className="max-w-sm m-auto mt-10">
 		<Icon icon={AlertCircle} size={28} />
 		<AlertTitle className="!pl-10">Error</AlertTitle>
 		<AlertDescription className="!pl-10">{error.message}</AlertDescription>
