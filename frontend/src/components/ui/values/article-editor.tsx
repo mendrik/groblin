@@ -1,6 +1,5 @@
 import type { Value } from '@/gql/graphql'
 import type { ArticleType } from '@shared/json-value-types'
-import MDEditor from '@uiw/react-md-editor'
 import { Eye } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '../popover'
 import { ScrollArea } from '../scroll-area'
@@ -21,8 +20,8 @@ export const ArticleEditor: ValueEditor<ArticleValue> = ({ value }) => {
 			</PopoverTrigger>
 			<PopoverContent className="w-[600px] bg-background p-0">
 				<ScrollArea className="h-[400px] p-8">
-					<article className="prose  dark:prose-invert" data-color-mode="dark">
-						<MDEditor.Markdown source={value?.value.content} />
+					<article className="prose dark:prose-invert" data-color-mode="dark">
+						Hallo
 					</article>
 				</ScrollArea>
 			</PopoverContent>
