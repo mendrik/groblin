@@ -44,7 +44,7 @@ export const SimpleSelect = <T,>({
 	optional = false,
 	placeholder,
 	onChange,
-	allowEmpty = true, // todo
+	allowEmpty = true, // todopr-8
 	value,
 	className,
 	render
