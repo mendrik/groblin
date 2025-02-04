@@ -1,7 +1,12 @@
 import { caseOf, match } from '@shared/utils/match'
+import TColor from '@tiptap/extension-color'
 import type { Level } from '@tiptap/extension-heading'
-import { type ChainedCommands, EditorContent, useEditor } from '@tiptap/react'
+import THighlight from '@tiptap/extension-highlight'
+import TTextStyle from '@tiptap/extension-text-style'
+import TUnderline from '@tiptap/extension-underline'
+import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import chroma from 'chroma-js'
 import {
 	Baseline,
 	Bold,
@@ -14,7 +19,7 @@ import {
 	Undo,
 	X
 } from 'lucide-react' // Icons from Lucide (or any other icon library)
-import { invoker } from 'ramda'
+import { openColorPicker } from '../ui/color-picker'
 import { MicroIcon } from '../ui/random/micro-icon'
 import {
 	Select,
@@ -42,7 +47,11 @@ const TiptapEditor = () => {
 				heading: {
 					levels: [1, 2]
 				}
-			})
+			}),
+			TColor,
+			THighlight,
+			TUnderline,
+			TTextStyle
 		],
 		editorProps: {
 			attributes: {
@@ -57,10 +66,6 @@ const TiptapEditor = () => {
 		return null
 	}
 
-	const command = (command: keyof ChainedCommands) => {
-		invoker(0, command)(editor.chain().focus()).run()
-	}
-
 	const variant = (name: string) =>
 		editor.isActive(name) ? 'secondary' : 'ghost'
 
@@ -72,38 +77,38 @@ const TiptapEditor = () => {
 				<MicroIcon
 					size={20}
 					variant="ghost"
-					onClick={() => command('unsetAllMarks')}
+					onClick={() => editor.chain().undo().run()}
 					icon={Undo}
 				/>
 				<MicroIcon
 					size={20}
-					variant={variant('bold')}
-					onClick={() => command('toggleBold')}
+					variant="ghost"
+					onClick={() => editor.chain().redo().run()}
 					icon={Redo}
 				/>
 				<MicroIcon
 					size={20}
 					variant="ghost"
-					onClick={() => command('unsetAllMarks')}
+					onClick={() => editor.chain().focus().unsetAllMarks().run()}
 					icon={X}
 				/>
 				<MicroIcon
 					size={20}
 					variant={variant('bold')}
-					onClick={() => command('toggleBold')}
+					onClick={() => editor.chain().focus().toggleBold().run()}
 					icon={Bold}
 				/>
 				<MicroIcon
 					size={20}
 					variant={variant('italic')}
 					icon={Italic}
-					onClick={() => command('toggleItalic')}
+					onClick={() => editor.chain().focus().toggleItalic().run()}
 				/>
 				<MicroIcon
 					size={20}
-					variant={variant('italic')}
+					variant={variant('underline')}
 					icon={Underline}
-					onClick={() => command('toggleItalic')}
+					onClick={() => editor.chain().focus().toggleUnderline().run()}
 				/>
 				<Select onValueChange={applyMarkup} value="">
 					<SelectTrigger className="w-fit h-7">
@@ -112,15 +117,15 @@ const TiptapEditor = () => {
 					<SelectContent>
 						<SelectGroup>
 							<SelectLabel>Common</SelectLabel>
-							<SelectItem value="P">Paragraph</SelectItem>
+							<SelectItem value="p">Paragraph</SelectItem>
 							<SelectItem value="h1">H1</SelectItem>
 							<SelectItem value="h2">H2</SelectItem>
 							<SelectItem value="h2">H3</SelectItem>
-							<SelectItem value="P">Bullet list</SelectItem>
+							<SelectItem value="ul">Bullet list</SelectItem>
 							<SelectLabel>Miscellaneous</SelectLabel>
-							<SelectItem value="P">Ordered list</SelectItem>
-							<SelectItem value="P">Blockquote</SelectItem>
-							<SelectItem value="P">Code block</SelectItem>
+							<SelectItem value="ol">Ordered list</SelectItem>
+							<SelectItem value="quote">Blockquote</SelectItem>
+							<SelectItem value="code">Code block</SelectItem>
 							<SelectLabel>Headings</SelectLabel>
 							<SelectItem value="h4">H4</SelectItem>
 							<SelectItem value="h5">H5</SelectItem>
@@ -128,7 +133,7 @@ const TiptapEditor = () => {
 						</SelectGroup>
 					</SelectContent>
 				</Select>
-				<Select onValueChange={applyMarkup} value="">
+				<Select onValueChange={applyMarkup}>
 					<SelectTrigger className="w-fit h-7">
 						<SelectValue placeholder="Font" />
 					</SelectTrigger>
@@ -138,37 +143,60 @@ const TiptapEditor = () => {
 							<SelectItem value="h5">H5</SelectItem>
 							<SelectItem value="h6">H6</SelectItem>
 							<SelectLabel>Sans serif</SelectLabel>
-							<SelectItem value="P">Blockquote</SelectItem>
-							<SelectItem value="P">Code block</SelectItem>
+							<SelectItem value="p">Blockquote</SelectItem>
+							<SelectItem value="code">Code block</SelectItem>
 							<SelectLabel>Monospace</SelectLabel>
-							<SelectItem value="P">Blockquote</SelectItem>
+							<SelectItem value="quote">Blockquote</SelectItem>
 							<SelectItem value="P">Code block</SelectItem>
 						</SelectGroup>
 					</SelectContent>
 				</Select>
 				<MicroIcon
 					size={20}
-					variant={variant('italic')}
+					variant="ghost"
 					icon={Baseline}
-					onClick={() => command('toggleItalic')}
+					style={{
+						backgroundColor: editor.isActive('color')
+							? editor.getAttributes('textStyle').color
+							: undefined
+					}}
+					onClick={() =>
+						openColorPicker({
+							color: 'rgba(0,0,0,1)',
+							callback: color => {
+								const hex = chroma.rgb.apply(null, color).hex()
+								editor.chain().focus().setColor(hex).run()
+							}
+						})
+					}
 				/>
 				<MicroIcon
 					size={20}
-					variant={variant('italic')}
+					variant="ghost"
 					icon={PaintBucket}
-					onClick={() => command('toggleItalic')}
+					onClick={() =>
+						openColorPicker({
+							color: 'rgba(0,0,0,1)',
+							callback: color => {
+								const hex = chroma.rgb.apply(null, color).hex()
+								console.log(hex)
+
+								editor.chain().focus().setHighlight({ color: hex }).run()
+							}
+						})
+					}
 				/>
 				<MicroIcon
 					size={20}
-					variant={variant('italic')}
+					variant="ghost"
 					icon={Table}
-					onClick={() => command('toggleItalic')}
+					onClick={() => alert('todo')}
 				/>
 				<MicroIcon
 					size={20}
-					variant={variant('italic')}
+					variant="ghost"
 					icon={Image}
-					onClick={() => command('toggleItalic')}
+					onClick={() => alert('todo')}
 				/>
 			</div>
 			<EditorContent editor={editor} />

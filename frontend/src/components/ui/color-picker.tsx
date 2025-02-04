@@ -31,9 +31,11 @@ export const openColorPicker: (props: OpenProps) => void = pipe(
 )
 const close = pipe(F, setSignal($dialogOpen))
 
+const setColor = updateSignalFn($props, assoc('color'))
+
 export const ColorPicker = () => {
-	const setColor = updateSignalFn($props, assoc('color'))
-	const { rgbaArr } = useColorPicker(notNil($props).color, setColor)
+	const color = notNil($props).color
+	const { rgbaArr } = useColorPicker(color, setColor)
 
 	return (
 		<Dialog open={$dialogOpen.value}>
@@ -49,7 +51,7 @@ export const ColorPicker = () => {
 				</VisuallyHidden>
 				<PickerLib
 					className="z-20"
-					value={notNil($props).color}
+					value={color}
 					width={270}
 					height={170}
 					onChange={setColor}
