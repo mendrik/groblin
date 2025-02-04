@@ -1,0 +1,14 @@
+/* Basic editor styles */
+.tiptap {
+    :first-child {
+      margin-top: 0;
+    }
+  
+    ul ul, ol ol, li, li p {
+        margin: 0;
+    }
+
+    &.prose {
+        --tw-prose-bold: inherit;
+    }
+}

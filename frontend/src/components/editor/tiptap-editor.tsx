@@ -12,6 +12,7 @@ import {
 	Bold,
 	Image,
 	Italic,
+	Link,
 	PaintBucket,
 	Redo,
 	Table,
@@ -30,6 +31,7 @@ import {
 	SelectTrigger,
 	SelectValue
 } from '../ui/select'
+import './tiptap-editor.css'
 
 const levelForHeading = match<[string], Level>(
 	caseOf(['H1'], 1),
@@ -48,15 +50,14 @@ const TiptapEditor = () => {
 					levels: [1, 2]
 				}
 			}),
-			TColor,
-			THighlight,
 			TUnderline,
+			TColor,
+			THighlight.configure({ multicolor: true }),
 			TTextStyle
 		],
 		editorProps: {
 			attributes: {
-				class:
-					'prose focus:outline-none dark:prose-invert [&_li]:my-0 [&_li>p]:my-0'
+				class: 'focus:outline-none prose dark:prose-invert'
 			}
 		},
 		content: '<p>Hello World!</p>'
@@ -72,7 +73,7 @@ const TiptapEditor = () => {
 	const applyMarkup = (value: string) => {}
 
 	return (
-		<div className="w-full min-h-[calc(100vh-64px)] mb-10 prose dark:prose-invert mt-2">
+		<div className="w-full min-h-[calc(100vh-64px)] mb-10 mt-2">
 			<div className="flex items-center gap-2 mb-8">
 				<MicroIcon
 					size={20}
@@ -110,6 +111,7 @@ const TiptapEditor = () => {
 					icon={Underline}
 					onClick={() => editor.chain().focus().toggleUnderline().run()}
 				/>
+				<MicroIcon size={20} variant={variant('link')} icon={Link} />
 				<Select onValueChange={applyMarkup} value="">
 					<SelectTrigger className="w-fit h-7">
 						<SelectValue placeholder="Section" />
@@ -179,8 +181,6 @@ const TiptapEditor = () => {
 							color: 'rgba(0,0,0,1)',
 							callback: color => {
 								const hex = chroma.rgb.apply(null, color).hex()
-								console.log(hex)
-
 								editor.chain().focus().setHighlight({ color: hex }).run()
 							}
 						})
