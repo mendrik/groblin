@@ -30,6 +30,7 @@ The structure of the tree simultanously creates a graphql interface for clients 
 - [ ] Tests
 - [ ] Node settings
 - [ ] Authorization roles
+- [ ] Documentation
 
 #### Ideas for the future
 - [ ] External sources (REST, DB, Mailboxes)
