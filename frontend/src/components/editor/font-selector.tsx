@@ -6,7 +6,7 @@ import {
 	SelectLabel,
 	SelectTrigger,
 	SelectValue
-} from '@radix-ui/react-select'
+} from '@/components/ui/select'
 import type { Editor } from '@tiptap/react'
 
 type OwnProps = {

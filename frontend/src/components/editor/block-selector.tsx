@@ -6,7 +6,7 @@ import {
 	SelectLabel,
 	SelectTrigger,
 	SelectValue
-} from '@radix-ui/react-select'
+} from '@/components/ui/select'
 import { caseOf, match } from '@shared/utils/match'
 import type { Editor } from '@tiptap/react'
 
@@ -15,33 +15,32 @@ type OwnProps = {
 }
 
 export const BlockSelector = ({ editor }: OwnProps) => {
-		// Applies block markup commands such as heading, paragraph, lists, etc.
-		const applyMarkup = match<[string], boolean>(
-			caseOf(['p'], () => editor.chain().focus().setParagraph().run()),
-			caseOf(['h1'], () =>
-				editor.chain().focus().toggleHeading({ level: 1 }).run()
-			),
-			caseOf(['h2'], () =>
-				editor.chain().focus().toggleHeading({ level: 2 }).run()
-			),
-			caseOf(['h3'], () =>
-				editor.chain().focus().toggleHeading({ level: 3 }).run()
-			),
-			caseOf(['h4'], () =>
-				editor.chain().focus().toggleHeading({ level: 4 }).run()
-			),
-			caseOf(['h5'], () =>
-				editor.chain().focus().toggleHeading({ level: 5 }).run()
-			),
-			caseOf(['h6'], () =>
-				editor.chain().focus().toggleHeading({ level: 6 }).run()
-			),
-			caseOf(['ul'], () => editor.chain().focus().toggleBulletList().run()),
-			caseOf(['ol'], () => editor.chain().focus().toggleOrderedList().run()),
-			caseOf(['quote'], () => editor.chain().focus().toggleBlockquote().run()),
-			caseOf(['code'], () => editor.chain().focus().toggleCodeBlock().run())
-		)
-	
+	// Applies block markup commands such as heading, paragraph, lists, etc.
+	const applyMarkup = match<[string], boolean>(
+		caseOf(['p'], () => editor.chain().focus().setParagraph().run()),
+		caseOf(['h1'], () =>
+			editor.chain().focus().toggleHeading({ level: 1 }).run()
+		),
+		caseOf(['h2'], () =>
+			editor.chain().focus().toggleHeading({ level: 2 }).run()
+		),
+		caseOf(['h3'], () =>
+			editor.chain().focus().toggleHeading({ level: 3 }).run()
+		),
+		caseOf(['h4'], () =>
+			editor.chain().focus().toggleHeading({ level: 4 }).run()
+		),
+		caseOf(['h5'], () =>
+			editor.chain().focus().toggleHeading({ level: 5 }).run()
+		),
+		caseOf(['h6'], () =>
+			editor.chain().focus().toggleHeading({ level: 6 }).run()
+		),
+		caseOf(['ul'], () => editor.chain().focus().toggleBulletList().run()),
+		caseOf(['ol'], () => editor.chain().focus().toggleOrderedList().run()),
+		caseOf(['quote'], () => editor.chain().focus().toggleBlockquote().run()),
+		caseOf(['code'], () => editor.chain().focus().toggleCodeBlock().run())
+	)
 
 	return (
 		<Select onValueChange={applyMarkup} value="">
