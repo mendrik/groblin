@@ -21,12 +21,9 @@ export const StringEditor: ValueEditor<StringValue> = ({
 			className="max-w-[200px]"
 			key={editorKey(node, value)}
 		>
-			<div className="pointer-events-none opacity-0 h-0 min-w-fit whitespace-nowrap">
-				{text}
-			</div>
 			<input
 				id={editorKey(node, value)}
-				className="h-7 w-full bg-transparent border-none appearance-none outline-none ring-0 min-w-[30px]"
+				className="h-7 w-full bg-transparent border-none appearance-none outline-none ring-0 min-w-[30px] field-sizing"
 				defaultValue={value?.value?.content}
 				onChange={pipe(inputValue, setText)}
 				onBlur={pipeAsync(inputValue, objOf('content'), save)}

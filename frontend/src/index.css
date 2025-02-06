@@ -86,6 +86,10 @@ flex
   container-type: inline-size;
 }
 
+.field-sizing {
+  field-sizing: content;
+}
+
 @layer base {
   [data-registry="plate"] * {
     @apply border-border;

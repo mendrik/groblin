@@ -32,7 +32,6 @@ export const TagsInput = ({
 }: TagsInputProps) => {
 	const containerRef = useRef<HTMLDivElement>(null)
 	const inputRef = useRef<HTMLInputElement>(null)
-	const measureRef = useRef<HTMLDivElement>(null)
 	const active = useSignal<string>('')
 	const list = useSignal<string[]>(value)
 	const toFocus = useSignal<number>(-1)
@@ -44,13 +43,6 @@ export const TagsInput = ({
 	}
 
 	const clearInput = () => (ref(inputRef).value = '')
-
-	const adjustWidth = (value: string) => {
-		const mDiv = ref(measureRef)
-		mDiv.innerText = value
-		const { width } = mDiv.getBoundingClientRect()
-		ref(inputRef).style.maxWidth = `${Math.max(width, 40)}px`
-	}
 
 	const deleteActive = () => {
 		const idx = list.value.indexOf(active.value)
@@ -129,10 +121,6 @@ export const TagsInput = ({
 					))}
 				</SortContext>
 			</KeyListener>
-			<div
-				className="text-sm px-1 opacity-0 pointer-events-none absolute"
-				ref={measureRef}
-			/>
 			<KeyListener
 				onEnter={pipe(tagName, when(isNotEmpty, push), clearInput)}
 				onBackspace={pipe(inputValue, when(isEmpty, deleteLast))}
@@ -141,12 +129,11 @@ export const TagsInput = ({
 				<input
 					ref={inputRef}
 					placeholder={placeholder}
-					onChange={pipe(tagName, adjustWidth)}
 					onBlur={pipe(tagName, when(isNotEmpty, push), clearInput)}
 					className={cn(
-						'[&[style]]:placeholder-transparent',
+						'[&[style]]:placeholder-transparent field-sizing disabled:cursor-not-allowed disabled:opacity-50',
 						'border-none appearance-none bg-transparent text-sm p-1 min-w-0 flex-grow basis-5',
-						'placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50'
+						'placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0'
 					)}
 				/>
 			</KeyListener>
