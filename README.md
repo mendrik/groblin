@@ -1,29 +1,20 @@
+# Groblin 
+
+Groblin is a headless *content management system* that exposes a read-only graphql API for the dynamically defined models.
+
 <p align="center">
-<img src="https://github.com/user-attachments/assets/91c15d84-dec0-48ca-ad1f-c4c655c47bd1" width="200">
+    <img src="https://mindmine-v2.s3.eu-north-1.amazonaws.com/images/gnome.png" width="200">
 </p>
 
-NodeTypes
-- Media
-- Enumeration
-- Icon
-- Rest
-- Formula/Code
+<blockquote>
+<strong>Even the shiniest treasure loses its sparkle if buried too deep. Keep your content like a goblin's hoard — organized, accessible, and ready to dazzle when needed!</strong><br/><i>– Grumblewick the Goblin, Content Keeper of the Caverns</i>
+</blockquote>
 
-Settings
-- required
-- priority
-- list item name template 
+#### Todo
+- [ ] Thumbnails for Media
+- [ ] Tag node types
+- [ ] Media preview
+- [ ] Article editor
+- [ ] Validation
+- [ ] Array filters
 
-Preview
-- List
-- Json
-- Markdown
-- Media
-
-Validation
-- error badges
-
-Graphql API
-- dynamic resolver
-
-- list item position to local storage

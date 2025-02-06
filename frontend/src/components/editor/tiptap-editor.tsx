@@ -5,17 +5,14 @@ import Highlight from '@tiptap/extension-highlight'
 import Link from '@tiptap/extension-link'
 import TextStyle from '@tiptap/extension-text-style'
 import Underline from '@tiptap/extension-underline'
-import { BubbleMenu, EditorContent, useEditor } from '@tiptap/react'
+import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import {
-	BetweenHorizonalStart,
 	Bold,
 	Underline as IconUnderline,
 	Image,
 	Italic,
-	ListX,
 	Redo,
-	Trash,
 	Undo,
 	X
 } from 'lucide-react'
