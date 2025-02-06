@@ -4,7 +4,7 @@
       margin-top: 0;
     }
   
-    ul ul, ol ol, li, li p {
+    ul ul, ol ol, li, li p, td > p, th > p {
         margin: 0;
     }
 
@@ -13,6 +13,8 @@
     }
 
     table, td, th {
+        padding: 0;
+        table-layout: fixed;
         border-collapse: collapse;
         width: 100%;
         border: 1px solid hsl(var(--border));

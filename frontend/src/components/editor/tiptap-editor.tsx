@@ -1,6 +1,4 @@
-import { caseOf, match } from '@shared/utils/match'
 import Color from '@tiptap/extension-color'
-import type { Level } from '@tiptap/extension-heading'
 import Highlight from '@tiptap/extension-highlight'
 import Link from '@tiptap/extension-link'
 import TextStyle from '@tiptap/extension-text-style'
@@ -30,15 +28,6 @@ import { ColorButton } from './color-button'
 import { FontSelector } from './font-selector'
 import { LinkButton } from './link-button'
 import { TableButton } from './table-button'
-
-const levelForHeading = match<[string], Level>(
-	caseOf(['H1'], 1),
-	caseOf(['H2'], 2),
-	caseOf(['H3'], 3),
-	caseOf(['H4'], 4),
-	caseOf(['H5'], 5),
-	caseOf(['H6'], 6)
-)
 
 const TiptapEditor = () => {
 	const editor = useEditor({
