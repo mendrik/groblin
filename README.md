@@ -14,7 +14,21 @@ Groblin is a headless *content management system* that exposes a read-only graph
 - [ ] Thumbnails for Media
 - [ ] Tag node types
 - [ ] Media preview
-- [ ] Article editor
+- [ ] List preview filters
+- [ ] Article editor 
+    - [ ] Prose styles
+    - [ ] Tables
+    - [ ] Images 
 - [ ] Validation
 - [ ] Array filters
+- [ ] Licence
+- [ ] Import/Export
+- [ ] Tests
+- [ ] Node settings
+- [ ] Authorization roles
+
+#### Ideas for the future
+- [ ] External sources (REST, DB, Mailboxes)
+- [ ] Business rule manager
+- [ ] Authorizations
 
