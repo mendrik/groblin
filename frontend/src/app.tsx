@@ -11,6 +11,7 @@ import {
 	ResizablePanelGroup
 } from './components/ui/resizable'
 import { ScrollArea } from './components/ui/scroll-area'
+import { InputDialog } from './components/ui/simple/input-dialog'
 import useResize from './hooks/use-resize'
 import { notNil } from './lib/signals'
 import { $panelSizes, setPanelSizes } from './state/panels'
@@ -56,6 +57,7 @@ export function App() {
 					</ResizablePanelGroup>
 				</div>
 			</ScrollArea>
+			<InputDialog />
 		</Layout>
 	)
 }

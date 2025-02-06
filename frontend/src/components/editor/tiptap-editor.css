@@ -11,4 +11,14 @@
     &.prose {
         --tw-prose-bold: inherit;
     }
+
+    table, td, th {
+        border-collapse: collapse;
+        width: 100%;
+        border: 1px solid hsl(var(--border));
+    }
+
+    a {
+        color: hsl(var(--chart-2));
+    }
 }

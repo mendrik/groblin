@@ -73,7 +73,7 @@ export default function ListPreview({ node: currentNode, width }: OwnProps) {
 				className="w-full table grid-lines mr-2 mt-10"
 				style={{ '--columns': maxColumns }}
 			>
-				<li className="item">
+				<li className="item sticky top-0 h-auto">
 					<div />
 					{columns.map(({ id, type, name }) => (
 						<div key={id} className={cn('label', type)}>

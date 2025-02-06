@@ -1,37 +1,38 @@
 import { caseOf, match } from '@shared/utils/match'
-import TColor from '@tiptap/extension-color'
+import Color from '@tiptap/extension-color'
 import type { Level } from '@tiptap/extension-heading'
-import THighlight from '@tiptap/extension-highlight'
-import TTextStyle from '@tiptap/extension-text-style'
-import TUnderline from '@tiptap/extension-underline'
-import { EditorContent, useEditor } from '@tiptap/react'
+import Highlight from '@tiptap/extension-highlight'
+import Link from '@tiptap/extension-link'
+import TextStyle from '@tiptap/extension-text-style'
+import Underline from '@tiptap/extension-underline'
+import { BubbleMenu, EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import chroma from 'chroma-js'
 import {
-	Baseline,
+	BetweenHorizonalStart,
 	Bold,
+	Underline as IconUnderline,
 	Image,
 	Italic,
-	Link,
-	PaintBucket,
+	ListX,
 	Redo,
-	Table,
-	Underline,
+	Trash,
 	Undo,
 	X
-} from 'lucide-react' // Icons from Lucide (or any other icon library)
-import { openColorPicker } from '../ui/color-picker'
+} from 'lucide-react'
 import { MicroIcon } from '../ui/random/micro-icon'
-import {
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectLabel,
-	SelectTrigger,
-	SelectValue
-} from '../ui/select'
 import './tiptap-editor.css'
+
+// Import table-related extensions from TipTap
+import TableExtension from '@tiptap/extension-table'
+import TableCell from '@tiptap/extension-table-cell'
+import TableHeader from '@tiptap/extension-table-header'
+import TableRow from '@tiptap/extension-table-row'
+import { BackgroundButton } from './background-button'
+import { BlockSelector } from './block-selector'
+import { ColorButton } from './color-button'
+import { FontSelector } from './font-selector'
+import { LinkButton } from './link-button'
+import { TableButton } from './table-button'
 
 const levelForHeading = match<[string], Level>(
 	caseOf(['H1'], 1),
@@ -47,13 +48,21 @@ const TiptapEditor = () => {
 		extensions: [
 			StarterKit.configure({
 				heading: {
-					levels: [1, 2]
+					levels: [1, 2, 3, 4, 5, 6]
 				}
 			}),
-			TUnderline,
-			TColor,
-			THighlight.configure({ multicolor: true }),
-			TTextStyle
+			Underline,
+			Color,
+			Link,
+			Highlight.configure({ multicolor: true }),
+			TextStyle,
+			// Add the table extensions
+			TableExtension.configure({
+				resizable: true
+			}),
+			TableRow,
+			TableHeader,
+			TableCell
 		],
 		editorProps: {
 			attributes: {
@@ -67,10 +76,9 @@ const TiptapEditor = () => {
 		return null
 	}
 
+	// Determines the variant for toolbar icons based on active mark/node
 	const variant = (name: string) =>
 		editor.isActive(name) ? 'secondary' : 'ghost'
-
-	const applyMarkup = (value: string) => {}
 
 	return (
 		<div className="w-full min-h-[calc(100vh-64px)] mb-10 mt-2">
@@ -108,95 +116,20 @@ const TiptapEditor = () => {
 				<MicroIcon
 					size={20}
 					variant={variant('underline')}
-					icon={Underline}
+					icon={IconUnderline}
 					onClick={() => editor.chain().focus().toggleUnderline().run()}
 				/>
-				<MicroIcon size={20} variant={variant('link')} icon={Link} />
-				<Select onValueChange={applyMarkup} value="">
-					<SelectTrigger className="w-fit h-7">
-						<SelectValue placeholder="Section" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectGroup>
-							<SelectLabel>Common</SelectLabel>
-							<SelectItem value="p">Paragraph</SelectItem>
-							<SelectItem value="h1">H1</SelectItem>
-							<SelectItem value="h2">H2</SelectItem>
-							<SelectItem value="h2">H3</SelectItem>
-							<SelectItem value="ul">Bullet list</SelectItem>
-							<SelectLabel>Miscellaneous</SelectLabel>
-							<SelectItem value="ol">Ordered list</SelectItem>
-							<SelectItem value="quote">Blockquote</SelectItem>
-							<SelectItem value="code">Code block</SelectItem>
-							<SelectLabel>Headings</SelectLabel>
-							<SelectItem value="h4">H4</SelectItem>
-							<SelectItem value="h5">H5</SelectItem>
-							<SelectItem value="h6">H6</SelectItem>
-						</SelectGroup>
-					</SelectContent>
-				</Select>
-				<Select onValueChange={applyMarkup}>
-					<SelectTrigger className="w-fit h-7">
-						<SelectValue placeholder="Font" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectGroup>
-							<SelectLabel>Serif</SelectLabel>
-							<SelectItem value="h5">H5</SelectItem>
-							<SelectItem value="h6">H6</SelectItem>
-							<SelectLabel>Sans serif</SelectLabel>
-							<SelectItem value="p">Blockquote</SelectItem>
-							<SelectItem value="code">Code block</SelectItem>
-							<SelectLabel>Monospace</SelectLabel>
-							<SelectItem value="quote">Blockquote</SelectItem>
-							<SelectItem value="P">Code block</SelectItem>
-						</SelectGroup>
-					</SelectContent>
-				</Select>
-				<MicroIcon
-					size={20}
-					variant="ghost"
-					icon={Baseline}
-					style={{
-						backgroundColor: editor.isActive('color')
-							? editor.getAttributes('textStyle').color
-							: undefined
-					}}
-					onClick={() =>
-						openColorPicker({
-							color: 'rgba(0,0,0,1)',
-							callback: color => {
-								const hex = chroma.rgb.apply(null, color).hex()
-								editor.chain().focus().setColor(hex).run()
-							}
-						})
-					}
-				/>
-				<MicroIcon
-					size={20}
-					variant="ghost"
-					icon={PaintBucket}
-					onClick={() =>
-						openColorPicker({
-							color: 'rgba(0,0,0,1)',
-							callback: color => {
-								const hex = chroma.rgb.apply(null, color).hex()
-								editor.chain().focus().setHighlight({ color: hex }).run()
-							}
-						})
-					}
-				/>
-				<MicroIcon
-					size={20}
-					variant="ghost"
-					icon={Table}
-					onClick={() => alert('todo')}
-				/>
+				<LinkButton editor={editor} />
+				<BlockSelector editor={editor} />
+				<FontSelector editor={editor} />
+				<ColorButton editor={editor} />
+				<BackgroundButton editor={editor} />
+				<TableButton editor={editor} />
 				<MicroIcon
 					size={20}
 					variant="ghost"
 					icon={Image}
-					onClick={() => alert('todo')}
+					onClick={() => alert('Image functionality not implemented yet')}
 				/>
 			</div>
 			<EditorContent editor={editor} />
