@@ -1,4 +1,4 @@
-import { NodeType } from '@/gql/graphql'
+import { NodeType, type Value } from '@/gql/graphql'
 import { $focusedNode, type TreeNode, asNode } from '@/state/tree'
 import { caseOf, match } from '@shared/utils/match'
 import { T as _ } from 'ramda'
@@ -13,7 +13,16 @@ const ArticlePreview = lazy(() => import('./article-preview'))
 const MediaPreview = lazy(() => import('./media-preview'))
 const NoSupport = lazy(() => import('./no-support'))
 
-const toPreviewPanel = match<[TreeNode], ExoticComponent<any>>(
+export type PreviewProps = {
+	node: TreeNode
+	values: Value[]
+	width: number
+}
+
+const toPreviewPanel = match<
+	[TreeNode],
+	ExoticComponent<{ node: TreeNode; values: Value[]; width: number }>
+>(
 	caseOf([{ type: NodeType.List }], () => ListPreview),
 	caseOf([{ type: NodeType.Article }], () => ArticlePreview),
 	caseOf([{ type: NodeType.Media }], () => MediaPreview),
@@ -42,7 +51,7 @@ export const PreviewPanel = ({ width }: OwnProps) => {
 					}}
 				>
 					<Suspense fallback={<PreviewLoader />}>
-						{width !== 0 && <Panel node={node} width={width} />}
+						{width !== 0 && <Panel node={node} width={width} values={[]} />}
 					</Suspense>
 				</SWRConfig>
 			</ErrorBoundary>

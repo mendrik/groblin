@@ -1,3 +1,4 @@
+import type { ListItemValue } from '@/components/ui/values/list-editor'
 import { ValueEditor, ViewContext } from '@/components/ui/values/value-editor'
 import FocusTravel from '@/components/utils/focus-travel'
 import { Api } from '@/gql-client'
@@ -12,11 +13,11 @@ import { useSignalEffect } from '@preact/signals-react'
 import { evolveAlt } from '@shared/utils/evolve-alt'
 import { append, propEq, take } from 'ramda'
 import { compact } from 'ramda-adjunct'
+import { useDeepCompareEffect } from 'react-use'
 import useSWR, { useSWRConfig } from 'swr'
 import { ListItemActions } from './list-item-actions'
 import './list-preview.css'
-import type { ListItemValue } from '@/components/ui/values/list-editor'
-import { useDeepCompareEffect } from 'react-use'
+import type { PreviewProps } from './preview-panel'
 type Request = {
 	node_id: number
 	list_path?: number[]
@@ -42,12 +43,10 @@ const useLoadColumns = (nodeId: number, columns: number): Node[] => {
 	return take(columns, data ?? [])
 }
 
-type OwnProps = {
-	node: TreeNode
-	width: number
-}
-
-export default function ListPreview({ node: currentNode, width }: OwnProps) {
+export default function ListPreview({
+	node: currentNode,
+	width
+}: PreviewProps) {
 	const { mutate } = useSWRConfig()
 	const maxColumns = Math.floor(width / 150)
 	const list_path = $activePath.value
