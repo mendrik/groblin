@@ -3,9 +3,9 @@ import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
 import type { DB, JsonValue } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
-import { Topic } from 'src/types.ts'
 import type { Context } from 'src/types.ts'
-import { Role } from 'src/types.ts'
+import { Role, Topic } from 'src/types.ts'
+import { enrichValue } from 'src/utils/values.ts'
 import {
 	Arg,
 	Authorized,
@@ -116,8 +116,10 @@ export class ValueResolver {
 			.orderBy(['order', 'id'])
 			.selectAll()
 			.execute()
+			.then(xs => xs.map(enrichValue))
+			.then(xs => Promise.all(xs))
 	}
-
+ 
 	async value(id: number): Promise<Value | undefined> {
 		return this.db
 			.selectFrom('values')

@@ -21,7 +21,6 @@ import {
 	X
 } from 'lucide-react'
 import { MicroIcon } from '../ui/random/micro-icon'
-import './tiptap-editor.css'
 
 // Import table-related extensions from TipTap
 import TableExtension from '@tiptap/extension-table'

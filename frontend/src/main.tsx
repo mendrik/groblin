@@ -1,17 +1,19 @@
+import { setDefaultOptions } from 'date-fns'
+import { enGB } from 'date-fns/locale'
 import { Maybe } from 'purify-ts'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { Router } from 'wouter'
 import { ThemeProvider } from './components/theme-provider'
 import { Toaster } from './components/ui/sonner'
-import './index.css'
 import { LoggedIn } from './routing/logged-in'
 import { LoggedOut } from './routing/logged-out'
-import './state/project'
-import { setDefaultOptions } from 'date-fns'
-import { enGB } from 'date-fns/locale'
-import { Router } from 'wouter'
 import { loadProject } from './state/project'
 import { $user } from './state/user'
+
+import './components/editor/tiptap-editor.css'
+import './index.css'
+import './state/project'
 
 const Main = () => (
 	<StrictMode>

@@ -1,5 +1,6 @@
 import type { Value } from '@/gql/graphql'
 import type { ArticleType } from '@shared/json-value-types'
+import DOMPurify from 'dompurify'
 import { Eye } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '../popover'
 import { ScrollArea } from '../scroll-area'
@@ -24,7 +25,7 @@ export const ArticleEditor: ValueEditor<ArticleValue> = ({ value }) => {
 						className="prose dark:prose-invert tiptap"
 						data-color-mode="dark"
 						dangerouslySetInnerHTML={{
-							__html: value?.value.content as TrustedHTML
+							__html: DOMPurify.sanitize(value?.value.content ?? '')
 						}}
 					/>
 				</ScrollArea>

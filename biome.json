@@ -20,8 +20,7 @@
 		"enabled": true,
 		"rules": {
 			"security": {
-				"noDangerouslySetInnerHtml": "off",
-				"noDangerouslySetInnerHtmlWithChildren": "off"
+				"noDangerouslySetInnerHtml": "off"
 			},
 			"a11y": {
 				"noLabelWithoutControl": "off"
@@ -63,5 +62,5 @@
 			"trailingCommas": "none",
 			"arrowParentheses": "asNeeded"
 		}
-	},
+	}
 }
