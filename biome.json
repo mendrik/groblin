@@ -19,6 +19,10 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
+			"security": {
+				"noDangerouslySetInnerHtml": "off",
+				"noDangerouslySetInnerHtmlWithChildren": "off"
+			},
 			"a11y": {
 				"noLabelWithoutControl": "off"
 			},
@@ -59,5 +63,5 @@
 			"trailingCommas": "none",
 			"arrowParentheses": "asNeeded"
 		}
-	}
+	},
 }

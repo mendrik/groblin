@@ -19,10 +19,14 @@ export const ArticleEditor: ValueEditor<ArticleValue> = ({ value }) => {
 				/>
 			</PopoverTrigger>
 			<PopoverContent className="w-[600px] bg-background p-0">
-				<ScrollArea className="h-[400px] p-8">
-					<article className="prose dark:prose-invert" data-color-mode="dark">
-						Hallo
-					</article>
+				<ScrollArea className="h-[400px] p-4">
+					<article
+						className="prose dark:prose-invert tiptap"
+						data-color-mode="dark"
+						dangerouslySetInnerHTML={{
+							__html: value?.value.content as TrustedHTML
+						}}
+					/>
 				</ScrollArea>
 			</PopoverContent>
 		</Popover>
