@@ -35,7 +35,12 @@ import { FontSelector } from './font-selector'
 import { LinkButton } from './link-button'
 import { TableButton } from './table-button'
 
-const TiptapEditor = () => {
+type OwnProps = {
+	defaultValue?: string
+	onChange?: (value: string) => any
+}
+
+const TiptapEditor = ({ defautlValue = '' }: OwnProps) => {
 	const editor = useEditor({
 		extensions: [
 			Align.configure({
@@ -65,7 +70,7 @@ const TiptapEditor = () => {
 				class: 'focus:outline-none prose dark:prose-invert'
 			}
 		},
-		content: '<p>Hello World!</p>'
+		content: defautlValue
 	})
 
 	if (!editor) {
