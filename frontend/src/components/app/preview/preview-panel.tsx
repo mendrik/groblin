@@ -10,11 +10,13 @@ import { SelectInfo } from './select-info'
 
 const ListPreview = lazy(() => import('./list-preview'))
 const ArticlePreview = lazy(() => import('./article-preview'))
+const MediaPreview = lazy(() => import('./media-preview'))
 const NoSupport = lazy(() => import('./no-support'))
 
 const toPreviewPanel = match<[TreeNode], ExoticComponent<any>>(
 	caseOf([{ type: NodeType.List }], () => ListPreview),
 	caseOf([{ type: NodeType.Article }], () => ArticlePreview),
+	caseOf([{ type: NodeType.Media }], () => MediaPreview),
 	caseOf([_], () => NoSupport)
 )
 
