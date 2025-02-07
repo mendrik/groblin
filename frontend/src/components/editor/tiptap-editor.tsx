@@ -40,7 +40,7 @@ type OwnProps = {
 	onChange?: (value: string) => any
 }
 
-const TiptapEditor = ({ defautlValue = '' }: OwnProps) => {
+const TiptapEditor = ({ defaultValue = '', onChange }: OwnProps) => {
 	const editor = useEditor({
 		extensions: [
 			Align.configure({
@@ -65,12 +65,15 @@ const TiptapEditor = ({ defautlValue = '' }: OwnProps) => {
 			TableHeader,
 			TableCell
 		],
+		onUpdate({ editor }) {
+			onChange?.(editor.getHTML())
+		},
 		editorProps: {
 			attributes: {
 				class: 'focus:outline-none prose dark:prose-invert'
 			}
 		},
-		content: defautlValue
+		content: defaultValue
 	})
 
 	if (!editor) {

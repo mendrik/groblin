@@ -32,5 +32,5 @@ export default function ArticlePreview({ node }: OwnProps) {
 
 	useDebounce(() => save(article), 500, [article])
 
-	return <TiptapEditor defaultValue={article}/>
+	return <TiptapEditor defaultValue={article} onChange={setArticle}/>
 }
