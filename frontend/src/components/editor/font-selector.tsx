@@ -15,7 +15,7 @@ type OwnProps = {
 
 export const FontSelector = ({ editor }: OwnProps) => {
 	const applyFont = (value: string) => {
-		editor.chain().focus().setMark('textStyle', { fontFamily: value }).run()
+		editor.chain().focus().setFontFamily(value).run()
 	}
 
 	return (

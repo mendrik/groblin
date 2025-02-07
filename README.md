@@ -12,7 +12,7 @@
 
 Each node has different types and based on the type and settings different editors can be used to maintain the content.
 
-The structure of the tree simultanously creates a graphql interface for clients to consume its content.
+The structure of the tree simultaneously creates a graphql interface for clients to consume.
 
 #### Todo
 - [ ] Thumbnails for Media

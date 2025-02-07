@@ -1,11 +1,17 @@
 import Color from '@tiptap/extension-color'
+import FontFamily from '@tiptap/extension-font-family'
 import Highlight from '@tiptap/extension-highlight'
 import Link from '@tiptap/extension-link'
+import Align from '@tiptap/extension-text-align'
 import TextStyle from '@tiptap/extension-text-style'
 import Underline from '@tiptap/extension-underline'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import {
+	AlignCenter,
+	AlignJustify,
+	AlignLeft,
+	AlignRight,
 	Bold,
 	Underline as IconUnderline,
 	Image,
@@ -32,12 +38,16 @@ import { TableButton } from './table-button'
 const TiptapEditor = () => {
 	const editor = useEditor({
 		extensions: [
+			Align.configure({
+				types: ['heading', 'paragraph', 'tableCell', 'tableHead']
+			}),
 			StarterKit.configure({
 				heading: {
 					levels: [1, 2, 3, 4, 5, 6]
 				}
 			}),
 			Underline,
+			FontFamily,
 			Color,
 			Link,
 			Highlight.configure({ multicolor: true }),
@@ -71,19 +81,16 @@ const TiptapEditor = () => {
 			<div className="flex items-center gap-2 mb-8">
 				<MicroIcon
 					size={20}
-					variant="ghost"
 					onClick={() => editor.chain().undo().run()}
 					icon={Undo}
 				/>
 				<MicroIcon
 					size={20}
-					variant="ghost"
 					onClick={() => editor.chain().redo().run()}
 					icon={Redo}
 				/>
 				<MicroIcon
 					size={20}
-					variant="ghost"
 					onClick={() => editor.chain().focus().unsetAllMarks().run()}
 					icon={X}
 				/>
@@ -110,10 +117,29 @@ const TiptapEditor = () => {
 				<FontSelector editor={editor} />
 				<ColorButton editor={editor} />
 				<BackgroundButton editor={editor} />
+				<MicroIcon
+					size={20}
+					icon={AlignLeft}
+					onClick={() => editor.chain().focus().setTextAlign('left').run()}
+				/>
+				<MicroIcon
+					size={20}
+					icon={AlignCenter}
+					onClick={() => editor.chain().focus().setTextAlign('center').run()}
+				/>
+				<MicroIcon
+					size={20}
+					icon={AlignRight}
+					onClick={() => editor.chain().focus().setTextAlign('right').run()}
+				/>
+				<MicroIcon
+					size={20}
+					icon={AlignJustify}
+					onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+				/>
 				<TableButton editor={editor} />
 				<MicroIcon
 					size={20}
-					variant="ghost"
 					icon={Image}
 					onClick={() => alert('Image functionality not implemented yet')}
 				/>

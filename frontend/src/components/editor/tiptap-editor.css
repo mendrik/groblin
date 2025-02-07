@@ -1,5 +1,13 @@
 /* Basic editor styles */
 .tiptap {
+    .tableWrapper {
+        width: 100%;
+    }
+
+    th {
+        font-weight: normal;
+    }
+
     :first-child {
       margin-top: 0;
     }
@@ -12,12 +20,16 @@
         --tw-prose-bold: inherit;
     }
 
-    table, td, th {
+    table, tr, td, th {
         padding: 0;
         table-layout: fixed;
         border-collapse: collapse;
         width: 100%;
-        border: 1px solid hsl(var(--border));
+        border: 1px dotted hsl(var(--border));
+    }
+
+    td, th {
+        padding: 2px 3px;
     }
 
     a {
