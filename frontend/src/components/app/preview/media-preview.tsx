@@ -13,7 +13,7 @@ export default function MediaPreview({ node }: PreviewProps) {
 			<Card className="w-[300px]">
 				<CardHeader>
 					<CardTitle>
-						{value?.name} {value?.contentType} {value?.file} {value?.size} 
+						{value?.name} {value?.url}
 					</CardTitle>
 				</CardHeader>
 				<CardContent>Hallo</CardContent>

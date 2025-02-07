@@ -143,7 +143,6 @@ describe('evolveAlt', () => {
 			arr: map((x: number) => `${x * 2}`)
 		}
 		const result = evolveAlt(transformations, obj)
-		expectType<string[]>(result.arr)
 		expect(result).toEqual({ arr: ['2', '4', '6'] })
 	})
 

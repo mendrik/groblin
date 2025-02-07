@@ -119,7 +119,7 @@ export class ValueResolver {
 			.then(xs => xs.map(enrichValue))
 			.then(xs => Promise.all(xs))
 	}
- 
+
 	async value(id: number): Promise<Value | undefined> {
 		return this.db
 			.selectFrom('values')
