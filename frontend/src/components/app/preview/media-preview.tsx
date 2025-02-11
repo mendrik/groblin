@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
 import { $valueMap, activePath } from '@/state/value'
 import type { MediaType } from '@shared/json-value-types'
 import type { PreviewProps } from './preview-panel'
@@ -12,11 +13,11 @@ export default function MediaPreview({ node }: PreviewProps) {
 		<div className="w-full h-screen justify-center items-center flex">
 			<Card className="w-[300px]">
 				<CardHeader>
-					<CardTitle>
-						{value?.name} {value?.url}
-					</CardTitle>
+					<CardTitle className="text-center">{value?.name}</CardTitle>
 				</CardHeader>
-				<CardContent>Hallo</CardContent>
+				<CardContent>
+					<img className={cn('h-auto w-full')} src={value?.url} alt="" />
+				</CardContent>
 			</Card>
 		</div>
 	)
