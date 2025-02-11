@@ -29,13 +29,16 @@ import { PublicServer } from './services/public-server.ts'
 import { PublicService } from './services/public-service.ts'
 import { S3Client } from './services/s3-client.ts'
 import { SchemaContext } from './services/schema-context.ts'
+import { ValueEnricher } from './services/value-enricher.ts'
 
 const pubSub = createPubSub()
 const container = new Container()
 container.bind<PubSub>('PubSub').toConstantValue(pubSub)
+container.bind(Kysely<DB>).toConstantValue(db)
+container.bind(S3Client).toSelf()
 container.bind(NodeResolver).toSelf()
 container.bind(NodeSettingsResolver).toSelf()
-container.bind(ValueResolver).toSelf()
+container.bind(ValueEnricher).toSelf()
 container.bind(AuthResolver).toSelf()
 container.bind(ListResolver).toSelf()
 container.bind(ProjectResolver).toSelf()
@@ -44,16 +47,15 @@ container.bind(UserResolver).toSelf()
 container.bind(LogAccess).toSelf()
 container.bind(ProjectService).toSelf()
 container.bind(IoResolver).toSelf()
-container.bind(S3Client).toSelf()
 container.bind(AuthChecker).toSelf()
 container.bind(EmailService).toSelf()
 container.bind(PublicService).toSelf()
 container.bind(SchemaContext).toSelf()
-container.bind(Kysely<DB>).toConstantValue(db)
 container.bind(ImageService).to(ImageService).inSingletonScope()
 container.bind(NodeSettingsService).to(NodeSettingsService).inSingletonScope()
 container.bind(InternalServer).to(InternalServer).inSingletonScope()
 container.bind(PublicServer).to(PublicServer).inSingletonScope()
+container.bind(ValueResolver).toSelf()
 
 console.log(yellow(`Starting services...`))
 void container.get(EmailService).init()

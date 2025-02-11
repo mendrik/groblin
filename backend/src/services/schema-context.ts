@@ -1,6 +1,6 @@
 import { listToTree } from '@shared/utils/list-to-tree.ts'
 import { mapBy } from '@shared/utils/map-by.ts'
-import { GraphQLEnumType, type GraphQLOutputType } from 'graphql'
+import { GraphQLEnumType } from 'graphql'
 import { inject, injectable } from 'inversify'
 import { Kysely, sql } from 'kysely'
 import { Maybe, MaybeAsync } from 'purify-ts'
@@ -12,18 +12,13 @@ import {
 	type NodeSettings,
 	NodeSettingsResolver
 } from 'src/resolvers/node-settings-resolver.ts'
-import { type Value, ValueResolver } from 'src/resolvers/value-resolver.ts'
+import type { Value } from 'src/resolvers/value-resolver.ts'
 import {
 	type ListPath,
 	NodeType,
 	type ProjectId,
 	type TreeNode
 } from 'src/types.ts'
-
-type NodeGraphQLType = {
-	type: GraphQLOutputType
-	node: TreeNode
-}
 
 @injectable()
 export class SchemaContext {
@@ -32,9 +27,6 @@ export class SchemaContext {
 
 	@inject(NodeSettingsResolver)
 	private nodeSettingsResolver: NodeSettingsResolver
-
-	@inject(ValueResolver)
-	private valueResolver: ValueResolver
 
 	@inject(ListResolver)
 	private listResolver: ListResolver

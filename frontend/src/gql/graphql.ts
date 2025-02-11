@@ -234,7 +234,6 @@ export enum NodeType {
   Media = 'media',
   Number = 'number',
   Object = 'object',
-  Reference = 'reference',
   Root = 'root',
   String = 'string'
 }

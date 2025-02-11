@@ -3,9 +3,9 @@ import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
 import type { DB, JsonValue } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
+import { ValueEnricher } from 'src/services/value-enricher.ts'
 import type { Context } from 'src/types.ts'
 import { Role, Topic } from 'src/types.ts'
-import { enrichValue } from 'src/utils/values.ts'
 import {
 	Arg,
 	Authorized,
@@ -94,6 +94,9 @@ export class ValueResolver {
 	@inject('PubSub')
 	private pubSub: PubSub
 
+	@inject(ValueEnricher)
+	private readonly enricher: ValueEnricher
+
 	@Subscription(returns => Value, {
 		topics: Topic.ValuesUpdated
 	})
@@ -116,7 +119,7 @@ export class ValueResolver {
 			.orderBy(['order', 'id'])
 			.selectAll()
 			.execute()
-			.then(xs => xs.map(enrichValue))
+			.then(xs => xs.map(this.enricher.enrichValue))
 			.then(xs => Promise.all(xs))
 	}
 
