@@ -12,7 +12,7 @@ export default defineConfig({
 			babel: {
 				plugins: [
 					['module:@preact/signals-react-transform']
-					//		['babel-plugin-react-compiler', { transform: 'preact' }]
+					//['babel-plugin-react-compiler']
 				]
 			}
 		})
