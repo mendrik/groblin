@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { WiggleMicroIcon } from '@/components/ui/random/wiggle-micro-icon'
 import { cn } from '@/lib/utils'
 import { $valueMap, activePath } from '@/state/value'
 import type { MediaType } from '@shared/json-value-types'
@@ -14,13 +14,11 @@ export default function MediaPreview({ node }: PreviewProps) {
 	return (
 		<div className="w-full h-screen justify-center items-center flex">
 			<Card className="w-[300px] relative">
-				<Button
-					variant="outline"
-					size="icon"
-					className="absolute top-2 right-2"
-				>
-					<Trash className="h-4 w-4" />
-				</Button>
+				<WiggleMicroIcon
+					icon={Trash}
+					onClick={() => void 0}
+					className="absolute right-1 top-1"
+				/>
 				<CardHeader>
 					<CardTitle className="text-center">{value?.name}</CardTitle>
 				</CardHeader>

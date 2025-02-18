@@ -4,7 +4,11 @@ import { useRef, useState } from 'react'
 import { useClickAway } from 'react-use'
 import { MicroIcon, type MicroIconProps } from './micro-icon'
 
-export const WiggleMicroIcon = ({ onClick, ...props }: MicroIconProps) => {
+export const WiggleMicroIcon = ({
+	onClick,
+	className,
+	...props
+}: MicroIconProps) => {
 	const [armed, setArmed] = useState(false)
 	const ref = useRef<HTMLButtonElement>(null)
 	useClickAway(ref, () => setArmed(false))
@@ -15,7 +19,8 @@ export const WiggleMicroIcon = ({ onClick, ...props }: MicroIconProps) => {
 			onClick={ev => (armed ? onClick?.(ev) : setArmed(true))}
 			className={cn(
 				armed &&
-					'animate-wiggle bg-destructive text-destructive-foreground hover:bg-destructive'
+					'animate-wiggle bg-destructive text-destructive-foreground hover:bg-destructive',
+				className
 			)}
 		/>
 	)

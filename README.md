@@ -18,6 +18,7 @@ The structure of the tree simultaneously creates a graphql interface for clients
 - [ ] Thumbnails for Media
 - [ ] Tag node types
 - [ ] Media preview
+- [ ] User management
 - [ ] List preview filters
 - [ ] Article editor 
     - [ ] Prose styles
