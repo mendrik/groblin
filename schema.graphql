@@ -103,6 +103,7 @@ type Mutation {
   deleteListItem(id: Int!): Boolean!
   deleteNodeById(id: Int!, order: Int!, parent_id: Int!): Boolean!
   deleteUser(id: Int!): Boolean!
+  deleteValue(id: Int!): Boolean!
   importArray(data: JsonArrayImportInput!): Boolean!
   insertListItem(listItem: InsertListItem!): Int!
   insertNode(data: InsertNode!, settings: JSONObject): Node!

@@ -1,222 +1,225 @@
 query GetProject {
-  getProject {
-    user {
-      id
-      email
-      name
-      lastProjectId
-    }
-    project {
-      id
-      name
-    }
-    nodes {
-      ...Node
-    }
-    values {
-      ...Value
-    }
-    nodeSettings {
-      ...NodeSettings
-    }
-  }
+	getProject {
+		user {
+			id
+			email
+			name
+			lastProjectId
+		}
+		project {
+			id
+			name
+		}
+		nodes {
+			...Node
+		}
+		values {
+			...Value
+		}
+		nodeSettings {
+			...NodeSettings
+		}
+	}
 }
 
 fragment Value on Value {
-      id
-      node_id
-      order
-      value
-      list_path
-      updated_at
+	id
+	node_id
+	order
+	value
+	list_path
+	updated_at
 }
 
 fragment Node on Node {
-  id
-  name
-  order
-  type
-  depth
-  parent_id
+	id
+	name
+	order
+	type
+	depth
+	parent_id
 }
 
 fragment NodeSettings on NodeSettings {
-  id
-  node_id
-  settings
+	id
+	node_id
+	settings
 }
 
 subscription NodesUpdated {
-  nodesUpdated
+	nodesUpdated
 }
 
 query GetNodes {
-  getNodes {
-    ...Node
-  }
+	getNodes {
+		...Node
+	}
 }
 
 mutation InsertNode($data: InsertNode!, $settings: JSONObject) {
-  insertNode(data: $data, settings: $settings) {
-    id
-  }
+	insertNode(data: $data, settings: $settings) {
+		id
+	}
 }
 
 mutation UpdateNode($data: ChangeNodeInput!) {
-  updateNode(data: $data)
+	updateNode(data: $data)
 }
 
 mutation DeleteNodeById($order: Int!, $parent_id: Int!, $id: Int!) {
-  deleteNodeById(order: $order, parent_id: $parent_id, id: $id)
+	deleteNodeById(order: $order, parent_id: $parent_id, id: $id)
 }
 
 query GetNodeSttings {
-  getNodeSettings {
-    id
-    settings
-    node_id
-  }
+	getNodeSettings {
+		id
+		settings
+		node_id
+	}
 }
 
 mutation UpsertNodeSettings($data: UpsertNodeSettings!) {
-  upsertNodeSettings(data: $data)
+	upsertNodeSettings(data: $data)
 }
 
 subscription NodeSettingsUpdated {
-  nodeSettingsUpdated
+	nodeSettingsUpdated
 }
 
-
 mutation Register($data: Registration!) {
-  register(data: $data)
+	register(data: $data)
 }
 
 mutation Login($data: Login!) {
-  login(data: $data) {
-    token
-    expiresDate
-  }
+	login(data: $data) {
+		token
+		expiresDate
+	}
 }
 
 mutation Logout {
-  logout
+	logout
 }
 
 subscription ValuesUpdated {
-  valuesUpdated {
-    ...Value
-  }
+	valuesUpdated {
+		...Value
+	}
 }
 
 query GetValues($data: GetValues!) {
-  getValues(data: $data) {
-    ...Value
-  }
+	getValues(data: $data) {
+		...Value
+	}
 }
 
 mutation InsertListItem($listItem: InsertListItem!) {
-  insertListItem(listItem: $listItem)
+	insertListItem(listItem: $listItem)
 }
 
 mutation DeleteListItem($id: Int!) {
-  deleteListItem(id: $id)
+	deleteListItem(id: $id)
 }
 
 mutation UpsertValue($data: UpsertValue!) {
-  upsertValue(data: $data)
+	upsertValue(data: $data)
+}
+
+mutation DeleteValue($id: Int!) {
+	deleteValue(id: $id)
 }
 
 mutation ImportArray($data: JsonArrayImportInput!) {
-  importArray(data: $data)
+	importArray(data: $data)
 }
 
 mutation TruncateList($data: TruncateValue!) {
-  truncate(data: $data)
+	truncate(data: $data)
 }
 
 mutation UploadUrl($filename: String!) {
-  uploadUrl(filename: $filename) {
-    signedUrl
-    object
-  }
+	uploadUrl(filename: $filename) {
+		signedUrl
+		object
+	}
 }
 
 query GetListItems($request: ListRequest!) {
-  getListItems(request: $request) {
-    id
-    node_id
-    value
-    order
-    list_path
-    updated_at
-    children {
-      ...Value
-    }
-  }
+	getListItems(request: $request) {
+		id
+		node_id
+		value
+		order
+		list_path
+		updated_at
+		children {
+			...Value
+		}
+	}
 }
 
 query GetListColumns($node_id: Int!) {
-  getListColumns(node_id: $node_id) {
-    ...Node
-  }
+	getListColumns(node_id: $node_id) {
+		...Node
+	}
 }
 
 fragment ApiKey on ApiKey {
-  name
-  key
-  is_active
-  created_at
-  expires_at
-  last_used
+	name
+	key
+	is_active
+	created_at
+	expires_at
+	last_used
 }
 
 query GetApiKeys {
-  getApiKeys {
-    ...ApiKey
-  }
+	getApiKeys {
+		...ApiKey
+	}
 }
 
 mutation CreateApiKey($data: CreateApiKey!) {
-  createApiKey(data: $data) {
-    ...ApiKey
-  }
+	createApiKey(data: $data) {
+		...ApiKey
+	}
 }
 
 mutation DeleteApiKey($key: String!) {
-  deleteApiKey(key: $key)
+	deleteApiKey(key: $key)
 }
 
 mutation ToggleApiKey($key: String!) {
-  toggleApiKey(key: $key)
+	toggleApiKey(key: $key)
 }
 
 subscription ApiKeysUpdated {
-  apiKeysUpdated
+	apiKeysUpdated
 }
 
 fragment ProjectUser on ProjectUser {
-  id
-  email
-  name
-  confirmed
-  roles
-  owner
+	id
+	email
+	name
+	confirmed
+	roles
+	owner
 }
 
 query GetUsers {
-  getUsers {
-    ...ProjectUser
-  }
+	getUsers {
+		...ProjectUser
+	}
 }
 
 mutation InviteUser($invite: Invite!) {
-  inviteUser(data: $invite)
+	inviteUser(data: $invite)
 }
 
 mutation DeleteUser($id: Int!) {
-  deleteUser(id: $id)
+	deleteUser(id: $id)
 }
 
 subscription UsersUpdated {
-  usersUpdated
+	usersUpdated
 }

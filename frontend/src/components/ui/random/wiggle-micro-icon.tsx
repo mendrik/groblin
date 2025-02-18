@@ -16,7 +16,14 @@ export const WiggleMicroIcon = ({
 		<MicroIcon
 			ref={ref}
 			{...props}
-			onClick={ev => (armed ? onClick?.(ev) : setArmed(true))}
+			onClick={ev => {
+				if (armed) {
+					onClick?.(ev)
+					setArmed(false)
+				} else {
+					setArmed(true)
+				}
+			}}
 			className={cn(
 				armed &&
 					'animate-wiggle bg-destructive text-destructive-foreground hover:bg-destructive',

@@ -225,4 +225,16 @@ export class ValueResolver {
 		this.pubSub.publish(Topic.ValuesUpdated, true)
 		return numDeletedRows > 0
 	}
+
+	@Mutation(returns => Boolean)
+	async deleteValue(@Arg('id', () => Int) id: number, @Ctx() ctx: Context) {
+		const { user } = ctx
+		const { numDeletedRows } = await this.db
+			.deleteFrom('values')
+			.where('id', '=', id)
+			.where('project_id', '=', user.lastProjectId)
+			.executeTakeFirstOrThrow()
+		this.pubSub.publish(Topic.ValuesUpdated, true)
+		return numDeletedRows > 0
+	}
 }

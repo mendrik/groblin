@@ -106,6 +106,7 @@ export type Mutation = {
   deleteListItem: Scalars['Boolean']['output'];
   deleteNodeById: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
+  deleteValue: Scalars['Boolean']['output'];
   importArray: Scalars['Boolean']['output'];
   insertListItem: Scalars['Int']['output'];
   insertNode: Node;
@@ -145,6 +146,11 @@ export type MutationDeleteNodeByIdArgs = {
 
 
 export type MutationDeleteUserArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationDeleteValueArgs = {
   id: Scalars['Int']['input'];
 };
 
@@ -450,6 +456,13 @@ export type UpsertValueMutationVariables = Exact<{
 
 export type UpsertValueMutation = { upsertValue: number };
 
+export type DeleteValueMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type DeleteValueMutation = { deleteValue: boolean };
+
 export type ImportArrayMutationVariables = Exact<{
   data: JsonArrayImportInput;
 }>;
@@ -713,6 +726,11 @@ export const UpsertValueDocument = `
   upsertValue(data: $data)
 }
     `;
+export const DeleteValueDocument = `
+    mutation DeleteValue($id: Int!) {
+  deleteValue(id: $id)
+}
+    `;
 export const ImportArrayDocument = `
     mutation ImportArray($data: JsonArrayImportInput!) {
   importArray(data: $data)
@@ -857,6 +875,9 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     },
     UpsertValue(variables: UpsertValueMutationVariables, options?: C): Promise<ExecutionResult<UpsertValueMutation, E>> {
       return requester<UpsertValueMutation, UpsertValueMutationVariables>(UpsertValueDocument, variables, options) as Promise<ExecutionResult<UpsertValueMutation, E>>;
+    },
+    DeleteValue(variables: DeleteValueMutationVariables, options?: C): Promise<ExecutionResult<DeleteValueMutation, E>> {
+      return requester<DeleteValueMutation, DeleteValueMutationVariables>(DeleteValueDocument, variables, options) as Promise<ExecutionResult<DeleteValueMutation, E>>;
     },
     ImportArray(variables: ImportArrayMutationVariables, options?: C): Promise<ExecutionResult<ImportArrayMutation, E>> {
       return requester<ImportArrayMutation, ImportArrayMutationVariables>(ImportArrayDocument, variables, options) as Promise<ExecutionResult<ImportArrayMutation, E>>;

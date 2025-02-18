@@ -6,13 +6,11 @@ import { inject, injectable } from 'inversify'
 import { T as _, assocPath } from 'ramda'
 import { isString, resolveP } from 'ramda-adjunct'
 import type { Value } from 'src/resolvers/value-resolver.ts'
-import { isJsonObject } from '../utils/json.ts'
+import { isJsonObject } from 'src/utils/json.ts'
 import { S3Client } from './s3-client.ts'
 
-const isImage = ({ value }: Value) =>
+const hasMedia = ({ value }: Value) =>
 	isJsonObject(value) && isString(value.contentType)
-		? value.contentType.startsWith('image/')
-		: false
 
 type MediaValue = Value & { value: MediaType }
 
@@ -31,7 +29,7 @@ export class ValueEnricher {
 	}
 
 	public enrichValue = match<[Value], Promise<Value>>(
-		caseOf([isImage], v => this.appendS3Url(v as MediaValue)),
+		caseOf([hasMedia], v => this.appendS3Url(v as MediaValue)),
 		caseOf([_], resolveP<Value>)
 	)
 }

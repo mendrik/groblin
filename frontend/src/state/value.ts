@@ -124,3 +124,4 @@ export const selectAnyListItem = (value: Value) => {
 }
 
 export const saveValue = (data: UpsertValue) => Api.UpsertValue({ data })
+export const deleteValue = (id: number) => Api.DeleteValue({ id })
