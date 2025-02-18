@@ -78,3 +78,4 @@ export const prependArg =
 	}
 
 export const isNil = (x: unknown): x is undefined => x === undefined
+export const isNotNil = <T>(x: unknown): x is T => x !== undefined

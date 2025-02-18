@@ -1,6 +1,5 @@
 import { NodeType, type Value } from '@/gql/graphql'
 import { $focusedNode, type TreeNode, asNode } from '@/state/tree'
-import { $valueMap } from '@/state/value'
 import { caseOf, match } from '@shared/utils/match'
 import { T as _ } from 'ramda'
 import { type ExoticComponent, Suspense, lazy } from 'react'
@@ -40,17 +39,12 @@ export const PreviewPanel = ({ width }: OwnProps) => {
 	const node = asNode(nodeId)
 	const Panel = toPreviewPanel(node)
 
-	console.log($valueMap.value[node.id])
-
 	return (
 		<div className="flex flex-1 h-full w-full items-start px-4">
 			<ErrorBoundary fallback={<SelectInfo />} onError={console.error}>
 				<SWRConfig
 					value={{
-						suspense: true,
-						onError: (err, key) => {
-							throw err
-						}
+						suspense: true
 					}}
 				>
 					<Suspense fallback={<PreviewLoader />}>
