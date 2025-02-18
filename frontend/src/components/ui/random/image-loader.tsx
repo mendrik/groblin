@@ -1,10 +1,11 @@
 import { throwError } from '@shared/errors'
 import { caseOf, match } from '@shared/utils/match'
 import { isNotNil } from '@shared/utils/ramda'
-import { Ban, Loader } from 'lucide-react'
+import { Ban } from 'lucide-react'
 import { T as _ } from 'ramda'
 import type { ReactNode } from 'react'
 import useSWR from 'swr'
+import { Skeleton } from '../skeleton'
 import { MicroIcon } from './micro-icon'
 
 type OwnProps = {
@@ -25,7 +26,7 @@ export const ImageLoader = ({ src }: OwnProps) => {
 
 	return match<[boolean, Error, string | undefined], ReactNode>(
 		caseOf([true, _, _], () => (
-			<MicroIcon icon={Loader} className="w-10 h-10 spin" />
+			<Skeleton className="w-full aspect-square rounded-xl" />
 		)),
 		caseOf([false, isNotNil<Error>, _], (_, error) => (
 			<div className="flex flex-col items-center space-y-2">
