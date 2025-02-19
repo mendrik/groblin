@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { mapBy } from './map-by'
+import { mapBy } from './map-by.ts'
 
 type Item = { id: number; name: string }
 

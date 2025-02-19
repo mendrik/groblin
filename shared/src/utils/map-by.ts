@@ -1,4 +1,4 @@
-import type { AnyFn } from '@tp/functions'
+import type { AnyFn } from '@tp/functions.ts'
 
 export function mapBy<T, R>(fn: (el: T) => R): (list: T[]) => Map<R, T>
 export function mapBy<T, R>(fn: (el: T) => R, list: T[]): Map<R, T>

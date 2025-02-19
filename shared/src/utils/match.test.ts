@@ -10,7 +10,7 @@ import {
 import { expectNotType, expectType } from 'tsd'
 import { describe, expect, it } from 'vitest'
 import { type EnumLike, ZodNativeEnum, type ZodTypeAny, nativeEnum } from 'zod'
-import { caseOf, match } from './match'
+import { caseOf, match } from './match.ts'
 
 describe('pattern', () => {
 	it('should match the correct case', () => {

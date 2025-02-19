@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { pipeTap } from './pipe-tap'
+import { pipeTap } from './pipe-tap.ts'
 
 describe('pipeTap', () => {
 	const add2 = vi.fn((x: number) => x + 2)
