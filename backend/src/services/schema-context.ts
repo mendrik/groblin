@@ -3,7 +3,7 @@ import { mapBy } from '@shared/utils/map-by.ts'
 import { GraphQLEnumType } from 'graphql'
 import { inject, injectable } from 'inversify'
 import { Kysely, sql } from 'kysely'
-import { Maybe, MaybeAsync } from 'purify-ts'
+import { Maybe } from 'purify-ts'
 import { assoc, prop, propOr } from 'ramda'
 import { isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
 import type { DB, JsonValue } from 'src/database/schema.ts'
@@ -19,6 +19,7 @@ import {
 	type ProjectId,
 	type TreeNode
 } from 'src/types.ts'
+import { ValueEnricher } from './value-enricher.ts'
 
 @injectable()
 export class SchemaContext {
@@ -30,6 +31,9 @@ export class SchemaContext {
 
 	@inject(ListResolver)
 	private listResolver: ListResolver
+
+	@inject(ValueEnricher)
+	private valueEnricher: ValueEnricher
 
 	projectId: ProjectId
 	_settings: Map<number, NodeSettings>
@@ -62,28 +66,24 @@ export class SchemaContext {
 			.orderBy('order', 'asc')
 			.execute()
 	}
-	getValue(node: TreeNode, path: ListPath): Promise<JsonValue> {
-		const fetch = () =>
-			this.db
-				.selectFrom('values')
-				.where('node_id', '=', node.id)
-				.select('values.value')
-				.$if(isNilOrEmpty(path), qb =>
-					qb.where(eb =>
-						eb.or([
-							eb('list_path', 'is', null),
-							eb('list_path', '=', sql.val([]))
-						])
-					)
+	getValue(node: TreeNode, path: ListPath): Promise<Value | undefined> {
+		return this.db
+			.selectFrom('values')
+			.where('node_id', '=', node.id)
+			.selectAll()
+			.$if(isNilOrEmpty(path), qb =>
+				qb.where(eb =>
+					eb.or([
+						eb('list_path', 'is', null),
+						eb('list_path', '=', sql.val([]))
+					])
 				)
-				.$if(isNotNilOrEmpty(path), qb =>
-					qb.where('list_path', '=', sql.val(path))
-				)
-				.executeTakeFirst()
-				.then(Maybe.fromNullable)
-		return MaybeAsync.fromPromise(fetch)
-			.map(({ value }) => value)
-			.orDefault(null)
+			)
+			.$if(isNotNilOrEmpty(path), qb =>
+				qb.where('list_path', '=', sql.val(path))
+			)
+			.executeTakeFirst()
+			.then(this.enrichValue.bind(this))
 	}
 
 	settings(nodeId: number): Maybe<JsonValue> {
@@ -148,5 +148,9 @@ export class SchemaContext {
 				)
 				return acc
 			}, new Map<number, GraphQLEnumType>())
+	}
+
+	async enrichValue(value?: Value): Promise<Value | undefined> {
+		return value ? this.valueEnricher.enrichValue(value) : undefined
 	}
 }
