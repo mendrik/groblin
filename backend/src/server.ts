@@ -31,6 +31,12 @@ import { S3Client } from './services/s3-client.ts'
 import { SchemaContext } from './services/schema-context.ts'
 import { ValueEnricher } from './services/value-enricher.ts'
 
+import { useAdapter } from '@type-cacheable/node-cache-adapter'
+import NodeCache from 'node-cache'
+
+const client = new NodeCache()
+useAdapter(client)
+
 const pubSub = createPubSub()
 const container = new Container()
 container.bind<PubSub>('PubSub').toConstantValue(pubSub)

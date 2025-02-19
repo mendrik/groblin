@@ -13,12 +13,14 @@ const hasMedia = ({ value }: Value) =>
 	isJsonObject(value) && isString(value.contentType)
 
 type MediaValue = Value & { value: MediaType }
+import { Cacheable } from '@type-cacheable/core'
 
 @injectable()
 export class ValueEnricher {
 	@inject(S3Client)
 	private readonly s3: S3Client
 
+	@Cacheable({ cacheKey: (v: any[]) => `s3url-${v[0].id}`, ttlSeconds: 3500 })
 	private async appendS3Url(value: MediaValue): Promise<Value> {
 		const command = new GetObjectCommand({
 			Bucket: process.env.AWS_BUCKET,
