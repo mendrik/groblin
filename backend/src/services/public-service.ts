@@ -20,7 +20,7 @@ import {
 	GraphQLSchema,
 	GraphQLString
 } from 'graphql'
-import { GraphQLDate } from 'graphql-scalars'
+import { GraphQLDateTime } from 'graphql-scalars'
 import { inject, injectable } from 'inversify'
 import { Maybe } from 'purify-ts'
 import { T as _, isNotNil } from 'ramda'
@@ -48,7 +48,7 @@ const scalarForNode = match<[TreeNode, SchemaContext], GraphQLOutputType>(
 	caseOf([{ type: NodeType.boolean }, _], GraphQLBoolean),
 	caseOf([{ type: NodeType.number }, _], GraphQLFloat),
 	caseOf([{ type: NodeType.color }, _], new GraphQLList(GraphQLInt)),
-	caseOf([{ type: NodeType.date }, _], GraphQLDate),
+	caseOf([{ type: NodeType.date }, _], GraphQLDateTime),
 	caseOf(
 		[{ type: NodeType.choice }, _],
 		(node, c) => c.getEnumType(node.id) ?? GraphQLString
