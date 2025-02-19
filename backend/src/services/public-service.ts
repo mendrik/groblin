@@ -18,8 +18,7 @@ import {
 	GraphQLObjectType,
 	type GraphQLOutputType,
 	GraphQLSchema,
-	GraphQLString,
-	printSchema
+	GraphQLString
 } from 'graphql'
 import { GraphQLDateTime } from 'graphql-scalars'
 import { inject, injectable } from 'inversify'
@@ -141,7 +140,7 @@ export class PublicService {
 			types: [...this.context.getEnums()],
 			query: query.type as GraphQLObjectType
 		})
-		console.log(printSchema(schema))
+		// console.log(printSchema(schema))
 		return schema
 	}
 }
