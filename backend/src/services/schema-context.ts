@@ -1,6 +1,6 @@
 import { listToTree } from '@shared/utils/list-to-tree.ts'
 import { mapBy } from '@shared/utils/map-by.ts'
-import { GraphQLEnumType } from 'graphql'
+import { GraphQLEnumType, GraphQLString } from 'graphql'
 import { inject, injectable } from 'inversify'
 import { Kysely, sql } from 'kysely'
 import { Maybe } from 'purify-ts'
@@ -110,8 +110,8 @@ export class SchemaContext {
 		return listToTree('id', 'parent_id', 'nodes')(nodes) as TreeNode
 	}
 
-	getEnumType(nodeId: number): GraphQLEnumType | undefined {
-		return this._enums.get(nodeId)
+	getEnumType(nodeId: number): GraphQLEnumType | typeof GraphQLString {
+		return this._enums.get(nodeId) ?? GraphQLString
 	}
 
 	getEnums(): GraphQLEnumType[] {

@@ -49,10 +49,7 @@ const scalarForNode = match<[TreeNode, SchemaContext], GraphQLOutputType>(
 	caseOf([{ type: NodeType.number }, _], GraphQLFloat),
 	caseOf([{ type: NodeType.color }, _], new GraphQLList(GraphQLInt)),
 	caseOf([{ type: NodeType.date }, _], GraphQLDateTime),
-	caseOf(
-		[{ type: NodeType.choice }, _],
-		(node, c) => c.getEnumType(node.id) ?? GraphQLString
-	),
+	caseOf([{ type: NodeType.choice }, _], (n, c) => c.getEnumType(n.id)),
 	caseOf([_, _], GraphQLString)
 )
 
