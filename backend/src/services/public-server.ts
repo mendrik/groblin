@@ -1,15 +1,18 @@
-import {
-	type IncomingMessage,
-	type Server,
-	type ServerResponse,
-	createServer
-} from 'node:http'
+import type { IncomingMessage, Server, ServerResponse } from 'node:http'
 import { assertExists } from '@shared/asserts.ts'
 import { cyan, lightGreen, yellow } from 'ansicolor'
+import fastify, {
+	type FastifyInstance,
+	type FastifyReply,
+	type FastifyRequest
+} from 'fastify'
 import type { GraphQLSchema } from 'graphql'
 import { createYoga } from 'graphql-yoga'
 import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
+
+// This is the fastify instance you have created
+
 import type { DB } from 'src/database/schema.ts'
 import { Topic } from 'src/types.ts'
 import type { ProjectId } from 'src/types.ts'
@@ -34,12 +37,33 @@ export class PublicServer {
 	private server: Server<typeof IncomingMessage, typeof ServerResponse>
 
 	private abort: AbortController
+	private app: FastifyInstance
 
 	constructor() {
-		const yoga = createYoga({
+		const yoga = createYoga<{
+			req: FastifyRequest
+			reply: FastifyReply
+		}>({
 			schema: ({ request }) => this.schema(request)
 		})
-		this.server = createServer(yoga)
+		this.app = fastify({ logger: true })
+		this.app.get('/image', async (req, reply) => {
+			reply.send('Hello World')
+		})
+		this.app.route({
+			url: yoga.graphqlEndpoint,
+			method: ['GET', 'POST', 'OPTIONS'],
+			handler: async (req: FastifyRequest, reply: FastifyReply) => {
+				const response = await yoga.handleNodeRequestAndResponse(req, reply, {
+					req,
+					reply
+				})
+				response.headers.forEach((value, key) => reply.header(key, value))
+				reply.status(response.status)
+				reply.send(response.body)
+				return reply
+			}
+		})
 		this.abort = new AbortController()
 	}
 
@@ -84,7 +108,7 @@ export class PublicServer {
 	public start() {
 		this.listenToNodeChanges()
 		this.listenToNodeSettingsChanges()
-		this.server.listen(port, () => {
+		this.app.listen({ port }).then(() => {
 			console.log(
 				cyan(
 					`Public GQL server on http://localhost:${lightGreen(port)}/graphql`
