@@ -14,8 +14,8 @@ import { Kysely } from 'kysely'
 // This is the fastify instance you have created
 
 import type { DB } from 'src/database/schema.ts'
-import { Topic } from 'src/types.ts'
 import type { ProjectId } from 'src/types.ts'
+import { Topic } from 'src/types.ts'
 import type { PubSub } from 'type-graphql'
 import { PublicService } from './public-service.ts'
 
@@ -47,7 +47,7 @@ export class PublicServer {
 			schema: ({ request }) => this.schema(request)
 		})
 		this.app = fastify({ logger: true })
-		this.app.get('/image', async (req, reply) => {
+		this.app.get('/image', async (req: FastifyRequest, reply: FastifyReply) => {
 			reply.send('Hello World')
 		})
 		this.app.route({
