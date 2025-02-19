@@ -1,4 +1,5 @@
 import type {
+	ArticleType,
 	BooleanType,
 	ChoiceType,
 	ColorType,
@@ -40,6 +41,7 @@ const isDateType = hasValue<DateType>
 const isMediaype = hasValue<MediaType>
 const isChoiceType = hasValue<ChoiceType>
 const isBooleanType = hasValue<BooleanType>
+const isArticleType = hasValue<ArticleType>
 
 const scalarForNode = match<[TreeNode, SchemaContext], GraphQLOutputType>(
 	caseOf([{ type: NodeType.boolean }, _], GraphQLBoolean),
@@ -61,6 +63,7 @@ const jsonForNode = match<[TreeNode, any], JsonValue>(
 	caseOf([{ type: NodeType.media }, isMediaype], (_, v) => v.name),
 	caseOf([{ type: NodeType.choice }, isChoiceType], (_, v) => v.selected),
 	caseOf([{ type: NodeType.boolean }, isBooleanType], (_, v) => v.state),
+	caseOf([{ type: NodeType.article }, isArticleType], (_, v) => v.content),
 	caseOf([_, _], () => null)
 )
 
