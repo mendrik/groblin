@@ -2,7 +2,7 @@ import { safeFormat } from '@/lib/date'
 import { inputValue } from '@/lib/dom-events'
 import { EditorType } from '@shared/enums'
 import { caseOf, match } from '@shared/utils/match'
-
+import type { AnyFn } from '@tp/functions'
 import { Calendar } from 'lucide-react'
 import { path, T as _, nth, pipe } from 'ramda'
 import type { ReactNode } from 'react'
@@ -40,7 +40,7 @@ const matcher = match<Args, ReactNode>(
 					render={nth(0)}
 					value={desc.options.find(([_, v]) => v === value)}
 					optional={type.isNullable()}
-					onChange={t => onChange(t?.[1] ?? null)}
+					onChange={pipe(nth(1) as AnyFn, onChange)}
 					placeholder={desc.placeholder}
 					{...field}
 				/>
