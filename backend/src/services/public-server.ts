@@ -17,6 +17,7 @@ import type { DB } from 'src/database/schema.ts'
 import type { ProjectId } from 'src/types.ts'
 import { Topic } from 'src/types.ts'
 import type { PubSub } from 'type-graphql'
+import { ImageService } from './image-service.ts'
 import { PublicService } from './public-service.ts'
 
 const port = 4001
@@ -34,6 +35,9 @@ export class PublicServer {
 	@inject(PublicService)
 	private schemaService: PublicService
 
+	@inject(ImageService)
+	private imageService: ImageService
+
 	private server: Server<typeof IncomingMessage, typeof ServerResponse>
 
 	private abort: AbortController
@@ -47,9 +51,9 @@ export class PublicServer {
 			schema: ({ request }) => this.schema(request)
 		})
 		this.app = fastify({ logger: true })
-		this.app.get('/image', async (req: FastifyRequest, reply: FastifyReply) => {
-			reply.send('Hello World')
-		})
+		this.app.get('/image', (req: FastifyRequest, reply: FastifyReply) =>
+			this.imageService.handleRequest(req, reply)
+		)
 		this.app.route({
 			url: yoga.graphqlEndpoint,
 			method: ['GET', 'POST', 'OPTIONS'],

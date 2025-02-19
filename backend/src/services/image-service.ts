@@ -1,3 +1,4 @@
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { inject, injectable } from 'inversify'
 import { isString } from 'ramda-adjunct'
 import type {} from 'src/database/schema.ts'
@@ -38,5 +39,9 @@ export class ImageService {
 				this.s3.deleteFile(value.value.file)
 			}
 		}
+	}
+
+	handleRequest(req: FastifyRequest, reply: FastifyReply) {
+		reply.send('Hello from image service')
 	}
 }
