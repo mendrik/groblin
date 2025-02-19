@@ -1,5 +1,5 @@
 import { NodeType, type Value } from '@/gql/graphql'
-import { $focusedNode, type TreeNode, asNode } from '@/state/tree'
+import { $focusedNode, $nodesMap, type TreeNode, asNode } from '@/state/tree'
 import { caseOf, match } from '@shared/utils/match'
 import { T as _ } from 'ramda'
 import { type ExoticComponent, Suspense, lazy } from 'react'
@@ -35,7 +35,7 @@ type OwnProps = {
 
 export const PreviewPanel = ({ width }: OwnProps) => {
 	const nodeId = $focusedNode.value
-	if (!nodeId) return <SelectInfo />
+	if (!nodeId || $nodesMap.value[nodeId] == null) return <SelectInfo />
 	const node = asNode(nodeId)
 	const Panel = toPreviewPanel(node)
 

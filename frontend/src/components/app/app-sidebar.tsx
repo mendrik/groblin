@@ -9,7 +9,7 @@ import {
 } from '@radix-ui/react-tooltip'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import {
-	Database,
+	FileJson,
 	House,
 	Key,
 	LogIn,
@@ -72,7 +72,7 @@ export const AppSidebar = () => {
 					<IconLink icon={Users} onClick={() => navigate('/users')}>
 						Users
 					</IconLink>
-					<IconLink icon={Database}>Export</IconLink>
+					<IconLink icon={FileJson}>Import</IconLink>
 					<IconLink icon={UserCircleIcon}>Profile</IconLink>
 					<IconLink icon={LogIn} onClick={logoutCommand}>
 						Logout
