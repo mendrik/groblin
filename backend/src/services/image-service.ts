@@ -67,10 +67,7 @@ export class ImageService {
 		return url`http://${host}:${port}/image/${encryptInteger(value.id)}?size=${size}`
 	}
 
-	@ErrorHandler((res, error) => {
-		res.writeHead(500, error.message)
-		res.end(error.message)
-	})
+	@ErrorHandler()
 	async handleRequest<I extends IncomingMessage, O extends ServerResponse<I>>(
 		req: I,
 		response: O
