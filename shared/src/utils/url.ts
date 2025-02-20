@@ -21,7 +21,7 @@ export const url = (
 	const combinedUrl = zipWith<string, string, string>(
 		concat,
 		strings,
-		values.map(encodeURIComponent).concat(pad)
+		values.concat(pad)
 	).join('')
 	const [baseUrl, queryString] = split('?', combinedUrl)
 	const processedQuery = Maybe.fromNullable(queryString)
