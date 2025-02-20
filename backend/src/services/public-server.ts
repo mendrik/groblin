@@ -1,4 +1,4 @@
-import type { ClientRequest, Server, ServerResponse } from 'node:http'
+import type { IncomingMessage, OutgoingMessage, Server } from 'node:http'
 import { createServer } from 'node:http'
 import { assertExists } from '@shared/asserts.ts'
 import { cyan, lightGreen, yellow } from 'ansicolor'
@@ -42,14 +42,15 @@ export class PublicServer {
 
 	constructor() {
 		const yoga = createYoga<{
-			req: ClientRequest
-			reply: ServerResponse
+			req: IncomingMessage
+			reply: OutgoingMessage
 		}>({
 			schema: ({ request }) => this.schema(request)
 		})
+
 		this.server = createServer(
 			match<[any, any], any>(
-				caseOf([{ url: startsWith('/image') }, _], (i, o) =>
+				caseOf([{ url: startsWith('/image/') }, _], (i, o) =>
 					this.imageService.handleRequest(i, o)
 				),
 				caseOf([_, _], yoga)

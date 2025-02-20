@@ -1,10 +1,14 @@
-import type { ClientRequest, ServerResponse } from 'node:http'
+import type { IncomingMessage, ServerResponse } from 'node:http'
+import { assertExists, assertThat } from '@shared/asserts.ts'
 import type { MediaType } from '@shared/json-value-types.ts'
-import { encryptInteger } from '@shared/utils/number-hash.ts'
+import {} from '@shared/utils/match.ts'
+import { decryptInteger, encryptInteger } from '@shared/utils/number-hash.ts'
 import { url } from '@shared/utils/url.ts'
 import { inject, injectable } from 'inversify'
-import { isString } from 'ramda-adjunct'
-import type {} from 'src/database/schema.ts'
+import { Kysely } from 'kysely'
+import { uniq } from 'ramda'
+import { included, isString } from 'ramda-adjunct'
+import type { DB } from 'src/database/schema.ts'
 import { NodeResolver } from 'src/resolvers/node-resolver.ts'
 import type { Value } from 'src/resolvers/value-resolver.ts'
 import { NodeType } from 'src/types.ts'
@@ -16,6 +20,14 @@ import { S3Client } from './s3-client.ts'
 const port = process.env.PUBLIC_PORT
 const host = process.env.PUBLIC_HOST
 
+type ValueWithSettings = {
+	value: MediaType
+	settings?: {
+		thumbnails: string[]
+		required: boolean
+	}
+}
+
 @injectable()
 export class ImageService {
 	@inject('PubSub')
@@ -26,6 +38,9 @@ export class ImageService {
 
 	@inject(S3Client)
 	private s3: S3Client
+
+	@inject(Kysely)
+	private db: Kysely<DB>
 
 	init() {
 		void this.waitForImageReplacement()
@@ -51,8 +66,34 @@ export class ImageService {
 		return url`http://${host}:${port}/image/${encryptInteger(value.id)}?size=${size}`
 	}
 
-	handleRequest(_req: ClientRequest, response: ServerResponse) {
+	async handleRequest<I extends IncomingMessage, O extends ServerResponse<I>>(
+		req: I,
+		response: O
+	) {
+		assertExists(req.url, 'Request URL is missing')
+		const url = new URL(req.url, `http://${host}:${port}`)
+		const size = url.searchParams.get('size')
+		const idHash = url.pathname.split('/').pop()
+		assertExists(idHash, 'Image ID is missing')
+		const id = decryptInteger(idHash)
+
+		const res = await this.db
+			.selectFrom('values')
+			.leftJoin('node_settings', 'values.node_id', 'node_settings.node_id')
+			.select([
+				'values.value',
+				eb => eb.ref('node_settings.settings').as('settings')
+			])
+			.where('values.id', '=', id)
+			.executeTakeFirstOrThrow()
+		const settings = res as ValueWithSettings
+		const thumbails: string[] = uniq(
+			['640'].concat(settings.settings?.thumbnails ?? [])
+		)
+		if (size) {
+			assertThat(included(thumbails), size, 'Invalid size')
+		}
 		response.writeHead(200, { 'Content-Type': 'text/plain' })
-		response.end('Hello from image service')
+		response.end(JSON.stringify(thumbails))
 	}
 }
