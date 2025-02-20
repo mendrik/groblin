@@ -19,7 +19,6 @@ import {
 	type ProjectId,
 	type TreeNode
 } from 'src/types.ts'
-import { ValueEnricher } from './value-enricher.ts'
 
 @injectable()
 export class SchemaContext {
@@ -31,9 +30,6 @@ export class SchemaContext {
 
 	@inject(ListResolver)
 	private listResolver: ListResolver
-
-	@inject(ValueEnricher)
-	private valueEnricher: ValueEnricher
 
 	projectId: ProjectId
 	_settings: Map<number, NodeSettings>
@@ -83,7 +79,6 @@ export class SchemaContext {
 				qb.where('list_path', '=', sql.val(path))
 			)
 			.executeTakeFirst()
-			.then(this.enrichValue.bind(this))
 	}
 
 	settings(nodeId: number): Maybe<JsonValue> {
@@ -148,9 +143,5 @@ export class SchemaContext {
 				)
 				return acc
 			}, new Map<number, GraphQLEnumType>())
-	}
-
-	async enrichValue(value?: Value): Promise<Value | undefined> {
-		return value ? this.valueEnricher.enrichValue(value) : undefined
 	}
 }

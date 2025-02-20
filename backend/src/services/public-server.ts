@@ -18,7 +18,7 @@ import type { PubSub } from 'type-graphql'
 import { ImageService } from './image-service.ts'
 import { PublicService } from './public-service.ts'
 
-const port = 4001
+const port = process.env.PUBLIC_PORT
 
 @injectable()
 export class PublicServer {

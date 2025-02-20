@@ -6,6 +6,9 @@
 		"test": "vitest",
 		"schema": ""
 	},
+	"dependencies": {
+		"purify-ts": "2.1.0"
+	},
 	"peerDependencies": {
 		"ts-toolbelt": "9.6.0"
 	},

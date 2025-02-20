@@ -7,7 +7,6 @@ export type MediaType = {
 	file: string
 	contentType: string
 	size: Bytes
-	url?: string
 }
 
 export type DateType = { date: string | Date }

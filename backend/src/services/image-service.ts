@@ -1,5 +1,6 @@
 import type { ClientRequest, ServerResponse } from 'node:http'
-import type {} from 'fastify'
+import type { MediaType } from '@shared/json-value-types.ts'
+import { url } from '@shared/utils/url.ts'
 import { inject, injectable } from 'inversify'
 import { isString } from 'ramda-adjunct'
 import type {} from 'src/database/schema.ts'
@@ -10,6 +11,9 @@ import { Topic } from 'src/types.ts'
 import { isJsonObject } from 'src/utils/json.ts'
 import type { PubSub } from 'type-graphql'
 import { S3Client } from './s3-client.ts'
+
+const port = process.env.PUBLIC_PORT
+const host = process.env.PUBLIC_HOST
 
 @injectable()
 export class ImageService {
@@ -42,8 +46,12 @@ export class ImageService {
 		}
 	}
 
+	imageUrl(value: Value & { value: MediaType }, size?: string) {
+		return url`http://${host}:${port}/image/${value.id}?size=${size}`
+	}
+
 	handleRequest(_req: ClientRequest, response: ServerResponse) {
-		response.writeHead(200,{"Content-Type":"text/plain"});
+		response.writeHead(200, { 'Content-Type': 'text/plain' })
 		response.end('Hello from image service')
 	}
 }

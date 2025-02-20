@@ -29,7 +29,6 @@ import { PublicServer } from './services/public-server.ts'
 import { PublicService } from './services/public-service.ts'
 import { S3Client } from './services/s3-client.ts'
 import { SchemaContext } from './services/schema-context.ts'
-import { ValueEnricher } from './services/value-enricher.ts'
 
 import { useAdapter } from '@type-cacheable/node-cache-adapter'
 import NodeCache from 'node-cache'
@@ -44,7 +43,6 @@ container.bind(Kysely<DB>).toConstantValue(db)
 container.bind(S3Client).toSelf()
 container.bind(NodeResolver).toSelf()
 container.bind(NodeSettingsResolver).toSelf()
-container.bind(ValueEnricher).toSelf()
 container.bind(AuthResolver).toSelf()
 container.bind(ListResolver).toSelf()
 container.bind(ProjectResolver).toSelf()
