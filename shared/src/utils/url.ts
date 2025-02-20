@@ -1,6 +1,5 @@
 import { Maybe } from 'purify-ts'
 import {
-	compose,
 	concat,
 	filter,
 	includes,
@@ -17,7 +16,7 @@ import { isNotNilOrEmpty } from 'ramda-adjunct'
 
 const filterEmptyParams = pipe(
 	split('&'),
-	filter(compose(isNotEmpty, match(/\w+=[^&$]+/))),
+	filter(o(isNotEmpty, match(/\w+=[^&$]+/))),
 	join('&')
 )
 
