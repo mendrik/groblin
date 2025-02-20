@@ -1,5 +1,6 @@
 import type { ClientRequest, ServerResponse } from 'node:http'
 import type { MediaType } from '@shared/json-value-types.ts'
+import { encryptInteger } from '@shared/utils/number-hash.ts'
 import { url } from '@shared/utils/url.ts'
 import { inject, injectable } from 'inversify'
 import { isString } from 'ramda-adjunct'
@@ -47,7 +48,7 @@ export class ImageService {
 	}
 
 	imageUrl(value: Value & { value: MediaType }, size?: string): string {
-		return url`http://${host}:${port}/image/${value.id}?size=${size}`
+		return url`http://${host}:${port}/image/${encryptInteger(value.id)}?size=${size}`
 	}
 
 	handleRequest(_req: ClientRequest, response: ServerResponse) {

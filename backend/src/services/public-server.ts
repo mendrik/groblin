@@ -6,7 +6,7 @@ import type { GraphQLSchema } from 'graphql'
 import { createYoga } from 'graphql-yoga'
 import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
-import { T as _ } from 'ramda'
+import { T as _, startsWith } from 'ramda'
 
 // This is the fastify instance you have created
 
@@ -49,7 +49,7 @@ export class PublicServer {
 		})
 		this.server = createServer(
 			match<[any, any], any>(
-				caseOf([{ url: '/image' }, _], (i, o) =>
+				caseOf([{ url: startsWith('/image') }, _], (i, o) =>
 					this.imageService.handleRequest(i, o)
 				),
 				caseOf([_, _], yoga)
