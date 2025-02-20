@@ -1,4 +1,5 @@
-import type { FastifyReply, FastifyRequest } from 'fastify'
+import type { ClientRequest, ServerResponse } from 'node:http'
+import type {} from 'fastify'
 import { inject, injectable } from 'inversify'
 import { isString } from 'ramda-adjunct'
 import type {} from 'src/database/schema.ts'
@@ -41,7 +42,8 @@ export class ImageService {
 		}
 	}
 
-	handleRequest(req: FastifyRequest, reply: FastifyReply) {
-		reply.send('Hello from image service')
+	handleRequest(_req: ClientRequest, response: ServerResponse) {
+		response.writeHead(200,{"Content-Type":"text/plain"});
+		response.end('Hello from image service')
 	}
 }

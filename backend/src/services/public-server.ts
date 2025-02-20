@@ -1,18 +1,21 @@
-import type { IncomingMessage, Server, ServerResponse } from 'node:http'
+import type {
+	ClientRequest,
+	IncomingMessage,
+	Server,
+	ServerResponse
+} from 'node:http'
+import { createServer } from 'node:http'
 import { assertExists } from '@shared/asserts.ts'
 import { cyan, lightGreen, yellow } from 'ansicolor'
-import fastify, {
-	type FastifyInstance,
-	type FastifyReply,
-	type FastifyRequest
-} from 'fastify'
 import type { GraphQLSchema } from 'graphql'
 import { createYoga } from 'graphql-yoga'
 import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
+import { T as _ } from 'ramda'
 
 // This is the fastify instance you have created
 
+import { caseOf, match } from '@shared/utils/match.ts'
 import type { DB } from 'src/database/schema.ts'
 import type { ProjectId } from 'src/types.ts'
 import { Topic } from 'src/types.ts'
@@ -41,33 +44,23 @@ export class PublicServer {
 	private server: Server<typeof IncomingMessage, typeof ServerResponse>
 
 	private abort: AbortController
-	private app: FastifyInstance
+	private app: Server
 
 	constructor() {
 		const yoga = createYoga<{
-			req: FastifyRequest
-			reply: FastifyReply
+			req: ClientRequest
+			reply: ServerResponse
 		}>({
 			schema: ({ request }) => this.schema(request)
 		})
-		this.app = fastify({ logger: true })
-		this.app.get('/image', (req: FastifyRequest, reply: FastifyReply) =>
-			this.imageService.handleRequest(req, reply)
+		this.app = createServer(
+			match<[any, any], any>(
+				caseOf([{ url: '/image' }, _], (i, o) =>
+					this.imageService.handleRequest(i, o)
+				),
+				caseOf([_, _], yoga)
+			)
 		)
-		this.app.route({
-			url: yoga.graphqlEndpoint,
-			method: ['GET', 'POST', 'OPTIONS'],
-			handler: async (req: FastifyRequest, reply: FastifyReply) => {
-				const response = await yoga.handleNodeRequestAndResponse(req, reply, {
-					req,
-					reply
-				})
-				response.headers.forEach((value, key) => reply.header(key, value))
-				reply.status(response.status)
-				reply.send(response.body)
-				return reply
-			}
-		})
 		this.abort = new AbortController()
 	}
 
@@ -112,7 +105,7 @@ export class PublicServer {
 	public start() {
 		this.listenToNodeChanges()
 		this.listenToNodeSettingsChanges()
-		this.app.listen({ port }).then(() => {
+		this.app.listen({ port }, () => {
 			console.log(
 				cyan(
 					`Public GQL server on http://localhost:${lightGreen(port)}/graphql`
