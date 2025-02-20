@@ -46,7 +46,7 @@ export class ImageService {
 		}
 	}
 
-	imageUrl(value: Value & { value: MediaType }, size?: string) {
+	imageUrl(value: Value & { value: MediaType }, size?: string): string {
 		return url`http://${host}:${port}/image/${value.id}?size=${size}`
 	}
 

@@ -1,3 +1,4 @@
+import { throwError } from '@shared/errors.ts'
 import type {
 	ArticleType,
 	BooleanType,
@@ -25,6 +26,7 @@ import { inject, injectable } from 'inversify'
 import { Maybe } from 'purify-ts'
 import { T as _, isNotNil } from 'ramda'
 import type { JsonValue } from 'src/database/schema.ts'
+import type { Value } from 'src/resolvers/value-resolver.ts'
 import {
 	type ListPath,
 	NodeType,
@@ -58,10 +60,12 @@ const jsonForNode = match<[TreeNode, any], JsonValue>(
 	caseOf([{ type: NodeType.color }, isColorType], (_, v) => v.rgba as number[]),
 	caseOf([{ type: NodeType.number }, isNumberType], (_, v) => v.figure),
 	caseOf([{ type: NodeType.date }, isDateType], (_, v) => v.date.toString()),
-	caseOf([{ type: NodeType.media }, isMediaype], (_, v) => v.url ?? v.name),
 	caseOf([{ type: NodeType.choice }, isChoiceType], (_, v) => v.selected),
 	caseOf([{ type: NodeType.boolean }, isBooleanType], (_, v) => v.state),
 	caseOf([{ type: NodeType.article }, isArticleType], (_, v) => v.content),
+	caseOf([{ type: NodeType.media }, isMediaype], () =>
+		throwError('Unreachable code')
+	),
 	caseOf([_, _], () => null)
 )
 
@@ -84,7 +88,12 @@ const resolveValue = (
 	resolve: async parent => {
 		const path = pathFor(parent)
 		const val = await context.getValue(node, path).then(Maybe.fromNullable)
-		return val.mapOrDefault(({ value }) => jsonForNode(node, value), null)
+		return val.mapOrDefault(value => {
+			if (node.type === NodeType.media) {
+				return context.imageUrl(value as Value & { value: MediaType })
+			}
+			return jsonForNode(node, value.value)
+		}, null)
 	}
 })
 

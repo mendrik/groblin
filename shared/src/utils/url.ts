@@ -1,27 +1,39 @@
 import { Maybe } from 'purify-ts'
-import { concat, join, pipe, reduce, split, zipWith } from 'ramda'
+import {
+	concat,
+	filter,
+	includes,
+	join,
+	pipe,
+	split,
+	take,
+	zipWith
+} from 'ramda'
 import { isNotNilOrEmpty } from 'ramda-adjunct'
 
 const filterEmptyParams = pipe(
 	split('&'),
-	reduce((acc: string[], param: string) => {
-		const [key, value] = split('=', param)
-		return !!key && !!value
-			? [...acc, `${key}=${encodeURIComponent(value)}`]
-			: acc
-	}, []),
+	filter((param: string) => {
+		const [key, value] = param.split('=')
+		return Boolean(key) && Boolean(value)
+	}),
 	join('&')
 )
-// Helper function to process the URL
+
 export const url = (
 	strings: TemplateStringsArray,
 	...values: string[]
 ): string => {
-	const pad = Array(strings.length - values.length).fill('')
-	const combinedUrl = zipWith<string, string, string>(
-		concat,
+	const params = values.concat(Array(strings.length - values.length).fill(''))
+	const combinedUrl = zipWith(
+		(a = '', b = '') => a.concat(b),
 		strings,
-		values.concat(pad)
+		params.map((value, index) => {
+			if (take(index, strings).some(includes('?'))) {
+				return encodeURIComponent(value)
+			}
+			return value
+		})
 	).join('')
 	const [baseUrl, queryString] = split('?', combinedUrl)
 	const processedQuery = Maybe.fromNullable(queryString)

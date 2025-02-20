@@ -33,6 +33,15 @@ describe('url', () => {
 			'http://example.com?foo=bar'
 		)
 	})
+	test('should encode query strings', () => {
+		const fooVal = 'bar&baz'
+		const emptyVal = 'x=&3' // This will be filtered out.
+		const path = '/xh/z' // This will be filtered out.
+		const sub = '&ww.' // This will be filtered out.
+		expect(
+			url`http://${sub}example.com${path}?foo=${fooVal}&baz=${emptyVal}`
+		).toBe('http://&ww.example.com/xh/z?foo=bar&baz=x%3D%263')
+	})
 
 	test('should return only the base URL if query string is empty or malformed', () => {
 		// Query marker with no parameters

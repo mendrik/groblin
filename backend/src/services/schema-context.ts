@@ -19,6 +19,8 @@ import {
 	type ProjectId,
 	type TreeNode
 } from 'src/types.ts'
+import { ImageService } from './image-service.ts'
+import { MediaType } from '@shared/json-value-types.ts'
 
 @injectable()
 export class SchemaContext {
@@ -28,8 +30,8 @@ export class SchemaContext {
 	@inject(NodeSettingsResolver)
 	private nodeSettingsResolver: NodeSettingsResolver
 
-	@inject(ListResolver)
-	private listResolver: ListResolver
+	@inject(ImageService)
+	private imageService: ImageService
 
 	projectId: ProjectId
 	_settings: Map<number, NodeSettings>
@@ -143,5 +145,9 @@ export class SchemaContext {
 				)
 				return acc
 			}, new Map<number, GraphQLEnumType>())
+	}
+
+	imageUrl(value: Value & { value: MediaType }, size?: string): string {
+		return this.imageService.imageUrl(value, size)
 	}
 }
