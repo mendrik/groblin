@@ -13,6 +13,7 @@ import { NodeResolver } from 'src/resolvers/node-resolver.ts'
 import type { Value } from 'src/resolvers/value-resolver.ts'
 import { NodeType } from 'src/types.ts'
 import { Topic } from 'src/types.ts'
+import { ErrorHandler } from 'src/utils/error-handler.ts'
 import { isJsonObject } from 'src/utils/json.ts'
 import type { PubSub } from 'type-graphql'
 import { S3Client } from './s3-client.ts'
@@ -66,6 +67,10 @@ export class ImageService {
 		return url`http://${host}:${port}/image/${encryptInteger(value.id)}?size=${size}`
 	}
 
+	@ErrorHandler((res, error) => {
+		res.writeHead(500, error.message)
+		res.end(error.message)
+	})
 	async handleRequest<I extends IncomingMessage, O extends ServerResponse<I>>(
 		req: I,
 		response: O
@@ -86,6 +91,7 @@ export class ImageService {
 			])
 			.where('values.id', '=', id)
 			.executeTakeFirstOrThrow()
+
 		const settings = res as ValueWithSettings
 		const thumbails: string[] = uniq(
 			['640'].concat(settings.settings?.thumbnails ?? [])
