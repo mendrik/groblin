@@ -1,9 +1,13 @@
 import { Maybe } from 'purify-ts'
 import {
+	compose,
 	concat,
 	filter,
 	includes,
+	isNotEmpty,
 	join,
+	match,
+	o,
 	pipe,
 	split,
 	take,
@@ -13,10 +17,7 @@ import { isNotNilOrEmpty } from 'ramda-adjunct'
 
 const filterEmptyParams = pipe(
 	split('&'),
-	filter((param: string) => {
-		const [key, value] = param.split('=')
-		return Boolean(key) && Boolean(value)
-	}),
+	filter(compose(isNotEmpty, match(/\w+=[^&$]+/))),
 	join('&')
 )
 
