@@ -1,9 +1,4 @@
-import type {
-	ClientRequest,
-	IncomingMessage,
-	Server,
-	ServerResponse
-} from 'node:http'
+import type { ClientRequest, Server, ServerResponse } from 'node:http'
 import { createServer } from 'node:http'
 import { assertExists } from '@shared/asserts.ts'
 import { cyan, lightGreen, yellow } from 'ansicolor'
@@ -41,10 +36,9 @@ export class PublicServer {
 	@inject(ImageService)
 	private imageService: ImageService
 
-	private server: Server<typeof IncomingMessage, typeof ServerResponse>
-
 	private abort: AbortController
-	private app: Server
+
+	private server: Server
 
 	constructor() {
 		const yoga = createYoga<{
@@ -53,7 +47,7 @@ export class PublicServer {
 		}>({
 			schema: ({ request }) => this.schema(request)
 		})
-		this.app = createServer(
+		this.server = createServer(
 			match<[any, any], any>(
 				caseOf([{ url: '/image' }, _], (i, o) =>
 					this.imageService.handleRequest(i, o)
@@ -105,7 +99,7 @@ export class PublicServer {
 	public start() {
 		this.listenToNodeChanges()
 		this.listenToNodeSettingsChanges()
-		this.app.listen({ port }, () => {
+		this.server.listen({ port }, () => {
 			console.log(
 				cyan(
 					`Public GQL server on http://localhost:${lightGreen(port)}/graphql`
