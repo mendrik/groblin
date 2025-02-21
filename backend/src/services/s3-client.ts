@@ -27,22 +27,21 @@ export class S3Client extends AwsS3 {
 		return response.Body
 	}
 
-	async getContent(key: string) {
+	getContent(key: string) {
 		return this.getBody(key).then(b => b.transformToString())
 	}
 
-	async deleteFile(key: string) {
-		const response = await this.send(
+	deleteFile(key: string) {
+		return this.send(
 			new DeleteObjectCommand({
 				Bucket: process.env.AWS_BUCKET,
 				Key: key
 			})
 		)
-		return response
 	}
 
-	async exists(key: string) {
-		return await this.send(
+	exists(key: string) {
+		return this.send(
 			new HeadObjectCommand({
 				Bucket: process.env.AWS_BUCKET,
 				Key: key
@@ -50,12 +49,12 @@ export class S3Client extends AwsS3 {
 		).then(T).catch(F)
 	}
 
-	async getBytes(key: string) {
+	getBytes(key: string) {
 		return this.getBody(key).then(b => b.transformToByteArray())
 	}
 
-	async uploadBytes(key: string, data: Buffer, metadata: Record<string, string>) {
-		return await this.send(
+	uploadBytes(key: string, data: Buffer, metadata: Record<string, string>) {
+		return this.send(
 			new PutObjectCommand({
 				Bucket: process.env.AWS_BUCKET,
 				Key: key,
