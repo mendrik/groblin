@@ -512,6 +512,9 @@ importers:
       purify-ts:
         specifier: 2.1.0
         version: 2.1.0
+      sqids:
+        specifier: ^0.3.0
+        version: 0.3.0
       ts-toolbelt:
         specifier: 9.6.0
         version: 9.6.0
@@ -5905,6 +5908,9 @@ packages:
 
   sponge-case@1.0.1:
     resolution: {integrity: sha512-dblb9Et4DAtiZ5YSUZHLl4XhH4uK80GhAZrVXdN4O2P4gQ40Wa5UIOPUHlA/nFd2PLblBZWUioLMMAVrgpoYcA==}
+
+  sqids@0.3.0:
+    resolution: {integrity: sha512-lOQK1ucVg+W6n3FhRwwSeUijxe93b51Bfz5PMRMihVf1iVkl82ePQG7V5vwrhzB11v0NtsR25PSZRGiSomJaJw==}
 
   stack-generator@2.0.10:
     resolution: {integrity: sha512-mwnua/hkqM6pF4k8SnmZ2zfETsRUpWXREfA/goT8SLCV4iOFa4bzOX2nDipWAZFPTjLvQB82f5yaodMVhK0yJQ==}
@@ -12766,6 +12772,8 @@ snapshots:
   sponge-case@1.0.1:
     dependencies:
       tslib: 2.6.3
+
+  sqids@0.3.0: {}
 
   stack-generator@2.0.10:
     dependencies:

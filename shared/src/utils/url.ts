@@ -22,11 +22,11 @@ const filterEmptyParams = pipe(
 
 export const url = (
 	strings: TemplateStringsArray,
-	...values: (string|undefined)[]
+	...values: (number | boolean | string | undefined)[]
 ): string => {
 	const params = values.concat(Array(strings.length - values.length).fill(''))
 	const combinedUrl = zipWith(
-		(a = '', b = '') => a.concat(b),
+		(a = '', b = '') => `${a}`.concat(`${b}`),
 		strings,
 		params.map((value, index) => {
 			if (value && take(index, strings).some(includes('?'))) {

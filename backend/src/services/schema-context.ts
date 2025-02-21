@@ -1,3 +1,4 @@
+import type { MediaType } from '@shared/json-value-types.ts'
 import { listToTree } from '@shared/utils/list-to-tree.ts'
 import { mapBy } from '@shared/utils/map-by.ts'
 import { GraphQLEnumType, GraphQLString } from 'graphql'
@@ -7,7 +8,6 @@ import { Maybe } from 'purify-ts'
 import { assoc, prop, propOr } from 'ramda'
 import { isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
 import type { DB, JsonValue } from 'src/database/schema.ts'
-import { ListResolver } from 'src/resolvers/list-resolver.ts'
 import {
 	type NodeSettings,
 	NodeSettingsResolver
@@ -20,7 +20,6 @@ import {
 	type TreeNode
 } from 'src/types.ts'
 import { ImageService } from './image-service.ts'
-import { MediaType } from '@shared/json-value-types.ts'
 
 @injectable()
 export class SchemaContext {
@@ -148,6 +147,6 @@ export class SchemaContext {
 	}
 
 	imageUrl(value: Value & { value: MediaType }, size?: string): string {
-		return this.imageService.imageUrl(value, size)
+		return this.imageService.mediaUrl(value, size)
 	}
 }

@@ -4,7 +4,7 @@ import {
 	GetObjectCommand,
 	HeadObjectCommand,
 	PutObjectCommand,
-	PutObjectRequest
+	type PutObjectRequest
 } from '@aws-sdk/client-s3'
 import { injectable } from 'inversify'
 import { F, T } from 'ramda'
@@ -47,7 +47,9 @@ export class S3Client extends AwsS3 {
 				Bucket: process.env.AWS_BUCKET,
 				Key: key
 			})
-		).then(T).catch(F)
+		)
+			.then(T)
+			.catch(F)
 	}
 
 	getBytes(key: string) {

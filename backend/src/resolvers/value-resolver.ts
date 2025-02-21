@@ -223,11 +223,15 @@ export class ValueResolver {
 	@Mutation(returns => Boolean)
 	async deleteValue(@Arg('id', () => Int) id: number, @Ctx() ctx: Context) {
 		const { user } = ctx
+		const value = await this.value(id)
 		const { numDeletedRows } = await this.db
 			.deleteFrom('values')
 			.where('id', '=', id)
 			.where('project_id', '=', user.lastProjectId)
 			.executeTakeFirstOrThrow()
+		if (value != null) {
+			this.pubSub.publish(Topic.ValueReplaced, value)
+		}
 		this.pubSub.publish(Topic.ValuesUpdated, true)
 		return numDeletedRows > 0
 	}

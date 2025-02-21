@@ -20,11 +20,18 @@ import { isJsonObject } from 'src/utils/json.ts'
 import type { PubSub } from 'type-graphql'
 import { S3Client } from './s3-client.ts'
 
-const port = process.env.PUBLIC_PORT
-const host = process.env.PUBLIC_HOST
+const mediaUrl = process.env.VITE_MEDIA_URL
 
 type ValueWithSettings = {
 	value: MediaType
+	settings?: {
+		thumbnails: string[]
+		required: boolean
+	}
+}
+
+type NodeWithSettings = {
+	type: NodeType
 	settings?: {
 		thumbnails: string[]
 		required: boolean
@@ -54,19 +61,34 @@ export class ImageService {
 		for await (const value of this.pubSub.subscribe(
 			Topic.ValueReplaced
 		) as AsyncIterable<Value>) {
-			const node = await this.nodeResolver.getNode(value.node_id)
+			const res = await this.db
+				.selectFrom('node')
+				.leftJoin('node_settings', 'node.id', 'node_settings.node_id')
+				.select([
+					'node.type',
+					eb => eb.ref('node_settings.settings').as('settings')
+				])
+				.where('node.id', '=', value.node_id)
+				.executeTakeFirstOrThrow()
+			const node = res as NodeWithSettings
 			if (
 				node.type === NodeType.media &&
 				isJsonObject(value.value) &&
 				isString(value.value.file)
 			) {
 				this.s3.deleteFile(value.value.file)
+				const thumbails: string[] = uniq(
+					['640'].concat(node.settings?.thumbnails ?? [])
+				)
+				for await (const size of thumbails) {
+					await this.s3.deleteFile(`${value.value.file}_${size}`)
+				}
 			}
 		}
 	}
 
-	imageUrl(value: Value & { value: MediaType }, size?: string): string {
-		return url`http://${host}:${port}/image/${encryptInteger(value.id)}?size=${size}`
+	mediaUrl(value: Value & { value: MediaType }, size?: string): string {
+		return url`${mediaUrl}/${encryptInteger(value.id)}?size=${size}`
 	}
 
 	@ErrorHandler()
@@ -75,7 +97,7 @@ export class ImageService {
 		response: O
 	) {
 		assertExists(req.url, 'Request URL is missing')
-		const url = new URL(req.url, `http://${host}:${port}`)
+		const url = new URL(req.url, mediaUrl)
 		const size = url.searchParams.get('size') ?? undefined
 		const idHash = url.pathname.split('/').pop()
 
@@ -99,7 +121,11 @@ export class ImageService {
 		if (size) {
 			assertThat(included(thumbails), size, 'Invalid size')
 		}
-		if (size && !(await this.imageExists(media.value, size))) {
+		if (
+			size &&
+			media.value.contentType.startsWith('image') &&
+			!(await this.imageExists(media.value, size))
+		) {
 			await this.createThumbnail(media.value, size)
 		}
 		const getObj = new GetObjectCommand({
@@ -110,6 +136,7 @@ export class ImageService {
 			expiresIn: 3600
 		})
 		response.writeHead(302, {
+			'Access-Control-Allow-Origin': '*',
 			Location: s3Url
 		})
 		response.end()
@@ -127,7 +154,7 @@ export class ImageService {
 				fit: sharp.fit.inside, // Ensures the image fits within the specified dimensions
 				withoutEnlargement: true // Prevents enlarging the image if it's smaller than the specified dimensions
 			})
-			.webp()
+			.webp({ quality: Number(process.env.THUMB_QUALITY ?? 80) })
 			.toBuffer()
 		const targetFile = this.thumbnailFile(media, size)
 		await this.s3.uploadBytes(targetFile, resizedImage, {
