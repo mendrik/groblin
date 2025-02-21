@@ -158,10 +158,15 @@ export class ValueResolver {
 		const { numDeletedRows } = await this.db
 			.transaction()
 			.execute(async trx => {
-				await trx
+				const deleted = await trx
 					.deleteFrom('values')
 					.where('list_path', '&&', [[id]])
+					.returning(['id', 'value', 'node_id', 'list_path'])
 					.execute()
+
+				for (const value of deleted) {
+					this.pubSub.publish(Topic.ValueReplaced, value)
+				}
 
 				return await trx
 					.deleteFrom('values')
