@@ -1,13 +1,15 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import { GetObjectCommand } from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { assertExists, assertThat } from '@shared/asserts.ts'
 import type { MediaType } from '@shared/json-value-types.ts'
-import {} from '@shared/utils/match.ts'
 import { decryptInteger, encryptInteger } from '@shared/utils/number-hash.ts'
 import { url } from '@shared/utils/url.ts'
 import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
 import { uniq } from 'ramda'
 import { included, isString } from 'ramda-adjunct'
+import sharp from 'sharp'
 import type { DB } from 'src/database/schema.ts'
 import { NodeResolver } from 'src/resolvers/node-resolver.ts'
 import type { Value } from 'src/resolvers/value-resolver.ts'
@@ -74,7 +76,7 @@ export class ImageService {
 	) {
 		assertExists(req.url, 'Request URL is missing')
 		const url = new URL(req.url, `http://${host}:${port}`)
-		const size = url.searchParams.get('size')
+		const size = url.searchParams.get('size') ?? undefined
 		const idHash = url.pathname.split('/').pop()
 		assertExists(idHash, 'Image ID is missing')
 		const id = decryptInteger(idHash)
@@ -96,7 +98,38 @@ export class ImageService {
 		if (size) {
 			assertThat(included(thumbails), size, 'Invalid size')
 		}
-		response.writeHead(200, { 'Content-Type': 'text/plain' })
-		response.end(JSON.stringify(thumbails))
+		if (size && !this.imageExists(settings.value.file, size)) {
+			await this.createThumbnail(settings.value, size)
+		}
+		const getObj = new GetObjectCommand({
+			Bucket: process.env.AWS_BUCKET,
+			Key: size ? `${settings.value.file}_${size}` : settings.value.file
+		})
+		const s3Url = await getSignedUrl(this.s3, getObj, { expiresIn: 3600 })
+		response.writeHead(302, { Location: s3Url })
+	}
+
+	async createThumbnail(media: MediaType, size: string) {
+		const [width, height] = size.includes('x')
+			? size.split('x').map(Number)
+			: [Number(size), Number(size)]
+		const image = await this.s3.getBytes(media.file)
+		const resizedImage = await sharp(image)
+			.resize({
+				width,
+				height,
+				fit: sharp.fit.inside, // Ensures the image fits within the specified dimensions
+				withoutEnlargement: true // Prevents enlarging the image if it's smaller than the specified dimensions
+			})
+			.webp()
+			.toBuffer()
+		await this.s3.uploadBytes(`${media.file}_${size}`, resizedImage, {
+			'Content-Type': 'image/webp',
+			filename: media.name
+		})
+	}
+
+	async imageExists(file: string, size?: string): Promise<boolean> {
+		return this.s3.exists(file)
 	}
 }
