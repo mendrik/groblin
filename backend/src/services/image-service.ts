@@ -91,22 +91,25 @@ export class ImageService {
 			.where('values.id', '=', id)
 			.executeTakeFirstOrThrow()
 
-		const settings = res as ValueWithSettings
+		const media = res as ValueWithSettings
 		const thumbails: string[] = uniq(
-			['640'].concat(settings.settings?.thumbnails ?? [])
+			['640'].concat(media.settings?.thumbnails ?? [])
 		)
 		if (size) {
 			assertThat(included(thumbails), size, 'Invalid size')
 		}
-		if (size && !this.imageExists(settings.value.file, size)) {
-			await this.createThumbnail(settings.value, size)
+		if (size && !this.imageExists(media.value, size)) {
+			console.log('Creating thumbnail', size)
+			await this.createThumbnail(media.value, size)
 		}
 		const getObj = new GetObjectCommand({
 			Bucket: process.env.AWS_BUCKET,
-			Key: size ? `${settings.value.file}_${size}` : settings.value.file
+			Key: size ? this.thumbnailFile(media.value, size) : media.value.file
 		})
 		const s3Url = await getSignedUrl(this.s3, getObj, { expiresIn: 3600 })
+		console.log(s3Url)
 		response.writeHead(302, { Location: s3Url })
+		response.end()
 	}
 
 	async createThumbnail(media: MediaType, size: string) {
@@ -123,13 +126,18 @@ export class ImageService {
 			})
 			.webp()
 			.toBuffer()
-		await this.s3.uploadBytes(`${media.file}_${size}`, resizedImage, {
+		const targetFile = this.thumbnailFile(media, size)
+		await this.s3.uploadBytes(targetFile, resizedImage, {
 			'Content-Type': 'image/webp',
 			filename: media.name
 		})
 	}
 
-	async imageExists(file: string, size?: string): Promise<boolean> {
-		return this.s3.exists(file)
+	async imageExists(media: MediaType, size: string): Promise<boolean> {
+		return this.s3.exists(this.thumbnailFile(media, size))
+	}
+
+	thumbnailFile(media: MediaType, size: string): string {
+		return `${media.file}_${size}`
 	}
 }
