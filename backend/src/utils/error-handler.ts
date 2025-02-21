@@ -6,7 +6,11 @@ export function ErrorHandler(
 		res.end(error.message)
 	}
 ) {
-	return (_target: any, _propertyKey: string, descriptor: PropertyDescriptor) => {
+	return (
+		_target: any,
+		_propertyKey: string,
+		descriptor: PropertyDescriptor
+	) => {
 		const originalMethod = descriptor.value
 
 		descriptor.value = async function (...args: any[]) {
@@ -14,6 +18,7 @@ export function ErrorHandler(
 			try {
 				return await originalMethod.apply(this, args)
 			} catch (error) {
+				console.error(error)
 				handler(res, error)
 			}
 		}

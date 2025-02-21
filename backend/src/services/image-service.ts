@@ -78,6 +78,7 @@ export class ImageService {
 		const url = new URL(req.url, `http://${host}:${port}`)
 		const size = url.searchParams.get('size') ?? undefined
 		const idHash = url.pathname.split('/').pop()
+
 		assertExists(idHash, 'Image ID is missing')
 		const id = decryptInteger(idHash)
 
@@ -98,17 +99,19 @@ export class ImageService {
 		if (size) {
 			assertThat(included(thumbails), size, 'Invalid size')
 		}
-		if (size && !this.imageExists(media.value, size)) {
-			console.log('Creating thumbnail', size)
+		if (size && !(await this.imageExists(media.value, size))) {
 			await this.createThumbnail(media.value, size)
 		}
 		const getObj = new GetObjectCommand({
 			Bucket: process.env.AWS_BUCKET,
 			Key: size ? this.thumbnailFile(media.value, size) : media.value.file
 		})
-		const s3Url = await getSignedUrl(this.s3, getObj, { expiresIn: 3600 })
-		console.log(s3Url)
-		response.writeHead(302, { Location: s3Url })
+		const s3Url = await getSignedUrl(this.s3, getObj, {
+			expiresIn: 3600
+		})
+		response.writeHead(302, {
+			Location: s3Url
+		})
 		response.end()
 	}
 
@@ -128,8 +131,11 @@ export class ImageService {
 			.toBuffer()
 		const targetFile = this.thumbnailFile(media, size)
 		await this.s3.uploadBytes(targetFile, resizedImage, {
-			'Content-Type': 'image/webp',
-			filename: media.name
+			ContentType: 'image/webp',
+			ContentDisposition: `inline; filename="${media.name}"`,
+			Metadata: {
+				filename: media.name
+			}
 		})
 	}
 

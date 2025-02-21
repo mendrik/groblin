@@ -3,7 +3,8 @@ import {
 	DeleteObjectCommand,
 	GetObjectCommand,
 	HeadObjectCommand,
-	PutObjectCommand
+	PutObjectCommand,
+	PutObjectRequest
 } from '@aws-sdk/client-s3'
 import { injectable } from 'inversify'
 import { F, T } from 'ramda'
@@ -53,13 +54,13 @@ export class S3Client extends AwsS3 {
 		return this.getBody(key).then(b => b.transformToByteArray())
 	}
 
-	uploadBytes(key: string, data: Buffer, metadata: Record<string, string>) {
+	uploadBytes(key: string, data: Buffer, params: Partial<PutObjectRequest>) {
 		return this.send(
 			new PutObjectCommand({
 				Bucket: process.env.AWS_BUCKET,
 				Key: key,
 				Body: data,
-				Metadata: metadata
+				...params
 			})
 		)
 	}

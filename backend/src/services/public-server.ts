@@ -50,7 +50,7 @@ export class PublicServer {
 
 		this.server = createServer(
 			match<[any, any], any>(
-				caseOf([{ url: startsWith('/image/') }, _], (i, o) =>
+				caseOf([{ url: startsWith('/image/') }, _], (i, o) => 
 					this.imageService.handleRequest(i, o)
 				),
 				caseOf([_, _], yoga)
