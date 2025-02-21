@@ -29,7 +29,7 @@ export const url = (
 		(a = '', b = '') => a.concat(b),
 		strings,
 		params.map((value, index) => {
-			if (take(index, strings).some(includes('?'))) {
+			if (value && take(index, strings).some(includes('?'))) {
 				return encodeURIComponent(value)
 			}
 			return value
