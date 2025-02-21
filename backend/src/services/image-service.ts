@@ -5,9 +5,10 @@ import { assertExists, assertThat } from '@shared/asserts.ts'
 import type { MediaType } from '@shared/json-value-types.ts'
 import { decryptInteger, encryptInteger } from '@shared/utils/number-hash.ts'
 import { url } from '@shared/utils/url.ts'
+import type { AnyFn } from '@tp/functions.ts'
 import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
-import { uniq } from 'ramda'
+import { append, defaultTo, fromPairs, map, pipe, uniq } from 'ramda'
 import { included, isString } from 'ramda-adjunct'
 import sharp from 'sharp'
 import type { DB } from 'src/database/schema.ts'
@@ -22,20 +23,20 @@ import { S3Client } from './s3-client.ts'
 
 const mediaUrl = process.env.VITE_MEDIA_URL
 
+export type MediaValue = Value & { value: MediaType }
+type MediaSettings = {
+	thumbnails: string[]
+	required: boolean
+}
+
 type ValueWithSettings = {
 	value: MediaType
-	settings?: {
-		thumbnails: string[]
-		required: boolean
-	}
+	settings?: MediaSettings
 }
 
 type NodeWithSettings = {
 	type: NodeType
-	settings?: {
-		thumbnails: string[]
-		required: boolean
-	}
+	settings?: MediaSettings
 }
 
 @injectable()
@@ -88,7 +89,7 @@ export class ImageService {
 	}
 
 	mediaUrl(value: Value & { value: MediaType }, size?: string): string {
-		return url`${mediaUrl}/${encryptInteger(value.id)}?size=${size}`
+		return url`${mediaUrl}/${encryptInteger(value.id)}?size=${size}&updated_at=${value.updated_at.getTime()}`
 	}
 
 	@ErrorHandler()
@@ -172,5 +173,27 @@ export class ImageService {
 
 	thumbnailFile(media: MediaType, size: string): string {
 		return `${media.file}_${size}`
+	}
+
+	async getImageSet(media: MediaValue): Promise<Record<string, string>> {
+		const res = await this.db
+			.selectFrom('node_settings')
+			.select('settings')
+			.where('node_id', '=', media.node_id)
+			.executeTakeFirst()
+		const settings = res as MediaSettings | undefined
+
+		const thumbailMap: (sizes?: string[]) => Record<string, string> = pipe(
+			defaultTo([]),
+			append('640'),
+			uniq,
+			map((size: string) => [`url_${size}`, this.mediaUrl(media, size)]),
+			fromPairs as AnyFn
+		)
+
+		return {
+			url: this.mediaUrl(media),
+			...thumbailMap(settings?.thumbnails)
+		}
 	}
 }

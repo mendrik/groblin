@@ -21,18 +21,18 @@ import {
 	GraphQLSchema,
 	GraphQLString
 } from 'graphql'
-import { GraphQLDateTime } from 'graphql-scalars'
+import { GraphQLDateTime, GraphQLJSONObject } from 'graphql-scalars'
 import { inject, injectable } from 'inversify'
 import { Maybe } from 'purify-ts'
 import { T as _, isNotNil } from 'ramda'
 import type { JsonValue } from 'src/database/schema.ts'
-import type { Value } from 'src/resolvers/value-resolver.ts'
 import {
 	type ListPath,
 	NodeType,
 	type ProjectId,
 	type TreeNode
 } from 'src/types.ts'
+import type { MediaValue } from './image-service.ts'
 import { SchemaContext } from './schema-context.ts'
 
 const hasValue = <T>(value: T | null): value is T => value != null
@@ -52,6 +52,7 @@ const scalarForNode = match<[TreeNode, SchemaContext], GraphQLOutputType>(
 	caseOf([{ type: NodeType.color }, _], new GraphQLList(GraphQLInt)),
 	caseOf([{ type: NodeType.date }, _], GraphQLDateTime),
 	caseOf([{ type: NodeType.choice }, _], (n, c) => c.getEnumType(n.id)),
+	caseOf([{ type: NodeType.media }, _], GraphQLJSONObject),
 	caseOf([_, _], GraphQLString)
 )
 
@@ -88,9 +89,9 @@ const resolveValue = (
 	resolve: async parent => {
 		const path = pathFor(parent)
 		const val = await context.getValue(node, path).then(Maybe.fromNullable)
-		return val.mapOrDefault(value => {
+		return await val.mapOrDefault(value => {
 			if (node.type === NodeType.media) {
-				return context.imageUrl(value as Value & { value: MediaType })
+				return context.getImageSet(value as MediaValue)
 			}
 			return jsonForNode(node, value.value)
 		}, null)

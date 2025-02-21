@@ -19,10 +19,11 @@ import {
 	type ProjectId,
 	type TreeNode
 } from 'src/types.ts'
-import { ImageService } from './image-service.ts'
+import { ImageService, MediaValue } from './image-service.ts'
 
 @injectable()
 export class SchemaContext {
+	
 	@inject(Kysely<DB>)
 	private db: Kysely<DB>
 
@@ -146,7 +147,11 @@ export class SchemaContext {
 			}, new Map<number, GraphQLEnumType>())
 	}
 
-	imageUrl(value: Value & { value: MediaType }, size?: string): string {
+	imageUrl(value: MediaValue, size?: string): string {
 		return this.imageService.mediaUrl(value, size)
+	}
+
+	async getImageSet(media: MediaValue): Promise<Record<string, string>> {
+		return this.imageService.getImageSet(media)
 	}
 }
