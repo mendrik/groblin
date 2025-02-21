@@ -165,7 +165,7 @@ export class ValueResolver {
 					.execute()
 
 				for (const value of deleted) {
-					this.pubSub.publish(Topic.ValueReplaced, value)
+					this.pubSub.publish(Topic.ValueDeleted, value)
 				}
 
 				return await trx
@@ -202,7 +202,7 @@ export class ValueResolver {
 			.returning(['id', 'node_id', 'order', 'list_path', 'value', 'updated_at'])
 			.executeTakeFirstOrThrow()
 		if (prev != null) {
-			this.pubSub.publish(Topic.ValueReplaced, prev)
+			this.pubSub.publish(Topic.ValueDeleted, prev)
 		}
 		this.pubSub.publish(Topic.ValuesUpdated, res)
 		return res.id
@@ -235,7 +235,7 @@ export class ValueResolver {
 			.where('project_id', '=', user.lastProjectId)
 			.executeTakeFirstOrThrow()
 		if (value != null) {
-			this.pubSub.publish(Topic.ValueReplaced, value)
+			this.pubSub.publish(Topic.ValueDeleted, value)
 		}
 		this.pubSub.publish(Topic.ValuesUpdated, true)
 		return numDeletedRows > 0

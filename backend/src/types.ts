@@ -33,7 +33,6 @@ export enum Topic {
 	UserRegistered = 'userRegistered',
 	NodesUpdated = 'nodesUpdated',
 	ValuesUpdated = 'valuesUpdated',
-	ValueReplaced = 'valueReplaced',
 	ValueDeleted = 'valueDeleted',
 	NodeSettingsUpdated = 'nodeSettingsUpdated',
 	ApiKeysUpdated = 'apiKeysUpdated',

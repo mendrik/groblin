@@ -59,7 +59,7 @@ export class ImageService {
 	async waitForImageReplacement() {
 		console.log('Waiting for image replacement')
 		for await (const value of this.pubSub.subscribe(
-			Topic.ValueReplaced
+			Topic.ValueDeleted
 		) as AsyncIterable<Value>) {
 			const res = await this.db
 				.selectFrom('node')
