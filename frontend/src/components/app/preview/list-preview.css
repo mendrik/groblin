@@ -6,7 +6,7 @@
 	display: grid;
 	grid-template-columns: 20px repeat(
 			var(--columns, 1),
-			1fr
+			fit-content(30px)
 		); 
 	grid-auto-rows: auto;
 	border: .5px solid hsl(var(--background));

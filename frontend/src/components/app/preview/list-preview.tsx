@@ -48,7 +48,7 @@ export default function ListPreview({
 	width
 }: PreviewProps) {
 	const { mutate } = useSWRConfig()
-	const maxColumns = Math.floor(width / 150)
+	const maxColumns = Math.floor(width / 120)
 	const list_path = $activePath.value
 
 	const request = {
