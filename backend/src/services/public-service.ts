@@ -24,7 +24,7 @@ import {
 import { GraphQLDateTime } from 'graphql-scalars'
 import { inject, injectable } from 'inversify'
 import { Maybe } from 'purify-ts'
-import { T as _, isNotNil } from 'ramda'
+import { T as _, isNil, isNotNil } from 'ramda'
 import type { JsonValue } from 'src/database/schema.ts'
 import {
 	type ListPath,
@@ -62,6 +62,7 @@ const jsonForNode = match<[TreeNode, any], JsonValue>(
 	caseOf([{ type: NodeType.number }, isNumberType], (_, v) => v.figure),
 	caseOf([{ type: NodeType.date }, isDateType], (_, v) => v.date.toString()),
 	caseOf([{ type: NodeType.choice }, isChoiceType], (_, v) => v.selected),
+	caseOf([{ type: NodeType.boolean }, isNil], (_, v) => false),
 	caseOf([{ type: NodeType.boolean }, isBooleanType], (_, v) => v.state),
 	caseOf([{ type: NodeType.article }, isArticleType], (_, v) => v.content),
 	caseOf([{ type: NodeType.media }, isMediaype], () =>
@@ -88,13 +89,14 @@ const resolveValue = (
 	type: scalarForNode(node, context),
 	resolve: async parent => {
 		const path = pathFor(parent)
-		const val = await context.getValue(node, path).then(Maybe.fromNullable)
-		return val.mapOrDefault(value => {
-			if (node.type === NodeType.media) {
-				return context.getMedia(value as MediaValue)
-			}
-			return jsonForNode(node, value.value)
-		}, null)
+		const maybeValue = await context
+			.getValue(node, path)
+			.then(Maybe.fromNullable)
+		const value = maybeValue.extractNullable()
+		if (node.type === NodeType.media && value) {
+			return context.getMedia(value as MediaValue)
+		}
+		return jsonForNode(node, value?.value)
 	}
 })
 
