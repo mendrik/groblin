@@ -21,7 +21,7 @@ import {
 	GraphQLSchema,
 	GraphQLString
 } from 'graphql'
-import { GraphQLDateTime, GraphQLJSONObject } from 'graphql-scalars'
+import { GraphQLDateTime } from 'graphql-scalars'
 import { inject, injectable } from 'inversify'
 import { Maybe } from 'purify-ts'
 import { T as _, isNotNil } from 'ramda'
@@ -52,7 +52,7 @@ const scalarForNode = match<[TreeNode, SchemaContext], GraphQLOutputType>(
 	caseOf([{ type: NodeType.color }, _], new GraphQLList(GraphQLInt)),
 	caseOf([{ type: NodeType.date }, _], GraphQLDateTime),
 	caseOf([{ type: NodeType.choice }, _], (n, c) => c.getEnumType(n.id)),
-	caseOf([{ type: NodeType.media }, _], GraphQLJSONObject),
+	caseOf([{ type: NodeType.media }, _], (n, c) => c.getMediaType(n.id)),
 	caseOf([_, _], GraphQLString)
 )
 
@@ -89,9 +89,9 @@ const resolveValue = (
 	resolve: async parent => {
 		const path = pathFor(parent)
 		const val = await context.getValue(node, path).then(Maybe.fromNullable)
-		return await val.mapOrDefault(value => {
+		return val.mapOrDefault(value => {
 			if (node.type === NodeType.media) {
-				return context.getImageSet(value as MediaValue)
+				return context.getMedia(value as MediaValue)
 			}
 			return jsonForNode(node, value.value)
 		}, null)

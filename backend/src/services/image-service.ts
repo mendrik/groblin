@@ -175,25 +175,4 @@ export class ImageService {
 		return `${media.file}_${size}`
 	}
 
-	async getImageSet(media: MediaValue): Promise<Record<string, string>> {
-		const res = await this.db
-			.selectFrom('node_settings')
-			.select('settings')
-			.where('node_id', '=', media.node_id)
-			.executeTakeFirst()
-		const settings = res as MediaSettings | undefined
-
-		const thumbailMap: (sizes?: string[]) => Record<string, string> = pipe(
-			defaultTo([]),
-			append('640'),
-			uniq,
-			map((size: string) => [`url_${size}`, this.mediaUrl(media, size)]),
-			fromPairs as AnyFn
-		)
-
-		return {
-			url: this.mediaUrl(media),
-			...thumbailMap(settings?.thumbnails)
-		}
-	}
 }

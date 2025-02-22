@@ -1,7 +1,6 @@
-import type { MediaType } from '@shared/json-value-types.ts'
 import { listToTree } from '@shared/utils/list-to-tree.ts'
 import { mapBy } from '@shared/utils/map-by.ts'
-import { GraphQLEnumType, GraphQLString } from 'graphql'
+import { GraphQLEnumType, GraphQLObjectType, GraphQLString } from 'graphql'
 import { inject, injectable } from 'inversify'
 import { Kysely, sql } from 'kysely'
 import { Maybe } from 'purify-ts'
@@ -19,11 +18,11 @@ import {
 	type ProjectId,
 	type TreeNode
 } from 'src/types.ts'
-import { ImageService, MediaValue } from './image-service.ts'
+import { isJsonObject } from 'src/utils/json.ts'
+import { ImageService, type MediaValue } from './image-service.ts'
 
 @injectable()
 export class SchemaContext {
-	
 	@inject(Kysely<DB>)
 	private db: Kysely<DB>
 
@@ -36,6 +35,7 @@ export class SchemaContext {
 	projectId: ProjectId
 	_settings: Map<number, NodeSettings>
 	_enums: Map<number, GraphQLEnumType>
+	_thumbnails: Map<number, string[]>
 
 	async init(projectId: ProjectId) {
 		this.projectId = projectId
@@ -43,6 +43,25 @@ export class SchemaContext {
 			.settings(projectId)
 			.then(mapBy(prop('node_id')))
 		this._enums = await this.initEnums()
+		this._thumbnails = await this.initThumbnails()
+		console.log(this._thumbnails)
+	}
+
+	async initThumbnails(): Promise<Map<number, string[]>> {
+		const thumbnails = await this.db
+			.selectFrom('node_settings')
+			.leftJoin('node', 'node.id', 'node_settings.node_id')
+			.where('node_settings.project_id', '=', this.projectId)
+			.where('type', '=', NodeType.media)
+			.select(['node_id', 'settings'])
+			.execute()
+
+		return thumbnails.reduce((acc, { node_id, settings }) => {
+			if (isJsonObject(settings) && Array.isArray(settings.thumbnails)) {
+				acc.set(node_id, settings.thumbnails as string[])
+			}
+			return acc
+		}, new Map<number, string[]>())
 	}
 
 	async listItems(nodeId: number, path?: ListPath): Promise<Value[]> {
@@ -111,6 +130,25 @@ export class SchemaContext {
 		return this._enums.get(nodeId) ?? GraphQLString
 	}
 
+	getMediaType(nodeId: number): GraphQLObjectType {
+		const thumbnails = this._thumbnails.get(nodeId) ?? []
+		const fields = {
+			url: { type: GraphQLString },
+			contentType: { type: GraphQLString },
+			...thumbnails.reduce(
+				(acc, size) => ({
+					...acc,
+					[`url_${size}`]: { type: GraphQLString }
+				}),
+				{}
+			)
+		}
+		return new GraphQLObjectType({
+			name: `Media_${nodeId}`,
+			fields
+		})
+	}
+
 	getEnums(): GraphQLEnumType[] {
 		return Array.from(this._enums.values())
 	}
@@ -147,11 +185,22 @@ export class SchemaContext {
 			}, new Map<number, GraphQLEnumType>())
 	}
 
-	imageUrl(value: MediaValue, size?: string): string {
+	mediaUrl(value: MediaValue, size?: string): string {
 		return this.imageService.mediaUrl(value, size)
 	}
 
-	async getImageSet(media: MediaValue): Promise<Record<string, string>> {
-		return this.imageService.getImageSet(media)
+	getMedia(media: MediaValue) {
+		const thumbnails = this._thumbnails.get(media.node_id) ?? []
+		return {
+			url: this.imageService.mediaUrl(media),
+			contentType: media.value.contentType,
+			...thumbnails.reduce(
+				(acc, size) => ({
+					...acc,
+					[`url_${size}`]: this.imageService.mediaUrl(media, size)
+				}),
+				{}
+			)
+		}
 	}
 }
