@@ -86,6 +86,7 @@ export class PublicServer {
 			.selectFrom('api_key')
 			.select('project_id')
 			.where('key', '=', apiKey)
+			.where('is_active', '=', true)
 			.executeTakeFirstOrThrow()
 		const cache = this.schemaCache
 		if (!cache.has(project_id)) {
