@@ -105,6 +105,7 @@ export class NodeSettingsResolver {
 			.returning(['id', 'node_id', 'settings'])
 			.executeTakeFirstOrThrow()
 		this.pubSub.publish(Topic.NodeSettingsUpdated, res)
+		this.pubSub.publish(Topic.SomeNodeSettingsUpdated, user.lastProjectId)
 		return res.id
 	}
 }

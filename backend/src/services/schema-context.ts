@@ -190,17 +190,16 @@ export class SchemaContext {
 	}
 
 	getMedia(media: MediaValue) {
-		const thumbnails = this._thumbnails.get(media.node_id) ?? []
+		const sizes = this._thumbnails.get(media.node_id) ?? []
+		const thumbnails = sizes.reduce(
+			(acc, size) =>
+				assoc(`url_${size}`, this.imageService.mediaUrl(media, size), acc),
+			{}
+		)
 		return {
 			url: this.imageService.mediaUrl(media),
 			contentType: media.value.contentType,
-			...thumbnails.reduce(
-				(acc, size) => ({
-					...acc,
-					[`url_${size}`]: this.imageService.mediaUrl(media, size)
-				}),
-				{}
-			)
+			...thumbnails
 		}
 	}
 }

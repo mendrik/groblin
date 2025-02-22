@@ -106,7 +106,7 @@ export class IoResolver {
 			})
 
 		this.pubSub.publish(Topic.NodesUpdated, true)
-		this.pubSub.publish(Topic.NodeSettingsUpdated, true)
+		this.pubSub.publish(Topic.SomeNodeSettingsUpdated, user.lastProjectId)
 		this.pubSub.publish(Topic.ValuesUpdated, true)
 		await this.s3.deleteFile(data).catch(console.warn)
 		return true

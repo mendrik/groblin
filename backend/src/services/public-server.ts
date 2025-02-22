@@ -50,7 +50,7 @@ export class PublicServer {
 
 		this.server = createServer(
 			match<[any, any], any>(
-				caseOf([{ url: startsWith('/media/') }, _], (i, o) => 
+				caseOf([{ url: startsWith('/media/') }, _], (i, o) =>
 					this.imageService.handleRequest(i, o)
 				),
 				caseOf([_, _], yoga)
@@ -71,7 +71,7 @@ export class PublicServer {
 
 	private async listenToNodeSettingsChanges() {
 		for await (const projectId of this.pubSub.subscribe(
-			Topic.NodeSettingsUpdated
+			Topic.SomeNodeSettingsUpdated
 		) as AsyncGenerator<ProjectId>) {
 			this.schemaCache.delete(projectId)
 			console.log(yellow(`Reloading schema for project ${projectId}`))

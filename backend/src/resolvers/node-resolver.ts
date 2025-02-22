@@ -180,7 +180,7 @@ export class NodeResolver {
 		})
 		this.pubSub.publish(Topic.NodesUpdated, user.lastProjectId)
 		if (settings) {
-			this.pubSub.publish(Topic.NodeSettingsUpdated, user.lastProjectId)
+			this.pubSub.publish(Topic.SomeNodeSettingsUpdated, user.lastProjectId)
 		}
 		return await this.getNode(id)
 	}
