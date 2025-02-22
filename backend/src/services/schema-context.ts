@@ -130,8 +130,8 @@ export class SchemaContext {
 		return this._enums.get(nodeId) ?? GraphQLString
 	}
 
-	getMediaType(nodeId: number): GraphQLObjectType {
-		const thumbnails = this._thumbnails.get(nodeId) ?? []
+	getMediaType(node: TreeNode): GraphQLObjectType {
+		const thumbnails = this._thumbnails.get(node.id) ?? []
 		const fields = {
 			url: { type: GraphQLString },
 			contentType: { type: GraphQLString },
@@ -144,7 +144,7 @@ export class SchemaContext {
 			)
 		}
 		return new GraphQLObjectType({
-			name: `Media_${nodeId}`,
+			name: `Media_${node.name}`,
 			fields
 		})
 	}

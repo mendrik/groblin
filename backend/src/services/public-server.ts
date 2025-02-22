@@ -1,12 +1,17 @@
-import type { IncomingMessage, OutgoingMessage, Server } from 'node:http'
+import type {
+	IncomingMessage,
+	OutgoingMessage,
+	Server,
+	ServerResponse
+} from 'node:http'
 import { createServer } from 'node:http'
 import { assertExists } from '@shared/asserts.ts'
 import { cyan, lightGreen, yellow } from 'ansicolor'
-import type { GraphQLSchema } from 'graphql'
+import { type GraphQLSchema, printSchema } from 'graphql'
 import { createYoga } from 'graphql-yoga'
 import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
-import { T as _, startsWith } from 'ramda'
+import { T as _, equals, startsWith } from 'ramda'
 
 // This is the fastify instance you have created
 
@@ -45,13 +50,20 @@ export class PublicServer {
 			req: IncomingMessage
 			reply: OutgoingMessage
 		}>({
-			schema: ({ request }) => this.schema(request)
+			schema: ({ request }) => {
+				const apiKey = request.headers.get('x-api-key')
+				assertExists(apiKey, 'API key is required')
+				return this.schema(apiKey)
+			}
 		})
 
 		this.server = createServer(
 			match<[any, any], any>(
 				caseOf([{ url: startsWith('/media/') }, _], (i, o) =>
 					this.imageService.handleRequest(i, o)
+				),
+				caseOf([{ url: equals('/schema') }, _], (i, o) =>
+					this.generateSchema(i, o)
 				),
 				caseOf([_, _], yoga)
 			)
@@ -79,9 +91,7 @@ export class PublicServer {
 		}
 	}
 
-	private async schema(request: Request): Promise<GraphQLSchema> {
-		const apiKey = request.headers.get('x-api-key')
-		assertExists(apiKey, 'API key is required')
+	private async schema(apiKey: string): Promise<GraphQLSchema> {
 		const { project_id } = await this.db
 			.selectFrom('api_key')
 			.select('project_id')
@@ -96,6 +106,14 @@ export class PublicServer {
 		const res = cache.get(project_id)
 		assertExists(res, 'Schema not found')
 		return res
+	}
+
+	private async generateSchema(req: IncomingMessage, res: ServerResponse) {
+		const apiKey = req.headers['x-api-key'] as string | undefined
+		assertExists(apiKey, 'API key is required')
+		const schema = await this.schema(apiKey)
+		res.writeHead(200, { 'Content-Type': 'text/plain' })
+		res.end(printSchema(schema))
 	}
 
 	public start() {

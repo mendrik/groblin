@@ -19,8 +19,7 @@ import {
 	GraphQLObjectType,
 	type GraphQLOutputType,
 	GraphQLSchema,
-	GraphQLString,
-	printSchema
+	GraphQLString
 } from 'graphql'
 import { GraphQLDateTime } from 'graphql-scalars'
 import { inject, injectable } from 'inversify'
@@ -53,7 +52,7 @@ const scalarForNode = match<[TreeNode, SchemaContext], GraphQLOutputType>(
 	caseOf([{ type: NodeType.color }, _], new GraphQLList(GraphQLInt)),
 	caseOf([{ type: NodeType.date }, _], GraphQLDateTime),
 	caseOf([{ type: NodeType.choice }, _], (n, c) => c.getEnumType(n.id)),
-	caseOf([{ type: NodeType.media }, _], (n, c) => c.getMediaType(n.id)),
+	caseOf([{ type: NodeType.media }, _], (n, c) => c.getMediaType(n)),
 	caseOf([_, _], GraphQLString)
 )
 
@@ -151,7 +150,6 @@ export class PublicService {
 			types: [...this.context.getEnums()],
 			query: query.type as GraphQLObjectType
 		})
-		console.log(printSchema(schema))
 		return schema
 	}
 }
