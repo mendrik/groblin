@@ -1,7 +1,7 @@
 import { ForgotPasswordDialog } from '@/components/app/authentication/forgot-password'
-import { LoginDialog } from '@/components/app/authentication/login-dialog'
 import { PasswordResetDialog } from '@/components/app/authentication/password-reset'
 import { RegistrationDialog } from '@/components/app/authentication/register-dialog'
+import { LoginPage } from '@/components/pages/login'
 import { Form, FormControl } from '@/components/ui/form'
 import { TagsInput } from '@/components/ui/tags-input'
 import { useState } from 'react'
@@ -32,6 +32,6 @@ export const LoggedOut = () => (
 		<Route path="/reset-password" component={PasswordResetDialog} />
 		<Route path="/password" component={ForgotPasswordDialog} />
 		<Route path="/register" component={RegistrationDialog} />
-		<Route path="/" component={LoginDialog} />
+		<Route path="/" component={LoginPage} />
 	</>
 )

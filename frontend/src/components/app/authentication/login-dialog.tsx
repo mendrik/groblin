@@ -1,12 +1,12 @@
 import { Button } from '@/components/ui/button'
 import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle
-} from '@/components/ui/dialog'
+	Card,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle
+} from '@/components/ui/card'
+import {} from '@/components/ui/dialog'
 import { asField, stringField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { login } from '@/state/user'
@@ -37,32 +37,28 @@ const loginCommand = ({ rememberMe, ...credentials }: LoginForm) =>
 
 export const LoginDialog = () => {
 	return (
-		<Dialog open={true}>
-			<DialogContent className="max-w-sm" close={close}>
-				<DialogHeader>
-					<DialogTitle>Login</DialogTitle>
-					<DialogDescription>
-						Please enter your email and password
-					</DialogDescription>
-				</DialogHeader>
-				<ZodForm schema={loginSchema} onSubmit={loginCommand} onError={failed}>
-					<DialogFooter className="gap-2 flex flex-row items-center">
-						<div className="mr-auto">
-							Did you forget your{' '}
-							<Link to="/password" className="text-link">
-								password
-							</Link>
-							<br />
-							or still need to{' '}
-							<Link to="/register" className="text-link">
-								register
-							</Link>
-							?
-						</div>
-						<Button type="submit">Login</Button>
-					</DialogFooter>
-				</ZodForm>
-			</DialogContent>
-		</Dialog>
+		<Card className="w-full max-w-sm p-4 h-fit shadow-lg">
+			<CardHeader className="p-0 pb-4">
+				<CardTitle>Login</CardTitle>
+				<CardDescription>Please enter your email and password</CardDescription>
+			</CardHeader>
+			<ZodForm schema={loginSchema} onSubmit={loginCommand} onError={failed}>
+				<CardFooter className="gap-2 flex flex-row items-center p-0">
+					<div className="mr-auto">
+						Did you forget your{' '}
+						<Link to="/password" className="text-link">
+							password
+						</Link>
+						<br />
+						or still need to{' '}
+						<Link to="/register" className="text-link">
+							register
+						</Link>
+						?
+					</div>
+					<Button type="submit">Login</Button>
+				</CardFooter>
+			</ZodForm>
+		</Card>
 	)
 }
