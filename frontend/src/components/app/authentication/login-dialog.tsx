@@ -7,21 +7,17 @@ import {
 	CardTitle
 } from '@/components/ui/card'
 import {} from '@/components/ui/dialog'
-import { asField, stringField } from '@/components/ui/zod-form/utils'
+import { stringField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { login } from '@/state/user'
 import { EditorType } from '@shared/enums'
 import { toast } from 'sonner'
 import { Link } from 'wouter'
-import { type TypeOf, boolean, strictObject } from 'zod'
+import { type TypeOf, strictObject } from 'zod'
 
 const loginSchema = strictObject({
 	email: stringField('Email', EditorType.Email, 'username'),
-	password: stringField('Password', EditorType.Password, 'current-password'),
-	rememberMe: asField(boolean().default(false), {
-		label: 'Remember me',
-		editor: EditorType.Switch
-	})
+	password: stringField('Password', EditorType.Password, 'current-password')
 })
 
 const failed = (e: Error) =>
@@ -32,7 +28,7 @@ const failed = (e: Error) =>
 
 type LoginForm = TypeOf<typeof loginSchema>
 
-const loginCommand = ({ rememberMe, ...credentials }: LoginForm) =>
+const loginCommand = ({ ...credentials }: LoginForm) =>
 	login(credentials).then(() => toast.success('Successfully logged in'))
 
 export const LoginDialog = () => {
