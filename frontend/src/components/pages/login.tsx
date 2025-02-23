@@ -5,8 +5,8 @@ import { Button } from '../ui/button.tsx'
 
 export const LoginPage = () => {
 	return (
-		<div className="flex flex-row items-stretch min-h-screen w-full">
-			<div className="flex-[1] bg-popover flex flex-col gap-4 items-center justify-center">
+		<div className="flex flex-col-reverse sm:flex-row items-stretch min-h-screen">
+			<div className="bg-popover flex flex-col gap-4 items-center justify-center p-4 flex-[1]">
 				<article className="prose prose-sm prose-slate dark:prose-invert w-2/3">
 					<img
 						src="https://mindmine-v2.s3.eu-north-1.amazonaws.com/images/gnome.png"
@@ -61,7 +61,7 @@ export const LoginPage = () => {
 					</li>
 				</ol>
 			</div>
-			<main className="flex-[1] relative flex flex-col items-center justify-center">
+			<main className="relative flex flex-col items-center justify-center p-4 flex-[1]">
 				<LoginDialog />
 			</main>
 		</div>

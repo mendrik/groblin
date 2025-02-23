@@ -33,7 +33,7 @@ const loginCommand = ({ ...credentials }: LoginForm) =>
 
 export const LoginDialog = () => {
 	return (
-		<Card className="w-full max-w-sm p-4 h-fit shadow-lg">
+		<Card className="w-auto max-w-sm p-4 h-fit shadow-lg">
 			<CardHeader className="p-0 pb-4">
 				<CardTitle>Login</CardTitle>
 				<CardDescription>Please enter your email and password</CardDescription>
