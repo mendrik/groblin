@@ -1,5 +1,10 @@
 import { Api } from '@/gql-client'
-import type { LoggedInUser, Login, Registration } from '@/gql/graphql'
+import type {
+	ForgotPassword,
+	LoggedInUser,
+	Login,
+	Registration
+} from '@/gql/graphql'
 import { getItem, removeItems, setItem } from '@/lib/local-storage'
 import { setSignal } from '@/lib/signals'
 import { signal } from '@preact/signals-react'
@@ -30,3 +35,5 @@ export const login = (data: Login) =>
 			})
 		)
 		.then(loadProject)
+
+export const forgotPassword = (data: ForgotPassword) => void 0

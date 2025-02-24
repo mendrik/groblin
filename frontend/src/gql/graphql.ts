@@ -43,6 +43,10 @@ export type CreateApiKey = {
   name: Scalars['String']['input'];
 };
 
+export type ForgotPassword = {
+  email: Scalars['String']['input'];
+};
+
 export type GetValues = {
   ids: Array<Scalars['Int']['input']>;
 };
@@ -107,6 +111,7 @@ export type Mutation = {
   deleteNodeById: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
   deleteValue: Scalars['Boolean']['output'];
+  forgotPassword: Scalars['Boolean']['output'];
   importArray: Scalars['Boolean']['output'];
   insertListItem: Scalars['Int']['output'];
   insertNode: Node;
@@ -152,6 +157,11 @@ export type MutationDeleteUserArgs = {
 
 export type MutationDeleteValueArgs = {
   id: Scalars['Int']['input'];
+};
+
+
+export type MutationForgotPasswordArgs = {
+  data: ForgotPassword;
 };
 
 

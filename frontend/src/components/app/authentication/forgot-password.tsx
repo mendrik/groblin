@@ -22,7 +22,7 @@ const forgotPasswordSchema = strictObject({
 
 type ForgotPassword = TypeOf<typeof forgotPasswordSchema>
 
-const forgotPasswordCommand: Fn<Partial<ForgotPassword>, void> = pipeTap(
+const forgotPasswordCommand: Fn<ForgotPassword, void> = pipeTap(
 	console.log // todo
 )
 

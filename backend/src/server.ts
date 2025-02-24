@@ -32,6 +32,7 @@ import { SchemaContext } from './services/schema-context.ts'
 
 import { useAdapter } from '@type-cacheable/node-cache-adapter'
 import NodeCache from 'node-cache'
+import { SesClient } from './services/ses-client.ts'
 
 const client = new NodeCache()
 useAdapter(client)
@@ -41,6 +42,7 @@ const container = new Container()
 container.bind<PubSub>('PubSub').toConstantValue(pubSub)
 container.bind(Kysely<DB>).toConstantValue(db)
 container.bind(S3Client).toSelf()
+container.bind(SesClient).toSelf()
 container.bind(NodeResolver).toSelf()
 container.bind(NodeSettingsResolver).toSelf()
 container.bind(AuthResolver).toSelf()

@@ -12,3 +12,5 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 * `pnpm dlx cdk deploy`  deploy this stack to your default AWS account/region
 * `pnpm dlx cdk diff`    compare deployed stack with current state
 * `pnpm dlx cdk synth`   emits the synthesized CloudFormation template
+
+* `pnpm dlx jsx-email create forgot-password --out=./emails` create new email template 

@@ -35,6 +35,10 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 """
 scalar DateTimeISO
 
+input ForgotPassword {
+  email: String!
+}
+
 input GetValues {
   ids: [Int!]!
 }
@@ -104,6 +108,7 @@ type Mutation {
   deleteNodeById(id: Int!, order: Int!, parent_id: Int!): Boolean!
   deleteUser(id: Int!): Boolean!
   deleteValue(id: Int!): Boolean!
+  forgotPassword(data: ForgotPassword!): Boolean!
   importArray(data: JsonArrayImportInput!): Boolean!
   insertListItem(listItem: InsertListItem!): Int!
   insertNode(data: InsertNode!, settings: JSONObject): Node!

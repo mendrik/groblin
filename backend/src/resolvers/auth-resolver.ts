@@ -24,6 +24,8 @@ import {
 	Resolver,
 	UseMiddleware
 } from 'type-graphql'
+import { SesClient } from 'src/services/ses-client.ts'
+import { SendEmailCommand } from '@aws-sdk/client-ses'
 
 const jwtSecret = process.env.JWT_SECRET
 
@@ -119,6 +121,9 @@ export class AuthResolver {
 	@inject(Kysely)
 	private readonly db: Kysely<DB>
 
+	@inject(SesClient)
+	private readonly sesClient: SesClient
+
 	userByEmail = (email: string) =>
 		this.db
 			.selectFrom('user')
@@ -165,6 +170,29 @@ export class AuthResolver {
 	async logout(@Ctx() ctx: Context) {
 		ctx.user = undefined as any
 		return true
+	}
+
+	@Mutation(returns => Boolean)
+	async forgotPassword(@Arg('data', () => ForgotPassword) data: ForgotPassword) {	
+		const email = new SendEmailCommand({
+			Source: "info@groblin.org",
+			Destination: {
+				ToAddresses: [data.email]
+			},
+			Message: {
+				Body: {
+					Html: {
+						Data: 'Forgot password email'
+					}
+				},
+				Subject: {
+					Data: 'Forgot password',
+					Charset: 'UTF-8'
+				}
+			}
+		})
+		await this.sesClient.send(email)
+		
 	}
 
 	// todo forgot password, reset password
