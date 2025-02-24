@@ -36,4 +36,5 @@ export const login = (data: Login) =>
 		)
 		.then(loadProject)
 
-export const forgotPassword = (data: ForgotPassword) => void 0
+export const forgotPassword = (data: ForgotPassword) => 
+	Api.ForgotPassword({ data })

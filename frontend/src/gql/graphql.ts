@@ -567,6 +567,13 @@ export type UsersUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>
 
 export type UsersUpdatedSubscription = { usersUpdated: boolean };
 
+export type ForgotPasswordMutationVariables = Exact<{
+  data: ForgotPassword;
+}>;
+
+
+export type ForgotPasswordMutation = { forgotPassword: boolean };
+
 export const ValueFragmentDoc = `
     fragment Value on Value {
   id
@@ -832,6 +839,11 @@ export const UsersUpdatedDocument = `
   usersUpdated
 }
     `;
+export const ForgotPasswordDocument = `
+    mutation ForgotPassword($data: ForgotPassword!) {
+  forgotPassword(data: $data)
+}
+    `;
 export type Requester<C = {}, E = unknown> = <R, V>(doc: string, vars?: V, options?: C) => Promise<ExecutionResult<R, E>> | AsyncIterable<ExecutionResult<R, E>>
 export function getSdk<C, E>(requester: Requester<C, E>) {
   return {
@@ -930,6 +942,9 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     },
     UsersUpdated(variables?: UsersUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<UsersUpdatedSubscription, E>> {
       return requester<UsersUpdatedSubscription, UsersUpdatedSubscriptionVariables>(UsersUpdatedDocument, variables, options) as AsyncIterable<ExecutionResult<UsersUpdatedSubscription, E>>;
+    },
+    ForgotPassword(variables: ForgotPasswordMutationVariables, options?: C): Promise<ExecutionResult<ForgotPasswordMutation, E>> {
+      return requester<ForgotPasswordMutation, ForgotPasswordMutationVariables>(ForgotPasswordDocument, variables, options) as Promise<ExecutionResult<ForgotPasswordMutation, E>>;
     }
   };
 }

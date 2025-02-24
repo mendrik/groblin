@@ -223,3 +223,7 @@ mutation DeleteUser($id: Int!) {
 subscription UsersUpdated {
 	usersUpdated
 }
+
+mutation ForgotPassword($data: ForgotPassword!) {
+	forgotPassword(data: $data)
+}
