@@ -1,8 +1,12 @@
-# Welcome to your CDK TypeScript project
+# Welcome to Groblin backend
 
-This is a blank project for CDK development with TypeScript.
+Copy your .env.template file to .env and edit it according to your needs.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+## Emails
+
+Use this [tool](https://usewaypoint.github.io/email-builder-js/) to edit emails templates and place 
+them under backend/emails as json.
+
 
 ## Useful commands
 
@@ -12,5 +16,3 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 * `pnpm dlx cdk deploy`  deploy this stack to your default AWS account/region
 * `pnpm dlx cdk diff`    compare deployed stack with current state
 * `pnpm dlx cdk synth`   emits the synthesized CloudFormation template
-
-* `pnpm dlx jsx-email create forgot-password --out=./emails` create new email template 
