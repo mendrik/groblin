@@ -6,11 +6,12 @@
 		"module": "NodeNext",
 		"types": ["reflect-metadata"],
 		"moduleResolution": "NodeNext",
+		"resolveJsonModule": true,
 		"lib": ["ESNext"],
 		"paths": {
 			"@shared/*": ["../shared/src/*"],
 			"@tp/*": ["../type-patches/*"]
 		}
 	},
-	"include": ["src", "../shared/src", "../type-patches"]
+	"include": ["src", "emails", "../shared/src", "../type-patches"]
 }

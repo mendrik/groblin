@@ -9,11 +9,14 @@ import {
 } from '@/components/ui/dialog'
 import { stringField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
+import { forgotPassword } from '@/state/user'
 import { EditorType } from '@shared/enums'
 import { pipeTap } from '@shared/utils/pipe-tap'
 import type { Fn } from '@tp/functions.ts'
 import { pipe } from 'ramda'
+import { toast } from 'sonner'
 import { Link } from 'wouter'
+import { navigate } from 'wouter/use-browser-location'
 import { type TypeOf, strictObject } from 'zod'
 
 const forgotPasswordSchema = strictObject({
@@ -22,8 +25,16 @@ const forgotPasswordSchema = strictObject({
 
 type ForgotPassword = TypeOf<typeof forgotPasswordSchema>
 
+const success = () =>
+	toast.success('Reset password email was sent', {
+		description: 'Check your mail box for a link to reset your password',
+		closeButton: true
+	})
+
 const forgotPasswordCommand: Fn<ForgotPassword, void> = pipeTap(
-	console.log // todo
+	forgotPassword,
+	success,
+	() => navigate('/')
 )
 
 export const ForgotPasswordDialog = () => {

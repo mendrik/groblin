@@ -1,7 +1,13 @@
 import { type BinaryLike, scrypt } from 'node:crypto'
+import { SendEmailCommand } from '@aws-sdk/client-ses'
 import { assertThat } from '@shared/asserts.ts'
 import { awaitObj } from '@shared/utils/await-obj.ts'
 import { evolveAlt } from '@shared/utils/evolve-alt.ts'
+import {
+	type TReaderDocument,
+	renderToStaticMarkup
+} from '@usewaypoint/email-builder'
+import resetPassword from 'emails/resetPassword.json' assert { type: 'json' }
 import { inject, injectable } from 'inversify'
 import jwt from 'jsonwebtoken'
 import { Kysely } from 'kysely'
@@ -10,6 +16,7 @@ import { F, equals, isNil, isNotNil, pipe, when } from 'ramda'
 import type { DB } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'
 import { ProjectService } from 'src/services/project-service.ts'
+import { SesClient } from 'src/services/ses-client.ts'
 import { Topic } from 'src/types.ts'
 import type { Context } from 'src/types.ts'
 import {
@@ -24,8 +31,6 @@ import {
 	Resolver,
 	UseMiddleware
 } from 'type-graphql'
-import { SesClient } from 'src/services/ses-client.ts'
-import { SendEmailCommand } from '@aws-sdk/client-ses'
 
 const jwtSecret = process.env.JWT_SECRET
 
@@ -173,16 +178,21 @@ export class AuthResolver {
 	}
 
 	@Mutation(returns => Boolean)
-	async forgotPassword(@Arg('data', () => ForgotPassword) data: ForgotPassword) {	
+	async forgotPassword(
+		@Arg('data', () => ForgotPassword) data: ForgotPassword
+	) {
 		const email = new SendEmailCommand({
-			Source: "info@groblin.org",
+			Source: 'info@groblin.org',
 			Destination: {
 				ToAddresses: [data.email]
 			},
 			Message: {
 				Body: {
 					Html: {
-						Data: 'Forgot password email'
+						Data: renderToStaticMarkup(resetPassword as TReaderDocument, {
+							rootBlockId: 'root'
+						}),
+						Charset: 'UTF-8'
 					}
 				},
 				Subject: {
@@ -192,8 +202,6 @@ export class AuthResolver {
 			}
 		})
 		await this.sesClient.send(email)
-		
+		return true
 	}
-
-	// todo forgot password, reset password
 }
