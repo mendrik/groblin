@@ -22,6 +22,7 @@ import { Topic } from 'src/types.ts'
 import type { PubSub } from 'type-graphql'
 import { ImageService } from './image-service.ts'
 import { PublicService } from './public-service.ts'
+import { auth } from 'src/auth.ts'
 
 const port = process.env.PUBLIC_PORT
 
@@ -59,6 +60,7 @@ export class PublicServer {
 
 		this.server = createServer(
 			match<[any, any], any>(
+				caseOf([{ url: startsWith('/api/auth/') }, _], auth),
 				caseOf([{ url: startsWith('/media/') }, _], (i, o) =>
 					this.imageService.handleRequest(i, o)
 				),

@@ -86,21 +86,6 @@ subscription NodeSettingsUpdated {
 	nodeSettingsUpdated
 }
 
-mutation Register($data: Registration!) {
-	register(data: $data)
-}
-
-mutation Login($data: Login!) {
-	login(data: $data) {
-		token
-		expiresDate
-	}
-}
-
-mutation Logout {
-	logout
-}
-
 subscription ValuesUpdated {
 	valuesUpdated {
 		...Value
@@ -222,8 +207,4 @@ mutation DeleteUser($id: Int!) {
 
 subscription UsersUpdated {
 	usersUpdated
-}
-
-mutation ForgotPassword($data: ForgotPassword!) {
-	forgotPassword(data: $data)
 }

@@ -7,10 +7,10 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { stringField } from '@/components/ui/zod-form/utils'
+import { asField, stringField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
+import { authClient } from '@/lib/auth-client'
 import { setSignal } from '@/lib/signals'
-import { register } from '@/state/user'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
 import { pipeAsync } from '@shared/utils/pipe-async'
@@ -18,12 +18,20 @@ import type { Fn } from '@tp/functions.ts'
 import { omit } from 'ramda'
 import { toast } from 'sonner'
 import { Link } from 'wouter'
-import { type TypeOf, strictObject } from 'zod'
+import { type TypeOf, strictObject, string } from 'zod'
 
 const registrationSchema = strictObject({
 	name: stringField('Name', EditorType.Input, 'name', 'Full name'),
-	email: stringField('Email', EditorType.Email, 'username', 'your@email.com'),
-	password: stringField('Password', EditorType.Password, 'new-password'),
+	email: asField(string().email(), {
+		label: 'Email',
+		editor: EditorType.Email,
+		autofill: 'username'
+	}),
+	password: asField(string().min(8).max(32), {
+		label: 'Password',
+		editor: EditorType.Password,
+		autofill: 'new-password'
+	}),
 	repeatPassword: stringField(
 		'Repeat password',
 		EditorType.Password,
@@ -53,7 +61,7 @@ const failed = (e: Error) =>
 
 const registerCommand: Fn<RegistrationForm, unknown> = pipeAsync(
 	omit(['repeatPassword']),
-	register,
+	authClient.signUp.email,
 	success,
 	lockForm
 )

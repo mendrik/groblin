@@ -7,7 +7,6 @@ import { prop } from 'ramda'
 import 'reflect-metadata'
 import { AuthChecker } from 'src/middleware/auth-checker.ts'
 import { ApiKeyResolver } from 'src/resolvers/api-key-resolver.ts'
-import { AuthResolver } from 'src/resolvers/auth-resolver.ts'
 import { IoResolver } from 'src/resolvers/io-resolver.ts'
 import { ListResolver } from 'src/resolvers/list-resolver.ts'
 import { NodeResolver } from 'src/resolvers/node-resolver.ts'
@@ -36,7 +35,6 @@ export class InternalServer {
 	public async start(container: Container) {
 		const schema = await buildSchema({
 			resolvers: [
-				AuthResolver,
 				ProjectResolver,
 				NodeResolver,
 				NodeSettingsResolver,

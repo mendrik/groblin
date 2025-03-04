@@ -43,10 +43,6 @@ export type CreateApiKey = {
   name: Scalars['String']['input'];
 };
 
-export type ForgotPassword = {
-  email: Scalars['String']['input'];
-};
-
 export type GetValues = {
   ids: Array<Scalars['Int']['input']>;
 };
@@ -98,12 +94,6 @@ export type LoggedInUser = {
   name: Scalars['String']['output'];
 };
 
-export type Login = {
-  email: Scalars['String']['input'];
-  password: Scalars['String']['input'];
-  rememberMe?: InputMaybe<Scalars['Boolean']['input']>;
-};
-
 export type Mutation = {
   createApiKey: ApiKey;
   deleteApiKey: Scalars['Boolean']['output'];
@@ -111,14 +101,10 @@ export type Mutation = {
   deleteNodeById: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
   deleteValue: Scalars['Boolean']['output'];
-  forgotPassword: Scalars['Boolean']['output'];
   importArray: Scalars['Boolean']['output'];
   insertListItem: Scalars['Int']['output'];
   insertNode: Node;
   inviteUser: Scalars['Boolean']['output'];
-  login: Token;
-  logout: Scalars['Boolean']['output'];
-  register: Scalars['Boolean']['output'];
   toggleApiKey: Scalars['Boolean']['output'];
   truncate: Scalars['Boolean']['output'];
   updateNode: Scalars['Boolean']['output'];
@@ -160,11 +146,6 @@ export type MutationDeleteValueArgs = {
 };
 
 
-export type MutationForgotPasswordArgs = {
-  data: ForgotPassword;
-};
-
-
 export type MutationImportArrayArgs = {
   data: JsonArrayImportInput;
 };
@@ -183,16 +164,6 @@ export type MutationInsertNodeArgs = {
 
 export type MutationInviteUserArgs = {
   data: Invite;
-};
-
-
-export type MutationLoginArgs = {
-  data: Login;
-};
-
-
-export type MutationRegisterArgs = {
-  data: Registration;
 };
 
 
@@ -302,23 +273,12 @@ export type QueryGetValuesArgs = {
   data: GetValues;
 };
 
-export type Registration = {
-  email: Scalars['String']['input'];
-  name: Scalars['String']['input'];
-  password: Scalars['String']['input'];
-};
-
 export type Subscription = {
   apiKeysUpdated: Scalars['Boolean']['output'];
   nodeSettingsUpdated: Scalars['Boolean']['output'];
   nodesUpdated: Scalars['Boolean']['output'];
   usersUpdated: Scalars['Boolean']['output'];
   valuesUpdated: Value;
-};
-
-export type Token = {
-  expiresDate: Scalars['DateTimeISO']['output'];
-  token: Scalars['String']['output'];
 };
 
 export type TruncateValue = {
@@ -413,25 +373,6 @@ export type NodeSettingsUpdatedSubscriptionVariables = Exact<{ [key: string]: ne
 
 
 export type NodeSettingsUpdatedSubscription = { nodeSettingsUpdated: boolean };
-
-export type RegisterMutationVariables = Exact<{
-  data: Registration;
-}>;
-
-
-export type RegisterMutation = { register: boolean };
-
-export type LoginMutationVariables = Exact<{
-  data: Login;
-}>;
-
-
-export type LoginMutation = { login: { token: string, expiresDate: any } };
-
-export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
-
-
-export type LogoutMutation = { logout: boolean };
 
 export type ValuesUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
@@ -567,13 +508,6 @@ export type UsersUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>
 
 export type UsersUpdatedSubscription = { usersUpdated: boolean };
 
-export type ForgotPasswordMutationVariables = Exact<{
-  data: ForgotPassword;
-}>;
-
-
-export type ForgotPasswordMutation = { forgotPassword: boolean };
-
 export const ValueFragmentDoc = `
     fragment Value on Value {
   id
@@ -694,24 +628,6 @@ export const UpsertNodeSettingsDocument = `
 export const NodeSettingsUpdatedDocument = `
     subscription NodeSettingsUpdated {
   nodeSettingsUpdated
-}
-    `;
-export const RegisterDocument = `
-    mutation Register($data: Registration!) {
-  register(data: $data)
-}
-    `;
-export const LoginDocument = `
-    mutation Login($data: Login!) {
-  login(data: $data) {
-    token
-    expiresDate
-  }
-}
-    `;
-export const LogoutDocument = `
-    mutation Logout {
-  logout
 }
     `;
 export const ValuesUpdatedDocument = `
@@ -839,11 +755,6 @@ export const UsersUpdatedDocument = `
   usersUpdated
 }
     `;
-export const ForgotPasswordDocument = `
-    mutation ForgotPassword($data: ForgotPassword!) {
-  forgotPassword(data: $data)
-}
-    `;
 export type Requester<C = {}, E = unknown> = <R, V>(doc: string, vars?: V, options?: C) => Promise<ExecutionResult<R, E>> | AsyncIterable<ExecutionResult<R, E>>
 export function getSdk<C, E>(requester: Requester<C, E>) {
   return {
@@ -873,15 +784,6 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     },
     NodeSettingsUpdated(variables?: NodeSettingsUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<NodeSettingsUpdatedSubscription, E>> {
       return requester<NodeSettingsUpdatedSubscription, NodeSettingsUpdatedSubscriptionVariables>(NodeSettingsUpdatedDocument, variables, options) as AsyncIterable<ExecutionResult<NodeSettingsUpdatedSubscription, E>>;
-    },
-    Register(variables: RegisterMutationVariables, options?: C): Promise<ExecutionResult<RegisterMutation, E>> {
-      return requester<RegisterMutation, RegisterMutationVariables>(RegisterDocument, variables, options) as Promise<ExecutionResult<RegisterMutation, E>>;
-    },
-    Login(variables: LoginMutationVariables, options?: C): Promise<ExecutionResult<LoginMutation, E>> {
-      return requester<LoginMutation, LoginMutationVariables>(LoginDocument, variables, options) as Promise<ExecutionResult<LoginMutation, E>>;
-    },
-    Logout(variables?: LogoutMutationVariables, options?: C): Promise<ExecutionResult<LogoutMutation, E>> {
-      return requester<LogoutMutation, LogoutMutationVariables>(LogoutDocument, variables, options) as Promise<ExecutionResult<LogoutMutation, E>>;
     },
     ValuesUpdated(variables?: ValuesUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<ValuesUpdatedSubscription, E>> {
       return requester<ValuesUpdatedSubscription, ValuesUpdatedSubscriptionVariables>(ValuesUpdatedDocument, variables, options) as AsyncIterable<ExecutionResult<ValuesUpdatedSubscription, E>>;
@@ -942,9 +844,6 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
     },
     UsersUpdated(variables?: UsersUpdatedSubscriptionVariables, options?: C): AsyncIterable<ExecutionResult<UsersUpdatedSubscription, E>> {
       return requester<UsersUpdatedSubscription, UsersUpdatedSubscriptionVariables>(UsersUpdatedDocument, variables, options) as AsyncIterable<ExecutionResult<UsersUpdatedSubscription, E>>;
-    },
-    ForgotPassword(variables: ForgotPasswordMutationVariables, options?: C): Promise<ExecutionResult<ForgotPasswordMutation, E>> {
-      return requester<ForgotPasswordMutation, ForgotPasswordMutationVariables>(ForgotPasswordDocument, variables, options) as Promise<ExecutionResult<ForgotPasswordMutation, E>>;
     }
   };
 }

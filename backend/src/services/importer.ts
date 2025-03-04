@@ -15,7 +15,6 @@ import {
 	isString
 } from 'ramda-adjunct'
 import type { DB, JsonArray, JsonObject } from 'src/database/schema.ts'
-import type { LoggedInUser } from 'src/resolvers/auth-resolver.ts'
 import type { JsonArrayImportInput } from 'src/resolvers/io-resolver.ts'
 import type { Node } from 'src/resolvers/node-resolver.ts'
 import { NodeType } from 'src/types.ts'
@@ -204,7 +203,7 @@ const isSetting = (value: any): value is DbNodeSetting => 'settings' in value
 
 export const importJson =
 	(
-		{ lastProjectId }: LoggedInUser,
+		{ lastProjectId }: User,
 		json: JsonStart,
 		node: TreeNode,
 		options: Options

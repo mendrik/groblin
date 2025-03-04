@@ -23,6 +23,22 @@ export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
+export interface Account {
+  accessToken: string | null;
+  accessTokenExpiresAt: Timestamp | null;
+  accountId: string;
+  createdAt: Timestamp;
+  id: string;
+  idToken: string | null;
+  password: string | null;
+  providerId: string;
+  refreshToken: string | null;
+  refreshTokenExpiresAt: Timestamp | null;
+  scope: string | null;
+  updatedAt: Timestamp;
+  userId: string;
+}
+
 export interface ApiKey {
   created_at: Generated<Timestamp>;
   expires_at: Timestamp | null;
@@ -66,13 +82,26 @@ export interface ProjectUser {
   user_id: number;
 }
 
+export interface Session {
+  createdAt: Timestamp;
+  expiresAt: Timestamp;
+  id: string;
+  ipAddress: string | null;
+  token: string;
+  updatedAt: Timestamp;
+  userAgent: string | null;
+  userId: string;
+}
+
 export interface User {
-  confirmed: Generated<boolean>;
+  createdAt: Timestamp;
   email: string;
-  id: Generated<number>;
+  emailVerified: boolean;
+  id: string;
+  image: string | null;
   last_project_id: number | null;
   name: string;
-  password: string;
+  updatedAt: Timestamp;
 }
 
 export interface Values {
@@ -86,12 +115,24 @@ export interface Values {
   value: Json | null;
 }
 
+export interface Verification {
+  createdAt: Timestamp | null;
+  expiresAt: Timestamp;
+  id: string;
+  identifier: string;
+  updatedAt: Timestamp | null;
+  value: string;
+}
+
 export interface DB {
+  account: Account;
   api_key: ApiKey;
   node: Node;
   node_settings: NodeSettings;
   project: Project;
   project_user: ProjectUser;
+  session: Session;
   user: User;
   values: Values;
+  verification: Verification;
 }

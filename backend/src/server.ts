@@ -1,17 +1,15 @@
-import 'reflect-metadata'
+import { yellow } from 'ansicolor'
 import 'dotenv/config'
 import { createPubSub } from 'graphql-yoga'
 import { Container } from 'inversify'
 import { Kysely } from 'kysely'
 import { tryCatch } from 'ramda'
 import 'reflect-metadata'
-import { yellow } from 'ansicolor'
 import type { PubSub } from 'type-graphql'
 import type { DB } from './database/schema.ts'
 import { AuthChecker } from './middleware/auth-checker.ts'
 import { LogAccess } from './middleware/log-access.ts'
 import { ApiKeyResolver } from './resolvers/api-key-resolver.ts'
-import { AuthResolver } from './resolvers/auth-resolver.ts'
 import { IoResolver } from './resolvers/io-resolver.ts'
 import { ListResolver } from './resolvers/list-resolver.ts'
 import { NodeResolver } from './resolvers/node-resolver.ts'
@@ -45,7 +43,6 @@ container.bind(S3Client).toSelf()
 container.bind(SesClient).toSelf()
 container.bind(NodeResolver).toSelf()
 container.bind(NodeSettingsResolver).toSelf()
-container.bind(AuthResolver).toSelf()
 container.bind(ListResolver).toSelf()
 container.bind(ProjectResolver).toSelf()
 container.bind(ApiKeyResolver).toSelf()

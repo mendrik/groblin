@@ -16,7 +16,6 @@ import {
 	Resolver,
 	UseMiddleware
 } from 'type-graphql'
-import { LoggedInUser } from './auth-resolver.ts'
 import { Node, NodeResolver } from './node-resolver.ts'
 import { NodeSettings, NodeSettingsResolver } from './node-settings-resolver.ts'
 import { Value, ValueResolver } from './value-resolver.ts'
@@ -35,7 +34,7 @@ export class ProjectData {
 	@Field(type => Project)
 	project: Project
 
-	@Field(type => LoggedInUser)
+	@Field(type => User)
 	user: LoggedInUser
 
 	@Field(type => [Node])

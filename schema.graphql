@@ -35,10 +35,6 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 """
 scalar DateTimeISO
 
-input ForgotPassword {
-  email: String!
-}
-
 input GetValues {
   ids: [Int!]!
 }
@@ -95,12 +91,6 @@ type LoggedInUser {
   name: String!
 }
 
-input Login {
-  email: String!
-  password: String!
-  rememberMe: Boolean
-}
-
 type Mutation {
   createApiKey(data: CreateApiKey!): ApiKey!
   deleteApiKey(key: String!): Boolean!
@@ -108,14 +98,10 @@ type Mutation {
   deleteNodeById(id: Int!, order: Int!, parent_id: Int!): Boolean!
   deleteUser(id: Int!): Boolean!
   deleteValue(id: Int!): Boolean!
-  forgotPassword(data: ForgotPassword!): Boolean!
   importArray(data: JsonArrayImportInput!): Boolean!
   insertListItem(listItem: InsertListItem!): Int!
   insertNode(data: InsertNode!, settings: JSONObject): Node!
   inviteUser(data: Invite!): Boolean!
-  login(data: Login!): Token!
-  logout: Boolean!
-  register(data: Registration!): Boolean!
   toggleApiKey(key: String!): Boolean!
   truncate(data: TruncateValue!): Boolean!
   updateNode(data: ChangeNodeInput!): Boolean!
@@ -186,23 +172,12 @@ type Query {
   getValues(data: GetValues!): [Value!]!
 }
 
-input Registration {
-  email: String!
-  name: String!
-  password: String!
-}
-
 type Subscription {
   apiKeysUpdated: Boolean!
   nodeSettingsUpdated: Boolean!
   nodesUpdated: Boolean!
   usersUpdated: Boolean!
   valuesUpdated: Value!
-}
-
-type Token {
-  expiresDate: DateTimeISO!
-  token: String!
 }
 
 input TruncateValue {
