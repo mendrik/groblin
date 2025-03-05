@@ -7,6 +7,7 @@ import type {
 import { createServer } from 'node:http'
 import { assertExists } from '@shared/asserts.ts'
 import { cyan, lightGreen, yellow } from 'ansicolor'
+import { toNodeHandler } from 'better-auth/node'
 import { type GraphQLSchema, printSchema } from 'graphql'
 import { createYoga } from 'graphql-yoga'
 import { inject, injectable } from 'inversify'
@@ -64,7 +65,7 @@ export class PublicServer {
 		this.server = createServer(
 			match<[any, any], any>(
 				caseOf([{ url: startsWith('/api/auth/') }, _], (i, o) =>
-					this.auth.handler(i)
+					toNodeHandler(this.auth)(i, o)
 				),
 				caseOf([{ url: startsWith('/media/') }, _], (i, o) =>
 					this.imageService.handleRequest(i, o)

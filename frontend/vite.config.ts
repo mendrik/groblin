@@ -29,5 +29,13 @@ export default defineConfig({
 		include: ['src/**/*.test.{ts,tsx}'],
 		environment: 'happy-dom',
 		testTimeout: 5000
+	},
+	server: {
+		proxy: {
+			'/api': {
+				target: 'http://localhost:4001',
+				changeOrigin: true
+			}
+		}
 	}
 })

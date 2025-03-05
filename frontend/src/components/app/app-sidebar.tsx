@@ -1,4 +1,4 @@
-import { authClient } from '@/lib/auth-client'
+import { signOut } from '@/lib/auth-client'
 import type { Icon as IconImg } from '@/type-patches/icons'
 import {
 	Tooltip,
@@ -67,7 +67,7 @@ export const AppSidebar = () => {
 					</IconLink>
 					<IconLink icon={FileJson}>Import</IconLink>
 					<IconLink icon={UserCircleIcon}>Profile</IconLink>
-					<IconLink icon={LogIn} onClick={() => authClient.signOut()}>
+					<IconLink icon={LogIn} onClick={() => signOut()}>
 						Logout
 					</IconLink>
 				</ul>

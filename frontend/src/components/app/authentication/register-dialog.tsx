@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dialog'
 import { asField, stringField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
-import { authClient } from '@/lib/auth-client'
+import { signUp } from '@/lib/auth-client'
 import { setSignal } from '@/lib/signals'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
@@ -61,7 +61,7 @@ const failed = (e: Error) =>
 
 const registerCommand: Fn<RegistrationForm, unknown> = pipeAsync(
 	omit(['repeatPassword']),
-	authClient.signUp.email,
+	signUp.email,
 	success,
 	lockForm
 )
