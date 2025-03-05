@@ -15,12 +15,12 @@ type Auth = ReturnType<typeof betterAuth>
 
 @injectable()
 export class Authenticator {
-	@inject(SesClient)
-	private sesClient: SesClient
-
 	api: Auth['api']
 	handler: Auth['handler']
-	constructor() {
+	constructor(
+		@inject(SesClient)
+		private sesClient: SesClient
+	) {
 		const email = this.sesClient
 		const auth = betterAuth({
 			database: {
@@ -34,7 +34,7 @@ export class Authenticator {
 				sendOnSignUp: true,
 				sendVerificationEmail: async options =>
 					email.sendEmail({
-						file: './emails/confirmAccount.json',
+						file: 'confirmAccount.json',
 						to: options.user.email,
 						subject: 'Verify your email',
 						options

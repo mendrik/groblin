@@ -21,7 +21,7 @@ export class SesClient extends AWSClient {
 		subject,
 		options = {}
 	}: SendEmail): Promise<void> {
-		const template = await import(file)
+		const template = await import(`../../emails/${file}`)
 		const email = new SendEmailCommand({
 			Destination: {
 				ToAddresses: [to]
