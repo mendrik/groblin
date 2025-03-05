@@ -1,5 +1,4 @@
-import { removeItems } from '@/lib/local-storage'
-import { logout } from '@/state/user'
+import { authClient } from '@/lib/auth-client'
 import type { Icon as IconImg } from '@/type-patches/icons'
 import {
 	Tooltip,
@@ -7,7 +6,6 @@ import {
 	TooltipProvider,
 	TooltipTrigger
 } from '@radix-ui/react-tooltip'
-import { pipeAsync } from '@shared/utils/pipe-async'
 import {
 	FileJson,
 	House,
@@ -24,11 +22,6 @@ import { Icon } from '../ui/simple/icon'
 type OwnProps = {
 	icon: IconImg
 } & ButtonHTMLAttributes<HTMLButtonElement>
-
-export const logoutCommand = pipeAsync(
-	() => removeItems(['token', 'tokenExpiresDate']),
-	logout
-)
 
 const IconLink = ({
 	icon,
@@ -74,7 +67,7 @@ export const AppSidebar = () => {
 					</IconLink>
 					<IconLink icon={FileJson}>Import</IconLink>
 					<IconLink icon={UserCircleIcon}>Profile</IconLink>
-					<IconLink icon={LogIn} onClick={logoutCommand}>
+					<IconLink icon={LogIn} onClick={() => authClient.signOut()}>
 						Logout
 					</IconLink>
 				</ul>

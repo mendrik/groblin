@@ -10,7 +10,6 @@ import {
 	Ctx,
 	Field,
 	InputType,
-	Int,
 	Mutation,
 	ObjectType,
 	type PubSub,
@@ -22,8 +21,8 @@ import {
 
 @ObjectType()
 export class ProjectUser {
-	@Field(type => Int)
-	id: number
+	@Field(type => String)
+	id: string
 
 	@Field(type => String)
 	name: string
@@ -67,7 +66,7 @@ export class UserResolver {
 
 	@Query(returns => [ProjectUser])
 	async getUsers(@Ctx() ctx: Context): Promise<ProjectUser[]> {
-		const { user } = ctx
+		const { project_id } = ctx
 		return this.db
 			.selectFrom('user')
 			.innerJoin('project_user', 'project_user.user_id', 'user.id')
@@ -79,7 +78,7 @@ export class UserResolver {
 				'project_user.roles',
 				'project_user.owner'
 			])
-			.where('project_id', '=', user.lastProjectId)
+			.where('project_id', '=', project_id)
 			.orderBy('name', 'desc')
 			.execute()
 	}
@@ -87,12 +86,12 @@ export class UserResolver {
 	@Mutation(returns => Boolean)
 	async deleteUser(
 		@Ctx() ctx: Context,
-		@Arg('id', () => Int) id: number
+		@Arg('id', () => String) id: string
 	): Promise<boolean> {
 		const result = await this.db
 			.deleteFrom('project_user')
 			.where('user_id', '=', id)
-			.where('project_id', '=', ctx.user.lastProjectId)
+			.where('project_id', '=', ctx.project_id)
 			.where('owner', '=', false)
 			.executeTakeFirstOrThrow()
 		this.pubSub.publish(Topic.UsersUpdated)

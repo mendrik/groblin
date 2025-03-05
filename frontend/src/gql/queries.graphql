@@ -1,11 +1,5 @@
 query GetProject {
 	getProject {
-		user {
-			id
-			email
-			name
-			lastProjectId
-		}
 		project {
 			id
 			name

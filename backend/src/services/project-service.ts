@@ -20,7 +20,6 @@ export class ProjectService {
 			const { id: project_id } = await trx
 				.insertInto('project')
 				.values({
-					id: user.id,
 					name: 'My Project'
 				})
 				.returning('id')
@@ -36,9 +35,11 @@ export class ProjectService {
 				.executeTakeFirstOrThrow()
 
 			await trx
-				.updateTable('user')
-				.set({ last_project_id: project_id })
-				.where('id', '=', user.id)
+				.insertInto('history')
+				.values({
+					user_id: user.id,
+					current_project_id: project_id
+				})
 				.execute()
 
 			await trx

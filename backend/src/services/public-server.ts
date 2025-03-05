@@ -16,13 +16,13 @@ import { T as _, equals, startsWith } from 'ramda'
 // This is the fastify instance you have created
 
 import { caseOf, match } from '@shared/utils/match.ts'
+import { Authenticator } from 'src/auth.ts'
 import type { DB } from 'src/database/schema.ts'
 import type { ProjectId } from 'src/types.ts'
 import { Topic } from 'src/types.ts'
 import type { PubSub } from 'type-graphql'
 import { ImageService } from './image-service.ts'
 import { PublicService } from './public-service.ts'
-import { auth } from 'src/auth.ts'
 
 const port = process.env.PUBLIC_PORT
 
@@ -42,6 +42,9 @@ export class PublicServer {
 	@inject(ImageService)
 	private imageService: ImageService
 
+	@inject(Authenticator)
+	private auth: Authenticator
+
 	private abort: AbortController
 
 	private server: Server
@@ -60,7 +63,9 @@ export class PublicServer {
 
 		this.server = createServer(
 			match<[any, any], any>(
-				caseOf([{ url: startsWith('/api/auth/') }, _], auth),
+				caseOf([{ url: startsWith('/api/auth/') }, _], (i, o) =>
+					this.auth.handler(i)
+				),
 				caseOf([{ url: startsWith('/media/') }, _], (i, o) =>
 					this.imageService.handleRequest(i, o)
 				),

@@ -34,9 +34,6 @@ export class ProjectData {
 	@Field(type => Project)
 	project: Project
 
-	@Field(type => User)
-	user: LoggedInUser
-
 	@Field(type => [Node])
 	nodes: Node[]
 
@@ -73,7 +70,7 @@ export class ProjectResolver {
 		const project = await this.db
 			.selectFrom('project')
 			.selectAll()
-			.where('id', '=', ctx.user.lastProjectId)
+			.where('id', '=', ctx.project_id)
 			.executeTakeFirst()
 			.then(failOn(isNil, 'Project not found'))
 
@@ -81,7 +78,6 @@ export class ProjectResolver {
 			project,
 			nodes,
 			values,
-			user: ctx.user,
 			nodeSettings
 		}
 	}

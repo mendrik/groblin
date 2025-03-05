@@ -1,4 +1,5 @@
 import { betterAuth } from 'better-auth'
+import { injectable } from 'inversify'
 import { PostgresDialect } from 'kysely'
 import pg from 'pg'
 
@@ -18,3 +19,13 @@ export const auth = betterAuth({
 		enabled: true
 	}
 })
+
+@injectable()
+export class Authenticator {
+	api: typeof auth.api
+	handler: typeof auth.handler
+	constructor() {
+		this.api = auth.api
+		this.handler = auth.handler
+	}
+}

@@ -30,6 +30,7 @@ import { SchemaContext } from './services/schema-context.ts'
 
 import { useAdapter } from '@type-cacheable/node-cache-adapter'
 import NodeCache from 'node-cache'
+import { Authenticator } from './auth.ts'
 import { SesClient } from './services/ses-client.ts'
 
 const client = new NodeCache()
@@ -45,6 +46,7 @@ container.bind(NodeResolver).toSelf()
 container.bind(NodeSettingsResolver).toSelf()
 container.bind(ListResolver).toSelf()
 container.bind(ProjectResolver).toSelf()
+container.bind(Authenticator).toSelf()
 container.bind(ApiKeyResolver).toSelf()
 container.bind(UserResolver).toSelf()
 container.bind(LogAccess).toSelf()

@@ -9,7 +9,7 @@ import {
 import {} from '@/components/ui/dialog'
 import { stringField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
-import { login } from '@/state/user'
+import { authClient } from '@/lib/auth-client'
 import { EditorType } from '@shared/enums'
 import { toast } from 'sonner'
 import { Link } from 'wouter'
@@ -28,8 +28,10 @@ const failed = (e: Error) =>
 
 type LoginForm = TypeOf<typeof loginSchema>
 
-const loginCommand = ({ ...credentials }: LoginForm) =>
-	login(credentials).then(() => toast.success('Successfully logged in'))
+const loginCommand = (credentials: LoginForm) =>
+	authClient
+		.signIn(credentials)
+		.then(() => toast.success('Successfully logged in'))
 
 export const LoginDialog = () => {
 	return (

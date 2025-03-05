@@ -94,7 +94,7 @@ export class ListResolver {
 		@Ctx() ctx: Context,
 		@Arg('request', () => ListRequest) request: ListRequest
 	): Promise<ListItem[]> {
-		return this.listItems(ctx.user.lastProjectId, request)
+		return this.listItems(ctx.project_id, request)
 	}
 
 	@Query(returns => [Node])
@@ -126,7 +126,7 @@ export class ListResolver {
 						false
 					),
 					eb('node_tree.type', 'not in', ['List', 'Object']),
-					eb('node_tree.project_id', '=', ctx.user.lastProjectId)
+					eb('node_tree.project_id', '=', ctx.project_id)
 				])
 			)
 			.orderBy('depth')

@@ -88,14 +88,11 @@ export class IoResolver {
 		@Arg('data', () => JsonArrayImportInput) payload: JsonArrayImportInput,
 		@Ctx() ctx: Context
 	) {
-		const { user } = ctx
+		const { project_id } = ctx
 		const { node_id, data } = payload
 		const json: JsonArray = await this.s3.getContent(data).then(JSON.parse)
-		const node = await this.nodeResolver.getTreeNode(
-			user.lastProjectId,
-			node_id
-		)
-		const importer = importJson(user, json, node, payload)
+		const node = await this.nodeResolver.getTreeNode(project_id, node_id)
+		const importer = importJson(project_id, json, node, payload)
 
 		await this.db
 			.transaction()
@@ -106,7 +103,7 @@ export class IoResolver {
 			})
 
 		this.pubSub.publish(Topic.NodesUpdated, true)
-		this.pubSub.publish(Topic.SomeNodeSettingsUpdated, user.lastProjectId)
+		this.pubSub.publish(Topic.SomeNodeSettingsUpdated, project_id)
 		this.pubSub.publish(Topic.ValuesUpdated, true)
 		await this.s3.deleteFile(data).catch(console.warn)
 		return true
@@ -117,8 +114,8 @@ export class IoResolver {
 		@Arg('filename', () => String) filename: string,
 		@Ctx() ctx: Context
 	) {
-		const { user } = ctx
-		const Key = `project_${user.lastProjectId}/${uuid()}`
+		const { user, project_id } = ctx
+		const Key = `project_${project_id}/${uuid()}`
 		const command = new PutObjectCommand({
 			Metadata: {
 				uploadedBy: user.email,

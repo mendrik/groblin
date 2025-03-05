@@ -84,19 +84,12 @@ input ListRequest {
   node_id: Int!
 }
 
-type LoggedInUser {
-  email: String!
-  id: Int!
-  lastProjectId: Int!
-  name: String!
-}
-
 type Mutation {
   createApiKey(data: CreateApiKey!): ApiKey!
   deleteApiKey(key: String!): Boolean!
   deleteListItem(id: Int!): Boolean!
   deleteNodeById(id: Int!, order: Int!, parent_id: Int!): Boolean!
-  deleteUser(id: Int!): Boolean!
+  deleteUser(id: String!): Boolean!
   deleteValue(id: Int!): Boolean!
   importArray(data: JsonArrayImportInput!): Boolean!
   insertListItem(listItem: InsertListItem!): Int!
@@ -148,14 +141,13 @@ type ProjectData {
   nodeSettings: [NodeSettings!]!
   nodes: [Node!]!
   project: Project!
-  user: LoggedInUser!
   values: [Value!]!
 }
 
 type ProjectUser {
   confirmed: Boolean!
   email: String!
-  id: Int!
+  id: String!
   name: String!
   owner: Boolean!
   roles: [String!]!

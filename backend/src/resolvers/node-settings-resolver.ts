@@ -71,8 +71,7 @@ export class NodeSettingsResolver {
 
 	@Query(returns => [NodeSettings])
 	async getNodeSettings(@Ctx() ctx: Context): Promise<NodeSettings[]> {
-		const { user } = ctx
-		return this.settings(user.lastProjectId)
+		return this.settings(ctx.project_id)
 	}
 
 	public settings(projectId: number): Promise<NodeSettings[]> {
@@ -88,13 +87,13 @@ export class NodeSettingsResolver {
 		@Arg('data', () => UpsertNodeSettings) data: UpsertNodeSettings,
 		@Ctx() ctx: Context
 	) {
-		const { user } = ctx
+		const { project_id } = ctx
 		const res = await this.db
 			.insertInto('node_settings')
 			.values({
 				id: data.id,
 				node_id: data.node_id,
-				project_id: user.lastProjectId,
+				project_id,
 				settings: data.settings
 			})
 			.onConflict(c =>
@@ -105,7 +104,7 @@ export class NodeSettingsResolver {
 			.returning(['id', 'node_id', 'settings'])
 			.executeTakeFirstOrThrow()
 		this.pubSub.publish(Topic.NodeSettingsUpdated, res)
-		this.pubSub.publish(Topic.SomeNodeSettingsUpdated, user.lastProjectId)
+		this.pubSub.publish(Topic.SomeNodeSettingsUpdated, project_id)
 		return res.id
 	}
 }

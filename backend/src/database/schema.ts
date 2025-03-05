@@ -50,6 +50,11 @@ export interface ApiKey {
   project_id: number;
 }
 
+export interface History {
+  current_project_id: number | null;
+  user_id: string;
+}
+
 export interface Node {
   depth: Generated<number | null>;
   id: Generated<number>;
@@ -79,7 +84,7 @@ export interface ProjectUser {
   owner: Generated<boolean>;
   project_id: number;
   roles: string[];
-  user_id: number;
+  user_id: string | null;
 }
 
 export interface Session {
@@ -99,7 +104,6 @@ export interface User {
   emailVerified: boolean;
   id: string;
   image: string | null;
-  last_project_id: number | null;
   name: string;
   updatedAt: Timestamp;
 }
@@ -127,6 +131,7 @@ export interface Verification {
 export interface DB {
   account: Account;
   api_key: ApiKey;
+  history: History;
   node: Node;
   node_settings: NodeSettings;
   project: Project;

@@ -31,7 +31,7 @@ export const getItem = <T>(
 		console.warn('getItem called while setItemAsync is still pending')
 	}
 	const item = localStorage.getItem(key)
-	return item ? safeParse(item) : initial
+	return item ? safeParse(item) : initial as T
 }
 
 const removeItem = localStorage.removeItem.bind(localStorage)
