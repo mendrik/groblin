@@ -1,4 +1,4 @@
-import { T as _, map, mapObjIndexed } from 'ramda'
+import { T as _, mapObjIndexed } from 'ramda'
 import { isArray, isPlainObj } from 'ramda-adjunct'
 import { caseOf, match } from './match'
 
@@ -30,13 +30,11 @@ export function traverse(
 	if (obj === undefined) {
 		return (obj: object) => traverse(fn as any, obj)
 	} else {
-		console.log(obj)
-
 		return mapObjIndexed(
 			match<[any, string], any>(
-				caseOf([isArray, _], map(traverse(fn))),
-				caseOf([isPlainObj, _], traverse(fn)),
-				caseOf([_, _], fn)
+				caseOf([isArray, _], (v, k) => v.map(e => traverse(fn, e))),
+				caseOf([isPlainObj, _], (v, k) => traverse(fn, v)),
+				caseOf([_, _], console.log)
 			),
 			obj
 		)

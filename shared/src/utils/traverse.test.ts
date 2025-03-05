@@ -1,4 +1,4 @@
-import { T as _ } from 'ramda'
+import { T as _, map, multiply } from 'ramda'
 import { isArray, isNumber } from 'ramda-adjunct'
 import { describe, expect, it } from 'vitest'
 import { caseOf, match } from './match'
@@ -19,13 +19,13 @@ describe('traverse', () => {
 
 	it('should handle arrays within objects', () => {
 		const obj = { a: 1, b: [2, 3, 4] }
-		const result = traverse((v, k) => {
-			console.log(v, k)
-			return match<[number | number[], string | undefined], number | number[]>(
-				caseOf([isArray, _], value => value.map(el => el * 3)),
-				caseOf([isNumber, _], value => value * 2)
-			)(v, k)
-		}, obj)
+		const result = traverse(
+			match<[number | number[], string | undefined], number | number[]>(
+				caseOf([isArray, _], map(multiply(3))),
+				caseOf([isNumber, _], multiply(2))
+			),
+			obj
+		)
 		expect(result).toEqual({ a: 2, b: [4, 6, 8] })
 	})
 
