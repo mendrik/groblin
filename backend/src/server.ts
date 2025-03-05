@@ -18,7 +18,6 @@ import { ProjectResolver } from './resolvers/project-resolver.ts'
 import { UserResolver } from './resolvers/user-resolver.ts'
 import { ValueResolver } from './resolvers/value-resolver.ts'
 import { db } from './services/database.ts'
-import { EmailService } from './services/email-service.ts'
 import { ImageService } from './services/image-service.ts'
 import { InternalServer } from './services/interal-server.ts'
 import { NodeSettingsService } from './services/node-settings-service.ts'
@@ -53,7 +52,6 @@ container.bind(LogAccess).toSelf()
 container.bind(ProjectService).toSelf()
 container.bind(IoResolver).toSelf()
 container.bind(AuthChecker).toSelf()
-container.bind(EmailService).toSelf()
 container.bind(PublicService).toSelf()
 container.bind(SchemaContext).toSelf()
 container.bind(ImageService).to(ImageService).inSingletonScope()
@@ -63,7 +61,6 @@ container.bind(PublicServer).to(PublicServer).inSingletonScope()
 container.bind(ValueResolver).toSelf()
 
 console.log(yellow(`Starting services...`))
-void container.get(EmailService).init()
 void container.get(ImageService).init()
 void container.get(NodeSettingsService).init()
 void container.get(InternalServer).start(container)
