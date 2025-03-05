@@ -1,6 +1,7 @@
 import { SESClient as AWSClient, SendEmailCommand } from '@aws-sdk/client-ses'
 import { renderToStaticMarkup } from '@usewaypoint/email-builder'
 import { injectable } from 'inversify'
+import type { Json } from 'src/database/schema.ts'
 
 type SendEmail = {
 	file: string
@@ -21,7 +22,7 @@ export class SesClient extends AWSClient {
 		subject,
 		options = {}
 	}: SendEmail): Promise<void> {
-		const template = await import(`../../emails/${file}`)
+		const template: Json = await import(`../../emails/${file}`)
 		const email = new SendEmailCommand({
 			Destination: {
 				ToAddresses: [to]
@@ -34,10 +35,7 @@ export class SesClient extends AWSClient {
 				Body: {
 					Html: {
 						Charset: 'UTF-8',
-						Data: renderToStaticMarkup(template, {
-							rootBlockId: 'root',
-							...options
-						})
+						Data: renderToStaticMarkup(template, { rootBlockId: 'root' })
 					}
 				}
 			},
