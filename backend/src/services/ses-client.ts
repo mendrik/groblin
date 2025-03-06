@@ -1,7 +1,11 @@
 import { SESClient as AWSClient, SendEmailCommand } from '@aws-sdk/client-ses'
+import { caseOf, match } from '@shared/utils/match.ts'
+import { replacePlaceholders } from '@shared/utils/strings.ts'
+import { traverse } from '@shared/utils/traverse.ts'
 import { renderToStaticMarkup } from '@usewaypoint/email-builder'
 import { injectable } from 'inversify'
-import type { Json } from 'src/database/schema.ts'
+import { T as _, both, identity, includes } from 'ramda'
+import { isString } from 'ramda-adjunct'
 
 type SendEmail = {
 	file: string
@@ -22,7 +26,16 @@ export class SesClient extends AWSClient {
 		subject,
 		options = {}
 	}: SendEmail): Promise<void> {
-		const template: Json = await import(`../../emails/${file}`)
+		const template = await import(`../../emails/${file}`)
+		const withOptions = traverse(
+			match<[any, string | undefined], any>(
+				caseOf([both(isString, includes('{{')), _], s =>
+					replacePlaceholders(options)(s)
+				),
+				caseOf([_, _], identity)
+			),
+			template
+		)
 		const email = new SendEmailCommand({
 			Destination: {
 				ToAddresses: [to]
@@ -35,7 +48,7 @@ export class SesClient extends AWSClient {
 				Body: {
 					Html: {
 						Charset: 'UTF-8',
-						Data: renderToStaticMarkup(template, { rootBlockId: 'root' })
+						Data: renderToStaticMarkup(withOptions, { rootBlockId: 'root' })
 					}
 				}
 			},

@@ -66,16 +66,3 @@ export const fork =
 export const removeAt = (idx: number): (<T>(list: T[]) => T[]) =>
 	pipe(splitAt(idx) as AnyFn, apply(useWith(concat, [identity, tail]) as AnyFn))
 
-type Fn<TArgs extends any[], TResult> = (...args: TArgs) => TResult
-
-export const prependArg =
-	<TFirst, TArgs extends any[], TResult>(
-		arg: TFirst,
-		fn: Fn<TArgs, TResult>
-	): Fn<[TFirst, ...TArgs], TResult> =>
-	(_arg: TFirst, ...args: TArgs): TResult => {
-		return fn.apply([arg, ...args]) // Call fn with the rest of the arguments
-	}
-
-export const isNil = (x: unknown): x is undefined => x === undefined
-export const isNotNil = <T>(x: unknown): x is T => x !== undefined

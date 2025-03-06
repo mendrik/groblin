@@ -33,7 +33,8 @@
 			},
 			"suspicious": {
 				"noExplicitAny": "off",
-				"noAssignInExpressions": "off"
+				"noAssignInExpressions": "off",
+				"noPrototypeBuiltins": "off"
 			},
 			"correctness": {
 				"noUnusedImports": "error",
