@@ -23,6 +23,13 @@ export function traverse<
 	R extends Record<keyof O, any>
 >(fn: (el: Values<O>, key?: string) => Values<R>, obj: O, key?: string): R
 
+/**
+ * Can be used to traverse an object and apply a function to each value. Descends into arrays and objects.
+ * @param fn 
+ * @param obj 
+ * @param key 
+ * @returns 
+ */
 export function traverse(
 	fn: (value: any, key?: string) => any,
 	obj?: any,

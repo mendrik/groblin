@@ -58,6 +58,13 @@ type INF<G> = {
 			: never
 }
 
+/**
+ * Takes a list of predicates and returns a function that takes a list of values and returns a list of lists of values
+ * where each list of values is the result of filtering the input list by the corresponding predicate.
+ * This function does not partition the input list: elements can be in multiple output lists.
+ * @param preds 
+ * @returns 
+ */
 export const fork =
 	<T, G extends Array<GP<any, any>>>(...preds: G) =>
 	<T2 extends T>(v: T2[]): [...INF<G>] =>

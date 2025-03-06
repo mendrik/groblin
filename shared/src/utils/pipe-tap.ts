@@ -177,6 +177,12 @@ export function pipeTap<
 	? Promise<Awaited<ReturnType<F7>>>
 	: ReturnType<F7>
 
+/**
+ * PipeTap is a function that calls a series of functions with the initial argument and the result 
+ * of the previous function. Functions can be async and the results will be automatically awaited.
+ * @param ...fn1 a series of up to 7 functions
+ * @returns the result of the last function in the series
+ */
 export function pipeTap<F extends Array<PF>>(
 	fn1: F[0],
 	fn2?: F[1],
