@@ -46,7 +46,7 @@ describe('traverse', () => {
 	it('should provide key as second argument to the transform function', () => {
 		const obj = { a: 1, b: 2, c: 3 }
 		const result = traverse(
-			(value: number, key: string) => `${key}:${value}`,
+			(value: number, key?: string) => `${key}:${value}`,
 			obj
 		)
 		expect(result).toEqual({ a: 'a:1', b: 'b:2', c: 'c:3' })

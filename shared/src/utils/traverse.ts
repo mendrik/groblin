@@ -1,4 +1,4 @@
-import { T as _, mapObjIndexed } from 'ramda'
+import { T as _, map, mapObjIndexed } from 'ramda'
 import { isArray, isPlainObj } from 'ramda-adjunct'
 import { caseOf, match } from './match'
 
@@ -17,26 +17,24 @@ type Values<O> = O extends Record<string, any>
 export function traverse<
 	O extends Record<string, any>,
 	R extends Record<keyof O, any>
->(fn: (el: Values<O>, key?: string) => Values<R>): (obj: O) => R
+>(fn: (el: Values<O>, key?: string) => Values<R>): (obj: O, key?: string) => R
 export function traverse<
 	O extends Record<string, any>,
 	R extends Record<keyof O, any>
->(fn: (el: Values<O>, key?: string) => Values<R>, obj: O): R
+>(fn: (el: Values<O>, key?: string) => Values<R>, obj: O, key?: string): R
 
 export function traverse(
 	fn: (value: any, key?: string) => any,
-	obj?: any
+	obj?: any,
+	key?: string
 ): any {
 	if (obj === undefined) {
-		return (obj: object) => traverse(fn as any, obj)
+		return (obj: object, key?: string) => traverse(fn as any, obj, key)
 	} else {
-		return mapObjIndexed(
-			match<[any, string], any>(
-				caseOf([isArray, _], (v, k) => v.map(e => traverse(fn, e))),
-				caseOf([isPlainObj, _], (v, k) => traverse(fn, v)),
-				caseOf([_, _], console.log)
-			),
-			obj
-		)
+		return match<[any, string | undefined], any>(
+			caseOf([isArray, _], map(traverse(fn))),
+			caseOf([isPlainObj, _], v => mapObjIndexed(traverse(fn), v)),
+			caseOf([_, _], fn)
+		)(obj, key)
 	}
 }
