@@ -32,7 +32,7 @@ export class Authenticator {
 			},
 			emailVerification: {
 				sendOnSignUp: true,
-				sendVerificationEmail: async options =>
+				sendVerificationEmail: options =>
 					email.sendEmail({
 						file: 'confirmAccount.json',
 						to: options.user.email,
