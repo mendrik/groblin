@@ -49,4 +49,9 @@ describe('replacePlaceholders', () => {
 		expect(replacer('Hello, {{name}}!')).toBe('Hello, World!')
 		expect(replacer('You are {{age}} years old.')).toBe('You are 42 years old.')
 	})
+
+	it('should work with nested keys', () => {
+		const replacer = replacePlaceholders({ user: { name: 'World' } })
+		expect(replacer('Hello, {{user.name}}!')).toBe('Hello, World!')
+	})
 })

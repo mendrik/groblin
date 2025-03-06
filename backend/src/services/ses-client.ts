@@ -29,7 +29,7 @@ export class SesClient extends AWSClient {
 		const template = await import(`../../emails/${file}`)
 		const withOptions = traverse(
 			match<[any, string | undefined], any>(
-				caseOf([both(isString, includes('{{')), _], s =>
+				caseOf([isString, _], s =>
 					replacePlaceholders(options)(s)
 				),
 				caseOf([_, _], identity)
