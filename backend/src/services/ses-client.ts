@@ -14,6 +14,21 @@ type SendEmail = {
 	options?: Record<string, any>
 }
 
+export const render = async (
+	file: string,
+	options: Record<string, any>
+): Promise<string> => {
+	const template = await import(file)
+	const withOptions = traverse(
+		match<[unknown, string | undefined], any>(
+			caseOf([isString, _], replacePlaceholders(options)),
+			caseOf([_, _], identity)
+		),
+		template
+	)
+	return renderToStaticMarkup(withOptions, { rootBlockId: 'root' })
+}
+
 @injectable()
 export class SesClient extends AWSClient {
 	constructor() {
@@ -26,14 +41,7 @@ export class SesClient extends AWSClient {
 		subject,
 		options = {}
 	}: SendEmail): Promise<void> {
-		const template = await import(`../../emails/${file}`)
-		const withOptions = traverse(
-			match<[any, string | undefined], any>(
-				caseOf([isString, _], s => replacePlaceholders(options)(s)),
-				caseOf([_, _], identity)
-			),
-			template
-		)
+		const body = await render(`../../emails/${file}`, options)
 		const email = new SendEmailCommand({
 			Destination: {
 				ToAddresses: [to]
@@ -46,7 +54,7 @@ export class SesClient extends AWSClient {
 				Body: {
 					Html: {
 						Charset: 'UTF-8',
-						Data: renderToStaticMarkup(withOptions, { rootBlockId: 'root' })
+						Data: body
 					}
 				}
 			},
