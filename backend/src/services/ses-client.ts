@@ -4,7 +4,7 @@ import { replacePlaceholders } from '@shared/utils/strings.ts'
 import { traverse } from '@shared/utils/traverse.ts'
 import { renderToStaticMarkup } from '@usewaypoint/email-builder'
 import { injectable } from 'inversify'
-import { T as _, both, identity, includes } from 'ramda'
+import { T as _, identity } from 'ramda'
 import { isString } from 'ramda-adjunct'
 
 type SendEmail = {
@@ -29,9 +29,7 @@ export class SesClient extends AWSClient {
 		const template = await import(`../../emails/${file}`)
 		const withOptions = traverse(
 			match<[any, string | undefined], any>(
-				caseOf([isString, _], s =>
-					replacePlaceholders(options)(s)
-				),
+				caseOf([isString, _], s => replacePlaceholders(options)(s)),
 				caseOf([_, _], identity)
 			),
 			template
