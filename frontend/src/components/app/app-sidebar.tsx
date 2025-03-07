@@ -18,6 +18,8 @@ import {
 import type { ButtonHTMLAttributes, PropsWithChildren } from 'react'
 import { useLocation } from 'wouter'
 import { Icon } from '../ui/simple/icon'
+import { setSignal } from '@/lib/signals'
+import { $user } from '@/state/user'
 
 type OwnProps = {
 	icon: IconImg
@@ -67,7 +69,11 @@ export const AppSidebar = () => {
 					</IconLink>
 					<IconLink icon={FileJson}>Import</IconLink>
 					<IconLink icon={UserCircleIcon}>Profile</IconLink>
-					<IconLink icon={LogIn} onClick={() => signOut()}>
+					<IconLink icon={LogIn} onClick={() => signOut({
+						fetchOptions: {
+							onSuccess: () => setSignal($user, null)
+						}
+					})}>
 						Logout
 					</IconLink>
 				</ul>
