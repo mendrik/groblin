@@ -1,7 +1,6 @@
 import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
 import type { DB } from 'src/database/schema.ts'
-import type { Context } from 'src/types.ts'
 import { NodeType, Role } from 'src/types.ts'
 import type { PubSub } from 'type-graphql'
 
@@ -15,7 +14,7 @@ export class ProjectService {
 	@inject('PubSub')
 	private pubSub: PubSub
 
-	async initializeProject({ user }: Context): Promise<LastProjectId> {
+	async initializeProject(userId: string): Promise<LastProjectId> {
 		return this.db.transaction().execute(async trx => {
 			const { id: project_id } = await trx
 				.insertInto('project')
@@ -29,7 +28,7 @@ export class ProjectService {
 				.insertInto('project_user')
 				.values({
 					project_id,
-					user_id: user.id,
+					user_id: userId,
 					roles: [Role.Admin]
 				})
 				.executeTakeFirstOrThrow()
@@ -37,7 +36,7 @@ export class ProjectService {
 			await trx
 				.insertInto('history')
 				.values({
-					user_id: user.id,
+					user_id: userId,
 					current_project_id: project_id
 				})
 				.execute()
