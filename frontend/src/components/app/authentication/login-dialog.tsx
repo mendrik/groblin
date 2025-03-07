@@ -9,8 +9,11 @@ import {
 import {} from '@/components/ui/dialog'
 import { stringField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
-import { signIn } from '@/lib/auth-client'
+import { dataOrError, signIn } from '@/lib/auth-client'
+import { setSignal } from '@/lib/signals'
+import { $user } from '@/state/user'
 import { EditorType } from '@shared/enums'
+import { prop } from 'ramda'
 import { toast } from 'sonner'
 import { Link } from 'wouter'
 import { type TypeOf, strictObject } from 'zod'
@@ -29,7 +32,12 @@ const failed = (e: Error) =>
 type LoginForm = TypeOf<typeof loginSchema>
 
 const loginCommand = (credentials: LoginForm) =>
-	signIn.email(credentials).then(() => toast.success('Successfully logged in'))
+	signIn
+		.email(credentials)
+		.then(dataOrError)
+		.then(prop('user'))
+		.then(setSignal($user))
+		.then(_ => toast.success('Successfully logged in'))
 
 export const LoginDialog = () => {
 	return (
