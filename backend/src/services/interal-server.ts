@@ -16,7 +16,7 @@ import { UserResolver } from 'src/resolvers/user-resolver.ts'
 import { ValueResolver } from 'src/resolvers/value-resolver.ts'
 import { buildSchema } from 'type-graphql'
 import { WebSocketServer } from 'ws'
-import { onConnect } from '../middleware/on-connect.ts'
+import { onConnect as connectFactory } from '../middleware/on-connect.ts'
 import { onError } from '../middleware/on-errors.ts'
 
 const port = Number.parseInt(process.env.PORT ?? '6173')
@@ -57,7 +57,7 @@ export class InternalServer {
 				execute,
 				subscribe,
 				context: prop('extra'),
-				onConnect,
+				onConnect: connectFactory(container),
 				onError
 			},
 			this.server

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { replacePlaceholders } from './strings'
+import { replacePlaceholders } from './strings.ts'
 
 describe('replacePlaceholders', () => {
 	it('should replace single placeholder with value', () => {

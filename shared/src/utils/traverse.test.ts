@@ -1,8 +1,8 @@
 import { T as _, map, multiply } from 'ramda'
 import { isArray, isNumber } from 'ramda-adjunct'
 import { describe, expect, it } from 'vitest'
-import { caseOf, match } from './match'
-import { traverse } from './traverse'
+import { caseOf, match } from './match.ts'
+import { traverse } from './traverse.ts'
 
 describe('traverse', () => {
 	it('should transform values in a flat object', () => {

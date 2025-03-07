@@ -1,6 +1,6 @@
 import { T as _, map, mapObjIndexed } from 'ramda'
 import { isArray, isObj } from 'ramda-adjunct'
-import { caseOf, match } from './match'
+import { caseOf, match } from './match.ts'
 
 type Values<O> = O extends Record<string, any>
 	? {
@@ -25,10 +25,10 @@ export function traverse<
 
 /**
  * Can be used to traverse an object and apply a function to each value. Descends into arrays and objects.
- * @param fn 
- * @param obj 
- * @param key 
- * @returns 
+ * @param fn
+ * @param obj
+ * @param key
+ * @returns
  */
 export function traverse(
 	fn: (value: any, key?: string) => any,
