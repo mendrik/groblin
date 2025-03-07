@@ -106,8 +106,9 @@ export const isPrimitive = (
  * Each case must be wrapped in a caseOf function, which takes an array of predicates and a handler function.
  * The arguments of the handler function will be narrowed down if the predicates are guards or partial objects.
  * Predicates can be also non-function values, which will be compared then directly.
- * Objects are matched partially and can also contains functions in place of properties. 
+ * Objects are matched partially and can also contains functions in place of properties.
  * Tuples are matched element-wise.
+ * If no match is found, an error is thrown.
  * @param cases a list of cases to match against
  */
 export function match<Args extends readonly unknown[], R>(
@@ -124,6 +125,6 @@ export function match<Args extends readonly unknown[], R>(
 					: handler
 			}
 		}
-		throw new Error('No match found')
+		throw new Error(`No match found for ${JSON.stringify(values, null, 2)}`)
 	}
 }

@@ -23,6 +23,7 @@ export class Authenticator {
 	) {
 		const email = this.sesClient
 		const auth = betterAuth({
+			trustedOrigins: ['http://localhost:5173', 'https://groblin.org'],
 			database: {
 				dialect,
 				type: 'postgres'
@@ -31,6 +32,7 @@ export class Authenticator {
 				enabled: true
 			},
 			emailVerification: {
+				
 				sendOnSignUp: true,
 				sendVerificationEmail: options =>
 					email.sendEmail({

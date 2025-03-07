@@ -11,13 +11,15 @@ import { asField, stringField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { signUp } from '@/lib/auth-client'
 import { setSignal } from '@/lib/signals'
+import type { NavigateFn } from '@/routing/types'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
+import { evolveAlt } from '@shared/utils/evolve-alt'
 import { pipeAsync } from '@shared/utils/pipe-async'
 import type { Fn } from '@tp/functions.ts'
 import { omit } from 'ramda'
 import { toast } from 'sonner'
-import { Link } from 'wouter'
+import { Link, useLocation } from 'wouter'
 import { type TypeOf, strictObject, string } from 'zod'
 
 const registrationSchema = strictObject({
@@ -59,14 +61,22 @@ const failed = (e: Error) =>
 		closeButton: true
 	})
 
-const registerCommand: Fn<RegistrationForm, unknown> = pipeAsync(
-	omit(['repeatPassword']),
-	signUp.email,
-	success,
-	lockForm
-)
+const registerCommand = (navigate: NavigateFn): Fn<RegistrationForm, unknown> =>
+	pipeAsync(
+		omit(['repeatPassword']),
+		evolveAlt({
+			callbackURL: '/dashboard'
+		}),
+		s =>
+			signUp.email(s, {
+				onRequest: () => void lockForm(),
+				onSuccess: () => navigate('/'),
+				onError: ({ error }) => void failed(error)
+			})
+	)
 
 export const RegistrationDialog = () => {
+	const [_, navigate] = useLocation()
 	return (
 		<Dialog open={true}>
 			<DialogContent closeButton={false} className="max-w-sm" close={close}>
@@ -79,7 +89,7 @@ export const RegistrationDialog = () => {
 				</DialogHeader>
 				<ZodForm
 					schema={registrationSchema}
-					onSubmit={registerCommand}
+					onSubmit={registerCommand(navigate)}
 					onError={failed}
 					disabled={$locked.value}
 				>
