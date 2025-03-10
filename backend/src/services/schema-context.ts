@@ -4,7 +4,7 @@ import { GraphQLEnumType, GraphQLObjectType, GraphQLString } from 'graphql'
 import { inject, injectable } from 'inversify'
 import { Kysely, sql } from 'kysely'
 import { Maybe } from 'purify-ts'
-import { assoc, prop, propOr } from 'ramda'
+import { assoc, isNotNil, prop, propOr } from 'ramda'
 import { isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
 import type { DB, JsonValue } from 'src/database/schema.ts'
 import {
@@ -20,6 +20,12 @@ import {
 } from 'src/types.ts'
 import { isJsonObject } from 'src/utils/json.ts'
 import { ImageService, type MediaValue } from './image-service.ts'
+
+type ListArgs = {
+	limit?: number
+	offset?: number
+	order?: string
+}
 
 @injectable()
 export class SchemaContext {
@@ -64,10 +70,19 @@ export class SchemaContext {
 		}, new Map<number, string[]>())
 	}
 
-	async listItems(nodeId: number, path?: ListPath): Promise<Value[]> {
+	async listItems(
+		nodeId: number,
+		path: ListPath,
+		args: ListArgs
+	): Promise<Value[]> {
+		console.log(args)
+
 		return this.db
 			.selectFrom('values')
-			.selectAll()
+			.selectAll('values')
+			.$if(isNotNilOrEmpty(args.order), qb =>
+				qb.leftJoin('node', 'node.id', 'values.node_id')
+			)
 			.where('node_id', '=', nodeId)
 			.$if(isNilOrEmpty(path), qb =>
 				qb.where(eb =>
@@ -81,6 +96,10 @@ export class SchemaContext {
 				qb.where('list_path', '=', sql.val(path))
 			)
 			.orderBy('order', 'asc')
+			.$if(isNotNil(args.offset), qb => qb.offset(args.offset ?? 0))
+			.$if(isNotNil(args.limit), qb =>
+				qb.limit(args.limit ?? Number.MAX_SAFE_INTEGER)
+			)
 			.execute()
 	}
 	getValue(node: TreeNode, path: ListPath): Promise<Value | undefined> {

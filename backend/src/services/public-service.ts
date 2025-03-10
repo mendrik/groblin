@@ -12,7 +12,9 @@ import type {
 import { caseOf, match } from '@shared/utils/match.ts'
 import {
 	GraphQLBoolean,
+	GraphQLEnumType,
 	type GraphQLFieldConfig,
+	type GraphQLFieldConfigArgumentMap,
 	GraphQLFloat,
 	GraphQLInt,
 	GraphQLList,
@@ -24,7 +26,7 @@ import {
 import { GraphQLDateTime } from 'graphql-scalars'
 import { inject, injectable } from 'inversify'
 import { Maybe } from 'purify-ts'
-import { T as _, isNil, isNotNil } from 'ramda'
+import { T as _, assoc, isNil, isNotNil, objOf } from 'ramda'
 import type { JsonValue } from 'src/database/schema.ts'
 import {
 	type ListPath,
@@ -71,6 +73,17 @@ const jsonForNode = match<[TreeNode, any], JsonValue>(
 	caseOf([_, _], () => null)
 )
 
+const dbType = match<[TreeNode], string | null>(
+	caseOf([{ type: NodeType.string }], 'content'),
+	caseOf([{ type: NodeType.color }], 'rgba'),
+	caseOf([{ type: NodeType.number }], 'figure'),
+	caseOf([{ type: NodeType.date }], 'date'),
+	caseOf([{ type: NodeType.choice }], 'selected'),
+	caseOf([{ type: NodeType.boolean }], 'state'),
+	caseOf([{ type: NodeType.article }], 'content'),
+	caseOf([_], null)
+)
+
 interface ResolvedNode {
 	id?: number
 	parent?: ResolvedNode // Parent reference
@@ -105,10 +118,30 @@ const resolveList = (
 	context: SchemaContext
 ): GraphQLFieldConfig<any, any> => {
 	const conf = resolveObj(node, context)
+	const ListArgs: GraphQLFieldConfigArgumentMap = {
+		offset: { type: GraphQLInt },
+		limit: { type: GraphQLInt },
+		order: {
+			type: new GraphQLEnumType({
+				name: `${node.name}Order`,
+				values: node.nodes.reduce(
+					(acc, node) =>
+						assoc(
+							node.name,
+							{ value: { db: dbType(node), node_id: node.id } },
+							acc
+						),
+					{}
+				)
+			})
+		}
+	}
+
 	return {
 		type: new GraphQLList(conf.type),
-		resolve: async parent => {
-			const items = await context.listItems(node.id, pathFor(parent))
+		args: ListArgs,
+		resolve: async (parent, args) => {
+			const items = await context.listItems(node.id, pathFor(parent), args)
 			return items.map(item => ({ id: item.id, parent }))
 		}
 	}
@@ -126,7 +159,7 @@ const resolveObj = (
 			name: node.name,
 			fields: Object.fromEntries(fields)
 		}),
-		resolve: parent => ({ parent })
+		resolve: objOf('parent')
 	}
 }
 
