@@ -1,4 +1,4 @@
-import { T as _, map, multiply } from 'ramda'
+import { T as _, multiply } from 'ramda'
 import { isArray, isNumber } from 'ramda-adjunct'
 import { describe, expect, it } from 'vitest'
 import { caseOf, match } from './match.ts'
@@ -21,7 +21,7 @@ describe('traverse', () => {
 		const obj = { a: 1, b: [2, 3, 4] }
 		const result = traverse(
 			match<[number | number[], string | undefined], number | number[]>(
-				caseOf([isArray, _], map(multiply(3))),
+				caseOf([isArray, _], arr => arr.map(multiply(3))),
 				caseOf([isNumber, _], multiply(2))
 			),
 			obj
