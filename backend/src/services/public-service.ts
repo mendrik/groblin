@@ -38,6 +38,8 @@ import type { MediaValue } from './image-service.ts'
 import { SchemaContext } from './schema-context.ts'
 
 const hasValue = <T>(value: T | null): value is T => value != null
+const isValueNode = (node: TreeNode) =>
+	![NodeType.object, NodeType.root, NodeType.list].includes(node.type)
 
 const isStringType = hasValue<StringType>
 const isNumberType = hasValue<NumberType>
@@ -113,18 +115,26 @@ const resolveValue = (
 	}
 })
 
+export function* iterateNodes(root: TreeNode): Generator<TreeNode> {
+	yield root
+	for (const child of root.nodes) {
+		yield* iterateNodes(child)
+	}
+}
+
 const resolveList = (
 	node: TreeNode,
 	context: SchemaContext
 ): GraphQLFieldConfig<any, any> => {
 	const conf = resolveObj(node, context)
+	const allChildNodes = [...iterateNodes(node)].filter(isValueNode)
 	const ListArgs: GraphQLFieldConfigArgumentMap = {
 		offset: { type: GraphQLInt },
 		limit: { type: GraphQLInt },
 		order: {
 			type: new GraphQLEnumType({
 				name: `${node.name}Order`,
-				values: node.nodes.reduce(
+				values: allChildNodes.reduce(
 					(acc, node) =>
 						assoc(
 							node.name,
