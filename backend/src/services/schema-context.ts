@@ -78,15 +78,15 @@ export class SchemaContext {
 	async listItems(
 		nodeId: number,
 		path: ListPath,
-		args: ListArgs
+		{ direction, limit, offset, order }: ListArgs
 	): Promise<Value[]> {
 		return this.db
 			.selectFrom('values')
 			.selectAll('values')
-			.$if(isNotNil(args.order), qb =>
+			.$if(isNotNil(order), qb =>
 				qb.leftJoin('values as child', join =>
 					join
-						.on('child.node_id', '=', args.order!.node_id)
+						.on('child.node_id', '=', order!.node_id)
 						.on(
 							'child.list_path',
 							'@>',
@@ -106,19 +106,15 @@ export class SchemaContext {
 			.$if(isNotNilOrEmpty(path), qb =>
 				qb.where('values.list_path', '=', sql.val(path))
 			)
-			.$if(isNotNil(args.offset), qb => qb.offset(args.offset ?? 0))
-			.$if(isNotNil(args.limit), qb =>
-				qb.limit(args.limit ?? Number.MAX_SAFE_INTEGER)
-			)
-			.$if(isNotNil(args.order), qb =>
+			.$if(isNotNil(offset), qb => qb.offset(offset ?? 0))
+			.$if(isNotNil(limit), qb => qb.limit(limit ?? Number.MAX_SAFE_INTEGER))
+			.$if(isNotNil(order), qb =>
 				qb.orderBy(
-					sql`child.value->>${sql.val(args.order!.json_field)}`,
-					args.direction ?? 'asc'
+					sql`child.value->>${sql.val(order!.json_field)}`,
+					direction ?? 'asc'
 				)
 			)
-			.$if(isNil(args.order), qb =>
-				qb.orderBy('values.order', args.direction ?? 'asc')
-			)
+			.$if(isNil(order), qb => qb.orderBy('values.order', direction ?? 'asc'))
 			.execute()
 	}
 	getValue(node: TreeNode, path: ListPath): Promise<Value | undefined> {
