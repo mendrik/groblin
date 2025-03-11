@@ -55,7 +55,6 @@ export class SchemaContext {
 			.then(mapBy(prop('node_id')))
 		this._enums = await this.initEnums()
 		this._thumbnails = await this.initThumbnails()
-		console.log(this._thumbnails)
 	}
 
 	async initThumbnails(): Promise<Map<number, string[]>> {
