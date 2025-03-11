@@ -80,8 +80,6 @@ export class SchemaContext {
 		path: ListPath,
 		args: ListArgs
 	): Promise<Value[]> {
-		console.log(args)
-
 		return this.db
 			.selectFrom('values')
 			.selectAll('values')
@@ -92,7 +90,7 @@ export class SchemaContext {
 						.on(
 							'child.list_path',
 							'@>',
-							sql`array_append(${sql.val(path)}, "values"."id")::int[]`
+							sql`array_append(${sql.val(path)}, "values"."id")`
 						)
 				)
 			)
