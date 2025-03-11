@@ -75,7 +75,7 @@ const jsonForNode = match<[TreeNode, any], JsonValue>(
 	caseOf([_, _], () => null)
 )
 
-const dbType = match<[TreeNode], string | null>(
+const dbType = match<[TreeNode], string>(
 	caseOf([{ type: NodeType.string }], 'content'),
 	caseOf([{ type: NodeType.color }], 'rgba'),
 	caseOf([{ type: NodeType.number }], 'figure'),
@@ -83,7 +83,7 @@ const dbType = match<[TreeNode], string | null>(
 	caseOf([{ type: NodeType.choice }], 'selected'),
 	caseOf([{ type: NodeType.boolean }], 'state'),
 	caseOf([{ type: NodeType.article }], 'content'),
-	caseOf([_], null)
+	caseOf([{ type: NodeType.media }], 'file')
 )
 
 interface ResolvedNode {
@@ -131,6 +131,15 @@ const resolveList = (
 	const ListArgs: GraphQLFieldConfigArgumentMap = {
 		offset: { type: GraphQLInt },
 		limit: { type: GraphQLInt },
+		direction: {
+			type: new GraphQLEnumType({
+				name: `${node.name}Direction`,
+				values: {
+					asc: { value: 'asc' },
+					desc: { value: 'desc' }
+				}
+			})
+		},
 		order: {
 			type: new GraphQLEnumType({
 				name: `${node.name}Order`,
@@ -138,7 +147,12 @@ const resolveList = (
 					(acc, node) =>
 						assoc(
 							node.name,
-							{ value: { db: dbType(node), node_id: node.id } },
+							{
+								value: {
+									json_field: dbType(node),
+									node_id: node.id
+								}
+							},
 							acc
 						),
 					{}

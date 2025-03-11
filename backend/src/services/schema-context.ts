@@ -3,8 +3,9 @@ import { mapBy } from '@shared/utils/map-by.ts'
 import { GraphQLEnumType, GraphQLObjectType, GraphQLString } from 'graphql'
 import { inject, injectable } from 'inversify'
 import { Kysely, sql } from 'kysely'
+import {} from 'node_modules/kysely/dist/esm/parser/order-by-parser.js'
 import { Maybe } from 'purify-ts'
-import { assoc, isNotNil, prop, propOr } from 'ramda'
+import { assoc, isNil, isNotNil, prop, propOr } from 'ramda'
 import { isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
 import type { DB, JsonValue } from 'src/database/schema.ts'
 import {
@@ -21,10 +22,14 @@ import {
 import { isJsonObject } from 'src/utils/json.ts'
 import { ImageService, type MediaValue } from './image-service.ts'
 
-type ListArgs = {
+export type ListArgs = {
 	limit?: number
 	offset?: number
-	order?: string
+	order?: {
+		node_id: number
+		json_field: string
+	}
+	direction?: 'asc' | 'desc'
 }
 
 @injectable()
@@ -80,25 +85,41 @@ export class SchemaContext {
 		return this.db
 			.selectFrom('values')
 			.selectAll('values')
-			.$if(isNotNilOrEmpty(args.order), qb =>
-				qb.leftJoin('node', 'node.id', 'values.node_id')
+			.$if(isNotNil(args.order), qb =>
+				qb.leftJoin('values as child', join =>
+					join
+						.on('child.node_id', '=', args.order!.node_id)
+						.on(
+							'child.list_path',
+							'@>',
+							sql`array_append(${sql.val(path)}, "values"."id")::int[]`
+						)
+				)
 			)
-			.where('node_id', '=', nodeId)
+			.where('values.node_id', '=', nodeId)
 			.$if(isNilOrEmpty(path), qb =>
 				qb.where(eb =>
 					eb.or([
-						eb('list_path', 'is', null),
-						eb('list_path', '=', sql.val([]))
+						eb('values.list_path', 'is', null),
+						eb('values.list_path', '=', sql.val([]))
 					])
 				)
 			)
 			.$if(isNotNilOrEmpty(path), qb =>
-				qb.where('list_path', '=', sql.val(path))
+				qb.where('values.list_path', '=', sql.val(path))
 			)
-			.orderBy('order', 'asc')
 			.$if(isNotNil(args.offset), qb => qb.offset(args.offset ?? 0))
 			.$if(isNotNil(args.limit), qb =>
 				qb.limit(args.limit ?? Number.MAX_SAFE_INTEGER)
+			)
+			.$if(isNotNil(args.order), qb =>
+				qb.orderBy(
+					sql`child.value->>${sql.val(args.order!.json_field)}`,
+					args.direction ?? 'asc'
+				)
+			)
+			.$if(isNil(args.order), qb =>
+				qb.orderBy('values.order', args.direction ?? 'asc')
 			)
 			.execute()
 	}

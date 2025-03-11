@@ -46,6 +46,7 @@
 			"style": {
 				"noUselessElse": "off",
 				"noUnusedTemplateLiteral": "off",
+				"noNonNullAssertion": "off",
 				"useImportType": {
 					"fix": "safe",
 					"level": "error"
