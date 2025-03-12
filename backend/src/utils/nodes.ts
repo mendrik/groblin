@@ -1,4 +1,4 @@
-import type { TreeNode } from 'src/types.ts'
+import { NodeType, type TreeNode } from 'src/types.ts'
 
 export function* allNodes(node: TreeNode): Generator<TreeNode> {
 	yield node
@@ -6,3 +6,6 @@ export function* allNodes(node: TreeNode): Generator<TreeNode> {
 		yield* allNodes(child)
 	}
 }
+
+export const isValueNode = (node: TreeNode) =>
+	![NodeType.object, NodeType.root, NodeType.list].includes(node.type)

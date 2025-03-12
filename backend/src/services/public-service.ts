@@ -1,111 +1,34 @@
-import { throwError } from '@shared/errors.ts'
-import type {
-	ArticleType,
-	BooleanType,
-	ChoiceType,
-	ColorType,
-	DateType,
-	MediaType,
-	NumberType,
-	StringType
-} from '@shared/json-value-types.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
 import {
-	GraphQLBoolean,
 	GraphQLEnumType,
 	type GraphQLFieldConfig,
 	type GraphQLFieldConfigArgumentMap,
-	GraphQLFloat,
 	type GraphQLInputFieldConfig,
 	GraphQLInputObjectType,
-	type GraphQLInputType,
 	GraphQLInt,
 	GraphQLList,
 	GraphQLObjectType,
-	type GraphQLOutputType,
-	GraphQLSchema,
-	GraphQLString
+	GraphQLSchema
 } from 'graphql'
-import { GraphQLDateTime } from 'graphql-scalars'
 import { inject, injectable } from 'inversify'
 import { Maybe } from 'purify-ts'
-import { T as _, assoc, isNil, isNotNil, objOf } from 'ramda'
-import type { JsonValue } from 'src/database/schema.ts'
+import { T as _, assoc, isNotNil, objOf } from 'ramda'
 import {
 	type ListPath,
 	NodeType,
 	type ProjectId,
 	type TreeNode
 } from 'src/types.ts'
+import {
+	dbType,
+	inputScalarForNode,
+	jsonForNode,
+	operators,
+	outputScalarForNode
+} from 'src/utils/mappings.ts'
+import { allNodes, isValueNode } from 'src/utils/nodes.ts'
 import type { MediaValue } from './image-service.ts'
 import { SchemaContext } from './schema-context.ts'
-
-const hasValue = <T>(value: T | null): value is T => value != null
-const isValueNode = (node: TreeNode) =>
-	![NodeType.object, NodeType.root, NodeType.list].includes(node.type)
-
-const isStringType = hasValue<StringType>
-const isNumberType = hasValue<NumberType>
-const isColorType = hasValue<ColorType>
-const isDateType = hasValue<DateType>
-const isMediaype = hasValue<MediaType>
-const isChoiceType = hasValue<ChoiceType>
-const isBooleanType = hasValue<BooleanType>
-const isArticleType = hasValue<ArticleType>
-
-const outputScalarForNode = match<[TreeNode, SchemaContext], GraphQLOutputType>(
-	caseOf([{ type: NodeType.boolean }, _], GraphQLBoolean),
-	caseOf([{ type: NodeType.number }, _], GraphQLFloat),
-	caseOf([{ type: NodeType.color }, _], new GraphQLList(GraphQLInt)),
-	caseOf([{ type: NodeType.date }, _], GraphQLDateTime),
-	caseOf([{ type: NodeType.choice }, _], (n, c) => c.getEnumType(n.id)),
-	caseOf([{ type: NodeType.media }, _], (n, c) => c.getMediaType(n)),
-	caseOf([_, _], GraphQLString)
-)
-
-const GraphQLDateInput = new GraphQLInputObjectType({
-	name: 'DateInput',
-	fields: {
-		year: { type: GraphQLInt },
-		month: { type: GraphQLInt },
-		day: { type: GraphQLInt }
-	}
-})
-
-const inputScalarForNode = match<[TreeNode, SchemaContext], GraphQLInputType>(
-	caseOf([{ type: NodeType.boolean }, _], GraphQLBoolean),
-	caseOf([{ type: NodeType.number }, _], GraphQLFloat),
-	caseOf([{ type: NodeType.date }, _], GraphQLDateInput),
-	caseOf([{ type: NodeType.choice }, _], (n, c) => c.getEnumType(n.id)),
-	caseOf([{ type: NodeType.media }, _], GraphQLBoolean),
-	caseOf([_, _], GraphQLString)
-)
-
-const jsonForNode = match<[TreeNode, any], JsonValue>(
-	caseOf([{ type: NodeType.string }, isStringType], (_, v) => v.content),
-	caseOf([{ type: NodeType.color }, isColorType], (_, v) => v.rgba as number[]),
-	caseOf([{ type: NodeType.number }, isNumberType], (_, v) => v.figure),
-	caseOf([{ type: NodeType.date }, isDateType], (_, v) => v.date.toString()),
-	caseOf([{ type: NodeType.choice }, isChoiceType], (_, v) => v.selected),
-	caseOf([{ type: NodeType.boolean }, isNil], (_, v) => false),
-	caseOf([{ type: NodeType.boolean }, isBooleanType], (_, v) => v.state),
-	caseOf([{ type: NodeType.article }, isArticleType], (_, v) => v.content),
-	caseOf([{ type: NodeType.media }, isMediaype], () =>
-		throwError('Unreachable code')
-	),
-	caseOf([_, _], () => null)
-)
-
-const dbType = match<[TreeNode], string>(
-	caseOf([{ type: NodeType.string }], 'content'),
-	caseOf([{ type: NodeType.color }], 'rgba'),
-	caseOf([{ type: NodeType.number }], 'figure'),
-	caseOf([{ type: NodeType.date }], 'date'),
-	caseOf([{ type: NodeType.choice }], 'selected'),
-	caseOf([{ type: NodeType.boolean }], 'state'),
-	caseOf([{ type: NodeType.article }], 'content'),
-	caseOf([{ type: NodeType.media }], 'file')
-)
 
 interface ResolvedNode {
 	id?: number
@@ -136,25 +59,11 @@ const resolveValue = (
 	}
 })
 
-const opSet = ['eq', 'not', 'gt', 'lt', 'gte', 'lte']
-
-const operators: (node: TreeNode) => string[] = match<[TreeNode], string[]>(
-	caseOf([{ type: NodeType.string }], () => ['eq', 'not', 'rex']),
-	caseOf([{ type: NodeType.color }], () => ['eq', 'not']),
-	caseOf([{ type: NodeType.number }], () => opSet),
-	caseOf([{ type: NodeType.date }], () => opSet),
-	caseOf([{ type: NodeType.choice }], () => ['eq', 'not']),
-	caseOf([{ type: NodeType.boolean }], () => ['eq']),
-	caseOf([{ type: NodeType.article }], () => ['contains', 'exists']),
-	caseOf([{ type: NodeType.media }], () => ['exists']),
-	caseOf([_], () => [])
-)
-
 const filterType = (
 	node: TreeNode,
 	ctx: SchemaContext
 ): GraphQLInputObjectType => {
-	const allChildNodes = [...iterateNodes(node)].filter(isValueNode)
+	const allChildNodes = [...allNodes(node)].filter(isValueNode)
 	return new GraphQLInputObjectType({
 		name: `${node.name}Filter`,
 		fields: allChildNodes.reduce(
@@ -164,7 +73,8 @@ const filterType = (
 				for (const op of ops) {
 					const key = op === 'eq' ? node.name : `${node.name}_${op}`
 					acc[key] = {
-						type: inputScalarForNode(node, ctx)
+						type: inputScalarForNode(node, ctx),
+						extensions: { node }
 					}
 				}
 				return acc
@@ -174,7 +84,7 @@ const filterType = (
 	})
 }
 const orderType = (node: TreeNode): GraphQLEnumType => {
-	const allChildNodes = [...iterateNodes(node)].filter(isValueNode)
+	const allChildNodes = [...allNodes(node)].filter(isValueNode)
 	return new GraphQLEnumType({
 		name: `${node.name}Order`,
 		values: allChildNodes.reduce(
@@ -217,12 +127,6 @@ const listArgs = (
 	}
 }
 
-export function* iterateNodes(root: TreeNode): Generator<TreeNode> {
-	yield root
-	for (const child of root.nodes) {
-		yield* iterateNodes(child)
-	}
-}
 
 const resolveList = (
 	node: TreeNode,

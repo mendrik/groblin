@@ -1,13 +1,15 @@
+import { assertExists } from '@shared/asserts.ts'
 import { listToTree } from '@shared/utils/list-to-tree.ts'
 import { mapBy } from '@shared/utils/map-by.ts'
 import { GraphQLEnumType, GraphQLObjectType, GraphQLString } from 'graphql'
 import { inject, injectable } from 'inversify'
-import { Kysely, sql } from 'kysely'
+import { type ExpressionBuilder, Kysely, sql } from 'kysely'
 import {} from 'node_modules/kysely/dist/esm/parser/order-by-parser.js'
 import { Maybe } from 'purify-ts'
 import { assoc, isNil, isNotNil, prop, propOr } from 'ramda'
 import { isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
 import type { DB, JsonValue } from 'src/database/schema.ts'
+import { NodeResolver } from 'src/resolvers/node-resolver.ts'
 import {
 	type NodeSettings,
 	NodeSettingsResolver
@@ -20,6 +22,8 @@ import {
 	type TreeNode
 } from 'src/types.ts'
 import { isJsonObject } from 'src/utils/json.ts'
+import { dbOperator, dbType } from 'src/utils/mappings.ts'
+import { allNodes, isValueNode } from 'src/utils/nodes.ts'
 import { ImageService, type MediaValue } from './image-service.ts'
 
 export type Filter = {
@@ -38,6 +42,25 @@ export type ListArgs = {
 	direction?: 'asc' | 'desc'
 }
 
+const andClauses = (
+	allChildNodes: TreeNode[],
+	filters: Filter[],
+	eb: ExpressionBuilder<DB, 'values'>
+): any =>
+	filters.map(filter =>
+		Object.entries(filter).map(([key, value]) => {
+			const [nodeName, operator = 'eq'] = key.split('_')
+			const node = allChildNodes.find(({ name }) => name === nodeName)
+			assertExists(node, `Node ${nodeName} not found`)
+			const jsonField = dbType(node)
+			return eb(
+				`child.value->>${sql.val(jsonField)}` as any,
+				sql.val(dbOperator(operator)),
+				sql.val(value)
+			)
+		})
+	)
+
 @injectable()
 export class SchemaContext {
 	@inject(Kysely<DB>)
@@ -45,6 +68,9 @@ export class SchemaContext {
 
 	@inject(NodeSettingsResolver)
 	private nodeSettingsResolver: NodeSettingsResolver
+
+	@inject(NodeResolver)
+	private nodeResolver: NodeResolver
 
 	@inject(ImageService)
 	private imageService: ImageService
@@ -86,20 +112,22 @@ export class SchemaContext {
 		{ direction, limit, offset, order, and, or }: ListArgs
 	): Promise<Value[]> {
 		const shouldJoin = Boolean(order) || Boolean(and) || Boolean(or)
+		const node = await this.nodeResolver.getTreeNode(nodeId)
+		const allChildNodes = [...allNodes(node)].filter(isValueNode)
+
 		return this.db
 			.selectFrom('values')
 			.selectAll('values')
 			.$if(shouldJoin, qb =>
-				qb
-					.leftJoin('values as child', join =>
-						join
-							.on('child.node_id', '=', order!.node_id)
-							.on(
-								'child.list_path',
-								'@>',
-								sql`array_append(${sql.val(path)}, "values"."id")`
-							)
-					)
+				qb.leftJoin('values as child', join =>
+					join
+						.on('child.node_id', '=', order!.node_id)
+						.on(
+							'child.list_path',
+							'@>',
+							sql`array_append(${sql.val(path)}, "values"."id")`
+						)
+				)
 			)
 			.where('values.node_id', '=', nodeId)
 			.$if(isNilOrEmpty(path), qb =>
@@ -110,16 +138,20 @@ export class SchemaContext {
 					])
 				)
 			)
+			.$if(isNotNilOrEmpty(and), qb =>
+				qb.where(eb => eb.and(andClauses(allChildNodes, and, eb)))
+			)
 			.$if(isNotNilOrEmpty(path), qb =>
 				qb.where('values.list_path', '=', sql.val(path))
 			)
 			.$if(isNotNil(offset), qb => qb.offset(offset ?? 0))
 			.$if(isNotNil(limit), qb => qb.limit(limit ?? Number.MAX_SAFE_INTEGER))
-			.$if(isNotNil(order), qb => 					qb.orderBy(
-				sql`child.value->>${sql.val(order!.json_field)}`,
-				direction ?? 'asc'
+			.$if(isNotNil(order), qb =>
+				qb.orderBy(
+					sql`child.value->>${sql.val(order!.json_field)}`,
+					direction ?? 'asc'
+				)
 			)
-)
 			.$if(isNil(order), qb => qb.orderBy('values.order', direction ?? 'asc'))
 			.execute()
 	}
