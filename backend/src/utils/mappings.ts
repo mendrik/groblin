@@ -96,9 +96,9 @@ export const dbType = match<[TreeNode], string>(
 )
 
 export const dbOperator = match<[string], string>(
-	caseOf(['eq'], '=='),
-	caseOf(['not'], '<>'),
-	caseOf(['rex'], ' like %s%'),
+	caseOf(['eq'], '='),
+	caseOf(['not'], '!='),
+	caseOf(['rex'], 'like'),
 	caseOf(['gt'], '>'),
 	caseOf(['lt'], '<'),
 	caseOf(['gte'], '>='),

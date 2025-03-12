@@ -42,24 +42,22 @@ export type ListArgs = {
 	direction?: 'asc' | 'desc'
 }
 
-const andClauses = (
+const clause = (
 	allChildNodes: TreeNode[],
-	filters: Filter[],
+	filter: Filter,
 	eb: ExpressionBuilder<DB, 'values'>
-): any =>
-	filters.map(filter =>
-		Object.entries(filter).map(([key, value]) => {
-			const [nodeName, operator = 'eq'] = key.split('_')
-			const node = allChildNodes.find(({ name }) => name === nodeName)
-			assertExists(node, `Node ${nodeName} not found`)
-			const jsonField = dbType(node)
-			return eb(
-				`child.value->>${sql.val(jsonField)}` as any,
-				sql.val(dbOperator(operator)),
-				sql.val(value)
-			)
-		})
-	)
+) =>
+	Object.entries(filter).map(([key, value]) => {
+		const [nodeName, operator = 'eq'] = key.split('_')
+		const node = allChildNodes.find(({ name }) => name === nodeName)
+		assertExists(node, `Node ${nodeName} not found`)
+		const jsonField = dbType(node)
+		return eb(
+			sql`child.value->> ${sql.val(jsonField)}`,
+			sql.raw(dbOperator(operator)),
+			sql.val(value)
+		)
+	})
 
 @injectable()
 export class SchemaContext {
@@ -112,7 +110,7 @@ export class SchemaContext {
 		{ direction, limit, offset, order, and, or }: ListArgs
 	): Promise<Value[]> {
 		const shouldJoin = Boolean(order) || Boolean(and) || Boolean(or)
-		const node = await this.nodeResolver.getTreeNode(nodeId)
+		const node = await this.nodeResolver.getTreeNode(this.projectId, nodeId)
 		const allChildNodes = [...allNodes(node)].filter(isValueNode)
 
 		return this.db
@@ -121,7 +119,7 @@ export class SchemaContext {
 			.$if(shouldJoin, qb =>
 				qb.leftJoin('values as child', join =>
 					join
-						.on('child.node_id', '=', order!.node_id)
+						.on('child.node_id', 'in', allChildNodes.map(prop('id')))
 						.on(
 							'child.list_path',
 							'@>',
@@ -139,7 +137,14 @@ export class SchemaContext {
 				)
 			)
 			.$if(isNotNilOrEmpty(and), qb =>
-				qb.where(eb => eb.and(andClauses(allChildNodes, and, eb)))
+				qb.where(eb =>
+					eb.and(and.map(filter => eb.and(clause(allChildNodes, filter, eb))))
+				)
+			)
+			.$if(isNotNilOrEmpty(or), qb =>
+				qb.where(eb =>
+					eb.or(or.map(filter => eb.and(clause(allChildNodes, filter, eb))))
+				)
 			)
 			.$if(isNotNilOrEmpty(path), qb =>
 				qb.where('values.list_path', '=', sql.val(path))
