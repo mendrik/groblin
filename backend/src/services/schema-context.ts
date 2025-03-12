@@ -22,7 +22,13 @@ import {
 import { isJsonObject } from 'src/utils/json.ts'
 import { ImageService, type MediaValue } from './image-service.ts'
 
+export type Filter = {
+	[key: string]: any
+}
+
 export type ListArgs = {
+	and: Filter[]
+	or: Filter[]
 	limit?: number
 	offset?: number
 	order?: {
@@ -77,12 +83,13 @@ export class SchemaContext {
 	async listItems(
 		nodeId: number,
 		path: ListPath,
-		{ direction, limit, offset, order }: ListArgs
+		{ direction, limit, offset, order, and, or }: ListArgs
 	): Promise<Value[]> {
+		const shouldJoin = Boolean(order) || Boolean(and) || Boolean(or)
 		return this.db
 			.selectFrom('values')
 			.selectAll('values')
-			.$if(isNotNil(order), qb =>
+			.$if(shouldJoin, qb =>
 				qb
 					.leftJoin('values as child', join =>
 						join
@@ -92,10 +99,6 @@ export class SchemaContext {
 								'@>',
 								sql`array_append(${sql.val(path)}, "values"."id")`
 							)
-					)
-					.orderBy(
-						sql`child.value->>${sql.val(order!.json_field)}`,
-						direction ?? 'asc'
 					)
 			)
 			.where('values.node_id', '=', nodeId)
@@ -112,6 +115,11 @@ export class SchemaContext {
 			)
 			.$if(isNotNil(offset), qb => qb.offset(offset ?? 0))
 			.$if(isNotNil(limit), qb => qb.limit(limit ?? Number.MAX_SAFE_INTEGER))
+			.$if(isNotNil(order), qb => 					qb.orderBy(
+				sql`child.value->>${sql.val(order!.json_field)}`,
+				direction ?? 'asc'
+			)
+)
 			.$if(isNil(order), qb => qb.orderBy('values.order', direction ?? 'asc'))
 			.execute()
 	}
