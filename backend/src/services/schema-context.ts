@@ -83,15 +83,20 @@ export class SchemaContext {
 			.selectFrom('values')
 			.selectAll('values')
 			.$if(isNotNil(order), qb =>
-				qb.leftJoin('values as child', join =>
-					join
-						.on('child.node_id', '=', order!.node_id)
-						.on(
-							'child.list_path',
-							'@>',
-							sql`array_append(${sql.val(path)}, "values"."id")`
-						)
-				)
+				qb
+					.leftJoin('values as child', join =>
+						join
+							.on('child.node_id', '=', order!.node_id)
+							.on(
+								'child.list_path',
+								'@>',
+								sql`array_append(${sql.val(path)}, "values"."id")`
+							)
+					)
+					.orderBy(
+						sql`child.value->>${sql.val(order!.json_field)}`,
+						direction ?? 'asc'
+					)
 			)
 			.where('values.node_id', '=', nodeId)
 			.$if(isNilOrEmpty(path), qb =>
@@ -107,12 +112,6 @@ export class SchemaContext {
 			)
 			.$if(isNotNil(offset), qb => qb.offset(offset ?? 0))
 			.$if(isNotNil(limit), qb => qb.limit(limit ?? Number.MAX_SAFE_INTEGER))
-			.$if(isNotNil(order), qb =>
-				qb.orderBy(
-					sql`child.value->>${sql.val(order!.json_field)}`,
-					direction ?? 'asc'
-				)
-			)
 			.$if(isNil(order), qb => qb.orderBy('values.order', direction ?? 'asc'))
 			.execute()
 	}

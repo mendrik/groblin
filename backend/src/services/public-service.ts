@@ -16,6 +16,9 @@ import {
 	type GraphQLFieldConfig,
 	type GraphQLFieldConfigArgumentMap,
 	GraphQLFloat,
+	type GraphQLInputFieldConfig,
+	GraphQLInputObjectType,
+	type GraphQLInputType,
 	GraphQLInt,
 	GraphQLList,
 	GraphQLObjectType,
@@ -50,13 +53,31 @@ const isChoiceType = hasValue<ChoiceType>
 const isBooleanType = hasValue<BooleanType>
 const isArticleType = hasValue<ArticleType>
 
-const scalarForNode = match<[TreeNode, SchemaContext], GraphQLOutputType>(
+const outputScalarForNode = match<[TreeNode, SchemaContext], GraphQLOutputType>(
 	caseOf([{ type: NodeType.boolean }, _], GraphQLBoolean),
 	caseOf([{ type: NodeType.number }, _], GraphQLFloat),
 	caseOf([{ type: NodeType.color }, _], new GraphQLList(GraphQLInt)),
 	caseOf([{ type: NodeType.date }, _], GraphQLDateTime),
 	caseOf([{ type: NodeType.choice }, _], (n, c) => c.getEnumType(n.id)),
 	caseOf([{ type: NodeType.media }, _], (n, c) => c.getMediaType(n)),
+	caseOf([_, _], GraphQLString)
+)
+
+const GraphQLDateInput = new GraphQLInputObjectType({
+	name: 'DateInput',
+	fields: {
+		year: { type: GraphQLInt },
+		month: { type: GraphQLInt },
+		day: { type: GraphQLInt }
+	}
+})
+
+const inputScalarForNode = match<[TreeNode, SchemaContext], GraphQLInputType>(
+	caseOf([{ type: NodeType.boolean }, _], GraphQLBoolean),
+	caseOf([{ type: NodeType.number }, _], GraphQLFloat),
+	caseOf([{ type: NodeType.date }, _], GraphQLDateInput),
+	caseOf([{ type: NodeType.choice }, _], (n, c) => c.getEnumType(n.id)),
+	caseOf([{ type: NodeType.media }, _], GraphQLBoolean),
 	caseOf([_, _], GraphQLString)
 )
 
@@ -101,7 +122,7 @@ const resolveValue = (
 	node: TreeNode,
 	context: SchemaContext
 ): GraphQLFieldConfig<any, any> => ({
-	type: scalarForNode(node, context),
+	type: outputScalarForNode(node, context),
 	resolve: async parent => {
 		const path = pathFor(parent)
 		const maybeValue = await context
@@ -115,6 +136,87 @@ const resolveValue = (
 	}
 })
 
+const opSet = ['eq', 'not', 'gt', 'lt', 'gte', 'lte']
+
+const operators: (node: TreeNode) => string[] = match<[TreeNode], string[]>(
+	caseOf([{ type: NodeType.string }], () => ['eq', 'not', 'rex']),
+	caseOf([{ type: NodeType.color }], () => ['eq', 'not']),
+	caseOf([{ type: NodeType.number }], () => opSet),
+	caseOf([{ type: NodeType.date }], () => opSet),
+	caseOf([{ type: NodeType.choice }], () => ['eq', 'not']),
+	caseOf([{ type: NodeType.boolean }], () => ['eq']),
+	caseOf([{ type: NodeType.article }], () => ['contains', 'exists']),
+	caseOf([{ type: NodeType.media }], () => ['exists']),
+	caseOf([_], () => [])
+)
+
+const filterType = (
+	node: TreeNode,
+	ctx: SchemaContext
+): GraphQLInputObjectType => {
+	const allChildNodes = [...iterateNodes(node)].filter(isValueNode)
+	return new GraphQLInputObjectType({
+		name: `${node.name}Filter`,
+		fields: allChildNodes.reduce(
+			(acc, node) => {
+				const ops = operators(node)
+				if (ops.length === 0) return acc
+				for (const op of ops) {
+					const key = op === 'eq' ? node.name : `${node.name}_${op}`
+					acc[key] = {
+						type: inputScalarForNode(node, ctx)
+					}
+				}
+				return acc
+			},
+			{} as Record<string, GraphQLInputFieldConfig>
+		)
+	})
+}
+const orderType = (node: TreeNode): GraphQLEnumType => {
+	const allChildNodes = [...iterateNodes(node)].filter(isValueNode)
+	return new GraphQLEnumType({
+		name: `${node.name}Order`,
+		values: allChildNodes.reduce(
+			(acc, node) =>
+				assoc(
+					node.name,
+					{
+						value: {
+							json_field: dbType(node),
+							node_id: node.id
+						}
+					},
+					acc
+				),
+			{}
+		)
+	})
+}
+
+const directionType = new GraphQLEnumType({
+	name: `Direction`,
+	values: {
+		asc: { value: 'asc' },
+		desc: { value: 'desc' }
+	}
+})
+
+const listArgs = (
+	node: TreeNode,
+	ctx: SchemaContext
+): GraphQLFieldConfigArgumentMap => {
+	const filter = filterType(node, ctx)
+	return {
+		offset: { type: GraphQLInt },
+		limit: { type: GraphQLInt },
+		direction: { type: directionType },
+		order: { type: orderType(node) },
+		and: { type: new GraphQLList(filter) },
+		or: { type: new GraphQLList(filter) }
+	}
+}
+
 export function* iterateNodes(root: TreeNode): Generator<TreeNode> {
 	yield root
 	for (const child of root.nodes) {
@@ -127,43 +229,10 @@ const resolveList = (
 	context: SchemaContext
 ): GraphQLFieldConfig<any, any> => {
 	const conf = resolveObj(node, context)
-	const allChildNodes = [...iterateNodes(node)].filter(isValueNode)
-	const ListArgs: GraphQLFieldConfigArgumentMap = {
-		offset: { type: GraphQLInt },
-		limit: { type: GraphQLInt },
-		direction: {
-			type: new GraphQLEnumType({
-				name: `${node.name}Direction`,
-				values: {
-					asc: { value: 'asc' },
-					desc: { value: 'desc' }
-				}
-			})
-		},
-		order: {
-			type: new GraphQLEnumType({
-				name: `${node.name}Order`,
-				values: allChildNodes.reduce(
-					(acc, node) =>
-						assoc(
-							node.name,
-							{
-								value: {
-									json_field: dbType(node),
-									node_id: node.id
-								}
-							},
-							acc
-						),
-					{}
-				)
-			})
-		}
-	}
 
 	return {
 		type: new GraphQLList(conf.type),
-		args: ListArgs,
+		args: listArgs(node, context),
 		resolve: async (parent, args) => {
 			const items = await context.listItems(node.id, pathFor(parent), args)
 			return items.map(item => ({ id: item.id, parent }))
