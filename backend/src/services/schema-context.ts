@@ -52,9 +52,11 @@ const clause = (
 		const node = allChildNodes.find(({ name }) => name === nodeName)
 		assertExists(node, `Node ${nodeName} not found`)
 		const jsonField = dbType(node)
+		console.log(nodeName, operator, value)
+
 		return eb(
 			sql`child.value->> ${sql.val(jsonField)}`,
-			sql.raw(dbOperator(operator)),
+			sql.raw(dbOperator(operator, value)),
 			sql.val(value)
 		)
 	})

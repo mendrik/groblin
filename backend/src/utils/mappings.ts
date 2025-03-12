@@ -60,15 +60,16 @@ export const outputScalarForNode = match<
 )
 
 export const inputScalarForNode = match<
-	[TreeNode, SchemaContext],
+	[TreeNode, string, SchemaContext],
 	GraphQLInputType
 >(
-	caseOf([{ type: NodeType.boolean }, _], GraphQLBoolean),
-	caseOf([{ type: NodeType.number }, _], GraphQLFloat),
-	caseOf([{ type: NodeType.date }, _], GraphQLDateInput),
-	caseOf([{ type: NodeType.choice }, _], (n, c) => c.getEnumType(n.id)),
-	caseOf([{ type: NodeType.media }, _], GraphQLBoolean),
-	caseOf([_, _], GraphQLString)
+	caseOf([{ type: NodeType.boolean }, _, _], GraphQLBoolean),
+	caseOf([{ type: NodeType.number }, _, _], GraphQLFloat),
+	caseOf([{ type: NodeType.date }, _, _], GraphQLDateInput),
+	caseOf([{ type: NodeType.choice }, _, _], (n, _, c) => c.getEnumType(n.id)),
+	caseOf([{ type: NodeType.media }, _, _], GraphQLBoolean),
+	caseOf([_, 'not', _], GraphQLString),
+	caseOf([_, _, _], GraphQLString)
 )
 export const jsonForNode = match<[TreeNode, any], JsonValue>(
 	caseOf([{ type: NodeType.string }, isStringType], (_, v) => v.content),
@@ -95,30 +96,28 @@ export const dbType = match<[TreeNode], string>(
 	caseOf([{ type: NodeType.media }], 'file')
 )
 
-export const dbOperator = match<[string], string>(
-	caseOf(['eq'], '='),
-	caseOf(['not'], '!='),
-	caseOf(['rex'], 'like'),
-	caseOf(['gt'], '>'),
-	caseOf(['lt'], '<'),
-	caseOf(['gte'], '>='),
-	caseOf(['lte'], '<='),
-	caseOf(['contains'], 'in'),
-	caseOf(['exists'], 'is not null')
+export const dbOperator = match<[string, any], string>(
+	caseOf(['eq', _], '='),
+	caseOf(['neq', _], '!='),
+	caseOf(['rex', _], 'like'),
+	caseOf(['gt', _], '>'),
+	caseOf(['lt', _], '<'),
+	caseOf(['gte', _], '>='),
+	caseOf(['lte', _], '<='),
+	caseOf(['in', _], 'in')
 )
 
-const opSet = ['eq', 'not', 'gt', 'lt', 'gte', 'lte']
-export const operators: (node: TreeNode) => string[] = match<
-	[TreeNode],
-	string[]
->(
-	caseOf([{ type: NodeType.string }], () => ['eq', 'not', 'rex']),
-	caseOf([{ type: NodeType.color }], () => ['eq', 'not']),
+type Operator = 'eq' | 'neq' | 'gt' | 'lt' | 'gte' | 'lte' | 'rex' | 'in'
+
+const opSet: Operator[] = ['eq', 'neq', 'gt', 'lt', 'gte', 'lte']
+export const operators = match<[TreeNode], Operator[]>(
+	caseOf([{ type: NodeType.string }], () => ['eq', 'neq', 'rex']),
+	caseOf([{ type: NodeType.color }], () => ['eq', 'neq']),
 	caseOf([{ type: NodeType.number }], () => opSet),
 	caseOf([{ type: NodeType.date }], () => opSet),
-	caseOf([{ type: NodeType.choice }], () => ['eq', 'not']),
+	caseOf([{ type: NodeType.choice }], () => ['eq', 'neq']),
 	caseOf([{ type: NodeType.boolean }], () => ['eq']),
-	caseOf([{ type: NodeType.article }], () => ['contains', 'exists']),
-	caseOf([{ type: NodeType.media }], () => ['exists']),
+	caseOf([{ type: NodeType.article }], () => ['rex', 'neq']),
+	caseOf([{ type: NodeType.media }], () => ['neq']),
 	caseOf([_], () => [])
 )

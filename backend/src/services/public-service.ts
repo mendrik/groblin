@@ -73,8 +73,7 @@ const filterType = (
 				for (const op of ops) {
 					const key = op === 'eq' ? node.name : `${node.name}_${op}`
 					acc[key] = {
-						type: inputScalarForNode(node, ctx),
-						extensions: { node }
+						type: inputScalarForNode(node, op, ctx)
 					}
 				}
 				return acc
@@ -126,7 +125,6 @@ const listArgs = (
 		or: { type: new GraphQLList(filter) }
 	}
 }
-
 
 const resolveList = (
 	node: TreeNode,
