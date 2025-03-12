@@ -3,7 +3,13 @@ import { listToTree } from '@shared/utils/list-to-tree.ts'
 import { mapBy } from '@shared/utils/map-by.ts'
 import { GraphQLEnumType, GraphQLObjectType, GraphQLString } from 'graphql'
 import { inject, injectable } from 'inversify'
-import { type ExpressionBuilder, Kysely, sql } from 'kysely'
+import {
+	type ExpressionBuilder,
+	Kysely,
+	type OperandExpression,
+	type SqlBool,
+	sql
+} from 'kysely'
 import {} from 'node_modules/kysely/dist/esm/parser/order-by-parser.js'
 import { Maybe } from 'purify-ts'
 import { assoc, isNil, isNotNil, prop, propOr } from 'ramda'
@@ -46,7 +52,7 @@ const clause = (
 	allChildNodes: TreeNode[],
 	filter: Filter,
 	eb: ExpressionBuilder<DB, 'values'>
-) =>
+): OperandExpression<SqlBool>[] =>
 	Object.entries(filter).map(([key, value]) => {
 		const [nodeName, operator = 'eq'] = key.split('_')
 		const node = allChildNodes.find(({ name }) => name === nodeName)
@@ -58,7 +64,7 @@ const clause = (
 			sql`child.value->> ${sql.val(jsonField)}`,
 			sql.raw(dbOperator(operator, value)),
 			sql.val(value)
-		)
+		) as OperandExpression<SqlBool>
 	})
 
 @injectable()
