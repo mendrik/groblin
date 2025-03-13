@@ -7,6 +7,7 @@ import type {
 import { createServer } from 'node:http'
 import { assertExists } from '@shared/asserts.ts'
 import { cyan, lightGreen, yellow } from 'ansicolor'
+import { toNodeHandler } from 'better-auth/node'
 import { type GraphQLSchema, printSchema } from 'graphql'
 import { createYoga } from 'graphql-yoga'
 import { inject, injectable } from 'inversify'
@@ -16,6 +17,7 @@ import { T as _, equals, startsWith } from 'ramda'
 // This is the fastify instance you have created
 
 import { caseOf, match } from '@shared/utils/match.ts'
+import { Authenticator } from 'src/auth.ts'
 import type { DB } from 'src/database/schema.ts'
 import type { ProjectId } from 'src/types.ts'
 import { Topic } from 'src/types.ts'
@@ -41,6 +43,9 @@ export class PublicServer {
 	@inject(ImageService)
 	private imageService: ImageService
 
+	@inject(Authenticator)
+	private auth: Authenticator
+
 	private abort: AbortController
 
 	private server: Server
@@ -59,6 +64,9 @@ export class PublicServer {
 
 		this.server = createServer(
 			match<[any, any], any>(
+				caseOf([{ url: startsWith('/api/auth/') }, _], (i, o) =>
+					toNodeHandler(this.auth)(i, o)
+				),
 				caseOf([{ url: startsWith('/media/') }, _], (i, o) =>
 					this.imageService.handleRequest(i, o)
 				),

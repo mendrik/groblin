@@ -105,10 +105,10 @@ export class ValueResolver {
 		@Arg('data', () => GetValues) { ids }: GetValues,
 		@Ctx() ctx: Context
 	): Promise<Value[]> {
-		const { user } = ctx
+		const { project_id } = ctx
 		return this.db
 			.selectFrom('values')
-			.where('project_id', '=', user.lastProjectId)
+			.where('project_id', '=', project_id)
 			.where(({ or, eb }) =>
 				or([eb('list_path', '<@', [ids]), eb('list_path', 'is', null)])
 			)
@@ -130,7 +130,7 @@ export class ValueResolver {
 		@Arg('listItem', () => InsertListItem) data: InsertListItem,
 		@Ctx() ctx: Context
 	) {
-		const { user } = ctx
+		const { project_id } = ctx
 		const { max_order } = await this.db
 			.selectFrom('values')
 			.where('node_id', '=', data.node_id)
@@ -141,7 +141,7 @@ export class ValueResolver {
 			.insertInto('values')
 			.values({
 				node_id: data.node_id,
-				project_id: user.lastProjectId,
+				project_id,
 				value: { name: data.name },
 				list_path: data.list_path,
 				order: max_order + 1
@@ -183,14 +183,14 @@ export class ValueResolver {
 		@Arg('data', () => UpsertValue) data: UpsertValue,
 		@Ctx() ctx: Context
 	) {
-		const { user } = ctx
+		const { project_id } = ctx
 		const prev = data.id ? await this.value(data.id) : undefined
 		const res = await this.db
 			.insertInto('values')
 			.values({
 				id: data.id,
 				node_id: data.node_id,
-				project_id: user.lastProjectId,
+				project_id,
 				value: data.value,
 				list_path: data.list_path
 			})
@@ -213,12 +213,12 @@ export class ValueResolver {
 		@Arg('data', () => TruncateValue) data: TruncateValue,
 		@Ctx() ctx: Context
 	) {
-		const { user } = ctx
+		const { project_id } = ctx
 		const { numDeletedRows } = await this.db.transaction().execute(trx => {
 			return trx
 				.deleteFrom('values')
 				.where('node_id', '=', data.node_id)
-				.where('project_id', '=', user.lastProjectId)
+				.where('project_id', '=', project_id)
 				.executeTakeFirstOrThrow()
 		})
 		this.pubSub.publish(Topic.ValuesUpdated, true)
@@ -227,12 +227,12 @@ export class ValueResolver {
 
 	@Mutation(returns => Boolean)
 	async deleteValue(@Arg('id', () => Int) id: number, @Ctx() ctx: Context) {
-		const { user } = ctx
+		const { project_id } = ctx
 		const value = await this.value(id)
 		const { numDeletedRows } = await this.db
 			.deleteFrom('values')
 			.where('id', '=', id)
-			.where('project_id', '=', user.lastProjectId)
+			.where('project_id', '=', project_id)
 			.executeTakeFirstOrThrow()
 		if (value != null) {
 			this.pubSub.publish(Topic.ValueDeleted, value)

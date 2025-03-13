@@ -1,11 +1,5 @@
 query GetProject {
 	getProject {
-		user {
-			id
-			email
-			name
-			lastProjectId
-		}
 		project {
 			id
 			name
@@ -84,21 +78,6 @@ mutation UpsertNodeSettings($data: UpsertNodeSettings!) {
 
 subscription NodeSettingsUpdated {
 	nodeSettingsUpdated
-}
-
-mutation Register($data: Registration!) {
-	register(data: $data)
-}
-
-mutation Login($data: Login!) {
-	login(data: $data) {
-		token
-		expiresDate
-	}
-}
-
-mutation Logout {
-	logout
 }
 
 subscription ValuesUpdated {
@@ -222,8 +201,4 @@ mutation DeleteUser($id: Int!) {
 
 subscription UsersUpdated {
 	usersUpdated
-}
-
-mutation ForgotPassword($data: ForgotPassword!) {
-	forgotPassword(data: $data)
 }

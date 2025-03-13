@@ -7,7 +7,6 @@ import { prop } from 'ramda'
 import 'reflect-metadata'
 import { AuthChecker } from 'src/middleware/auth-checker.ts'
 import { ApiKeyResolver } from 'src/resolvers/api-key-resolver.ts'
-import { AuthResolver } from 'src/resolvers/auth-resolver.ts'
 import { IoResolver } from 'src/resolvers/io-resolver.ts'
 import { ListResolver } from 'src/resolvers/list-resolver.ts'
 import { NodeResolver } from 'src/resolvers/node-resolver.ts'
@@ -17,7 +16,7 @@ import { UserResolver } from 'src/resolvers/user-resolver.ts'
 import { ValueResolver } from 'src/resolvers/value-resolver.ts'
 import { buildSchema } from 'type-graphql'
 import { WebSocketServer } from 'ws'
-import { onConnect } from '../middleware/on-connect.ts'
+import { onConnect as connectFactory } from '../middleware/on-connect.ts'
 import { onError } from '../middleware/on-errors.ts'
 
 const port = Number.parseInt(process.env.PORT ?? '6173')
@@ -36,7 +35,6 @@ export class InternalServer {
 	public async start(container: Container) {
 		const schema = await buildSchema({
 			resolvers: [
-				AuthResolver,
 				ProjectResolver,
 				NodeResolver,
 				NodeSettingsResolver,
@@ -59,7 +57,7 @@ export class InternalServer {
 				execute,
 				subscribe,
 				context: prop('extra'),
-				onConnect,
+				onConnect: connectFactory(container),
 				onError
 			},
 			this.server

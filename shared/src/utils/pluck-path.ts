@@ -37,6 +37,12 @@ type TypeAtPath<T, P extends readonly string[]> = P extends readonly [
 
 const impl = ((p: string[], l: unknown[]) => map(path(p), l)) as AnyFn
 
+/**
+ * Given a path and a list of objects, return a list of the values at the path in each object.
+ * @param path
+ * @param list
+ * @returns a list of values at the path in each object
+ */
 export const pluckPath: <T, P extends TypesafePath<T>>(
 	path: P,
 	list: T[]

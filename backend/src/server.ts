@@ -1,17 +1,15 @@
-import 'reflect-metadata'
+import { yellow } from 'ansicolor'
 import 'dotenv/config'
 import { createPubSub } from 'graphql-yoga'
 import { Container } from 'inversify'
 import { Kysely } from 'kysely'
 import { tryCatch } from 'ramda'
 import 'reflect-metadata'
-import { yellow } from 'ansicolor'
 import type { PubSub } from 'type-graphql'
 import type { DB } from './database/schema.ts'
 import { AuthChecker } from './middleware/auth-checker.ts'
 import { LogAccess } from './middleware/log-access.ts'
 import { ApiKeyResolver } from './resolvers/api-key-resolver.ts'
-import { AuthResolver } from './resolvers/auth-resolver.ts'
 import { IoResolver } from './resolvers/io-resolver.ts'
 import { ListResolver } from './resolvers/list-resolver.ts'
 import { NodeResolver } from './resolvers/node-resolver.ts'
@@ -20,7 +18,6 @@ import { ProjectResolver } from './resolvers/project-resolver.ts'
 import { UserResolver } from './resolvers/user-resolver.ts'
 import { ValueResolver } from './resolvers/value-resolver.ts'
 import { db } from './services/database.ts'
-import { EmailService } from './services/email-service.ts'
 import { ImageService } from './services/image-service.ts'
 import { InternalServer } from './services/interal-server.ts'
 import { NodeSettingsService } from './services/node-settings-service.ts'
@@ -32,6 +29,7 @@ import { SchemaContext } from './services/schema-context.ts'
 
 import { useAdapter } from '@type-cacheable/node-cache-adapter'
 import NodeCache from 'node-cache'
+import { Authenticator } from './auth.ts'
 import { SesClient } from './services/ses-client.ts'
 
 const client = new NodeCache()
@@ -43,9 +41,9 @@ container.bind<PubSub>('PubSub').toConstantValue(pubSub)
 container.bind(Kysely<DB>).toConstantValue(db)
 container.bind(S3Client).toSelf()
 container.bind(SesClient).toSelf()
+container.bind(Authenticator).toSelf()
 container.bind(NodeResolver).toSelf()
 container.bind(NodeSettingsResolver).toSelf()
-container.bind(AuthResolver).toSelf()
 container.bind(ListResolver).toSelf()
 container.bind(ProjectResolver).toSelf()
 container.bind(ApiKeyResolver).toSelf()
@@ -54,7 +52,6 @@ container.bind(LogAccess).toSelf()
 container.bind(ProjectService).toSelf()
 container.bind(IoResolver).toSelf()
 container.bind(AuthChecker).toSelf()
-container.bind(EmailService).toSelf()
 container.bind(PublicService).toSelf()
 container.bind(SchemaContext).toSelf()
 container.bind(ImageService).to(ImageService).inSingletonScope()
@@ -64,7 +61,6 @@ container.bind(PublicServer).to(PublicServer).inSingletonScope()
 container.bind(ValueResolver).toSelf()
 
 console.log(yellow(`Starting services...`))
-void container.get(EmailService).init()
 void container.get(ImageService).init()
 void container.get(NodeSettingsService).init()
 void container.get(InternalServer).start(container)

@@ -1,4 +1,3 @@
-import { assertExists } from '@shared/asserts.ts'
 import { throwError } from '@shared/errors.ts'
 import { toArray } from '@shared/utils/async-generator.ts'
 import { failOn } from '@shared/utils/guards.ts'
@@ -15,7 +14,6 @@ import {
 	isString
 } from 'ramda-adjunct'
 import type { DB, JsonArray, JsonObject } from 'src/database/schema.ts'
-import type { LoggedInUser } from 'src/resolvers/auth-resolver.ts'
 import type { JsonArrayImportInput } from 'src/resolvers/io-resolver.ts'
 import type { Node } from 'src/resolvers/node-resolver.ts'
 import { NodeType } from 'src/types.ts'
@@ -203,14 +201,8 @@ const isValue = (value: any): value is DbValue => 'list_path' in value
 const isSetting = (value: any): value is DbNodeSetting => 'settings' in value
 
 export const importJson =
-	(
-		{ lastProjectId }: LoggedInUser,
-		json: JsonStart,
-		node: TreeNode,
-		options: Options
-	) =>
+	(project_id: number, json: JsonStart, node: TreeNode, options: Options) =>
 	async (trx: Transaction<DB>): Promise<void> => {
-		assertExists(lastProjectId, 'lastProjectId missing')
 		/**
 		 * The generator climbs down a json structure and generates
 		 * either values, nodes or node settings that need to be inserted
@@ -219,7 +211,7 @@ export const importJson =
 		 * need to fetch referencing ids ahead of the execution.
 		 */
 		const generator = processJson(
-			lastProjectId,
+			project_id,
 			options,
 			nodeId(trx),
 			valueId(trx)

@@ -23,6 +23,22 @@ export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
+export interface Account {
+  accessToken: string | null;
+  accessTokenExpiresAt: Timestamp | null;
+  accountId: string;
+  createdAt: Timestamp;
+  id: string;
+  idToken: string | null;
+  password: string | null;
+  providerId: string;
+  refreshToken: string | null;
+  refreshTokenExpiresAt: Timestamp | null;
+  scope: string | null;
+  updatedAt: Timestamp;
+  userId: string;
+}
+
 export interface ApiKey {
   created_at: Generated<Timestamp>;
   expires_at: Timestamp | null;
@@ -32,6 +48,11 @@ export interface ApiKey {
   last_used: Generated<Timestamp | null>;
   name: string;
   project_id: number;
+}
+
+export interface History {
+  current_project_id: number | null;
+  user_id: string;
 }
 
 export interface Node {
@@ -63,16 +84,28 @@ export interface ProjectUser {
   owner: Generated<boolean>;
   project_id: number;
   roles: string[];
-  user_id: number;
+  user_id: string | null;
+}
+
+export interface Session {
+  createdAt: Timestamp;
+  expiresAt: Timestamp;
+  id: string;
+  ipAddress: string | null;
+  token: string;
+  updatedAt: Timestamp;
+  userAgent: string | null;
+  userId: string;
 }
 
 export interface User {
-  confirmed: Generated<boolean>;
+  createdAt: Timestamp;
   email: string;
-  id: Generated<number>;
-  last_project_id: number | null;
+  emailVerified: boolean;
+  id: string;
+  image: string | null;
   name: string;
-  password: string;
+  updatedAt: Timestamp;
 }
 
 export interface Values {
@@ -86,12 +119,25 @@ export interface Values {
   value: Json | null;
 }
 
+export interface Verification {
+  createdAt: Timestamp | null;
+  expiresAt: Timestamp;
+  id: string;
+  identifier: string;
+  updatedAt: Timestamp | null;
+  value: string;
+}
+
 export interface DB {
+  account: Account;
   api_key: ApiKey;
+  history: History;
   node: Node;
   node_settings: NodeSettings;
   project: Project;
   project_user: ProjectUser;
+  session: Session;
   user: User;
   values: Values;
+  verification: Verification;
 }

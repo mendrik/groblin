@@ -16,7 +16,6 @@ import {
 	Resolver,
 	UseMiddleware
 } from 'type-graphql'
-import { LoggedInUser } from './auth-resolver.ts'
 import { Node, NodeResolver } from './node-resolver.ts'
 import { NodeSettings, NodeSettingsResolver } from './node-settings-resolver.ts'
 import { Value, ValueResolver } from './value-resolver.ts'
@@ -34,9 +33,6 @@ export class Project {
 export class ProjectData {
 	@Field(type => Project)
 	project: Project
-
-	@Field(type => LoggedInUser)
-	user: LoggedInUser
 
 	@Field(type => [Node])
 	nodes: Node[]
@@ -74,7 +70,7 @@ export class ProjectResolver {
 		const project = await this.db
 			.selectFrom('project')
 			.selectAll()
-			.where('id', '=', ctx.user.lastProjectId)
+			.where('id', '=', ctx.project_id)
 			.executeTakeFirst()
 			.then(failOn(isNil, 'Project not found'))
 
@@ -82,7 +78,6 @@ export class ProjectResolver {
 			project,
 			nodes,
 			values,
-			user: ctx.user,
 			nodeSettings
 		}
 	}

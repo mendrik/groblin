@@ -51,6 +51,13 @@ export function pipeAsync<A, B, C, D, E, F, G, H>(
 	fn7: AsyncFn<Awaited<G>, H>
 ): (input: A) => Promise<Awaited<H>>
 
+/**
+ * pipeAsync takes a list of functions and chains the output of each function to the input of the next function.
+ * The first function in the list should take a single argument, and the rest should take the output of the previous
+ * function. Async functions are supported, and the result of the last function in the chain is returned.
+ * @param fns a list of functions to chain
+ * @returns the result of the last function in the chain
+ */
 export function pipeAsync(
 	...fns: Array<(arg: any) => any>
 ): (input: any) => Promise<any> {

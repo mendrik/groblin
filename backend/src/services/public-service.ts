@@ -1,75 +1,34 @@
-import { throwError } from '@shared/errors.ts'
-import type {
-	ArticleType,
-	BooleanType,
-	ChoiceType,
-	ColorType,
-	DateType,
-	MediaType,
-	NumberType,
-	StringType
-} from '@shared/json-value-types.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
 import {
-	GraphQLBoolean,
+	GraphQLEnumType,
 	type GraphQLFieldConfig,
-	GraphQLFloat,
+	type GraphQLFieldConfigArgumentMap,
+	type GraphQLInputFieldConfig,
+	GraphQLInputObjectType,
 	GraphQLInt,
 	GraphQLList,
 	GraphQLObjectType,
-	type GraphQLOutputType,
-	GraphQLSchema,
-	GraphQLString
+	GraphQLSchema
 } from 'graphql'
-import { GraphQLDateTime } from 'graphql-scalars'
 import { inject, injectable } from 'inversify'
 import { Maybe } from 'purify-ts'
-import { T as _, isNil, isNotNil } from 'ramda'
-import type { JsonValue } from 'src/database/schema.ts'
+import { T as _, assoc, isNotNil, objOf } from 'ramda'
 import {
 	type ListPath,
 	NodeType,
 	type ProjectId,
 	type TreeNode
 } from 'src/types.ts'
+import {
+	dbType,
+	inputScalarForNode,
+	jsonForNode,
+	operators,
+	outputScalarForNode
+} from 'src/utils/mappings.ts'
+import { allNodes, isValueNode } from 'src/utils/nodes.ts'
 import type { MediaValue } from './image-service.ts'
 import { SchemaContext } from './schema-context.ts'
-
-const hasValue = <T>(value: T | null): value is T => value != null
-
-const isStringType = hasValue<StringType>
-const isNumberType = hasValue<NumberType>
-const isColorType = hasValue<ColorType>
-const isDateType = hasValue<DateType>
-const isMediaype = hasValue<MediaType>
-const isChoiceType = hasValue<ChoiceType>
-const isBooleanType = hasValue<BooleanType>
-const isArticleType = hasValue<ArticleType>
-
-const scalarForNode = match<[TreeNode, SchemaContext], GraphQLOutputType>(
-	caseOf([{ type: NodeType.boolean }, _], GraphQLBoolean),
-	caseOf([{ type: NodeType.number }, _], GraphQLFloat),
-	caseOf([{ type: NodeType.color }, _], new GraphQLList(GraphQLInt)),
-	caseOf([{ type: NodeType.date }, _], GraphQLDateTime),
-	caseOf([{ type: NodeType.choice }, _], (n, c) => c.getEnumType(n.id)),
-	caseOf([{ type: NodeType.media }, _], (n, c) => c.getMediaType(n)),
-	caseOf([_, _], GraphQLString)
-)
-
-const jsonForNode = match<[TreeNode, any], JsonValue>(
-	caseOf([{ type: NodeType.string }, isStringType], (_, v) => v.content),
-	caseOf([{ type: NodeType.color }, isColorType], (_, v) => v.rgba as number[]),
-	caseOf([{ type: NodeType.number }, isNumberType], (_, v) => v.figure),
-	caseOf([{ type: NodeType.date }, isDateType], (_, v) => v.date.toString()),
-	caseOf([{ type: NodeType.choice }, isChoiceType], (_, v) => v.selected),
-	caseOf([{ type: NodeType.boolean }, isNil], (_, v) => false),
-	caseOf([{ type: NodeType.boolean }, isBooleanType], (_, v) => v.state),
-	caseOf([{ type: NodeType.article }, isArticleType], (_, v) => v.content),
-	caseOf([{ type: NodeType.media }, isMediaype], () =>
-		throwError('Unreachable code')
-	),
-	caseOf([_, _], () => null)
-)
 
 interface ResolvedNode {
 	id?: number
@@ -86,7 +45,7 @@ const resolveValue = (
 	node: TreeNode,
 	context: SchemaContext
 ): GraphQLFieldConfig<any, any> => ({
-	type: scalarForNode(node, context),
+	type: outputScalarForNode(node, context),
 	resolve: async parent => {
 		const path = pathFor(parent)
 		const maybeValue = await context
@@ -100,15 +59,84 @@ const resolveValue = (
 	}
 })
 
+const filterType = (
+	node: TreeNode,
+	ctx: SchemaContext
+): GraphQLInputObjectType => {
+	const allChildNodes = [...allNodes(node)].filter(isValueNode)
+	return new GraphQLInputObjectType({
+		name: `${node.name}Filter`,
+		fields: allChildNodes.reduce(
+			(acc, node) => {
+				const ops = operators(node)
+				if (ops.length === 0) return acc
+				for (const op of ops) {
+					const key = op === 'eq' ? node.name : `${node.name}_${op}`
+					acc[key] = {
+						type: inputScalarForNode(node, op, ctx)
+					}
+				}
+				return acc
+			},
+			{} as Record<string, GraphQLInputFieldConfig>
+		)
+	})
+}
+const orderType = (node: TreeNode): GraphQLEnumType => {
+	const allChildNodes = [...allNodes(node)].filter(isValueNode)
+	return new GraphQLEnumType({
+		name: `${node.name}Order`,
+		values: allChildNodes.reduce(
+			(acc, node) =>
+				assoc(
+					node.name,
+					{
+						value: {
+							json_field: dbType(node),
+							node_id: node.id
+						}
+					},
+					acc
+				),
+			{}
+		)
+	})
+}
+
+const directionType = new GraphQLEnumType({
+	name: `Direction`,
+	values: {
+		asc: { value: 'asc' },
+		desc: { value: 'desc' }
+	}
+})
+
+const listArgs = (
+	node: TreeNode,
+	ctx: SchemaContext
+): GraphQLFieldConfigArgumentMap => {
+	const filter = filterType(node, ctx)
+	return {
+		offset: { type: GraphQLInt },
+		limit: { type: GraphQLInt },
+		direction: { type: directionType },
+		order: { type: orderType(node) },
+		and: { type: new GraphQLList(filter) },
+		or: { type: new GraphQLList(filter) }
+	}
+}
+
 const resolveList = (
 	node: TreeNode,
 	context: SchemaContext
 ): GraphQLFieldConfig<any, any> => {
 	const conf = resolveObj(node, context)
+
 	return {
 		type: new GraphQLList(conf.type),
-		resolve: async parent => {
-			const items = await context.listItems(node.id, pathFor(parent))
+		args: listArgs(node, context),
+		resolve: async (parent, args) => {
+			const items = await context.listItems(node.id, pathFor(parent), args)
 			return items.map(item => ({ id: item.id, parent }))
 		}
 	}
@@ -126,7 +154,7 @@ const resolveObj = (
 			name: node.name,
 			fields: Object.fromEntries(fields)
 		}),
-		resolve: parent => ({ parent })
+		resolve: objOf('parent')
 	}
 }
 

@@ -1,6 +1,8 @@
 import type { TreeOf } from '@shared/utils/list-to-tree.ts'
-import type { LoggedInUser } from './resolvers/auth-resolver.ts'
+import type { User } from 'better-auth'
 import type { Node } from './resolvers/node-resolver.ts'
+
+export type LoggedInUser = User
 
 export enum NodeType {
 	root = 'Root',
@@ -26,7 +28,8 @@ export enum Role {
 
 export interface Context {
 	requestId: number
-	user: Required<LoggedInUser>
+	user: LoggedInUser
+	project_id: ProjectId
 }
 
 export enum Topic {

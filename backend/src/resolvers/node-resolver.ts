@@ -133,7 +133,7 @@ export class NodeResolver {
 
 	@Query(returns => [Node])
 	async getNodes(@Ctx() ctx: Context): Promise<Node[]> {
-		return this.getDbNodes(ctx.user.lastProjectId)
+		return this.getDbNodes(ctx.project_id)
 	}
 
 	insertNodeTrx(trx: Transaction<DB>, data: InsertNode, ctx: Context) {
@@ -150,7 +150,7 @@ export class NodeResolver {
 			.insertInto('node')
 			.values({
 				...data,
-				project_id: ctx.user.lastProjectId
+				project_id: ctx.project_id
 			})
 			.returning('id')
 			.executeTakeFirstOrThrow()
@@ -163,7 +163,7 @@ export class NodeResolver {
 		settings: JsonValue | undefined,
 		@Ctx() ctx: Context
 	): Promise<Node> {
-		const { user } = ctx
+		const { project_id } = ctx
 		const id = await this.db.transaction().execute(async trx => {
 			const { id } = await this.insertNodeTrx(trx, data, ctx)
 			if (settings) {
@@ -171,16 +171,16 @@ export class NodeResolver {
 					.insertInto('node_settings')
 					.values({
 						node_id: id,
-						project_id: user.lastProjectId,
+						project_id,
 						settings
 					})
 					.execute()
 			}
 			return id
 		})
-		this.pubSub.publish(Topic.NodesUpdated, user.lastProjectId)
+		this.pubSub.publish(Topic.NodesUpdated, project_id)
 		if (settings) {
-			this.pubSub.publish(Topic.SomeNodeSettingsUpdated, user.lastProjectId)
+			this.pubSub.publish(Topic.SomeNodeSettingsUpdated, project_id)
 		}
 		return await this.getNode(id)
 	}
@@ -208,15 +208,15 @@ export class NodeResolver {
 		@Arg('data', () => ChangeNodeInput) data: ChangeNodeInput,
 		@Ctx() ctx: Context
 	): Promise<boolean> {
-		const { user } = ctx
+		const { project_id } = ctx
 		const { numUpdatedRows = 0 } = await this.db
 			.updateTable('node')
 			.set(data)
 			.where('id', '=', data.id)
-			.where('project_id', '=', user.lastProjectId)
+			.where('project_id', '=', project_id)
 			.executeTakeFirst()
 
-		this.pubSub.publish(Topic.NodesUpdated, user.lastProjectId)
+		this.pubSub.publish(Topic.NodesUpdated, project_id)
 		return numUpdatedRows > 0 // Returns true if at least one row was updated
 	}
 
@@ -227,7 +227,7 @@ export class NodeResolver {
 		@Arg('order', () => Int) order: number,
 		@Ctx() ctx: Context
 	): Promise<boolean> {
-		const { user } = ctx
+		const { project_id } = ctx
 		const { numDeletedRows } = await this.db
 			.transaction()
 			.execute(async trx => {
@@ -235,14 +235,14 @@ export class NodeResolver {
 					.updateTable('node')
 					.where('order', '>', order)
 					.where('parent_id', '=', parent_id ?? null)
-					.where('project_id', '=', user.lastProjectId)
+					.where('project_id', '=', project_id)
 					.where('type', '!=', NodeType.root)
 					.set({ order: sql`"order" - 1` })
 					.execute()
 
 				return trx.deleteFrom('node').where('id', '=', id).executeTakeFirst()
 			})
-		this.pubSub.publish(Topic.NodesUpdated, user.lastProjectId)
+		this.pubSub.publish(Topic.NodesUpdated, project_id)
 		return numDeletedRows > 0
 	}
 }

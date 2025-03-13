@@ -4,6 +4,20 @@ export type Resolved<T> = {
 	[K in keyof T]: T[K] extends Promise<infer R> ? R : T[K]
 }
 
+/**
+ * awaitObj takes an object with values that may be promises and returns an promised object with the same keys
+ * where the values are the resolved promises.
+ * ```typescript
+ * const obj = {
+ * 	a: Promise.resolve(1)
+ * 	b: 2
+ * }
+ * const resolved = await awaitObj(obj) // Promise<{a: number, b: number}>
+ * // resolved = { a: 1, b: 2 }
+ * ``` 
+ * @param obj 
+ * @returns 
+ */
 export async function awaitObj<T extends Record<string, any>>(
 	obj: T
 ): Promise<Resolved<T>> {

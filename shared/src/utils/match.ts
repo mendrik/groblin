@@ -93,6 +93,27 @@ export const isPrimitive = (
 ): value is Exclude<any, object | Array<any>> =>
 	!['object', 'function'].includes(typeof value)
 
+/**
+ * Match takes a list of cases and returns a function that will match the input values against the cases.
+ * For example like so
+ * ```typescript
+ * match<[Arg1, Arg2], string>( // you must hint the input and return types
+ *   caseOf([isArray, _], (arr, arg2) => 'Array'),
+ *   caseOf([isObj, _], (obj, arg2) => 'Object'),
+ *   caseOf([_, _], (arg1, arg2) => 'Default')
+ * )(arg1, arg2)
+ *  ```
+ * Each case must be wrapped in a caseOf function, which takes an array of predicates (matching the arity of the 
+ * input parameters) and a handler function.
+ * The argument types of the handler function will be narrowed down if the predicates are type guards or 
+ * partial objects.
+ * * Predicates can be also primitive values, in which case the camparison will be done with strict equality.
+ * * If the predicate is an object, the input object must contain all the properties of the predicate object.
+ * * If the object properties are predicates, the input object properties must match the predicates.
+ * * Tuples are matched element-wise.
+ * If no match is found, an error is thrown.
+ * @param cases a list of cases to match against
+ */
 export function match<Args extends readonly unknown[], R>(
 	...cases: MatchCase<readonly Matcher<Args[number]>[], Args, R>[]
 ) {
@@ -107,6 +128,6 @@ export function match<Args extends readonly unknown[], R>(
 					: handler
 			}
 		}
-		throw new Error('No match found')
+		throw new Error(`No match found for ${JSON.stringify(values, null, 2)}`)
 	}
 }

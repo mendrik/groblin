@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/dialog'
 import { stringField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
-import { forgotPassword } from '@/state/user'
 import { EditorType } from '@shared/enums'
 import { pipeTap } from '@shared/utils/pipe-tap'
 import type { Fn } from '@tp/functions.ts'
@@ -31,10 +30,8 @@ const success = () =>
 		closeButton: true
 	})
 
-const forgotPasswordCommand: Fn<ForgotPassword, void> = pipeTap(
-	forgotPassword,
-	success,
-	() => navigate('/')
+const forgotPasswordCommand: Fn<ForgotPassword, void> = pipeTap(success, () =>
+	navigate('/')
 )
 
 export const ForgotPasswordDialog = () => {

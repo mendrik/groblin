@@ -58,6 +58,13 @@ type INF<G> = {
 			: never
 }
 
+/**
+ * Takes a list of predicates and returns a function that takes a list of values and returns a list of lists of values
+ * where each list of values is the result of filtering the input list by the corresponding predicate.
+ * This function does not partition the input list: elements can be in multiple output lists.
+ * @param preds 
+ * @returns 
+ */
 export const fork =
 	<T, G extends Array<GP<any, any>>>(...preds: G) =>
 	<T2 extends T>(v: T2[]): [...INF<G>] =>
@@ -66,16 +73,3 @@ export const fork =
 export const removeAt = (idx: number): (<T>(list: T[]) => T[]) =>
 	pipe(splitAt(idx) as AnyFn, apply(useWith(concat, [identity, tail]) as AnyFn))
 
-type Fn<TArgs extends any[], TResult> = (...args: TArgs) => TResult
-
-export const prependArg =
-	<TFirst, TArgs extends any[], TResult>(
-		arg: TFirst,
-		fn: Fn<TArgs, TResult>
-	): Fn<[TFirst, ...TArgs], TResult> =>
-	(_arg: TFirst, ...args: TArgs): TResult => {
-		return fn.apply([arg, ...args]) // Call fn with the rest of the arguments
-	}
-
-export const isNil = (x: unknown): x is undefined => x === undefined
-export const isNotNil = <T>(x: unknown): x is T => x !== undefined

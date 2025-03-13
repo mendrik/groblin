@@ -72,10 +72,9 @@ export class ApiKeyResolver {
 
 	@Query(returns => [ApiKey])
 	async getApiKeys(@Ctx() ctx: Context): Promise<ApiKey[]> {
-		const { user } = ctx
 		return this.db
 			.selectFrom('api_key')
-			.where('project_id', '=', user.lastProjectId)
+			.where('project_id', '=', ctx.project_id)
 			.select([
 				'name',
 				'key',
@@ -93,14 +92,14 @@ export class ApiKeyResolver {
 		@Ctx() ctx: Context,
 		@Arg('data', () => CreateApiKey) data: CreateApiKey
 	): Promise<ApiKey> {
-		const { user } = ctx
+		const { project_id } = ctx
 		const key = randomBytes(32).toString('hex')
 		const result = await this.db
 			.insertInto('api_key')
 			.values({
 				...data,
 				key,
-				project_id: user.lastProjectId,
+				project_id,
 				is_active: true,
 				created_at: new Date()
 			})
@@ -125,7 +124,7 @@ export class ApiKeyResolver {
 		const result = await this.db
 			.deleteFrom('api_key')
 			.where('key', '=', key)
-			.where('project_id', '=', ctx.user.lastProjectId)
+			.where('project_id', '=', ctx.project_id)
 			.executeTakeFirstOrThrow()
 		this.pubSub.publish(Topic.ApiKeysUpdated)
 		return result.numDeletedRows > 0
@@ -139,7 +138,7 @@ export class ApiKeyResolver {
 		const result = await this.db
 			.updateTable('api_key')
 			.where('key', '=', key)
-			.where('project_id', '=', ctx.user.lastProjectId)
+			.where('project_id', '=', ctx.project_id)
 			.set('is_active', sql`NOT is_active`)
 			.executeTakeFirstOrThrow()
 		this.pubSub.publish(Topic.ApiKeysUpdated)

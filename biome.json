@@ -33,7 +33,8 @@
 			},
 			"suspicious": {
 				"noExplicitAny": "off",
-				"noAssignInExpressions": "off"
+				"noAssignInExpressions": "off",
+				"noPrototypeBuiltins": "off"
 			},
 			"correctness": {
 				"noUnusedImports": "error",
@@ -45,6 +46,7 @@
 			"style": {
 				"noUselessElse": "off",
 				"noUnusedTemplateLiteral": "off",
+				"noNonNullAssertion": "off",
 				"useImportType": {
 					"fix": "safe",
 					"level": "error"

@@ -1,5 +1,5 @@
 import type { ServerOptions } from 'graphql-ws'
-import type { LoggedInUser } from 'src/resolvers/auth-resolver.ts'
+import type { User } from 'src/database/schema.ts'
 
 export const onError: ServerOptions['onError'] = (
 	ctx,
@@ -8,6 +8,6 @@ export const onError: ServerOptions['onError'] = (
 	errors
 ) => {
 	const { extra } = ctx
-	const user = extra as LoggedInUser
+	const user = extra as User
 	console.error(`${user?.email}: ${message}`, ...errors)
 }

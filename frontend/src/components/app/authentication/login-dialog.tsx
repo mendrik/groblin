@@ -9,8 +9,13 @@ import {
 import {} from '@/components/ui/dialog'
 import { stringField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
-import { login } from '@/state/user'
+import { dataOrError, signIn } from '@/lib/auth-client'
+import { setSignal } from '@/lib/signals'
+import { loadProject } from '@/state/project'
+import { $user } from '@/state/user'
 import { EditorType } from '@shared/enums'
+import { pipeAsync } from '@shared/utils/pipe-async'
+import { prop } from 'ramda'
 import { toast } from 'sonner'
 import { Link } from 'wouter'
 import { type TypeOf, strictObject } from 'zod'
@@ -28,8 +33,14 @@ const failed = (e: Error) =>
 
 type LoginForm = TypeOf<typeof loginSchema>
 
-const loginCommand = ({ ...credentials }: LoginForm) =>
-	login(credentials).then(() => toast.success('Successfully logged in'))
+const loginCommand: (credentials: LoginForm) => Promise<any> = pipeAsync(
+	signIn.email,
+	dataOrError,
+	prop('user'),
+	user => loadProject().then(() => user),
+	setSignal($user),
+	_ => toast.success('Successfully logged in')
+)
 
 export const LoginDialog = () => {
 	return (
