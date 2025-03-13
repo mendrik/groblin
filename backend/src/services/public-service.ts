@@ -121,8 +121,8 @@ const listArgs = (
 		limit: { type: GraphQLInt },
 		direction: { type: directionType },
 		order: { type: orderType(node) },
-		and: { type: new GraphQLList(filter) },
-		or: { type: new GraphQLList(filter) }
+		allMatch: { type: new GraphQLList(filter) },
+		anyMatch: { type: new GraphQLList(filter) }
 	}
 }
 

@@ -12,8 +12,8 @@ import {
 } from 'kysely'
 import {} from 'node_modules/kysely/dist/esm/parser/order-by-parser.js'
 import { Maybe } from 'purify-ts'
-import { assoc, isNil, isNotNil, prop, propOr } from 'ramda'
-import { isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
+import { assoc, head, isNil, isNotNil, prop, propOr, split } from 'ramda'
+import { compact, isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
 import type { DB, JsonValue } from 'src/database/schema.ts'
 import { NodeResolver } from 'src/resolvers/node-resolver.ts'
 import {
@@ -37,8 +37,8 @@ export type Filter = {
 }
 
 export type ListArgs = {
-	and: Filter[]
-	or: Filter[]
+	allMatch: Filter[]
+	anyMatch: Filter[]
 	limit?: number
 	offset?: number
 	order?: {
@@ -47,6 +47,8 @@ export type ListArgs = {
 	}
 	direction?: 'asc' | 'desc'
 }
+
+const keyNames = (f: Filter) => Object.keys(f).map(split('_')).map(head)
 
 const clause = (
 	allChildNodes: TreeNode[],
@@ -58,10 +60,10 @@ const clause = (
 		const node = allChildNodes.find(({ name }) => name === nodeName)
 		assertExists(node, `Node ${nodeName} not found`)
 		const jsonField = dbType(node)
-		console.log(nodeName, operator, value)
+		console.log(`${nodeName}:`, jsonField, dbOperator(operator, value), value)
 
 		return eb(
-			sql`child.value->> ${sql.val(jsonField)}`,
+			sql`child.value->>${sql.val(jsonField)}`,
 			sql.raw(dbOperator(operator, value)),
 			sql.val(value)
 		) as OperandExpression<SqlBool>
@@ -115,11 +117,21 @@ export class SchemaContext {
 	async listItems(
 		nodeId: number,
 		path: ListPath,
-		{ direction, limit, offset, order, and, or }: ListArgs
+		{ direction, limit, offset, order, allMatch = [], anyMatch = [] }: ListArgs
 	): Promise<Value[]> {
-		const shouldJoin = Boolean(order) || Boolean(and) || Boolean(or)
+		const shouldJoin =
+			Boolean(order) || Boolean(allMatch.length) || Boolean(anyMatch.length)
 		const node = await this.nodeResolver.getTreeNode(this.projectId, nodeId)
 		const allChildNodes = [...allNodes(node)].filter(isValueNode)
+		const nodeNames = compact([
+			order?.json_field,
+			...allMatch?.flatMap(keyNames),
+			...anyMatch?.flatMap(keyNames)
+		])
+
+		const refNodes = allChildNodes.filter(({ name }) =>
+			nodeNames.includes(name)
+		)
 
 		return this.db
 			.selectFrom('values')
@@ -127,7 +139,7 @@ export class SchemaContext {
 			.$if(shouldJoin, qb =>
 				qb.leftJoin('values as child', join =>
 					join
-						.on('child.node_id', 'in', allChildNodes.map(prop('id')))
+						.on('child.node_id', 'in', refNodes.map(prop('id')))
 						.on(
 							'child.list_path',
 							'@>',
@@ -144,14 +156,18 @@ export class SchemaContext {
 					])
 				)
 			)
-			.$if(isNotNilOrEmpty(and), qb =>
+			.$if(isNotNilOrEmpty(allMatch), qb =>
 				qb.where(eb =>
-					eb.and(and.map(filter => eb.and(clause(allChildNodes, filter, eb))))
+					eb.and(
+						allMatch.map(filter => eb.and(clause(allChildNodes, filter, eb)))
+					)
 				)
 			)
-			.$if(isNotNilOrEmpty(or), qb =>
+			.$if(isNotNilOrEmpty(anyMatch), qb =>
 				qb.where(eb =>
-					eb.or(or.map(filter => eb.and(clause(allChildNodes, filter, eb))))
+					eb.or(
+						anyMatch.map(filter => eb.and(clause(allChildNodes, filter, eb)))
+					)
 				)
 			)
 			.$if(isNotNilOrEmpty(path), qb =>

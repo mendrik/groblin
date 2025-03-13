@@ -38,7 +38,8 @@
 			},
 			"correctness": {
 				"noUnusedImports": "error",
-				"noChildrenProp": "off"
+				"noChildrenProp": "off",
+				"noUnsafeOptionalChaining":"off"	
 			},
 			"performance": {
 				"noAccumulatingSpread": "off"
