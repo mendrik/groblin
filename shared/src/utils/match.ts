@@ -103,11 +103,14 @@ export const isPrimitive = (
  *   caseOf([_, _], (arg1, arg2) => 'Default')
  * )(arg1, arg2)
  *  ```
- * Each case must be wrapped in a caseOf function, which takes an array of predicates and a handler function.
- * The arguments of the handler function will be narrowed down if the predicates are guards or partial objects.
- * Predicates can be also non-function values, which will be compared then directly.
- * Objects are matched partially and can also contains functions in place of properties.
- * Tuples are matched element-wise.
+ * Each case must be wrapped in a caseOf function, which takes an array of predicates (matching the arity of the 
+ * input parameters) and a handler function.
+ * The argument types of the handler function will be narrowed down if the predicates are type guards or 
+ * partial objects.
+ * * Predicates can be also primitive values, in which case the camparison will be done with strict equality.
+ * * If the predicate is an object, the input object must contain all the properties of the predicate object.
+ * * If the object properties are predicates, the input object properties must match the predicates.
+ * * Tuples are matched element-wise.
  * If no match is found, an error is thrown.
  * @param cases a list of cases to match against
  */
