@@ -5,7 +5,9 @@ import type {
 	ServerResponse
 } from 'node:http'
 import { createServer } from 'node:http'
+import { renderGraphiQL } from '@graphql-yoga/render-graphiql'
 import { assertExists } from '@shared/asserts.ts'
+import { caseOf, match } from '@shared/utils/match.ts'
 import { cyan, lightGreen, yellow } from 'ansicolor'
 import { toNodeHandler } from 'better-auth/node'
 import { type GraphQLSchema, printSchema } from 'graphql'
@@ -13,11 +15,6 @@ import { createYoga } from 'graphql-yoga'
 import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
 import { T as _, equals, startsWith } from 'ramda'
-import { renderGraphiQL } from '@graphql-yoga/render-graphiql'
-// This is the fastify instance you have created
-
-import { createReadStream } from 'node:fs'
-import { caseOf, match } from '@shared/utils/match.ts'
 import { Authenticator } from 'src/auth.ts'
 import type { DB } from 'src/database/schema.ts'
 import type { ProjectId } from 'src/types.ts'
@@ -75,13 +72,6 @@ export class PublicServer {
 				caseOf([{ url: equals('/schema') }, _], (i, o) =>
 					this.generateSchema(i, o)
 				),
-				caseOf([{ url: equals('/graphiql') }, _], (i, o) => {
-					o.writeHead(200, { 'Content-Type': 'application/javascript' })
-					const readStream = createReadStream(
-						'node_modules/graphiql/graphiql.min.js'
-					)
-					readStream.pipe(o)
-				}),
 				caseOf([_, _], yoga)
 			)
 		)
