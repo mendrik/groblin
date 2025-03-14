@@ -7,6 +7,7 @@ import {
 	type ExpressionBuilder,
 	Kysely,
 	type OperandExpression,
+	type SelectQueryBuilder,
 	type SqlBool,
 	sql
 } from 'kysely'
@@ -69,6 +70,22 @@ const clause = (
 		) as OperandExpression<SqlBool>
 	})
 
+	const specificOrder = (path: ListPath, { order, direction }: ListArgs) => <T extends SelectQueryBuilder<DB, "values", any>>(qb: T) =>
+		qb
+			.leftJoin('values as v_order', join =>
+				join
+					.on('v_order.node_id', '=', order!.node_id)
+					.on(
+						'v_order.list_path',
+						'@>',
+						sql`array_append(${sql.val(path)}, "values"."id")`
+					)
+			)
+			.orderBy(
+				sql`v_order.value->>${sql.val(order!.json_field)}`,
+				direction ?? 'asc'
+			)
+
 @injectable()
 export class SchemaContext {
 	@inject(Kysely<DB>)
@@ -117,30 +134,16 @@ export class SchemaContext {
 	async listItems(
 		nodeId: number,
 		path: ListPath,
-		{ direction, limit, offset, order, allMatch = [], anyMatch = [] }: ListArgs
+		listArgs: ListArgs
 	): Promise<Value[]> {
+		const { direction, limit, offset, order, allMatch = [], anyMatch = [] } = listArgs
 		const node = await this.nodeResolver.getTreeNode(this.projectId, nodeId)
 		const allChildNodes = [...allNodes(node)].filter(isValueNode)
 
 		return this.db
 			.selectFrom('values')
 			.selectAll('values')
-			.$if(isNotNil(order), qb =>
-				qb
-					.leftJoin('values as v_order', join =>
-						join
-							.on('v_order.node_id', '=', order!.node_id)
-							.on(
-								'v_order.list_path',
-								'@>',
-								sql`array_append(${sql.val(path)}, "values"."id")`
-							)
-					)
-					.orderBy(
-						sql`v_order.value->>${sql.val(order!.json_field)}`,
-						direction ?? 'asc'
-					)
-			)
+			.$if(isNotNil(order), specificOrder(path, listArgs))
 			.where('values.node_id', '=', nodeId)
 			.$if(isNilOrEmpty(path), qb =>
 				qb.where(eb =>
