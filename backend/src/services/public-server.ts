@@ -13,9 +13,10 @@ import { createYoga } from 'graphql-yoga'
 import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
 import { T as _, equals, startsWith } from 'ramda'
-
+import { renderGraphiQL } from '@graphql-yoga/render-graphiql'
 // This is the fastify instance you have created
 
+import { createReadStream } from 'node:fs'
 import { caseOf, match } from '@shared/utils/match.ts'
 import { Authenticator } from 'src/auth.ts'
 import type { DB } from 'src/database/schema.ts'
@@ -59,7 +60,8 @@ export class PublicServer {
 				const apiKey = request.headers.get('x-api-key')
 				assertExists(apiKey, 'API key is required')
 				return this.schema(apiKey)
-			}
+			},
+			renderGraphiQL
 		})
 
 		this.server = createServer(
@@ -73,6 +75,13 @@ export class PublicServer {
 				caseOf([{ url: equals('/schema') }, _], (i, o) =>
 					this.generateSchema(i, o)
 				),
+				caseOf([{ url: equals('/graphiql') }, _], (i, o) => {
+					o.writeHead(200, { 'Content-Type': 'application/javascript' })
+					const readStream = createReadStream(
+						'node_modules/graphiql/graphiql.min.js'
+					)
+					readStream.pipe(o)
+				}),
 				caseOf([_, _], yoga)
 			)
 		)
