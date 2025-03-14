@@ -13,7 +13,7 @@ import {
 import {} from 'node_modules/kysely/dist/esm/parser/order-by-parser.js'
 import { Maybe } from 'purify-ts'
 import { assoc, head, isNil, isNotNil, prop, propOr, split } from 'ramda'
-import { compact, isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
+import { isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
 import type { DB, JsonValue } from 'src/database/schema.ts'
 import { NodeResolver } from 'src/resolvers/node-resolver.ts'
 import {
@@ -119,33 +119,27 @@ export class SchemaContext {
 		path: ListPath,
 		{ direction, limit, offset, order, allMatch = [], anyMatch = [] }: ListArgs
 	): Promise<Value[]> {
-		const shouldJoin =
-			Boolean(order) || Boolean(allMatch.length) || Boolean(anyMatch.length)
 		const node = await this.nodeResolver.getTreeNode(this.projectId, nodeId)
 		const allChildNodes = [...allNodes(node)].filter(isValueNode)
-		const nodeNames = compact([
-			order?.json_field,
-			...allMatch?.flatMap(keyNames),
-			...anyMatch?.flatMap(keyNames)
-		])
-
-		const refNodes = allChildNodes.filter(({ name }) =>
-			nodeNames.includes(name)
-		)
 
 		return this.db
 			.selectFrom('values')
 			.selectAll('values')
-			.$if(shouldJoin, qb =>
-				qb.leftJoin('values as child', join =>
-					join
-						.on('child.node_id', 'in', refNodes.map(prop('id')))
-						.on(
-							'child.list_path',
-							'@>',
-							sql`array_append(${sql.val(path)}, "values"."id")`
-						)
-				)
+			.$if(isNotNil(order), qb =>
+				qb
+					.leftJoin('values as v_order', join =>
+						join
+							.on('v_order.node_id', '=', order!.node_id)
+							.on(
+								'v_order.list_path',
+								'@>',
+								sql`array_append(${sql.val(path)}, "values"."id")`
+							)
+					)
+					.orderBy(
+						sql`v_order.value->>${sql.val(order!.json_field)}`,
+						direction ?? 'asc'
+					)
 			)
 			.where('values.node_id', '=', nodeId)
 			.$if(isNilOrEmpty(path), qb =>
@@ -175,12 +169,6 @@ export class SchemaContext {
 			)
 			.$if(isNotNil(offset), qb => qb.offset(offset ?? 0))
 			.$if(isNotNil(limit), qb => qb.limit(limit ?? Number.MAX_SAFE_INTEGER))
-			.$if(isNotNil(order), qb =>
-				qb.orderBy(
-					sql`child.value->>${sql.val(order!.json_field)}`,
-					direction ?? 'asc'
-				)
-			)
 			.$if(isNil(order), qb => qb.orderBy('values.order', direction ?? 'asc'))
 			.execute()
 	}
