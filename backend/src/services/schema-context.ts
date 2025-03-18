@@ -13,7 +13,7 @@ import {
 } from 'kysely'
 import {} from 'node_modules/kysely/dist/esm/parser/order-by-parser.js'
 import { Maybe } from 'purify-ts'
-import { assoc, head, isNil, isNotNil, prop, propOr, split } from 'ramda'
+import { assoc, isNil, isNotEmpty, isNotNil, prop, propOr } from 'ramda'
 import { isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
 import type { DB, JsonValue } from 'src/database/schema.ts'
 import { NodeResolver } from 'src/resolvers/node-resolver.ts'
@@ -48,8 +48,16 @@ export type ListArgs = {
 	}
 	direction?: 'asc' | 'desc'
 }
+type Key = string
+type Val = any
+type Operand = 'eq' | 'ne' | 'lt' | 'gt' | 'lte' | 'gte'
+type Operation = [Key, Operand, Val]
 
-const keyNames = (f: Filter) => Object.keys(f).map(split('_')).map(head)
+const splitFilter = (f: Filter) =>
+	Object.entries(f).map(
+		([k, v]) =>
+			`${k}${k.includes('_') ? '' : '_eq'}`.split('_').concat(v) as Operation
+	)
 
 const clause = (
 	allChildNodes: TreeNode[],
@@ -70,15 +78,41 @@ const clause = (
 		) as OperandExpression<SqlBool>
 	})
 
-	const specificOrder = (path: ListPath, { order, direction }: ListArgs) => <T extends SelectQueryBuilder<DB, "values", any>>(qb: T) =>
+const allMatchClause =
+	(path: ListPath, allChildNodes: TreeNode[], { allMatch }: ListArgs) =>
+	<T extends SelectQueryBuilder<DB, 'values', any>>(qb: T) => {
+		allMatch.flatMap(splitFilter).map(([key, operand, value]) => {
+			console.log(`all: ${key} ${operand} ${value}`)
+			const node = allChildNodes.find(n => n.name === key)
+			assertExists(node, `Node ${key} not found`)
+
+			qb.leftJoin(`values as all_${key}_${operand}`, join =>
+				join
+					.on(`all_${key}_${operand}.node_id`, '=', node.id)
+					.on(
+						sql`all_${key}.list_path @> array_append(${sql.val(path)}, "values"."id")`
+					)
+			)
+			qb.where(eb =>
+				eb(
+					`"all_${key}_${operand}"."value"->${dbType(node)}` as any,
+					dbOperator(operand, value) as any,
+					sql.val(value)
+				)
+			)
+		})
+		return qb
+	}
+
+const specificOrder =
+	(path: ListPath, { order, direction }: ListArgs) =>
+	<T extends SelectQueryBuilder<DB, 'values', any>>(qb: T) =>
 		qb
 			.leftJoin('values as v_order', join =>
 				join
 					.on('v_order.node_id', '=', order!.node_id)
 					.on(
-						'v_order.list_path',
-						'@>',
-						sql`array_append(${sql.val(path)}, "values"."id")`
+						sql`v_order.list_path @> array_append(${sql.val(path)}, "values"."id")`
 					)
 			)
 			.orderBy(
@@ -136,7 +170,14 @@ export class SchemaContext {
 		path: ListPath,
 		listArgs: ListArgs
 	): Promise<Value[]> {
-		const { direction, limit, offset, order, allMatch = [], anyMatch = [] } = listArgs
+		const {
+			direction,
+			limit,
+			offset,
+			order,
+			allMatch = [],
+			anyMatch = []
+		} = listArgs
 		const node = await this.nodeResolver.getTreeNode(this.projectId, nodeId)
 		const allChildNodes = [...allNodes(node)].filter(isValueNode)
 
@@ -144,6 +185,7 @@ export class SchemaContext {
 			.selectFrom('values')
 			.selectAll('values')
 			.$if(isNotNil(order), specificOrder(path, listArgs))
+			.$if(isNotEmpty(allMatch), allMatchClause(path, allChildNodes, listArgs))
 			.where('values.node_id', '=', nodeId)
 			.$if(isNilOrEmpty(path), qb =>
 				qb.where(eb =>
@@ -151,20 +193,6 @@ export class SchemaContext {
 						eb('values.list_path', 'is', null),
 						eb('values.list_path', '=', sql.val([]))
 					])
-				)
-			)
-			.$if(isNotNilOrEmpty(allMatch), qb =>
-				qb.where(eb =>
-					eb.and(
-						allMatch.map(filter => eb.and(clause(allChildNodes, filter, eb)))
-					)
-				)
-			)
-			.$if(isNotNilOrEmpty(anyMatch), qb =>
-				qb.where(eb =>
-					eb.or(
-						anyMatch.map(filter => eb.and(clause(allChildNodes, filter, eb)))
-					)
 				)
 			)
 			.$if(isNotNilOrEmpty(path), qb =>
