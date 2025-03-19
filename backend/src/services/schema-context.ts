@@ -1,20 +1,27 @@
 import { assertExists } from '@shared/asserts.ts'
 import { listToTree } from '@shared/utils/list-to-tree.ts'
 import { mapBy } from '@shared/utils/map-by.ts'
+import type { AnyFn } from '@tp/functions.ts'
 import { GraphQLEnumType, GraphQLObjectType, GraphQLString } from 'graphql'
 import { inject, injectable } from 'inversify'
-import {
-	type ExpressionBuilder,
-	Kysely,
-	type OperandExpression,
-	type SelectQueryBuilder,
-	type SqlBool,
-	sql
-} from 'kysely'
+import { Kysely, type SelectQueryBuilder, sql } from 'kysely'
 import {} from 'node_modules/kysely/dist/esm/parser/order-by-parser.js'
 import { Maybe } from 'purify-ts'
-import { assoc, isNil, isNotEmpty, isNotNil, prop, propOr } from 'ramda'
-import { isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
+import {
+	assoc,
+	chain,
+	head,
+	isNil,
+	isNotNil,
+	keys,
+	map,
+	pipe,
+	prop,
+	propOr,
+	split,
+	uniq
+} from 'ramda'
+import { compact, isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
 import type { DB, JsonValue } from 'src/database/schema.ts'
 import { NodeResolver } from 'src/resolvers/node-resolver.ts'
 import {
@@ -30,7 +37,7 @@ import {
 } from 'src/types.ts'
 import { isJsonObject } from 'src/utils/json.ts'
 import { dbOperator, dbType } from 'src/utils/mappings.ts'
-import { allNodes, isValueNode } from 'src/utils/nodes.ts'
+import { allNodes } from 'src/utils/nodes.ts'
 import { ImageService, type MediaValue } from './image-service.ts'
 
 export type Filter = {
@@ -59,66 +66,35 @@ const splitFilter = (f: Filter) =>
 			`${k}${k.includes('_') ? '' : '_eq'}`.split('_').concat(v) as Operation
 	)
 
-const clause = (
-	allChildNodes: TreeNode[],
-	filter: Filter,
-	eb: ExpressionBuilder<DB, 'values'>
-): OperandExpression<SqlBool>[] =>
-	Object.entries(filter).map(([key, value]) => {
-		const [nodeName, operator = 'eq'] = key.split('_')
-		const node = allChildNodes.find(({ name }) => name === nodeName)
-		assertExists(node, `Node ${nodeName} not found`)
-		const jsonField = dbType(node)
-		console.log(`${nodeName}:`, jsonField, dbOperator(operator, value), value)
-
-		return eb(
-			sql`child.value->>${sql.val(jsonField)}`,
-			sql.raw(dbOperator(operator, value)),
-			sql.val(value)
-		) as OperandExpression<SqlBool>
-	})
-
 const allMatchClause =
 	(path: ListPath, allChildNodes: TreeNode[], { allMatch }: ListArgs) =>
-	<T extends SelectQueryBuilder<DB, 'values', any>>(qb: T) => {
-		allMatch.flatMap(splitFilter).map(([key, operand, value]) => {
+	<T extends SelectQueryBuilder<DB, 'values', any>>(qb: T) =>
+		allMatch.flatMap(splitFilter).forEach(([key, operand, value]) => {
 			console.log(`all: ${key} ${operand} ${value}`)
 			const node = allChildNodes.find(n => n.name === key)
 			assertExists(node, `Node ${key} not found`)
+			const alias = `all_${key}_${operand}`
 
-			qb.leftJoin(`values as all_${key}_${operand}`, join =>
-				join
-					.on(`all_${key}_${operand}.node_id`, '=', node.id)
-					.on(
-						sql`all_${key}.list_path @> array_append(${sql.val(path)}, "values"."id")`
-					)
-			)
-			qb.where(eb =>
-				eb(
-					`"all_${key}_${operand}"."value"->${dbType(node)}` as any,
-					dbOperator(operand, value) as any,
-					sql.val(value)
+			return qb
+				.leftJoin(`values as ${alias}`, join =>
+					join
+						.on(`${alias}.node_id`, '=', sql.val(node.id))
+						.on(
+							sql`${alias}.list_path @> array_append(${sql.val(path)}, "values"."id")`
+						)
 				)
-			)
-		})
-		return qb
-	}
-
-const specificOrder =
-	(path: ListPath, { order, direction }: ListArgs) =>
-	<T extends SelectQueryBuilder<DB, 'values', any>>(qb: T) =>
-		qb
-			.leftJoin('values as v_order', join =>
-				join
-					.on('v_order.node_id', '=', order!.node_id)
-					.on(
-						sql`v_order.list_path @> array_append(${sql.val(path)}, "values"."id")`
+				.where(eb =>
+					eb(
+						sql`${sql.ref(alias)}.value->${sql.val(dbType(node))}` as any,
+						sql.raw(dbOperator(operand, value)),
+						sql.val(value)
 					)
-			)
-			.orderBy(
-				sql`v_order.value->>${sql.val(order!.json_field)}`,
-				direction ?? 'asc'
-			)
+				)
+		})
+
+const extractKeys = chain<Filter, string>(
+	pipe(keys, map(pipe(split('_'), head))) as AnyFn
+)
 
 @injectable()
 export class SchemaContext {
@@ -179,13 +155,67 @@ export class SchemaContext {
 			anyMatch = []
 		} = listArgs
 		const node = await this.nodeResolver.getTreeNode(this.projectId, nodeId)
-		const allChildNodes = [...allNodes(node)].filter(isValueNode)
+		const children = [...allNodes(node)]
+		const orderNodeKey = children.find(n => n.id === order?.node_id)?.name
+		const allKeys = pipe(
+			compact,
+			uniq
+		)([...extractKeys(allMatch), ...extractKeys(anyMatch), orderNodeKey])
+		const filterNodes = [...allNodes(node)].filter(node =>
+			allKeys.includes(node.name)
+		)
 
-		return this.db
+		const res = await this.db
 			.selectFrom('values')
-			.selectAll('values')
-			.$if(isNotNil(order), specificOrder(path, listArgs))
-			.$if(isNotEmpty(allMatch), allMatchClause(path, allChildNodes, listArgs))
+			.leftJoin('values as children', join =>
+				join
+					.on('children.node_id', 'in', filterNodes.map(prop('id')))
+					.on(
+						sql`children.list_path @> array_append(${sql.val(path)}, "values"."id")`
+					)
+			)
+			.$if(isNotNil(order), qb =>
+				qb
+					.leftJoin('values as order_v', join =>
+						join
+							.on('order_v.node_id', '=', sql.val(order?.node_id))
+							.on(
+								'order_v.list_path',
+								'@>',
+								sql`array_append(${sql.val(path)}, "values"."id")`
+							)
+					)
+					.orderBy(
+						sql`order_v.value->>${sql.val(order!.json_field)}`,
+						direction ?? 'asc'
+					)
+					.groupBy('order_v.value')
+			)
+			.select(({ fn, ref }) => [
+				'values.id',
+				'values.list_path',
+				'values.node_id',
+				'values.order',
+				'values.updated_at',
+				'values.value',
+				fn
+					.coalesce(
+						fn
+							.jsonAgg(
+								sql`json_build_object(
+								'node_id', "children"."node_id",
+								'value', "children"."value"
+							)`
+							)
+							.filterWhere(
+								ref('children.node_id'),
+								'in',
+								filterNodes.map(prop('id'))
+							),
+						sql`'[]'`
+					)
+					.as('data')
+			])
 			.where('values.node_id', '=', nodeId)
 			.$if(isNilOrEmpty(path), qb =>
 				qb.where(eb =>
@@ -201,8 +231,27 @@ export class SchemaContext {
 			.$if(isNotNil(offset), qb => qb.offset(offset ?? 0))
 			.$if(isNotNil(limit), qb => qb.limit(limit ?? Number.MAX_SAFE_INTEGER))
 			.$if(isNil(order), qb => qb.orderBy('values.order', direction ?? 'asc'))
+			.groupBy([
+				'values.id',
+				'values.list_path',
+				'values.node_id',
+				'values.order',
+				'values.updated_at',
+				'values.value'
+			])
 			.execute()
+		console.dir(res)
+		return res
 	}
+
+	/*
+			.$if(isNotNil(order), qb =>
+				qb.orderBy(
+					sql.raw(`"data"->"value"->>${order?.json_field}`),
+					direction ?? 'asc'
+				)
+			)
+*/
 	getValue(node: TreeNode, path: ListPath): Promise<Value | undefined> {
 		return this.db
 			.selectFrom('values')
