@@ -21,7 +21,6 @@ import {
 	GraphQLString
 } from 'graphql'
 import { GraphQLDateTime } from 'graphql-scalars'
-import { BinaryOperatorExpression } from 'node_modules/kysely/dist/esm/parser/binary-operation-parser.js'
 import { T as _, isNil } from 'ramda'
 import type { JsonValue } from 'src/database/schema.ts'
 import type { SchemaContext } from 'src/services/schema-context.ts'
@@ -97,8 +96,8 @@ export const dbType = match<[TreeNode], string>(
 	caseOf([{ type: NodeType.media }], 'file')
 )
 
-export const dbOperator = match<[string, any], BinaryOperatorExpression>(
-	caseOf(['eq', _], '='),
+export const dbOperator = match<[string, any], string>(
+	caseOf(['eq', _], '=='),
 	caseOf(['neq', _], '!='),
 	caseOf(['rex', _], 'like'),
 	caseOf(['gt', _], '>'),

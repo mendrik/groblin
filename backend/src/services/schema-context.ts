@@ -3,7 +3,7 @@ import { mapBy } from '@shared/utils/map-by.ts'
 import type { AnyFn } from '@tp/functions.ts'
 import { GraphQLEnumType, GraphQLObjectType, GraphQLString } from 'graphql'
 import { inject, injectable } from 'inversify'
-import { Kysely, sql } from 'kysely'
+import { Kysely, type RawBuilder, sql } from 'kysely'
 import { Maybe } from 'purify-ts'
 import {
 	assoc,
@@ -68,6 +68,17 @@ const splitFilter = (f: Filter) =>
 const extractKeys = chain<Filter, string>(
 	pipe(keys, map(pipe(split('_'), head))) as AnyFn
 )
+
+const andClause = (filters: Filter[]): RawBuilder<unknown> =>
+	sql.join(
+		filters.map(filter =>
+			Object.entries(filter).map(([key, val]) => {
+				const [k, op = 'eq'] = key.split('_') as [Key, Operand]
+				return `(@.${k} ${dbOperator(op, val)} ${sql.val(val)})`
+			})
+		),
+		sql.raw(' && ')
+	)
 
 @injectable()
 export class SchemaContext {
@@ -202,20 +213,9 @@ export class SchemaContext {
 				qb.where('values.list_path', '=', sql.val(path))
 			)
 			.$if(isNotEmpty(allMatch), qb =>
-				qb.where(eb =>
-					eb.and(
-						allMatch.map(f =>
-							eb.or(
-								Object.entries(f).map(([key, val]) => {
-									const [k, op = 'eq'] = key.split('_')
-									return eb(
-										`data"->${k}` as any,
-										dbOperator(op, val),
-										sql.val(val)
-									)
-								})
-							)
-						)
+				qb.where(({ exists, fn }) =>
+					exists(
+						sql`jsonb_path_query_array("data", '$[*] ? (${andClause(allMatch)})')`
 					)
 				)
 			)
@@ -235,14 +235,6 @@ export class SchemaContext {
 		return res
 	}
 
-	/*
-			.$if(isNotNil(order), qb =>
-				qb.orderBy(
-					sql.raw(`"data"->"value"->>${order?.json_field}`),
-					direction ?? 'asc'
-				)
-			)
-*/
 	getValue(node: TreeNode, path: ListPath): Promise<Value | undefined> {
 		return this.db
 			.selectFrom('values')
