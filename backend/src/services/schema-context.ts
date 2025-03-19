@@ -1,17 +1,16 @@
-import { assertExists } from '@shared/asserts.ts'
 import { listToTree } from '@shared/utils/list-to-tree.ts'
 import { mapBy } from '@shared/utils/map-by.ts'
 import type { AnyFn } from '@tp/functions.ts'
 import { GraphQLEnumType, GraphQLObjectType, GraphQLString } from 'graphql'
 import { inject, injectable } from 'inversify'
-import { Kysely, type SelectQueryBuilder, sql } from 'kysely'
-import {} from 'node_modules/kysely/dist/esm/parser/order-by-parser.js'
+import { Kysely, sql } from 'kysely'
 import { Maybe } from 'purify-ts'
 import {
 	assoc,
 	chain,
 	head,
 	isNil,
+	isNotEmpty,
 	isNotNil,
 	keys,
 	map,
@@ -36,7 +35,7 @@ import {
 	type TreeNode
 } from 'src/types.ts'
 import { isJsonObject } from 'src/utils/json.ts'
-import { dbOperator, dbType } from 'src/utils/mappings.ts'
+import { dbOperator } from 'src/utils/mappings.ts'
 import { allNodes } from 'src/utils/nodes.ts'
 import { ImageService, type MediaValue } from './image-service.ts'
 
@@ -65,32 +64,6 @@ const splitFilter = (f: Filter) =>
 		([k, v]) =>
 			`${k}${k.includes('_') ? '' : '_eq'}`.split('_').concat(v) as Operation
 	)
-
-const allMatchClause =
-	(path: ListPath, allChildNodes: TreeNode[], { allMatch }: ListArgs) =>
-	<T extends SelectQueryBuilder<DB, 'values', any>>(qb: T) =>
-		allMatch.flatMap(splitFilter).forEach(([key, operand, value]) => {
-			console.log(`all: ${key} ${operand} ${value}`)
-			const node = allChildNodes.find(n => n.name === key)
-			assertExists(node, `Node ${key} not found`)
-			const alias = `all_${key}_${operand}`
-
-			return qb
-				.leftJoin(`values as ${alias}`, join =>
-					join
-						.on(`${alias}.node_id`, '=', sql.val(node.id))
-						.on(
-							sql`${alias}.list_path @> array_append(${sql.val(path)}, "values"."id")`
-						)
-				)
-				.where(eb =>
-					eb(
-						sql`${sql.ref(alias)}.value->${sql.val(dbType(node))}` as any,
-						sql.raw(dbOperator(operand, value)),
-						sql.val(value)
-					)
-				)
-		})
 
 const extractKeys = chain<Filter, string>(
 	pipe(keys, map(pipe(split('_'), head))) as AnyFn
@@ -228,6 +201,22 @@ export class SchemaContext {
 			.$if(isNotNilOrEmpty(path), qb =>
 				qb.where('values.list_path', '=', sql.val(path))
 			)
+			.$if(isNotEmpty(allMatch), qb =>
+				qb.where(eb =>
+					eb.and(
+						Object.entries(allMatch).map(([key, val]) => {
+							const [k, op = 'eq'] = key.split('_')
+							return eb.or([
+								eb(
+									`"coalsece(data::jsonb"->${k},` as any,
+									dbOperator(op, val),
+									sql.val(val)
+								)
+							])
+						})
+					)
+				)
+			)
 			.$if(isNotNil(offset), qb => qb.offset(offset ?? 0))
 			.$if(isNotNil(limit), qb => qb.limit(limit ?? Number.MAX_SAFE_INTEGER))
 			.$if(isNil(order), qb => qb.orderBy('values.order', direction ?? 'asc'))
@@ -240,7 +229,7 @@ export class SchemaContext {
 				'values.value'
 			])
 			.execute()
-		console.dir(res)
+		console.dir(res, { depth: null })
 		return res
 	}
 
