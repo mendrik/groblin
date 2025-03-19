@@ -237,8 +237,6 @@ export class SchemaContext {
 				'values.value'
 			])
 			.execute()
-
-		console.dir
 		return res
 	}
 
