@@ -204,16 +204,18 @@ export class SchemaContext {
 			.$if(isNotEmpty(allMatch), qb =>
 				qb.where(eb =>
 					eb.and(
-						Object.entries(allMatch).map(([key, val]) => {
-							const [k, op = 'eq'] = key.split('_')
-							return eb.or([
-								eb(
-									`"coalsece(data::jsonb"->${k},` as any,
-									dbOperator(op, val),
-									sql.val(val)
-								)
-							])
-						})
+						allMatch.map(f =>
+							eb.or(
+								Object.entries(f).map(([key, val]) => {
+									const [k, op = 'eq'] = key.split('_')
+									return eb(
+										`data"->${k}` as any,
+										dbOperator(op, val),
+										sql.val(val)
+									)
+								})
+							)
+						)
 					)
 				)
 			)
