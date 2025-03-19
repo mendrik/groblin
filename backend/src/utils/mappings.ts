@@ -96,15 +96,15 @@ export const dbType = match<[TreeNode], string>(
 	caseOf([{ type: NodeType.media }], 'file')
 )
 
-export const dbOperator = match<[string, any], string>(
-	caseOf(['eq', _], '=='),
-	caseOf(['neq', _], '!='),
-	caseOf(['rex', _], 'like'),
-	caseOf(['gt', _], '>'),
-	caseOf(['lt', _], '<'),
-	caseOf(['gte', _], '>='),
-	caseOf(['lte', _], '<='),
-	caseOf(['in', _], 'in')
+export const dbOperator = match<[string, TreeNode, any], string>(
+	caseOf(['eq', _, _], ' == '),
+	caseOf(['neq', _, _], ' != '),
+	caseOf(['rex', _, _], ' like '),
+	caseOf(['gt', _, _], ' > '),
+	caseOf(['lt', _, _], ' < '),
+	caseOf(['gte', _, _], ' >= '),
+	caseOf(['lte', _, _], ' <= '),
+	caseOf(['in', _, _], ' in ')
 )
 
 type Operator = 'eq' | 'neq' | 'gt' | 'lt' | 'gte' | 'lte' | 'rex' | 'in'

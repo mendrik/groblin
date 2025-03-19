@@ -1,9 +1,10 @@
+import { assertExists } from '@shared/asserts.ts'
 import { listToTree } from '@shared/utils/list-to-tree.ts'
 import { mapBy } from '@shared/utils/map-by.ts'
 import type { AnyFn } from '@tp/functions.ts'
 import { GraphQLEnumType, GraphQLObjectType, GraphQLString } from 'graphql'
 import { inject, injectable } from 'inversify'
-import { Kysely, type RawBuilder, sql } from 'kysely'
+import { Kysely, type Nullable, type SelectQueryBuilder, sql } from 'kysely'
 import { Maybe } from 'purify-ts'
 import {
 	assoc,
@@ -21,7 +22,7 @@ import {
 	uniq
 } from 'ramda'
 import { compact, isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
-import type { DB, JsonValue } from 'src/database/schema.ts'
+import type { DB, JsonValue, Values } from 'src/database/schema.ts'
 import { NodeResolver } from 'src/resolvers/node-resolver.ts'
 import {
 	type NodeSettings,
@@ -35,7 +36,7 @@ import {
 	type TreeNode
 } from 'src/types.ts'
 import { isJsonObject } from 'src/utils/json.ts'
-import { dbOperator } from 'src/utils/mappings.ts'
+import { dbOperator, dbType } from 'src/utils/mappings.ts'
 import { allNodes } from 'src/utils/nodes.ts'
 import { ImageService, type MediaValue } from './image-service.ts'
 
@@ -57,28 +58,51 @@ export type ListArgs = {
 type Key = string
 type Val = any
 type Operand = 'eq' | 'ne' | 'lt' | 'gt' | 'lte' | 'gte'
-type Operation = [Key, Operand, Val]
-
-const splitFilter = (f: Filter) =>
-	Object.entries(f).map(
-		([k, v]) =>
-			`${k}${k.includes('_') ? '' : '_eq'}`.split('_').concat(v) as Operation
-	)
 
 const extractKeys = chain<Filter, string>(
 	pipe(keys, map(pipe(split('_'), head))) as AnyFn
 )
 
-const andClause = (filters: Filter[]): RawBuilder<unknown> =>
+const andClause = (nodes: TreeNode[], filters: Filter[]) =>
 	sql.join(
 		filters.map(filter =>
 			Object.entries(filter).map(([key, val]) => {
 				const [k, op = 'eq'] = key.split('_') as [Key, Operand]
-				return `(@.${k} ${dbOperator(op, val)} ${sql.val(val)})`
+				const node = nodes.find(n => n.name === k)
+				assertExists(node, `Node not found for key: ${k}`)
+				console.log(
+					`(@.value.${dbType(node)}${dbOperator(op, node, val)}"${val}")`
+				)
+				return sql`(@.value.${dbType(node)}${dbOperator(op, node, val)}${sql.val(val)})`
 			})
 		),
-		sql.raw(' && ')
+		sql.raw('&&')
 	)
+
+const customSort =
+	(path: ListPath, { direction, order }: ListArgs) =>
+	(
+		qb: SelectQueryBuilder<
+			DB & { children: Nullable<Values> },
+			'values' | 'children',
+			{}
+		>
+	) =>
+		qb
+			.leftJoin('values as order_v', join =>
+				join
+					.on('order_v.node_id', '=', sql.val(order?.node_id))
+					.on(
+						'order_v.list_path',
+						'@>',
+						sql`array_append(${sql.val(path)}, "values"."id")`
+					)
+			)
+			.orderBy(
+				sql`order_v.value->>${sql.val(order!.json_field)}`,
+				direction ?? 'asc'
+			)
+			.groupBy('order_v.value')
 
 @injectable()
 export class SchemaContext {
@@ -158,23 +182,7 @@ export class SchemaContext {
 						sql`children.list_path @> array_append(${sql.val(path)}, "values"."id")`
 					)
 			)
-			.$if(isNotNil(order), qb =>
-				qb
-					.leftJoin('values as order_v', join =>
-						join
-							.on('order_v.node_id', '=', sql.val(order?.node_id))
-							.on(
-								'order_v.list_path',
-								'@>',
-								sql`array_append(${sql.val(path)}, "values"."id")`
-							)
-					)
-					.orderBy(
-						sql`order_v.value->>${sql.val(order!.json_field)}`,
-						direction ?? 'asc'
-					)
-					.groupBy('order_v.value')
-			)
+			.$if(isNotNil(order), customSort(path, listArgs))
 			.select(({ fn, ref }) => [
 				'values.id',
 				'values.list_path',
@@ -186,10 +194,7 @@ export class SchemaContext {
 					.coalesce(
 						fn
 							.jsonAgg(
-								sql`json_build_object(
-								'node_id', "children"."node_id",
-								'value', "children"."value"
-							)`
+								sql`json_build_object('node_id', "children"."node_id",'value', "children"."value")`
 							)
 							.filterWhere(
 								ref('children.node_id'),
@@ -213,10 +218,11 @@ export class SchemaContext {
 				qb.where('values.list_path', '=', sql.val(path))
 			)
 			.$if(isNotEmpty(allMatch), qb =>
-				qb.where(({ exists, fn }) =>
-					exists(
-						sql`jsonb_path_query_array("data", '$[*] ? (${andClause(allMatch)})')`
-					)
+				qb.where(({ fn }) =>
+					fn(`jsonb_path_exists`, [
+						sql.ref('data'),
+						sql`$[*] ? ${andClause(filterNodes, allMatch)}`
+					])
 				)
 			)
 			.$if(isNotNil(offset), qb => qb.offset(offset ?? 0))
@@ -231,7 +237,8 @@ export class SchemaContext {
 				'values.value'
 			])
 			.execute()
-		console.dir(res, { depth: null })
+
+		console.dir
 		return res
 	}
 
