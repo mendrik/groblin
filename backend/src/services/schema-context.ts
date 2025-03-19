@@ -175,8 +175,8 @@ export class SchemaContext {
 
 		const res = await this.db
 			.selectFrom('values')
-			.leftJoin('values as children', join =>
-				join
+			.leftJoin('values as children', j =>
+				j
 					.on('children.node_id', 'in', filterNodes.map(prop('id')))
 					.on(
 						sql`children.list_path @> array_append(${sql.val(path)}, "values"."id")`
@@ -201,7 +201,7 @@ export class SchemaContext {
 								'in',
 								filterNodes.map(prop('id'))
 							),
-						sql`'[]'`
+						sql.val([])
 					)
 					.as('data')
 			])
@@ -214,20 +214,20 @@ export class SchemaContext {
 					])
 				)
 			)
-			.$if(isNotNilOrEmpty(path), qb =>
-				qb.where('values.list_path', '=', sql.val(path))
+			.$if(isNotNilOrEmpty(path), q =>
+				q.where('values.list_path', '=', sql.val(path))
 			)
-			.$if(isNotEmpty(allMatch), qb =>
-				qb.where(({ fn }) =>
+			.$if(isNotEmpty(allMatch), q =>
+				q.where(({ fn }) =>
 					fn(`jsonb_path_exists`, [
 						sql.ref('data'),
 						sql`$[*] ? ${andClause(filterNodes, allMatch)}`
 					])
 				)
 			)
-			.$if(isNotNil(offset), qb => qb.offset(offset ?? 0))
-			.$if(isNotNil(limit), qb => qb.limit(limit ?? Number.MAX_SAFE_INTEGER))
-			.$if(isNil(order), qb => qb.orderBy('values.order', direction ?? 'asc'))
+			.$if(isNotNil(offset), q => q.offset(offset ?? 0))
+			.$if(isNotNil(limit), q => q.limit(limit ?? Number.MAX_SAFE_INTEGER))
+			.$if(isNil(order), q => q.orderBy('values.order', direction ?? 'asc'))
 			.groupBy([
 				'values.id',
 				'values.list_path',
