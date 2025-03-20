@@ -4,7 +4,7 @@ import { mapBy } from '@shared/utils/map-by.ts'
 import type { AnyFn } from '@tp/functions.ts'
 import { GraphQLEnumType, GraphQLObjectType, GraphQLString } from 'graphql'
 import { inject, injectable } from 'inversify'
-import { Kysely, type Nullable, type SelectQueryBuilder, sql } from 'kysely'
+import { Kysely, type SelectQueryBuilder, sql } from 'kysely'
 import { Maybe } from 'purify-ts'
 import {
 	assoc,
@@ -22,7 +22,7 @@ import {
 	uniq
 } from 'ramda'
 import { compact, isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
-import type { DB, JsonValue, Values } from 'src/database/schema.ts'
+import type { DB, JsonValue } from 'src/database/schema.ts'
 import { NodeResolver } from 'src/resolvers/node-resolver.ts'
 import {
 	type NodeSettings,
@@ -81,13 +81,7 @@ const andClause = (nodes: TreeNode[], filters: Filter[]) =>
 
 const customSort =
 	(path: ListPath, { direction, order }: ListArgs) =>
-	(
-		qb: SelectQueryBuilder<
-			DB & { children: Nullable<Values> },
-			'values' | 'children',
-			{}
-		>
-	) =>
+	(qb: SelectQueryBuilder<any, any, any>) =>
 		qb
 			.leftJoin('values as order_v', join =>
 				join
@@ -95,14 +89,13 @@ const customSort =
 					.on(
 						'order_v.list_path',
 						'@>',
-						sql`array_append(${sql.val(path)}, "values"."id")`
+						sql`array_append(${sql.val(path)}, "values_with_data"."id")`
 					)
 			)
 			.orderBy(
 				sql`order_v.value->>${sql.val(order!.json_field)}`,
 				direction ?? 'asc'
 			)
-			.groupBy('order_v.value')
 
 @injectable()
 export class SchemaContext {
@@ -172,72 +165,83 @@ export class SchemaContext {
 		const filterNodes = [...allNodes(node)].filter(node =>
 			allKeys.includes(node.name)
 		)
-
-		const res = await this.db
-			.selectFrom('values')
-			.leftJoin('values as children', j =>
-				j
-					.on('children.node_id', 'in', filterNodes.map(prop('id')))
-					.on(
-						sql`children.list_path @> array_append(${sql.val(path)}, "values"."id")`
-					)
-			)
-			.$if(isNotNil(order), customSort(path, listArgs))
-			.select(({ fn, ref }) => [
-				'values.id',
-				'values.list_path',
-				'values.node_id',
-				'values.order',
-				'values.updated_at',
-				'values.value',
-				fn
-					.coalesce(
-						fn
-							.jsonAgg(
-								sql`json_build_object('node_id', "children"."node_id",'value', "children"."value")`
+		const res = this.db
+			.with('values_with_data', db =>
+				db
+					.selectFrom('values')
+					.leftJoin('values as children', j =>
+						j
+							.on('children.node_id', 'in', filterNodes.map(prop('id')))
+							.on(
+								sql`children.list_path @> array_append(${sql.val(path)}, "values"."id")`
 							)
-							.filterWhere(
-								ref('children.node_id'),
-								'in',
-								filterNodes.map(prop('id'))
-							),
-						sql.val([])
 					)
-					.as('data')
-			])
-			.where('values.node_id', '=', nodeId)
-			.$if(isNilOrEmpty(path), qb =>
-				qb.where(eb =>
-					eb.or([
-						eb('values.list_path', 'is', null),
-						eb('values.list_path', '=', sql.val([]))
+					.select(({ fn, ref }) => [
+						'values.id',
+						'values.list_path',
+						'values.node_id',
+						'values.order',
+						'values.updated_at',
+						'values.value',
+						fn
+							.coalesce(
+								fn
+									.jsonAgg(
+										sql`json_build_object('node_id', "children"."node_id",'value', "children"."value")`
+									)
+									.filterWhere(
+										ref('children.node_id'),
+										'in',
+										filterNodes.map(prop('id'))
+									),
+								sql.val([])
+							)
+							.as('data')
 					])
-				)
+					.where('values.node_id', '=', nodeId)
+					.$if(isNilOrEmpty(path), qb =>
+						qb.where(eb =>
+							eb.or([
+								eb('values.list_path', 'is', null),
+								eb('values.list_path', '=', sql.val([]))
+							])
+						)
+					)
+					.$if(isNotNilOrEmpty(path), q =>
+						q.where('values.list_path', '=', sql.val(path))
+					)
+					.groupBy([
+						'values.id',
+						'values.list_path',
+						'values.node_id',
+						'values.order',
+						'values.updated_at',
+						'values.value'
+					])
 			)
-			.$if(isNotNilOrEmpty(path), q =>
-				q.where('values.list_path', '=', sql.val(path))
-			)
+			.selectFrom('values_with_data')
+			.select([
+				'values_with_data.id',
+				'values_with_data.list_path',
+				'values_with_data.node_id',
+				'values_with_data.order',
+				'values_with_data.updated_at',
+				'values_with_data.value'
+			])
 			.$if(isNotEmpty(allMatch), q =>
 				q.where(({ fn }) =>
-					fn(`jsonb_path_exists`, [
-						sql.ref('data'),
-						sql`$[*] ? ${andClause(filterNodes, allMatch)}`
+					fn('jsonb_path_exists', [
+						sql.raw('data::jsonb'),
+						sql`'$[*] ? (@.value.content == "Germany")'::jsonpath`
 					])
 				)
 			)
+			.$if(isNotNil(order), customSort(path, listArgs))
 			.$if(isNotNil(offset), q => q.offset(offset ?? 0))
 			.$if(isNotNil(limit), q => q.limit(limit ?? Number.MAX_SAFE_INTEGER))
-			.$if(isNil(order), q => q.orderBy('values.order', direction ?? 'asc'))
-			.groupBy([
-				'values.id',
-				'values.list_path',
-				'values.node_id',
-				'values.order',
-				'values.updated_at',
-				'values.value'
-			])
-			.execute()
-		return res
+			.$if(isNil(order), q => q.orderBy('order', direction ?? 'asc'))
+
+		return await res.execute()
 	}
 
 	getValue(node: TreeNode, path: ListPath): Promise<Value | undefined> {
