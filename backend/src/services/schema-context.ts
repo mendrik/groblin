@@ -76,7 +76,7 @@ const andClause = (nodes: TreeNode[], filters: Filter[]) =>
 				return sql`(@.value.${dbType(node)}${dbOperator(op, node, val)}${sql.val(val)})`
 			})
 		),
-		sql.raw('&&')
+		sql`&&`
 	)
 
 const customSort =
@@ -236,9 +236,9 @@ export class SchemaContext {
 					])
 				)
 			)
-			.$if(isNotNil(order), customSort(path, listArgs))
 			.$if(isNotNil(offset), q => q.offset(offset ?? 0))
 			.$if(isNotNil(limit), q => q.limit(limit ?? Number.MAX_SAFE_INTEGER))
+			.$if(isNotNil(order), customSort(path, listArgs))
 			.$if(isNil(order), q => q.orderBy('order', direction ?? 'asc'))
 
 		return await res.execute()
