@@ -97,18 +97,20 @@ export const jsonField = match<[TreeNode], string>(
 	caseOf([{ type: NodeType.media }], 'file')
 )
 
+const withOp = (op: string) => (_: string, n: TreeNode, v: any) =>
+	 `@.value.${jsonField(n)} ${op} "${v}"`
+
 export const dbCondition = match<[string, TreeNode, any], string | null>(
-	caseOf(['eq', _, _], (_, n, v) => `@.value.${jsonField(n)} == "${v}"`),
-	caseOf(['neq', _, _], (_, n, v) => `@.value.${jsonField(n)} != "${v}"`),
-	caseOf(['rex', _, _], ' like '),
-	caseOf(['gt', _, _], ' > '),
-	caseOf(['lt', _, _], ' < '),
-	caseOf(['gte', _, _], ' >= '),
-	caseOf(['lte', _, _], ' <= '),
-	caseOf(['in', _, _], ' in ')
+	caseOf(['eq', _, _], withOp("==")),
+	caseOf(['neq', _, _], withOp("!=")),
+	caseOf(['rex', _, _], withOp("like_regex")),
+	caseOf(['gt', _, _], withOp(">")),
+	caseOf(['lt', _, _], withOp("<")),
+	caseOf(['gte', _, _], withOp(">=")),
+	caseOf(['lte', _, _], withOp("<="))
 )
 
-type Operator = 'eq' | 'neq' | 'gt' | 'lt' | 'gte' | 'lte' | 'rex' | 'in'
+type Operator = 'eq' | 'neq' | 'gt' | 'lt' | 'gte' | 'lte' | 'rex' 
 
 const opSet: Operator[] = ['eq', 'neq', 'gt', 'lt', 'gte', 'lte']
 export const operators = match<[TreeNode], Operator[]>(
