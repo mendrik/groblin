@@ -21,7 +21,6 @@ import {
 	GraphQLString
 } from 'graphql'
 import { GraphQLDateTime } from 'graphql-scalars'
-import { sql } from 'kysely'
 import { T as _, isNil } from 'ramda'
 import type { JsonValue } from 'src/database/schema.ts'
 import type { SchemaContext } from 'src/services/schema-context.ts'
@@ -98,19 +97,19 @@ export const jsonField = match<[TreeNode], string>(
 )
 
 const withOp = (op: string) => (_: string, n: TreeNode, v: any) =>
-	 `@.value.${jsonField(n)} ${op} "${v}"`
+	`@.value.${jsonField(n)} ${op} "${v}"`
 
 export const dbCondition = match<[string, TreeNode, any], string | null>(
-	caseOf(['eq', _, _], withOp("==")),
-	caseOf(['neq', _, _], withOp("!=")),
-	caseOf(['rex', _, _], withOp("like_regex")),
-	caseOf(['gt', _, _], withOp(">")),
-	caseOf(['lt', _, _], withOp("<")),
-	caseOf(['gte', _, _], withOp(">=")),
-	caseOf(['lte', _, _], withOp("<="))
+	caseOf(['eq', _, _], withOp('==')),
+	caseOf(['neq', _, _], withOp('!=')),
+	caseOf(['rex', _, _], withOp('like_regex')),
+	caseOf(['gt', _, _], withOp('>')),
+	caseOf(['lt', _, _], withOp('<')),
+	caseOf(['gte', _, _], withOp('>=')),
+	caseOf(['lte', _, _], withOp('<='))
 )
 
-type Operator = 'eq' | 'neq' | 'gt' | 'lt' | 'gte' | 'lte' | 'rex' 
+type Operator = 'eq' | 'neq' | 'gt' | 'lt' | 'gte' | 'lte' | 'rex'
 
 const opSet: Operator[] = ['eq', 'neq', 'gt', 'lt', 'gte', 'lte']
 export const operators = match<[TreeNode], Operator[]>(
