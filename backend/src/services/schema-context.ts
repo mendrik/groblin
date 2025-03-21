@@ -63,21 +63,22 @@ const extractKeys = chain<Filter, string>(
 	pipe(keys, map(pipe(split('_'), head))) as AnyFn
 )
 
-const andClause = (nodes: TreeNode[], filters: Filter[]) =>
-	sql.join(
-		filters.map(filter =>
-			Object.entries(filter).map(([key, val]) => {
-				const [k, op = 'eq'] = key.split('_') as [Key, Operand]
-				const node = nodes.find(n => n.name === k)
-				assertExists(node, `Node not found for key: ${k}`)
-				console.log(
-					`(@.value.${dbType(node)}${dbOperator(op, node, val)}"${val}")`
-				)
-				return sql`(@.value.${dbType(node)}${dbOperator(op, node, val)}${sql.val(val)})`
-			})
-		),
-		sql`&&`
-	)
+const andClause = (nodes: TreeNode[], filters: Filter[]) => {
+	const conditions = filters
+		.map(filter =>
+			Object.entries(filter)
+				.map(([key, val]) => {
+					const [k, op] = key.split('_') as [Key, Operand]
+					const node = nodes.find(n => n.name === k)
+					assertExists(node, `Node not found for key: ${k}`)
+					return `@.value.${dbType(node)}${dbOperator(op ?? 'eq', node, val)}${JSON.stringify(val)}`
+				})
+				.join(' || ')
+		)
+		.join(' && ')
+	console.log(conditions)
+	return sql`'$[*] ? (${sql.raw(conditions)})'`
+}
 
 const customSort =
 	(path: ListPath, { direction, order }: ListArgs) =>
@@ -232,7 +233,7 @@ export class SchemaContext {
 				q.where(({ fn }) =>
 					fn('jsonb_path_exists', [
 						sql.raw('data::jsonb'),
-						sql`'$[*] ? (@.value.content == "Germany")'::jsonpath`
+						andClause(filterNodes, allMatch)
 					])
 				)
 			)
