@@ -71,12 +71,11 @@ const andClause = (nodes: TreeNode[], filters: Filter[]) => {
 					const [k, op] = key.split('_') as [Key, Operand]
 					const node = nodes.find(n => n.name === k)
 					assertExists(node, `Node not found for key: ${k}`)
-					return `@.value.${dbType(node)}${dbOperator(op ?? 'eq', node, val)}${JSON.stringify(val)}`
+					return `(@.node_id == ${node.id} && @.value.${dbType(node)}${dbOperator(op ?? 'eq', node, val)}${JSON.stringify(val)})`
 				})
 				.join(' || ')
 		)
 		.join(' && ')
-	console.log(conditions)
 	return sql`'$[*] ? (${sql.raw(conditions)})'`
 }
 
@@ -188,7 +187,7 @@ export class SchemaContext {
 							.coalesce(
 								fn
 									.jsonAgg(
-										sql`json_build_object('node_id', "children"."node_id",'value', "children"."value")`
+										sql`json_build_object('node_id', "children"."node_id", 'value', "children"."value")`
 									)
 									.filterWhere(
 										ref('children.node_id'),
@@ -227,22 +226,29 @@ export class SchemaContext {
 				'values_with_data.node_id',
 				'values_with_data.order',
 				'values_with_data.updated_at',
-				'values_with_data.value'
+				'values_with_data.value',
+				'values_with_data.data'
 			])
 			.$if(isNotEmpty(allMatch), q =>
-				q.where(({ fn }) =>
-					fn('jsonb_path_exists', [
-						sql.raw('data::jsonb'),
-						andClause(filterNodes, allMatch)
-					])
+				q.where(({ fn, eb }) =>
+					eb(
+						fn('jsonb_path_query_array', [
+							sql.raw('data::jsonb'),
+							andClause(filterNodes, allMatch)
+						]),
+						'!=',
+						'[]'
+					)
 				)
 			)
 			.$if(isNotNil(offset), q => q.offset(offset ?? 0))
 			.$if(isNotNil(limit), q => q.limit(limit ?? Number.MAX_SAFE_INTEGER))
 			.$if(isNotNil(order), customSort(path, listArgs))
 			.$if(isNil(order), q => q.orderBy('order', direction ?? 'asc'))
+		const arr = await res.execute()
+		console.dir(arr, { depth: 10 })
 
-		return await res.execute()
+		return arr
 	}
 
 	getValue(node: TreeNode, path: ListPath): Promise<Value | undefined> {
