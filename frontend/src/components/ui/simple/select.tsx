@@ -1,4 +1,3 @@
-import { isString } from 'ramda-adjunct'
 import { type ReactNode, useState } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '../select'
 

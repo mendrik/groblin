@@ -103,7 +103,7 @@ const withOp = (op: string) => (_: string, n: TreeNode, v: any) =>
 export const dbCondition = match<[string, TreeNode, any], string | null>(
 	caseOf(
 		['eq', { type: NodeType.color }, chroma.valid],
-		(_, __, v) => `@.value.rgba == [${chroma(v).rgba().join(',')}]`
+		(_, __, v) => `@.value.rgba == $[ ${chroma(v).rgba().join(',')} ]`
 	),
 	caseOf(['eq', _, _], withOp('==')),
 	caseOf(['neq', _, _], withOp('!=')),
@@ -111,7 +111,8 @@ export const dbCondition = match<[string, TreeNode, any], string | null>(
 	caseOf(['gt', _, _], withOp('>')),
 	caseOf(['lt', _, _], withOp('<')),
 	caseOf(['gte', _, _], withOp('>=')),
-	caseOf(['lte', _, _], withOp('<='))
+	caseOf(['lte', _, _], withOp('<=')),
+	caseOf([_, _, _], '1 != 1')
 )
 
 type Operator = 'eq' | 'neq' | 'gt' | 'lt' | 'gte' | 'lte' | 'rex'
