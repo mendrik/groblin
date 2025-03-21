@@ -10,6 +10,7 @@ import type {
 	StringType
 } from '@shared/json-value-types.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
+import chroma from 'chroma-js'
 import {
 	GraphQLBoolean,
 	GraphQLFloat,
@@ -100,6 +101,10 @@ const withOp = (op: string) => (_: string, n: TreeNode, v: any) =>
 	`@.value.${jsonField(n)} ${op} "${v}"`
 
 export const dbCondition = match<[string, TreeNode, any], string | null>(
+	caseOf(
+		['eq', { type: NodeType.color }, chroma.valid],
+		(_, __, v) => `@.value.rgba == [${chroma(v).rgba().join(',')}]`
+	),
 	caseOf(['eq', _, _], withOp('==')),
 	caseOf(['neq', _, _], withOp('!=')),
 	caseOf(['rex', _, _], withOp('like_regex')),

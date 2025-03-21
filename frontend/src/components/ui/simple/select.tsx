@@ -30,7 +30,7 @@ export const SimpleSelect = <T,>({
 			onOpenChange={setOpen}
 			open={open}
 			onValueChange={v => {
-				!isString(v) && onChange(v as T)
+				onChange(v as T)
 				setOpen(false)
 			}}
 		>

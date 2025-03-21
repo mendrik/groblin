@@ -6,6 +6,7 @@ import { isNotNilOrEmpty } from 'ramda-adjunct'
 import { SimpleSelect } from '../simple/select'
 import type { ChoiceProps } from '../tree/properties/choice'
 import type { ValueEditor } from './value-editor'
+import { debugFn } from '@shared/utils/ramda'
 
 type ChoiceValue = Omit<Value, 'value'> & { value: ChoiceType }
 
@@ -23,7 +24,7 @@ export const ChoiceEditor: ValueEditor<ChoiceValue> = ({
 			options={settings?.choices ?? []}
 			allowEmpty={settings?.required !== true}
 			render={identity}
-			onChange={when(isNotNilOrEmpty, pipe(objOf('selected'), save))}
+			onChange={when(isNotNilOrEmpty, pipe(objOf('selected'), debugFn(save)))}
 			value={value?.value.selected}
 		/>
 	)
