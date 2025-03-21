@@ -73,7 +73,7 @@ const andClause = (nodes: TreeNode[], filters: Filter[]) => {
 					const [k, op] = key.split('_') as [Key, Operand]
 					const node = nodes.find(n => n.name === k)
 					assertExists(node, `Node not found for key: ${k}`)
-					const condition = dbCondition(op ?? 'eq', node, val)
+					const condition = dbCondition(op ?? 'eq', node, val.replace(/"/g, '""'))
 					return `(@.node_id == ${node.id} && ${condition})`
 				})
 				.join(' || ')

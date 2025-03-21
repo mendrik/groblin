@@ -21,6 +21,7 @@ import {
 	GraphQLString
 } from 'graphql'
 import { GraphQLDateTime } from 'graphql-scalars'
+import { sql } from 'kysely'
 import { T as _, isNil } from 'ramda'
 import type { JsonValue } from 'src/database/schema.ts'
 import type { SchemaContext } from 'src/services/schema-context.ts'
@@ -97,8 +98,8 @@ export const jsonField = match<[TreeNode], string>(
 )
 
 export const dbCondition = match<[string, TreeNode, any], string | null>(
-	caseOf(['eq', _, _], (_, n, v) => `@.value.${jsonField(n)} == ${v}`),
-	caseOf(['neq', _, _], (_, n, v) => `@.value.${jsonField(n)} != ${v}`),
+	caseOf(['eq', _, _], (_, n, v) => `@.value.${jsonField(n)} == "${v}"`),
+	caseOf(['neq', _, _], (_, n, v) => `@.value.${jsonField(n)} != "${v}"`),
 	caseOf(['rex', _, _], ' like '),
 	caseOf(['gt', _, _], ' > '),
 	caseOf(['lt', _, _], ' < '),
