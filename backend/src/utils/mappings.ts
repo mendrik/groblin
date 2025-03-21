@@ -85,7 +85,7 @@ export const jsonForNode = match<[TreeNode, any], JsonValue>(
 	),
 	caseOf([_, _], () => null)
 )
-export const dbType = match<[TreeNode], string>(
+export const jsonField = match<[TreeNode], string>(
 	caseOf([{ type: NodeType.string }], 'content'),
 	caseOf([{ type: NodeType.color }], 'rgba'),
 	caseOf([{ type: NodeType.number }], 'figure'),
@@ -96,9 +96,9 @@ export const dbType = match<[TreeNode], string>(
 	caseOf([{ type: NodeType.media }], 'file')
 )
 
-export const dbOperator = match<[string, TreeNode, any], string>(
-	caseOf(['eq', _, _], ' == '),
-	caseOf(['neq', _, _], ' != '),
+export const dbCondition = match<[string, TreeNode, any], string | null>(
+	caseOf(['eq', _, _], (_, n, v) => `@.value.${jsonField(n)} == ${v}`),
+	caseOf(['neq', _, _], (_, n, v) => `@.value.${jsonField(n)} != ${v}`),
 	caseOf(['rex', _, _], ' like '),
 	caseOf(['gt', _, _], ' > '),
 	caseOf(['lt', _, _], ' < '),

@@ -36,7 +36,7 @@ import {
 	type TreeNode
 } from 'src/types.ts'
 import { isJsonObject } from 'src/utils/json.ts'
-import { dbOperator, dbType } from 'src/utils/mappings.ts'
+import { dbCondition } from 'src/utils/mappings.ts'
 import { allNodes } from 'src/utils/nodes.ts'
 import { ImageService, type MediaValue } from './image-service.ts'
 
@@ -71,7 +71,8 @@ const andClause = (nodes: TreeNode[], filters: Filter[]) => {
 					const [k, op] = key.split('_') as [Key, Operand]
 					const node = nodes.find(n => n.name === k)
 					assertExists(node, `Node not found for key: ${k}`)
-					return `(@.node_id == ${node.id} && @.value.${dbType(node)}${dbOperator(op ?? 'eq', node, val)}${JSON.stringify(val)})`
+					const condition = dbCondition(op ?? 'eq', node, val)
+					return `(@.node_id == ${node.id} && ${condition})`
 				})
 				.join(' || ')
 		)
@@ -245,7 +246,10 @@ export class SchemaContext {
 			.$if(isNotNil(limit), q => q.limit(limit ?? Number.MAX_SAFE_INTEGER))
 			.$if(isNotNil(order), customSort(path, listArgs))
 			.$if(isNil(order), q => q.orderBy('order', direction ?? 'asc'))
-		return await res.execute()
+
+		const dataSet = await res.execute()
+		console.dir(dataSet, { depth: 10 })
+		return dataSet
 	}
 
 	getValue(node: TreeNode, path: ListPath): Promise<Value | undefined> {

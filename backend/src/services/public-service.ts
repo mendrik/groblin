@@ -20,8 +20,8 @@ import {
 	type TreeNode
 } from 'src/types.ts'
 import {
-	dbType,
 	inputScalarForNode,
+	jsonField,
 	jsonForNode,
 	operators,
 	outputScalarForNode
@@ -92,7 +92,7 @@ const orderType = (node: TreeNode): GraphQLEnumType => {
 					node.name,
 					{
 						value: {
-							json_field: dbType(node),
+							json_field: jsonField(node),
 							node_id: node.id
 						}
 					},
