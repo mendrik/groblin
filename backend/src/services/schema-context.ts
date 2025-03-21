@@ -245,10 +245,7 @@ export class SchemaContext {
 			.$if(isNotNil(limit), q => q.limit(limit ?? Number.MAX_SAFE_INTEGER))
 			.$if(isNotNil(order), customSort(path, listArgs))
 			.$if(isNil(order), q => q.orderBy('order', direction ?? 'asc'))
-		const arr = await res.execute()
-		console.dir(arr, { depth: 10 })
-
-		return arr
+		return await res.execute()
 	}
 
 	getValue(node: TreeNode, path: ListPath): Promise<Value | undefined> {
