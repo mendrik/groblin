@@ -10,6 +10,7 @@ import {
 	assoc,
 	chain,
 	head,
+	isEmpty,
 	isNil,
 	isNotEmpty,
 	isNotNil,
@@ -47,6 +48,7 @@ export type Filter = {
 export type ListArgs = {
 	allMatch: Filter[]
 	anyMatch: Filter[]
+	name?: string
 	limit?: number
 	offset?: number
 	order?: {
@@ -153,6 +155,7 @@ export class SchemaContext {
 			limit,
 			offset,
 			order,
+			name,
 			allMatch = [],
 			anyMatch = []
 		} = listArgs
@@ -170,36 +173,45 @@ export class SchemaContext {
 			.with('values_with_data', db =>
 				db
 					.selectFrom('values')
-					.leftJoin('values as children', j =>
-						j
-							.on('children.node_id', 'in', filterNodes.map(prop('id')))
-							.on(
-								sql`children.list_path @> array_append(${sql.val(path)}, "values"."id")`
-							)
-					)
-					.select(({ fn, ref }) => [
-						'values.id',
-						'values.list_path',
-						'values.node_id',
-						'values.order',
-						'values.updated_at',
-						'values.value',
-						fn
-							.coalesce(
-								fn
-									.jsonAgg(
-										sql`json_build_object('node_id', "children"."node_id", 'value', "children"."value")`
+					.$if(isEmpty(filterNodes), q => q.selectAll())
+					.$if(isNotEmpty(filterNodes), q =>
+						q
+							.leftJoin('values as children', j =>
+								j
+									.on('children.node_id', 'in', filterNodes.map(prop('id')))
+									.on(
+										sql`children.list_path @> array_append(${sql.val(path)}, "values"."id")`
 									)
-									.filterWhere(
-										ref('children.node_id'),
-										'in',
-										filterNodes.map(prop('id'))
-									),
-								sql.val([])
 							)
-							.as('data')
-					])
+							.select(({ fn, ref }) => [
+								'values.id',
+								'values.list_path',
+								'values.node_id',
+								'values.order',
+								'values.updated_at',
+								'values.value',
+								fn
+									.coalesce(
+										fn
+											.jsonAgg(
+												sql`json_build_object('node_id', "children"."node_id", 'value', "children"."value")`
+											)
+											.filterWhere(
+												ref('children.node_id'),
+												'in',
+												filterNodes.map(prop('id'))
+											),
+										sql.val([])
+									)
+									.as('data')
+							])
+					)
 					.where('values.node_id', '=', nodeId)
+					.$if(isNotNil(name), q =>
+						q.where(eb =>
+							eb(sql`"values"."value"->>'name'`, '=', sql.val(name))
+						)
+					)
 					.$if(isNilOrEmpty(path), qb =>
 						qb.where(eb =>
 							eb.or([
@@ -227,8 +239,7 @@ export class SchemaContext {
 				'values_with_data.node_id',
 				'values_with_data.order',
 				'values_with_data.updated_at',
-				'values_with_data.value',
-				'values_with_data.data'
+				'values_with_data.value'
 			])
 			.$if(isNotEmpty(allMatch), q =>
 				q.where(({ fn, eb }) =>
@@ -248,8 +259,8 @@ export class SchemaContext {
 			.$if(isNil(order), q => q.orderBy('order', direction ?? 'asc'))
 
 		const dataSet = await res.execute()
-		console.dir(dataSet, { depth: 10 })
-		return dataSet
+		// console.dir(dataSet, { depth: 10 })
+		return dataSet as any
 	}
 
 	getValue(node: TreeNode, path: ListPath): Promise<Value | undefined> {

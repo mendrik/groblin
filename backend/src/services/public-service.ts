@@ -8,7 +8,8 @@ import {
 	GraphQLInt,
 	GraphQLList,
 	GraphQLObjectType,
-	GraphQLSchema
+	GraphQLSchema,
+	GraphQLString
 } from 'graphql'
 import { inject, injectable } from 'inversify'
 import { Maybe } from 'purify-ts'
@@ -119,6 +120,7 @@ const listArgs = (
 	return {
 		offset: { type: GraphQLInt },
 		limit: { type: GraphQLInt },
+		name: { type: GraphQLString },
 		direction: { type: directionType },
 		order: { type: orderType(node) },
 		allMatch: { type: new GraphQLList(filter) },
