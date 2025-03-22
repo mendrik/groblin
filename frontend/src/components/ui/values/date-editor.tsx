@@ -38,7 +38,7 @@ export const DateEditor: ValueEditor<DateValue, DateProps> = ({
 }) => {
 	const date =
 		value?.value.year && value?.value.month && value?.value.day
-			? new Date(value.value.year, value.value.month - 1, value.value.day)
+			? new Date(value.value.year, value.value.month, value.value.day)
 			: undefined
 	return (
 		<KeyListener onArrowLeft={stopPropagation} onArrowRight={stopPropagation}>
