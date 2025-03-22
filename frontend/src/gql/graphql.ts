@@ -87,13 +87,6 @@ export type ListRequest = {
   node_id: Scalars['Int']['input'];
 };
 
-export type LoggedInUser = {
-  email: Scalars['String']['output'];
-  id: Scalars['Int']['output'];
-  lastProjectId: Scalars['Int']['output'];
-  name: Scalars['String']['output'];
-};
-
 export type Mutation = {
   createApiKey: ApiKey;
   deleteApiKey: Scalars['Boolean']['output'];
@@ -137,7 +130,7 @@ export type MutationDeleteNodeByIdArgs = {
 
 
 export type MutationDeleteUserArgs = {
-  id: Scalars['Int']['input'];
+  id: Scalars['String']['input'];
 };
 
 
@@ -234,14 +227,13 @@ export type ProjectData = {
   nodeSettings: Array<NodeSettings>;
   nodes: Array<Node>;
   project: Project;
-  user: LoggedInUser;
   values: Array<Value>;
 };
 
 export type ProjectUser = {
   confirmed: Scalars['Boolean']['output'];
   email: Scalars['String']['output'];
-  id: Scalars['Int']['output'];
+  id: Scalars['String']['output'];
   name: Scalars['String']['output'];
   owner: Scalars['Boolean']['output'];
   roles: Array<Scalars['String']['output']>;
@@ -482,12 +474,12 @@ export type ApiKeysUpdatedSubscriptionVariables = Exact<{ [key: string]: never; 
 
 export type ApiKeysUpdatedSubscription = { apiKeysUpdated: boolean };
 
-export type ProjectUserFragment = { id: number, email: string, name: string, confirmed: boolean, roles: Array<string>, owner: boolean };
+export type ProjectUserFragment = { id: string, email: string, name: string, confirmed: boolean, roles: Array<string>, owner: boolean };
 
 export type GetUsersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetUsersQuery = { getUsers: Array<{ id: number, email: string, name: string, confirmed: boolean, roles: Array<string>, owner: boolean }> };
+export type GetUsersQuery = { getUsers: Array<{ id: string, email: string, name: string, confirmed: boolean, roles: Array<string>, owner: boolean }> };
 
 export type InviteUserMutationVariables = Exact<{
   invite: Invite;
@@ -497,7 +489,7 @@ export type InviteUserMutationVariables = Exact<{
 export type InviteUserMutation = { inviteUser: boolean };
 
 export type DeleteUserMutationVariables = Exact<{
-  id: Scalars['Int']['input'];
+  id: Scalars['String']['input'];
 }>;
 
 
@@ -740,7 +732,7 @@ export const InviteUserDocument = `
 }
     `;
 export const DeleteUserDocument = `
-    mutation DeleteUser($id: Int!) {
+    mutation DeleteUser($id: String!) {
   deleteUser(id: $id)
 }
     `;

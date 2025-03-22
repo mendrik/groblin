@@ -24,4 +24,4 @@ $location.subscribe(loc => {
 })
 
 export const inviteUser = (invite: Invite) => Api.InviteUser({ invite })
-export const deleteUser = (id: number) => Api.DeleteUser({ id })
+export const deleteUser = (id: string) => Api.DeleteUser({ id })
