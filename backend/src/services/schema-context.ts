@@ -22,7 +22,7 @@ import {
 	split,
 	uniq
 } from 'ramda'
-import { compact, isNilOrEmpty, isNotNilOrEmpty, isString } from 'ramda-adjunct'
+import { compact, isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
 import type { DB, JsonValue } from 'src/database/schema.ts'
 import { NodeResolver } from 'src/resolvers/node-resolver.ts'
 import {
@@ -73,11 +73,7 @@ const andClause = (nodes: TreeNode[], filters: Filter[]) => {
 					const [k, op] = key.split('_') as [Key, Operand]
 					const node = nodes.find(n => n.name === k)
 					assertExists(node, `Node not found for key: ${k}`)
-					const condition = dbCondition(
-						op ?? 'eq',
-						node,
-						isString(val) ? val.replace(/"/g, '""') : val
-					)
+					const condition = dbCondition(op ?? 'eq', node, val)
 					return `(@.node_id == ${node.id} && ${condition})`
 				})
 				.join(' || ')

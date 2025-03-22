@@ -98,12 +98,15 @@ export const jsonField = match<[TreeNode], string>(
 )
 
 const withOp = (op: string) => (_: string, n: TreeNode, v: any) =>
-	`@.value.${jsonField(n)} ${op} "${v}"`
+	`@.value.${jsonField(n)} ${op} "${`${v}`.replace(/"/g, '\\"')}"`
 
 export const dbCondition = match<[string, TreeNode, any], string | null>(
 	caseOf(
 		['eq', { type: NodeType.color }, chroma.valid],
-		(_, __, v) => `@.value.rgba == $[ ${chroma(v).rgba().join(',')} ]`
+		(_, __, v) => {
+			const rgba = chroma(v).rgba()
+			return `@.value.rgba[0] == ${rgba[0]} && @.value.rgba[1] == ${rgba[1]} && @.value.rgba[2] == ${rgba[2]} && @.value.rgba[3] == ${rgba[3]}`
+		}
 	),
 	caseOf(['eq', _, _], withOp('==')),
 	caseOf(['neq', _, _], withOp('!=')),
