@@ -123,8 +123,7 @@ const listArgs = (
 		name: { type: GraphQLString },
 		direction: { type: directionType },
 		order: { type: orderType(node) },
-		allMatch: { type: new GraphQLList(filter) },
-		anyMatch: { type: new GraphQLList(filter) }
+		filter: { type: new GraphQLList(filter) }
 	}
 }
 

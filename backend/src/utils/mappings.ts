@@ -22,7 +22,6 @@ import {
 	type GraphQLOutputType,
 	GraphQLString
 } from 'graphql'
-import { GraphQLDateTime } from 'graphql-scalars'
 import { T as _, isNil } from 'ramda'
 import type { JsonValue } from 'src/database/schema.ts'
 import type { SchemaContext } from 'src/services/schema-context.ts'
@@ -55,7 +54,6 @@ export const outputScalarForNode = match<
 	caseOf([{ type: NodeType.boolean }, _], GraphQLBoolean),
 	caseOf([{ type: NodeType.number }, _], GraphQLFloat),
 	caseOf([{ type: NodeType.color }, _], new GraphQLList(GraphQLInt)),
-	caseOf([{ type: NodeType.date }, _], GraphQLDateTime),
 	caseOf([{ type: NodeType.choice }, _], (n, c) => c.getEnumType(n.id)),
 	caseOf([{ type: NodeType.media }, _], (n, c) => c.getMediaType(n)),
 	caseOf([_, _], GraphQLString)
@@ -77,7 +75,7 @@ export const jsonForNode = match<[TreeNode, any], JsonValue>(
 	caseOf([{ type: NodeType.string }, isStringType], (_, v) => v.content),
 	caseOf([{ type: NodeType.color }, isColorType], (_, v) => v.rgba as number[]),
 	caseOf([{ type: NodeType.number }, isNumberType], (_, v) => v.figure),
-	caseOf([{ type: NodeType.date }, isDateType], (_, v) => v.date.toString()),
+	caseOf([{ type: NodeType.date }, isDateType], (_, v) => v.date),
 	caseOf([{ type: NodeType.choice }, isChoiceType], (_, v) => v.selected),
 	caseOf([{ type: NodeType.boolean }, isNil], (_, v) => false),
 	caseOf([{ type: NodeType.boolean }, isBooleanType], (_, v) => v.state),
@@ -110,8 +108,6 @@ const opMap: Record<Operator, string> = {
 
 const isOperator = (op: any): op is Operator => Object.keys(opMap).includes(op)
 
-const withOp = (op: Operator, n: TreeNode, v: any) =>
-	`@.node_id == ${n.id} && @.value.${jsonField(n)} ${opMap[op]} ${v}`
 export const dbCondition = match<[string, TreeNode, any], string | null>(
 	caseOf(['eq', { type: NodeType.color }, chroma.valid], (_, __, v) => {
 		const rgba = chroma(v).rgba()
@@ -123,7 +119,10 @@ export const dbCondition = match<[string, TreeNode, any], string | null>(
 		const date = format(new Date(year, month - 1, day), 'yyyy-MM-dd')
 		return `@.value.date ${opMap[o]} "${date}"`
 	}),
-	caseOf([isOperator, _, _], withOp),
+	caseOf(
+		[isOperator, _, _],
+		(o, n, v) => `@.value.${jsonField(n)} ${opMap[o]} ${v}`
+	),
 	caseOf([_, _, _], '1 != 1')
 )
 
@@ -137,7 +136,7 @@ export const operators = match<[TreeNode], Operator[]>(
 	caseOf([{ type: NodeType.date }], () => opSet),
 	caseOf([{ type: NodeType.choice }], () => ['eq', 'neq']),
 	caseOf([{ type: NodeType.boolean }], () => ['eq']),
-	caseOf([{ type: NodeType.article }], () => ['rex', 'neq']),
+	caseOf([{ type: NodeType.article }], () => ['rex']),
 	caseOf([{ type: NodeType.media }], () => ['neq']),
 	caseOf([_], () => [])
 )

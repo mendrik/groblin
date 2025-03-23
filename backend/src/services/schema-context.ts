@@ -46,8 +46,7 @@ export type Filter = {
 }
 
 export type ListArgs = {
-	allMatch: Filter[]
-	anyMatch: Filter[]
+	filter: Filter[]
 	name?: string
 	limit?: number
 	offset?: number
@@ -150,22 +149,11 @@ export class SchemaContext {
 		path: ListPath,
 		listArgs: ListArgs
 	): Promise<Value[]> {
-		const {
-			direction,
-			limit,
-			offset,
-			order,
-			name,
-			allMatch = [],
-			anyMatch = []
-		} = listArgs
+		const { direction, limit, offset, order, name, filter = [] } = listArgs
 		const node = await this.nodeResolver.getTreeNode(this.projectId, nodeId)
 		const children = [...allNodes(node)]
 		const orderNodeKey = children.find(n => n.id === order?.node_id)?.name
-		const allKeys = pipe(
-			compact,
-			uniq
-		)([...extractKeys(allMatch), ...extractKeys(anyMatch), orderNodeKey])
+		const allKeys = pipe(compact, uniq)([...extractKeys(filter), orderNodeKey])
 		const filterNodes = [...allNodes(node)].filter(node =>
 			allKeys.includes(node.name)
 		)
@@ -241,12 +229,12 @@ export class SchemaContext {
 				'values_with_data.updated_at',
 				'values_with_data.value'
 			])
-			.$if(isNotEmpty(allMatch), q =>
+			.$if(isNotEmpty(filter), q =>
 				q.where(({ fn, eb }) =>
 					eb(
 						fn('jsonb_path_query_array', [
 							sql.raw('data::jsonb'),
-							andClause(filterNodes, allMatch)
+							andClause(filterNodes, filter)
 						]),
 						'!=',
 						'[]'
