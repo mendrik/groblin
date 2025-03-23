@@ -98,31 +98,37 @@ export const jsonField = match<[TreeNode], string>(
 	caseOf([{ type: NodeType.media }], 'file')
 )
 
-const withOp = (op: string) => (_: string, n: TreeNode, v: any) =>
-	`@.value.${jsonField(n)} ${op} "${`${v}`.replace(/"/g, '\\"')}"`
+const opMap: Record<Operator, string> = {
+	eq: '==',
+	neq: '!=',
+	rex: 'like_regex',
+	gt: '>',
+	lt: '<',
+	gte: '>=',
+	lte: '<='
+}
 
+const isOperator = (op: any): op is Operator => Object.keys(opMap).includes(op)
+
+const withOp = (op: Operator, n: TreeNode, v: any) =>
+	`@.node_id == ${n.id} && @.value.${jsonField(n)} ${opMap[op]} ${v}`
 export const dbCondition = match<[string, TreeNode, any], string | null>(
 	caseOf(['eq', { type: NodeType.color }, chroma.valid], (_, __, v) => {
 		const rgba = chroma(v).rgba()
 		// for some reason comparing the whole array doesn't work ¯\_(ツ)_/¯
 		return `@.value.rgba[0] == ${rgba[0]} && @.value.rgba[1] == ${rgba[1]} && @.value.rgba[2] == ${rgba[2]} && @.value.rgba[3] == ${rgba[3]}`
 	}),
-	caseOf(['eq', { type: NodeType.date }, _], (_, __, v) => {
+	caseOf([isOperator, { type: NodeType.date }, _], (o, __, v) => {
 		const { year, month, day } = v
+		const op = opMap[o]
 		const cond = [
-			year && `@.value.year == ${year}`,
-			month && `@.value.month == ${month - 1}`,
-			day && `@.value.day == ${day}`
+			year && `@.value.year ${op} ${year}`,
+			month && `@.value.month ${op} ${month - 1}`,
+			day && `@.value.day ${op} ${day}`
 		]
 		return compact(cond).join(' && ')
 	}),
-	caseOf(['eq', _, _], withOp('==')),
-	caseOf(['neq', _, _], withOp('!=')),
-	caseOf(['rex', _, _], withOp('like_regex')),
-	caseOf(['gt', _, _], withOp('>')),
-	caseOf(['lt', _, _], withOp('<')),
-	caseOf(['gte', _, _], withOp('>=')),
-	caseOf(['lte', _, _], withOp('<=')),
+	caseOf([isOperator, _, _], withOp),
 	caseOf([_, _, _], '1 != 1')
 )
 
