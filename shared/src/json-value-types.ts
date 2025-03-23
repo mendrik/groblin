@@ -9,7 +9,7 @@ export type MediaType = {
 	size: Bytes
 }
 
-export type DateType = { date: string | Date }
+export type DateType = { date: string }
 export type ColorType = { rgba: [number, number, number, number?] }
 export type ChoiceType = { selected: string }
 export type BooleanType = { state: boolean }
