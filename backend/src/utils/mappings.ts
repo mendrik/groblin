@@ -11,6 +11,7 @@ import type {
 } from '@shared/json-value-types.ts'
 import { caseOf, match } from '@shared/utils/match.ts'
 import chroma from 'chroma-js'
+import { format } from 'date-fns'
 import {
 	GraphQLBoolean,
 	GraphQLFloat,
@@ -23,7 +24,6 @@ import {
 } from 'graphql'
 import { GraphQLDateTime } from 'graphql-scalars'
 import { T as _, isNil } from 'ramda'
-import { compact } from 'ramda-adjunct'
 import type { JsonValue } from 'src/database/schema.ts'
 import type { SchemaContext } from 'src/services/schema-context.ts'
 import { NodeType, type TreeNode } from 'src/types.ts'
@@ -119,14 +119,9 @@ export const dbCondition = match<[string, TreeNode, any], string | null>(
 		return `@.value.rgba[0] == ${rgba[0]} && @.value.rgba[1] == ${rgba[1]} && @.value.rgba[2] == ${rgba[2]} && @.value.rgba[3] == ${rgba[3]}`
 	}),
 	caseOf([isOperator, { type: NodeType.date }, _], (o, __, v) => {
-		const { year, month, day } = v
-		const op = opMap[o]
-		const cond = [
-			year && `@.value.year ${op} ${year}`,
-			month && `@.value.month ${op} ${month - 1}`,
-			day && `@.value.day ${op} ${day}`
-		]
-		return compact(cond).join(' && ')
+		const { year = 0, month = 0, day = 1 } = v
+		const date = format(new Date(year, month - 1, day), 'yyyy-MM-dd')
+		return `@.value.date ${opMap[o]} "${date}"`
 	}),
 	caseOf([isOperator, _, _], withOp),
 	caseOf([_, _, _], '1 != 1')

@@ -259,7 +259,7 @@ export class SchemaContext {
 			.$if(isNil(order), q => q.orderBy('order', direction ?? 'asc'))
 
 		const dataSet = await res.execute()
-		// console.dir(dataSet, { depth: 10 })
+		console.dir(dataSet, { depth: 10 })
 		return dataSet as any
 	}
 
