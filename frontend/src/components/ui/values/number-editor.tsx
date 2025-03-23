@@ -34,7 +34,7 @@ export const NumberEditor: ValueEditor<NumberValue, NumberProps> = ({
 				defaultValue={value?.value.figure}
 				lazy={false}
 				className="h-7 w-full bg-transparent border-none appearance-none outline-none ring-0"
-				onAccept={pipe(nthArg(1), prop('typedValue'), setOk)}
+				onAccept={pipe(nthArg(1), prop('typedValue'), Number.parseFloat, setOk)}
 				onBlur={() => saveNewValue(ok)}
 				blocks={{
 					num: {

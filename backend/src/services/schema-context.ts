@@ -75,9 +75,9 @@ const andClause = (nodes: TreeNode[], filters: Filter[]) => {
 					const condition = dbCondition(op ?? 'eq', node, val)
 					return `(@.node_id == ${node.id} && ${condition})`
 				})
-				.join(' || ')
+				.join(' && ')
 		)
-		.join(' && ')
+		.join(' || ')
 	return sql`'$[*] ? (${sql.raw(conditions)})'::jsonpath`
 }
 
