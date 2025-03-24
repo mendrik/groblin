@@ -23,6 +23,7 @@ import {
 	GraphQLString
 } from 'graphql'
 import { T as _, isNil } from 'ramda'
+import { isString } from 'ramda-adjunct'
 import type { JsonValue } from 'src/database/schema.ts'
 import type { SchemaContext } from 'src/services/schema-context.ts'
 import { NodeType, type TreeNode } from 'src/types.ts'
@@ -121,7 +122,7 @@ export const dbCondition = match<[string, TreeNode, any], string | null>(
 	}),
 	caseOf(
 		[isOperator, _, _],
-		(o, n, v) => `@.value.${jsonField(n)} ${opMap[o]} ${v}`
+		(o, n, v) => `@.value.${jsonField(n)} ${opMap[o]} "${isString(v) ? v.replace(/"/g, '"') : v}"`
 	),
 	caseOf([_, _, _], '1 != 1')
 )
