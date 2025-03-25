@@ -161,7 +161,7 @@ export class SchemaContext {
 				q.where(eb => eb(sql`"values"."value"->>'name'`, '=', sql.val(name)))
 			)
 			.$if(isNotEmpty(filter), q =>
-				q.where(({ eb }) =>
+				q.where(({ eb, fn }) =>
 					eb.or(
 						filter.map(f =>
 							eb.and(
