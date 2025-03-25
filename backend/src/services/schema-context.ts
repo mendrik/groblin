@@ -10,7 +10,6 @@ import {
 	assoc,
 	chain,
 	head,
-	isEmpty,
 	isNil,
 	isNotEmpty,
 	isNotNil,
@@ -37,7 +36,7 @@ import {
 	type TreeNode
 } from 'src/types.ts'
 import { isJsonObject } from 'src/utils/json.ts'
-import { dbCondition } from 'src/utils/mappings.ts'
+import { type Operand, dbValue, jsonField, opMap } from 'src/utils/mappings.ts'
 import { allNodes } from 'src/utils/nodes.ts'
 import { ImageService, type MediaValue } from './image-service.ts'
 
@@ -58,28 +57,10 @@ export type ListArgs = {
 }
 type Key = string
 type Val = any
-type Operand = 'eq' | 'ne' | 'lt' | 'gt' | 'lte' | 'gte'
 
 const extractKeys = chain<Filter, string>(
 	pipe(keys, map(pipe(split('_'), head))) as AnyFn
 )
-
-const andClause = (nodes: TreeNode[], filters: Filter[]) => {
-	const conditions = filters
-		.map(filter =>
-			Object.entries(filter)
-				.map(([key, val]) => {
-					const [k, op] = key.split('_') as [Key, Operand]
-					const node = nodes.find(n => n.name === k)
-					assertExists(node, `Node not found for key: ${k}`)
-					const condition = dbCondition(op ?? 'eq', node, val)
-					return `(@.node_id == ${node.id} && ${condition})`
-				})
-				.join(' || ')
-		)
-		.join(' && ')
-	return sql`'$[*] ? (${sql.raw(conditions)})'::jsonpath`
-}
 
 const customSort =
 	(path: ListPath, { direction, order }: ListArgs) =>
@@ -158,93 +139,51 @@ export class SchemaContext {
 			allKeys.includes(node.name)
 		)
 		const res = this.db
-			.with('values_with_data', db =>
-				db
-					.selectFrom('values')
-					.$if(isEmpty(filterNodes), q => q.selectAll())
-					.$if(isNotEmpty(filterNodes), q =>
-						q
-							.leftJoin('values as children', j =>
-								j
-									.on('children.node_id', 'in', filterNodes.map(prop('id')))
-									.on(
-										sql`children.list_path @> array_append(${sql.val(path)}, "values"."id")`
-									)
-							)
-							.select(({ fn, ref }) => [
-								'values.id',
-								'values.list_path',
-								'values.node_id',
-								'values.order',
-								'values.updated_at',
-								'values.value',
-								fn
-									.coalesce(
-										fn
-											.jsonAgg(
-												sql`json_build_object('node_id', "children"."node_id", 'value', "children"."value")`
-											)
-											.filterWhere(
-												ref('children.node_id'),
-												'in',
-												filterNodes.map(prop('id'))
-											),
-										sql.val([])
-									)
-									.as('data')
-							])
-					)
-					.where('values.node_id', '=', nodeId)
-					.$if(isNotNil(name), q =>
-						q.where(eb =>
-							eb(sql`"values"."value"->>'name'`, '=', sql.val(name))
-						)
-					)
-					.$if(isNilOrEmpty(path), qb =>
-						qb.where(eb =>
-							eb.or([
-								eb('values.list_path', 'is', null),
-								eb('values.list_path', '=', sql.val([]))
-							])
-						)
-					)
-					.$if(isNotNilOrEmpty(path), q =>
-						q.where('values.list_path', '=', sql.val(path))
-					)
-					.groupBy([
-						'values.id',
-						'values.list_path',
-						'values.node_id',
-						'values.order',
-						'values.updated_at',
-						'values.value'
-					])
-			)
-			.selectFrom('values_with_data')
+			.selectFrom('values')
 			.select([
-				'values_with_data.id',
-				'values_with_data.list_path',
-				'values_with_data.node_id',
-				'values_with_data.order',
-				'values_with_data.updated_at',
-				'values_with_data.value'
+				'values.id',
+				'values.node_id',
+				'values.value',
+				'values.list_path',
+				'values.order'
 			])
+			.distinct()
+			.$if(isNotEmpty(filterNodes), q =>
+				q.leftJoin('values as children', j =>
+					j.on(
+						sql`children.list_path @> array_append(${sql.val(path)}, "values"."id")`
+					)
+				)
+			)
+			.where('values.node_id', '=', nodeId)
+			.where(sql.ref('children.value'), 'is not', null)
+			.$if(isNotNil(name), q =>
+				q.where(eb => eb(sql`"values"."value"->>'name'`, '=', sql.val(name)))
+			)
 			.$if(isNotEmpty(filter), q =>
-				q.where(({ fn, eb }) =>
-					eb(
-						fn('jsonb_path_query_array', [
-							sql.raw('data::jsonb'),
-							andClause(filterNodes, filter)
-						]),
-						'!=',
-						'[]'
+				q.where(({ eb }) =>
+					eb.and(
+						filter.map(f =>
+							eb.or(
+								Object.entries(f).map(([key, val]) => {
+									const [k, op = 'eq'] = key.split('_') as [Key, Operand]
+									const node = filterNodes.find(n => n.name === k)
+									assertExists(node, `Node not found for key: ${k}`)
+									return eb(
+										sql`${sql.ref('children.value')}->'${sql.raw(jsonField(node))}'`,
+										sql.raw(opMap[op]),
+										dbValue(op, node, val)
+									) as any
+								})
+							)
+						)
 					)
 				)
 			)
 			.$if(isNotNil(offset), q => q.offset(offset ?? 0))
 			.$if(isNotNil(limit), q => q.limit(limit ?? Number.MAX_SAFE_INTEGER))
 			.$if(isNotNil(order), customSort(path, listArgs))
-			.$if(isNil(order), q => q.orderBy('order', direction ?? 'asc'))
+			.$if(isNil(order), q => q.orderBy('values.order', direction ?? 'asc'))
 
 		const dataSet = await res.execute()
 		console.dir(dataSet, { depth: 10 })

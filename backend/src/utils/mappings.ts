@@ -22,8 +22,8 @@ import {
 	type GraphQLOutputType,
 	GraphQLString
 } from 'graphql'
+import { type RawBuilder, sql } from 'kysely'
 import { T as _, isNil } from 'ramda'
-import { isString } from 'ramda-adjunct'
 import type { JsonValue } from 'src/database/schema.ts'
 import type { SchemaContext } from 'src/services/schema-context.ts'
 import { NodeType, type TreeNode } from 'src/types.ts'
@@ -97,8 +97,8 @@ export const jsonField = match<[TreeNode], string>(
 	caseOf([{ type: NodeType.media }], 'file')
 )
 
-const opMap: Record<Operator, string> = {
-	eq: '==',
+export const opMap: Record<Operator, string> = {
+	eq: '=',
 	neq: '!=',
 	rex: 'like_regex',
 	gt: '>',
@@ -107,25 +107,7 @@ const opMap: Record<Operator, string> = {
 	lte: '<='
 }
 
-const isOperator = (op: any): op is Operator => Object.keys(opMap).includes(op)
-
-export const dbCondition = match<[string, TreeNode, any], string | null>(
-	caseOf(['eq', { type: NodeType.color }, chroma.valid], (_, __, v) => {
-		const rgba = chroma(v).rgba()
-		// for some reason comparing the whole array doesn't work ¯\_(ツ)_/¯
-		return `@.value.rgba[0] == ${rgba[0]} && @.value.rgba[1] == ${rgba[1]} && @.value.rgba[2] == ${rgba[2]} && @.value.rgba[3] == ${rgba[3]}`
-	}),
-	caseOf([isOperator, { type: NodeType.date }, _], (o, __, v) => {
-		const { year = 0, month = 0, day = 1 } = v
-		const date = format(new Date(year, month - 1, day), 'yyyy-MM-dd')
-		return `@.value.date ${opMap[o]} "${date}"`
-	}),
-	caseOf(
-		[isOperator, _, _],
-		(o, n, v) => `@.value.${jsonField(n)} ${opMap[o]} "${isString(v) ? v.replace(/"/g, '"') : v}"`
-	),
-	caseOf([_, _, _], '1 != 1')
-)
+export type Operand = keyof typeof opMap
 
 type Operator = 'eq' | 'neq' | 'gt' | 'lt' | 'gte' | 'lte' | 'rex'
 
@@ -140,4 +122,19 @@ export const operators = match<[TreeNode], Operator[]>(
 	caseOf([{ type: NodeType.article }], () => ['rex']),
 	caseOf([{ type: NodeType.media }], () => ['neq']),
 	caseOf([_], () => [])
+)
+
+const isOperator = (op: any): op is Operator => Object.keys(opMap).includes(op)
+
+export const dbValue = match<[string, TreeNode, any], RawBuilder<any>>(
+	caseOf(['eq', { type: NodeType.color }, chroma.valid], (_, __, v) => {
+		const rgba = chroma(v).rgba()
+		return sql.raw(`'[${rgba.join(',')}]'::jsonb`)
+	}),
+	caseOf([isOperator, { type: NodeType.date }, _], (o, __, v) => {
+		const { year = 0, month = 0, day = 1 } = v
+		const date = format(new Date(year, month - 1, day), 'yyyy-MM-dd')
+		return sql.val(date)
+	}),
+	caseOf([isOperator, _, _], (_, __, v) => sql.val(v))
 )
