@@ -21,7 +21,7 @@ import {
 	split,
 	uniq
 } from 'ramda'
-import { compact, isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
+import { compact, isNilOrEmpty, isNotNilOrEmpty, isString } from 'ramda-adjunct'
 import type { DB, JsonValue } from 'src/database/schema.ts'
 import { NodeResolver } from 'src/resolvers/node-resolver.ts'
 import {
@@ -162,15 +162,16 @@ export class SchemaContext {
 			)
 			.$if(isNotEmpty(filter), q =>
 				q.where(({ eb }) =>
-					eb.and(
+					eb.or(
 						filter.map(f =>
-							eb.or(
+							eb.and(
 								Object.entries(f).map(([key, val]) => {
 									const [k, op = 'eq'] = key.split('_') as [Key, Operand]
 									const node = filterNodes.find(n => n.name === k)
 									assertExists(node, `Node not found for key: ${k}`)
+									const arrow = isString(val) ? '->>' : '->'
 									return eb(
-										sql`${sql.ref('children.value')}->'${sql.raw(jsonField(node))}'`,
+										sql`${sql.ref('children.value')}${sql.raw(arrow)}${sql.lit(jsonField(node))}`,
 										sql.raw(opMap[op]),
 										dbValue(op, node, val)
 									) as any
