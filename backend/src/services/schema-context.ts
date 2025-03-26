@@ -4,7 +4,7 @@ import { mapBy } from '@shared/utils/map-by.ts'
 import type { AnyFn } from '@tp/functions.ts'
 import { GraphQLEnumType, GraphQLObjectType, GraphQLString } from 'graphql'
 import { inject, injectable } from 'inversify'
-import { Kysely, type SelectQueryBuilder, sql } from 'kysely'
+import { Kysely, type RawBuilder, type SelectQueryBuilder, sql } from 'kysely'
 import { Maybe } from 'purify-ts'
 import {
 	assoc,
@@ -61,6 +61,18 @@ type Val = any
 const extractKeys = chain<Filter, string>(
 	pipe(keys, map(pipe(split('_'), head))) as AnyFn
 )
+
+const filterTokens = (
+	join: string,
+	filter: Filter,
+	filterNodes: TreeNode[]
+): RawBuilder<unknown>[] =>
+	Object.entries(filter).map(([key, val]) => {
+		const [k, op = 'eq'] = key.split('_') as [Key, Operand]
+		const node = filterNodes.find(n => n.name === k)
+		assertExists(node, `Node not found for key: ${k}`)
+		return sql`${sql.ref(`${join}.value`)}${sql.raw(isString(val) ? '->>' : '->')}${sql.lit(jsonField(node))} ${sql.raw(opMap[op])} ${dbValue(op, node, val)}`
+	})
 
 const customSort =
 	(path: ListPath, { direction, order }: ListArgs) =>
@@ -148,39 +160,21 @@ export class SchemaContext {
 				'values.order'
 			])
 			.distinct()
-			.$if(isNotEmpty(filterNodes), q =>
-				q.leftJoin('values as children', j =>
-					j.on(
-						sql`children.list_path @> array_append(${sql.val(path)}, "values"."id")`
-					)
-				)
-			)
 			.where('values.node_id', '=', nodeId)
-			.where(sql.ref('children.value'), 'is not', null)
 			.$if(isNotNil(name), q =>
 				q.where(eb => eb(sql`"values"."value"->>'name'`, '=', sql.val(name)))
 			)
-			.$if(isNotEmpty(filter), q =>
-				q.where(({ eb, fn }) =>
-					eb.or(
-						filter.map(f =>
-							eb.and(
-								Object.entries(f).map(([key, val]) => {
-									const [k, op = 'eq'] = key.split('_') as [Key, Operand]
-									const node = filterNodes.find(n => n.name === k)
-									assertExists(node, `Node not found for key: ${k}`)
-									const arrow = isString(val) ? '->>' : '->'
-									return eb(
-										sql`${sql.ref('children.value')}${sql.raw(arrow)}${sql.lit(jsonField(node))}`,
-										sql.raw(opMap[op]),
-										dbValue(op, node, val)
-									) as any
-								})
-							)
-						)
-					)
-				)
-			)
+			.$if(isNotEmpty(filter), q => {
+				filter.forEach((f: Filter, index: number) => {
+					console.log(`${index}:`, JSON.stringify(f))
+					const name = `child_${index}`
+					const jb = sql`"${sql.raw(name)}"."list_path" @> array_append(${sql.val(path)}, "values"."id")`
+					return q
+						.leftJoin(`values as ${name}`, j => j.on(jb as any))
+						.where(eb => eb.and(filterTokens(name, f, filterNodes) as any))
+				})
+				return q
+			})
 			.$if(isNotNil(offset), q => q.offset(offset ?? 0))
 			.$if(isNotNil(limit), q => q.limit(limit ?? Number.MAX_SAFE_INTEGER))
 			.$if(isNotNil(order), customSort(path, listArgs))
