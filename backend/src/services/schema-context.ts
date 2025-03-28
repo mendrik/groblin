@@ -226,7 +226,7 @@ export class SchemaContext {
 							(q, { join }) =>
 								q.leftJoin(join.table as TableExpression<DB, keyof DB>, j =>
 									j.on(join.on as Expression<SqlBool>)
-								) as any,
+								) as SelectQueryBuilder<DB, 'values', Value>,
 							q
 						),
 					q
