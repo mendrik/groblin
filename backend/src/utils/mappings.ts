@@ -138,3 +138,9 @@ export const dbValue = match<[string, TreeNode, any], RawBuilder<any>>(
 	}),
 	caseOf([isOperator, _, _], (_, __, v) => sql.val(v))
 )
+
+export const arrow = match<[TreeNode], string>(
+	caseOf([{ type: NodeType.string }], '->>'),
+	caseOf([{ type: NodeType.date }], '->>'),
+	caseOf([_], '->')
+)

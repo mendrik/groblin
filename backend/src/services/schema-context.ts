@@ -45,7 +45,13 @@ import {
 	type TreeNode
 } from 'src/types.ts'
 import { isJsonObject } from 'src/utils/json.ts'
-import { type Operand, dbValue, jsonField, opMap } from 'src/utils/mappings.ts'
+import {
+	type Operand,
+	arrow,
+	dbValue,
+	jsonField,
+	opMap
+} from 'src/utils/mappings.ts'
 import { allNodes } from 'src/utils/nodes.ts'
 import { ImageService, type MediaValue } from './image-service.ts'
 
@@ -84,16 +90,14 @@ const customSort =
 	(qb: SelectQueryBuilder<any, any, any>) =>
 		qb
 			.leftJoin('values as order_v', join =>
-				join
-					.on('order_v.node_id', '=', sql.val(order?.node_id))
-					.on(
-						'order_v.list_path',
-						'@>',
-						sql`array_append(${sql.val(path)}, "values_with_data"."id")`
-					)
+				join.on(
+					'order_v.list_path',
+					'@>',
+					sql`array_append(${sql.val(path)}, "values"."id")`
+				)
 			)
 			.orderBy(
-				sql`order_v.value->>${sql.val(order!.json_field)}`,
+				sql`order_v.value->>${sql.lit(order!.json_field)}`,
 				direction ?? 'asc'
 			)
 
@@ -208,7 +212,7 @@ export class SchemaContext {
 							},
 							condition: (eb: ExpressionBuilder<any, any>) =>
 								eb(
-									sql`${sql.ref(`${join}.value`)}${sql.raw(isString(val) ? '->>' : '->')}${sql.lit(jsonField(node))}`,
+									sql`${sql.ref(`${join}.value`)}${sql.raw(arrow(node))}${sql.lit(jsonField(node))}`,
 									sql.raw(opMap[op]),
 									dbValue(op, node, val)
 								)
