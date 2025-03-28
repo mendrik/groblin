@@ -4,7 +4,17 @@ import { mapBy } from '@shared/utils/map-by.ts'
 import type { AnyFn } from '@tp/functions.ts'
 import { GraphQLEnumType, GraphQLObjectType, GraphQLString } from 'graphql'
 import { inject, injectable } from 'inversify'
-import { Kysely, type RawBuilder, type SelectQueryBuilder, sql } from 'kysely'
+import {
+	type Expression,
+	type ExpressionBuilder,
+	type ExpressionWrapper,
+	Kysely,
+	type RawBuilder,
+	type SelectQueryBuilder,
+	type SqlBool,
+	type TableExpression,
+	sql
+} from 'kysely'
 import { Maybe } from 'purify-ts'
 import {
 	assoc,
@@ -62,11 +72,7 @@ const extractKeys = chain<Filter, string>(
 	pipe(keys, map(pipe(split('_'), head))) as AnyFn
 )
 
-const filterTokens = (
-	join: string,
-	filter: Filter,
-	filterNodes: TreeNode[]
-): RawBuilder<unknown>[] =>
+const filterTokens = (join: string, filter: Filter, filterNodes: TreeNode[]) =>
 	Object.entries(filter).map(([key, val]) => {
 		const [k, op = 'eq'] = key.split('_') as [Key, Operand]
 		const node = filterNodes.find(n => n.name === k)
@@ -91,6 +97,28 @@ const customSort =
 				sql`order_v.value->>${sql.val(order!.json_field)}`,
 				direction ?? 'asc'
 			)
+
+type ChildQB = SelectQueryBuilder<
+	DB,
+	'values',
+	{
+		id: number
+		node_id: number
+		order: number
+		list_path: number[] | null
+		value: JsonValue
+	} & Partial<Omit<unknown, 'id' | 'node_id' | 'order' | 'list_path' | 'value'>>
+>
+
+type Condition = {
+	join: {
+		table: string
+		on: RawBuilder<DB>
+	}
+	condition: (
+		eb: ExpressionBuilder<DB, keyof DB>
+	) => ExpressionWrapper<DB, keyof DB, any>
+}
 
 @injectable()
 export class SchemaContext {
@@ -165,24 +193,57 @@ export class SchemaContext {
 				q.where(eb => eb(sql`"values"."value"->>'name'`, '=', sql.val(name)))
 			)
 			.$if(isNotEmpty(filter), q => {
-				filter.forEach((f: Filter, index: number) => {
-					console.log(`${index}:`, JSON.stringify(f))
-					const name = `child_${index}`
-					const jb = sql`"${sql.raw(name)}"."list_path" @> array_append(${sql.val(path)}, "values"."id")`
-					return q
-						.leftJoin(`values as ${name}`, j => j.on(jb as any))
-						.where(eb => eb.and(filterTokens(name, f, filterNodes) as any))
-				})
-				return q
+				// Pure function to process each filter entry
+				const processFilterEntry =
+					(index: number) =>
+					([key, val]: [string, any]): Condition => {
+						const [prop, op = 'eq'] = key.split('_') as [Key, Operand]
+						const join = `${prop}_${index}`
+						const node = filterNodes.find(n => n.name === prop)
+						assertExists(node, `Node not found for property: ${prop}`)
+
+						return {
+							join: {
+								table: `values as ${join}`,
+								on: sql`${sql.ref(`${join}.list_path`)} @> array_append(${sql.val(path)}, "values"."id")`
+							},
+							condition: (eb: ExpressionBuilder<any, any>) =>
+								eb(
+									sql`${sql.ref(`${join}.value`)}${sql.raw(isString(val) ? '->>' : '->')}${sql.lit(jsonField(node))}`,
+									sql.raw(opMap[op]),
+									dbValue(op, node, val)
+								)
+						}
+					}
+
+				const conditions = filter.map((f, index) =>
+					Object.entries(f).map(processFilterEntry(index))
+				)
+
+				const q2 = conditions.reduce(
+					(q, group) =>
+						group.reduce(
+							(q, { join }) =>
+								q.leftJoin(join.table as TableExpression<DB, keyof DB>, j =>
+									j.on(join.on as Expression<SqlBool>)
+								) as any,
+							q
+						),
+					q
+				)
+				return q2.where(eb =>
+					eb.or(
+						conditions.map(group =>
+							eb.and(group.map(({ condition }) => condition(eb)))
+						)
+					)
+				)
 			})
 			.$if(isNotNil(offset), q => q.offset(offset ?? 0))
 			.$if(isNotNil(limit), q => q.limit(limit ?? Number.MAX_SAFE_INTEGER))
 			.$if(isNotNil(order), customSort(path, listArgs))
 			.$if(isNil(order), q => q.orderBy('values.order', direction ?? 'asc'))
-
-		const dataSet = await res.execute()
-		console.dir(dataSet, { depth: 10 })
-		return dataSet as any
+		return res.execute() as Promise<Value[]>
 	}
 
 	getValue(node: TreeNode, path: ListPath): Promise<Value | undefined> {
