@@ -9,7 +9,6 @@ import {
 	type ExpressionBuilder,
 	type ExpressionWrapper,
 	Kysely,
-	type RawBuilder,
 	type SelectQueryBuilder,
 	type SqlBool,
 	type TableExpression,
@@ -112,8 +111,8 @@ type ChildQB = SelectQueryBuilder<
 
 type Condition = {
 	join: {
-		table: string
-		on: RawBuilder<DB>
+		table: TableExpression<DB, keyof DB>
+		on: Expression<SqlBool>
 	}
 	condition: (
 		eb: ExpressionBuilder<DB, keyof DB>
@@ -224,8 +223,8 @@ export class SchemaContext {
 					(q, group) =>
 						group.reduce(
 							(q, { join }) =>
-								q.leftJoin(join.table as TableExpression<DB, keyof DB>, j =>
-									j.on(join.on as Expression<SqlBool>)
+								q.leftJoin(join.table, j =>
+									j.on(join.on)
 								) as SelectQueryBuilder<DB, 'values', Value>,
 							q
 						),
