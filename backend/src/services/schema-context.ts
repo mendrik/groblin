@@ -19,7 +19,6 @@ import {
 	assoc,
 	chain,
 	head,
-	isNil,
 	isNotEmpty,
 	isNotNil,
 	keys,
@@ -71,7 +70,6 @@ export type ListArgs = {
 	direction?: 'asc' | 'desc'
 }
 type Key = string
-type Val = any
 
 const extractKeys = chain<Filter, string>(
 	pipe(keys, map(pipe(split('_'), head))) as AnyFn
@@ -79,31 +77,19 @@ const extractKeys = chain<Filter, string>(
 
 const customSort =
 	(path: ListPath, { direction, order }: ListArgs) =>
-	(qb: SelectQueryBuilder<any, any, any>) =>
-		qb
-			.leftJoin('values as order_v', join =>
-				join.on(
+	(qb: SelectQueryBuilder<any, any, any>) => {
+		const o = sql`order_v.value->>${sql.lit(order!.json_field)}`
+		return qb
+			.distinctOn([o])
+			.leftJoin('values as order_v', j =>
+				j.on(
 					'order_v.list_path',
 					'@>',
 					sql`array_append(${sql.val(path)}, "values"."id")`
 				)
 			)
-			.orderBy(
-				sql`order_v.value->>${sql.lit(order!.json_field)}`,
-				direction ?? 'asc'
-			)
-
-type ChildQB = SelectQueryBuilder<
-	DB,
-	'values',
-	{
-		id: number
-		node_id: number
-		order: number
-		list_path: number[] | null
-		value: JsonValue
-	} & Partial<Omit<unknown, 'id' | 'node_id' | 'order' | 'list_path' | 'value'>>
->
+			.orderBy(o, direction ?? 'asc')
+	}
 
 type Condition = {
 	join: {
@@ -182,14 +168,12 @@ export class SchemaContext {
 				'values.list_path',
 				'values.order'
 			])
-			.$if(isNotNil(order), q => q.distinctOn(['values.id', sql`order_v.value->>${sql.lit(order!.json_field)}`]))
-			.$if(isNil(order), q => q.distinct())
+			.distinctOn(['values.id', 'values.order'])
 			.where('values.node_id', '=', nodeId)
 			.$if(isNotNil(name), q =>
 				q.where(eb => eb(sql`"values"."value"->>'name'`, '=', sql.val(name)))
 			)
 			.$if(isNotEmpty(filter), q => {
-				// Pure function to process each filter entry
 				const processFilterEntry =
 					(index: number) =>
 					([key, val]: [string, any]): Condition => {
@@ -235,10 +219,11 @@ export class SchemaContext {
 					)
 				)
 			})
+			.$if(isNotNil(order), customSort(path, listArgs))
+			.orderBy('values.id')
+			.orderBy('values.order', direction ?? 'asc')
 			.$if(isNotNil(offset), q => q.offset(offset ?? 0))
 			.$if(isNotNil(limit), q => q.limit(limit ?? Number.MAX_SAFE_INTEGER))
-			.$if(isNotNil(order), customSort(path, listArgs))
-			.$if(isNil(order), q => q.orderBy('values.order', direction ?? 'asc'))
 		return res.execute() as Promise<Value[]>
 	}
 
