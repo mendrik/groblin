@@ -136,6 +136,9 @@ export const dbValue = match<[string, TreeNode, any], RawBuilder<any>>(
 		const date = format(new Date(year, month - 1, day), 'yyyy-MM-dd')
 		return sql.val(date)
 	}),
+	caseOf([isOperator, { type: NodeType.number }, _], (o, __, v) => {
+		return v
+	}),
 	caseOf([isOperator, _, _], (_, __, v) => sql.val(v))
 )
 
