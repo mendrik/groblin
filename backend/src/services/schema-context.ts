@@ -19,6 +19,7 @@ import {
 	assoc,
 	chain,
 	head,
+	isNil,
 	isNotEmpty,
 	isNotNil,
 	keys,
@@ -76,19 +77,22 @@ const extractKeys = chain<Filter, string>(
 )
 
 const customSort =
-	(path: ListPath, { direction, order }: ListArgs) =>
+	(path: ListPath, { order }: ListArgs) =>
 	(qb: SelectQueryBuilder<any, any, any>) => {
-		const o = sql`order_v.value->>${sql.lit(order!.json_field)}`
+		const o = sql`order_v.value->${sql.lit(order!.json_field)}`
+		console.log(order!.json_field)
+
 		return qb
-			.distinctOn([o])
 			.leftJoin('values as order_v', j =>
-				j.on(
-					'order_v.list_path',
-					'@>',
-					sql`array_append(${sql.val(path)}, "values"."id")`
-				)
+				j
+					.on(
+						'order_v.list_path',
+						'@>',
+						sql`array_append(${sql.val(path)}, "values"."id")`
+					)
+					.on('order_v.node_id', '=', sql.val(order!.node_id))
 			)
-			.orderBy(o, direction ?? 'asc')
+			.select([o.as('field_order')])
 	}
 
 type Condition = {
@@ -224,7 +228,18 @@ export class SchemaContext {
 			.orderBy('values.order', direction ?? 'asc')
 			.$if(isNotNil(offset), q => q.offset(offset ?? 0))
 			.$if(isNotNil(limit), q => q.limit(limit ?? Number.MAX_SAFE_INTEGER))
-		return res.execute() as Promise<Value[]>
+
+		const query = isNil(order)
+			? res
+			: this.db
+					.selectFrom(res.as('sub'))
+					.selectAll()
+					.orderBy('sub.field_order', direction ?? 'asc')
+
+		const data = await query.execute()
+		console.log(data)
+
+		return data as Value[]
 	}
 
 	getValue(node: TreeNode, path: ListPath): Promise<Value | undefined> {
