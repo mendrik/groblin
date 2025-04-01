@@ -1,6 +1,7 @@
 import { assertExists } from '@shared/asserts.ts'
 import { listToTree } from '@shared/utils/list-to-tree.ts'
 import { mapBy } from '@shared/utils/map-by.ts'
+import { caseOf, match } from '@shared/utils/match.ts'
 import type { AnyFn } from '@tp/functions.ts'
 import { GraphQLEnumType, GraphQLObjectType, GraphQLString } from 'graphql'
 import { inject, injectable } from 'inversify'
@@ -16,6 +17,7 @@ import {
 } from 'kysely'
 import { Maybe } from 'purify-ts'
 import {
+	T as _,
 	assoc,
 	chain,
 	head,
@@ -185,6 +187,16 @@ export class SchemaContext {
 						const join = `${prop}_${index}`
 						const node = filterNodes.find(n => n.name === prop)
 						assertExists(node, `Node not found for property: ${prop}`)
+						const field = sql`${sql.ref(`${join}.value`)}${sql.raw(arrow(node, val))}${sql.lit(jsonField(node))}`
+
+						const condition = (eb: ExpressionBuilder<any, any>) =>
+							match<[Operand, any], any>(
+								caseOf(['eq', isNil], () => eb(field, 'is', null)),
+								caseOf(['not', isNil], () => eb(field, 'is not', null)),
+								caseOf([_, _], () =>
+									eb(field, sql.raw(opMap[op]), dbValue(op, node, val))
+								)
+							)
 
 						return {
 							join: {
@@ -192,11 +204,7 @@ export class SchemaContext {
 								on: sql`${sql.ref(`${join}.list_path`)} @> array_append(${sql.val(path)}, "values"."id")`
 							},
 							condition: (eb: ExpressionBuilder<any, any>) =>
-								eb(
-									sql`${sql.ref(`${join}.value`)}${sql.raw(arrow(node))}${sql.lit(jsonField(node))}`,
-									sql.raw(opMap[op]),
-									dbValue(op, node, val)
-								)
+								condition(eb)(op, val)
 						}
 					}
 
@@ -208,7 +216,7 @@ export class SchemaContext {
 					(q, group) =>
 						group.reduce(
 							(q, { join }) =>
-								q.leftJoin(join.table, j =>
+								q.innerJoin(join.table, j =>
 									j.on(join.on)
 								) as SelectQueryBuilder<DB, 'values', Value>,
 							q
@@ -237,8 +245,7 @@ export class SchemaContext {
 					.orderBy('sub.field_order', direction ?? 'asc')
 
 		const data = await query.execute()
-		console.log(data)
-
+		// console.log(data)
 		return data as Value[]
 	}
 

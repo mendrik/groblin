@@ -99,7 +99,7 @@ export const jsonField = match<[TreeNode], string>(
 
 export const opMap: Record<Operator, string> = {
 	eq: '=',
-	neq: '!=',
+	not: '!=',
 	rex: 'like_regex',
 	gt: '>',
 	lt: '<',
@@ -109,18 +109,18 @@ export const opMap: Record<Operator, string> = {
 
 export type Operand = keyof typeof opMap
 
-type Operator = 'eq' | 'neq' | 'gt' | 'lt' | 'gte' | 'lte' | 'rex'
+type Operator = 'eq' | 'not' | 'gt' | 'lt' | 'gte' | 'lte' | 'rex'
 
-const opSet: Operator[] = ['eq', 'neq', 'gt', 'lt', 'gte', 'lte']
+const opSet: Operator[] = ['eq', 'not', 'gt', 'lt', 'gte', 'lte']
 export const operators = match<[TreeNode], Operator[]>(
-	caseOf([{ type: NodeType.string }], () => ['eq', 'neq', 'rex']),
-	caseOf([{ type: NodeType.color }], () => ['eq', 'neq']),
+	caseOf([{ type: NodeType.string }], () => ['eq', 'not', 'rex']),
+	caseOf([{ type: NodeType.color }], () => ['eq', 'not']),
 	caseOf([{ type: NodeType.number }], () => opSet),
 	caseOf([{ type: NodeType.date }], () => opSet),
-	caseOf([{ type: NodeType.choice }], () => ['eq', 'neq']),
+	caseOf([{ type: NodeType.choice }], () => ['eq', 'not']),
 	caseOf([{ type: NodeType.boolean }], () => ['eq']),
 	caseOf([{ type: NodeType.article }], () => ['rex']),
-	caseOf([{ type: NodeType.media }], () => ['neq']),
+	caseOf([{ type: NodeType.media }], () => ['not']),
 	caseOf([_], () => [])
 )
 
@@ -139,9 +139,10 @@ export const dbValue = match<[string, TreeNode, any], RawBuilder<any>>(
 	caseOf([isOperator, _, _], (_, __, v) => sql.val(v))
 )
 
-export const arrow = match<[TreeNode], string>(
-	caseOf([{ type: NodeType.object }], '->'),
-	caseOf([{ type: NodeType.color }], '->'),
-	caseOf([{ type: NodeType.list }], '->'),
-	caseOf([_], '->>')
+export const arrow = match<[TreeNode, any], string>(
+	caseOf([_, isNil], '->'),
+	caseOf([{ type: NodeType.object }, _], '->'),
+	caseOf([{ type: NodeType.color }, _], '->'),
+	caseOf([{ type: NodeType.list }, _], '->'),
+	caseOf([_, _], '->>')
 )
