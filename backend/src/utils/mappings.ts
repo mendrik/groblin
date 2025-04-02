@@ -100,7 +100,7 @@ export const jsonField = match<[TreeNode], string>(
 export const opMap: Record<Operator, string> = {
 	eq: '=',
 	not: '!=',
-	rex: 'like_regex',
+	rex: '~',
 	gt: '>',
 	lt: '<',
 	gte: '>=',
