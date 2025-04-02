@@ -89,6 +89,81 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: account; Type: TABLE; Schema: public; Owner: groblin
+--
+
+CREATE TABLE public.account (
+    id text NOT NULL,
+    "accountId" text NOT NULL,
+    "providerId" text NOT NULL,
+    "userId" text NOT NULL,
+    "accessToken" text,
+    "refreshToken" text,
+    "idToken" text,
+    "accessTokenExpiresAt" timestamp without time zone,
+    "refreshTokenExpiresAt" timestamp without time zone,
+    scope text,
+    password text,
+    "createdAt" timestamp without time zone NOT NULL,
+    "updatedAt" timestamp without time zone NOT NULL
+);
+
+
+ALTER TABLE public.account OWNER TO groblin;
+
+--
+-- Name: api_key; Type: TABLE; Schema: public; Owner: groblin
+--
+
+CREATE TABLE public.api_key (
+    id integer NOT NULL,
+    project_id integer NOT NULL,
+    key character varying(255) NOT NULL,
+    name character varying(100) NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    expires_at timestamp with time zone,
+    is_active boolean DEFAULT true NOT NULL,
+    last_used timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.api_key OWNER TO groblin;
+
+--
+-- Name: api_key_id_seq; Type: SEQUENCE; Schema: public; Owner: groblin
+--
+
+CREATE SEQUENCE public.api_key_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.api_key_id_seq OWNER TO groblin;
+
+--
+-- Name: api_key_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: groblin
+--
+
+ALTER SEQUENCE public.api_key_id_seq OWNED BY public.api_key.id;
+
+
+--
+-- Name: history; Type: TABLE; Schema: public; Owner: groblin
+--
+
+CREATE TABLE public.history (
+    user_id text NOT NULL,
+    current_project_id integer
+);
+
+
+ALTER TABLE public.history OWNER TO groblin;
+
+--
 -- Name: node; Type: TABLE; Schema: public; Owner: groblin
 --
 
@@ -205,50 +280,49 @@ ALTER SEQUENCE public.project_id_seq OWNED BY public.project.id;
 
 CREATE TABLE public.project_user (
     project_id integer NOT NULL,
-    user_id integer NOT NULL,
-    role text NOT NULL
+    roles text[] NOT NULL,
+    confirmed boolean DEFAULT false NOT NULL,
+    owner boolean DEFAULT false NOT NULL,
+    user_id text
 );
 
 
 ALTER TABLE public.project_user OWNER TO groblin;
 
 --
+-- Name: session; Type: TABLE; Schema: public; Owner: groblin
+--
+
+CREATE TABLE public.session (
+    id text NOT NULL,
+    "expiresAt" timestamp without time zone NOT NULL,
+    token text NOT NULL,
+    "createdAt" timestamp without time zone NOT NULL,
+    "updatedAt" timestamp without time zone NOT NULL,
+    "ipAddress" text,
+    "userAgent" text,
+    "userId" text NOT NULL
+);
+
+
+ALTER TABLE public.session OWNER TO groblin;
+
+--
 -- Name: user; Type: TABLE; Schema: public; Owner: groblin
 --
 
 CREATE TABLE public."user" (
-    id integer NOT NULL,
+    id text NOT NULL,
     name text NOT NULL,
     email text NOT NULL,
-    password text NOT NULL,
-    confirmed boolean DEFAULT false NOT NULL,
-    last_project_id integer
+    "emailVerified" boolean NOT NULL,
+    image text,
+    "createdAt" timestamp without time zone NOT NULL,
+    "updatedAt" timestamp without time zone NOT NULL
 );
 
 
 ALTER TABLE public."user" OWNER TO groblin;
-
---
--- Name: user_id_seq; Type: SEQUENCE; Schema: public; Owner: groblin
---
-
-CREATE SEQUENCE public.user_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.user_id_seq OWNER TO groblin;
-
---
--- Name: user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: groblin
---
-
-ALTER SEQUENCE public.user_id_seq OWNED BY public."user".id;
-
 
 --
 -- Name: values; Type: TABLE; Schema: public; Owner: groblin
@@ -291,6 +365,29 @@ ALTER SEQUENCE public.values_id_seq OWNED BY public."values".id;
 
 
 --
+-- Name: verification; Type: TABLE; Schema: public; Owner: groblin
+--
+
+CREATE TABLE public.verification (
+    id text NOT NULL,
+    identifier text NOT NULL,
+    value text NOT NULL,
+    "expiresAt" timestamp without time zone NOT NULL,
+    "createdAt" timestamp without time zone,
+    "updatedAt" timestamp without time zone
+);
+
+
+ALTER TABLE public.verification OWNER TO groblin;
+
+--
+-- Name: api_key id; Type: DEFAULT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public.api_key ALTER COLUMN id SET DEFAULT nextval('public.api_key_id_seq'::regclass);
+
+
+--
 -- Name: node id; Type: DEFAULT; Schema: public; Owner: groblin
 --
 
@@ -312,17 +409,34 @@ ALTER TABLE ONLY public.project ALTER COLUMN id SET DEFAULT nextval('public.proj
 
 
 --
--- Name: user id; Type: DEFAULT; Schema: public; Owner: groblin
---
-
-ALTER TABLE ONLY public."user" ALTER COLUMN id SET DEFAULT nextval('public.user_id_seq'::regclass);
-
-
---
 -- Name: values id; Type: DEFAULT; Schema: public; Owner: groblin
 --
 
 ALTER TABLE ONLY public."values" ALTER COLUMN id SET DEFAULT nextval('public.values_id_seq'::regclass);
+
+
+--
+-- Name: account account_pkey; Type: CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public.account
+    ADD CONSTRAINT account_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: api_key api_key_key_key; Type: CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public.api_key
+    ADD CONSTRAINT api_key_key_key UNIQUE (key);
+
+
+--
+-- Name: api_key api_key_pkey; Type: CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public.api_key
+    ADD CONSTRAINT api_key_pkey PRIMARY KEY (id);
 
 
 --
@@ -339,6 +453,14 @@ ALTER TABLE ONLY public."values"
 
 ALTER TABLE ONLY public.node
     ADD CONSTRAINT constraint_node_name UNIQUE (name, parent_id);
+
+
+--
+-- Name: history history_pkey; Type: CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public.history
+    ADD CONSTRAINT history_pkey PRIMARY KEY (user_id);
 
 
 --
@@ -366,11 +488,27 @@ ALTER TABLE ONLY public.project
 
 
 --
--- Name: project_user project_user_pkey; Type: CONSTRAINT; Schema: public; Owner: groblin
+-- Name: session session_pkey; Type: CONSTRAINT; Schema: public; Owner: groblin
 --
 
-ALTER TABLE ONLY public.project_user
-    ADD CONSTRAINT project_user_pkey PRIMARY KEY (project_id, user_id);
+ALTER TABLE ONLY public.session
+    ADD CONSTRAINT session_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: session session_token_key; Type: CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public.session
+    ADD CONSTRAINT session_token_key UNIQUE (token);
+
+
+--
+-- Name: user user_email_key; Type: CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public."user"
+    ADD CONSTRAINT user_email_key UNIQUE (email);
 
 
 --
@@ -387,6 +525,14 @@ ALTER TABLE ONLY public."user"
 
 ALTER TABLE ONLY public."values"
     ADD CONSTRAINT values_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: verification verification_pkey; Type: CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public.verification
+    ADD CONSTRAINT verification_pkey PRIMARY KEY (id);
 
 
 --
@@ -474,17 +620,17 @@ CREATE INDEX project_user_project_id ON public.project_user USING btree (project
 
 
 --
--- Name: project_user_user_id; Type: INDEX; Schema: public; Owner: groblin
---
-
-CREATE INDEX project_user_user_id ON public.project_user USING btree (user_id);
-
-
---
 -- Name: sqlite_autoindex_project_user_1; Type: INDEX; Schema: public; Owner: groblin
 --
 
 CREATE UNIQUE INDEX sqlite_autoindex_project_user_1 ON public.project_user USING btree (project_id);
+
+
+--
+-- Name: user_id_1741182052757_index; Type: INDEX; Schema: public; Owner: groblin
+--
+
+CREATE INDEX user_id_1741182052757_index ON public.project_user USING btree (user_id);
 
 
 --
@@ -509,11 +655,19 @@ CREATE TRIGGER set_values_updated_at BEFORE UPDATE ON public."values" FOR EACH R
 
 
 --
--- Name: user last_project_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: groblin
+-- Name: account account_userId_fkey1; Type: FK CONSTRAINT; Schema: public; Owner: groblin
 --
 
-ALTER TABLE ONLY public."user"
-    ADD CONSTRAINT last_project_id_fk FOREIGN KEY (last_project_id) REFERENCES public.project(id) ON DELETE RESTRICT;
+ALTER TABLE ONLY public.account
+    ADD CONSTRAINT "account_userId_fkey1" FOREIGN KEY ("userId") REFERENCES public."user"(id) ON DELETE CASCADE;
+
+
+--
+-- Name: api_key api_key_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: groblin
+--
+
+ALTER TABLE ONLY public.api_key
+    ADD CONSTRAINT api_key_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.project(id) ON DELETE CASCADE;
 
 
 --
@@ -557,19 +711,19 @@ ALTER TABLE ONLY public.project_user
 
 
 --
--- Name: project_user project_user_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: groblin
+-- Name: session session_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: groblin
 --
 
-ALTER TABLE ONLY public.project_user
-    ADD CONSTRAINT project_user_user_id_fkey FOREIGN KEY (user_id) REFERENCES public."user"(id) ON DELETE CASCADE;
+ALTER TABLE ONLY public.session
+    ADD CONSTRAINT "session_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."user"(id) ON DELETE CASCADE;
 
 
 --
--- Name: user user_last_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: groblin
+-- Name: session session_userId_fkey1; Type: FK CONSTRAINT; Schema: public; Owner: groblin
 --
 
-ALTER TABLE ONLY public."user"
-    ADD CONSTRAINT user_last_project_id_fkey FOREIGN KEY (last_project_id) REFERENCES public.project(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE ONLY public.session
+    ADD CONSTRAINT "session_userId_fkey1" FOREIGN KEY ("userId") REFERENCES public."user"(id) ON DELETE CASCADE;
 
 
 --
