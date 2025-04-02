@@ -32,7 +32,7 @@ import {
 	split,
 	uniq
 } from 'ramda'
-import { compact, isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
+import { compact, isNilOrEmpty, isNotNilOrEmpty, isNumber } from 'ramda-adjunct'
 import type { DB, JsonValue } from 'src/database/schema.ts'
 import { NodeResolver } from 'src/resolvers/node-resolver.ts'
 import {
@@ -52,7 +52,10 @@ import {
 	arrow,
 	dbValue,
 	jsonField,
-	opMap
+	onlyMonth,
+	onlyYear,
+	opMap,
+	yearAndMonth
 } from 'src/utils/mappings.ts'
 import { allNodes } from 'src/utils/nodes.ts'
 import { ImageService, type MediaValue } from './image-service.ts'
@@ -190,10 +193,13 @@ export class SchemaContext {
 						const field = sql`${sql.ref(`${join}.value`)}${sql.raw(arrow(node, val))}${sql.lit(jsonField(node))}`
 
 						const condition = (eb: ExpressionBuilder<any, any>) =>
-							match<[Operand, any], any>(
-								caseOf(['eq', isNil], () => eb(field, 'is', null)),
-								caseOf(['not', isNil], () => eb(field, 'is not', null)),
-								caseOf([_, _], () =>
+							match<[TreeNode, Operand, any], any>(
+								caseOf([_, 'eq', isNil], () => eb(field, 'is', null)),
+								caseOf([_, 'not', isNil], () => eb(field, 'is not', null)),
+								onlyYear(eb, field, op),
+								yearAndMonth(eb, field, op),
+								onlyMonth(eb, field, op),
+								caseOf([_, _, _], () =>
 									eb(field, sql.raw(opMap[op]), dbValue(op, node, val))
 								)
 							)
@@ -204,7 +210,7 @@ export class SchemaContext {
 								on: sql`${sql.ref(`${join}.list_path`)} @> array_append(${sql.val(path)}, "values"."id") and ${sql.ref(`${join}.node_id`)} = ${sql.val(node.id)}`
 							},
 							condition: (eb: ExpressionBuilder<any, any>) =>
-								condition(eb)(op, val)
+								condition(eb)(node, op, val)
 						}
 					}
 

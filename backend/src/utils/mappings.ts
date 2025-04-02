@@ -22,8 +22,9 @@ import {
 	type GraphQLOutputType,
 	GraphQLString
 } from 'graphql'
-import { type RawBuilder, sql } from 'kysely'
+import { type ExpressionBuilder, type RawBuilder, sql } from 'kysely'
 import { T as _, isNil } from 'ramda'
+import { isNumber } from 'ramda-adjunct'
 import type { JsonValue } from 'src/database/schema.ts'
 import type { SchemaContext } from 'src/services/schema-context.ts'
 import { NodeType, type TreeNode } from 'src/types.ts'
@@ -146,3 +147,53 @@ export const arrow = match<[TreeNode, any], string>(
 	caseOf([{ type: NodeType.list }, _], '->'),
 	caseOf([_, _], '->>')
 )
+
+export const onlyYear = (
+	eb: ExpressionBuilder<any, any>,
+	field: RawBuilder<unknown>,
+	op: Operator
+) =>
+	caseOf(
+		[{ type: NodeType.date }, _, { year: isNumber, month: isNil, day: isNil }],
+		(_, __, date: any) =>
+			eb(sql`extract(year from (${field})::date)`, '=', sql.val(date.year))
+	)
+export const yearAndMonth = (
+	eb: ExpressionBuilder<any, any>,
+	field: RawBuilder<unknown>,
+	op: Operator
+) =>
+	caseOf(
+		[
+			{ type: NodeType.date },
+			_,
+			{ year: isNumber, month: isNumber, day: isNil }
+		],
+		(_, __, date: any) =>
+			eb.and([
+				eb(
+					sql`extract(year from (${field})::date)`,
+					sql.raw(opMap[op]),
+					sql.val(date.year)
+				),
+				eb(
+					sql`extract(month from (${field})::date)`,
+					sql.raw(opMap[op]),
+					sql.val(date.month)
+				)
+			])
+	)
+export const onlyMonth = (
+	eb: ExpressionBuilder<any, any>,
+	field: RawBuilder<unknown>,
+	op: Operator
+) =>
+	caseOf(
+		[{ type: NodeType.date }, _, { year: isNil, month: isNumber, day: isNil }],
+		(_, __, date: any) =>
+			eb(
+				sql`extract(month from (${field})::date)`,
+				sql.raw(opMap[op]),
+				sql.val(date.month)
+			)
+	)
