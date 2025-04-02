@@ -1,7 +1,7 @@
-import { describe, expect, test } from 'vitest'
+import { describe, test } from 'vitest'
 
 describe('PublicService', () => {
 	test('should be defined', () => {
-		globalThis.pool 
+		console.log('PublicService test')
 	})
 })

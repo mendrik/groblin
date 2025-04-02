@@ -17,7 +17,7 @@ beforeAll(async () => {
 	const host = globalThis.container.getHost()
 	const port = globalThis.container.getMappedPort(5432)
 
-	globalThis.pool = new Pool({
+	globalThis.pool = await new Pool({
 		host,
 		port,
 		user: 'test',
