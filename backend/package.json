@@ -6,7 +6,7 @@
 		"types:db": "kysely-codegen --out-file src/database/schema.ts --dialect postgres",
 		"schema:db": "./dump_db.sh",
 		"schema": "pnpm types:db",
-		"server": "tsx watch --include ./src --include ../shared/src --include ../type-patches src/server.ts",
+		"server": "tsx watch --include ./src --include ../shared/src  src/server.ts",
 		"test": "vitest"
 	},
 	"devDependencies": {
@@ -16,6 +16,7 @@
 		"@types/pg": "8.11.11",
 		"@types/ws": "8.18.1",
 		"ansicolor": "2.0.3",
+		"cross-env": "7.0.3",
 		"kysely-codegen": "0.18.3",
 		"pg": "8.14.1",
 		"testcontainers": "^10.23.0",

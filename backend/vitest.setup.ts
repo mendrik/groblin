@@ -1,5 +1,6 @@
 // vitest.setup.ts
 
+import { spawn } from 'node:child_process'
 import { Pool } from 'pg'
 import { GenericContainer } from 'testcontainers'
 import { afterAll, afterEach, beforeAll, beforeEach } from 'vitest'
@@ -22,6 +23,10 @@ beforeAll(async () => {
 		user: 'test',
 		password: 'test',
 		database: 'postgres'
+	})
+
+	const child = spawn('tsx', ['src/server.ts'], {
+		stdio: 'inherit'
 	})
 })
 

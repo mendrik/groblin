@@ -82,3 +82,5 @@ process.on('SIGINT', () => {
 	// Perform any cleanup tasks here
 	process.exit(0) // Exit the process gracefully
 })
+
+export { container }
