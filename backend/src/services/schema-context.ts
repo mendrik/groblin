@@ -165,9 +165,7 @@ export class SchemaContext {
 		const children = [...allNodes(node)]
 		const orderNodeKey = children.find(n => n.id === order?.node_id)?.name
 		const allKeys = pipe(compact, uniq)([...extractKeys(filter), orderNodeKey])
-		const filterNodes = [...allNodes(node)].filter(node =>
-			allKeys.includes(node.name)
-		)
+		const filterNodes = children.filter(node => allKeys.includes(node.name))
 		const res = this.db
 			.selectFrom('values')
 			.select([
