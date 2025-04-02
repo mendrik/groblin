@@ -201,7 +201,7 @@ export class SchemaContext {
 						return {
 							join: {
 								table: `values as ${join}`,
-								on: sql`${sql.ref(`${join}.list_path`)} @> array_append(${sql.val(path)}, "values"."id")`
+								on: sql`${sql.ref(`${join}.list_path`)} @> array_append(${sql.val(path)}, "values"."id") and ${sql.ref(`${join}.node_id`)} = ${sql.val(node.id)}`
 							},
 							condition: (eb: ExpressionBuilder<any, any>) =>
 								condition(eb)(op, val)
@@ -216,7 +216,7 @@ export class SchemaContext {
 					(q, group) =>
 						group.reduce(
 							(q, { join }) =>
-								q.innerJoin(join.table, j =>
+								q.leftJoin(join.table, j =>
 									j.on(join.on)
 								) as SelectQueryBuilder<DB, 'values', Value>,
 							q
