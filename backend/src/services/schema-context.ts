@@ -32,7 +32,7 @@ import {
 	split,
 	uniq
 } from 'ramda'
-import { compact, isNilOrEmpty, isNotNilOrEmpty, isNumber } from 'ramda-adjunct'
+import { compact, isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
 import type { DB, JsonValue } from 'src/database/schema.ts'
 import { NodeResolver } from 'src/resolvers/node-resolver.ts'
 import {
