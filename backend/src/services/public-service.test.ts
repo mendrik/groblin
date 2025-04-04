@@ -1,7 +1,9 @@
-import { describe, test } from 'vitest'
+import { describe } from 'vitest'
+import { txTest } from '../../vitest.setup.ts'
 
 describe('PublicService', () => {
-	test('should be defined', () => {
+	
+	txTest('should be defined', () => {
 		console.log('PublicService test')
 	})
 })

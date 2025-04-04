@@ -2,8 +2,30 @@
 
 import { spawn } from 'node:child_process'
 import { Pool } from 'pg'
-import { GenericContainer } from 'testcontainers'
-import { afterAll, afterEach, beforeAll, beforeEach } from 'vitest'
+import { GenericContainer, type StartedTestContainer } from 'testcontainers'
+import { afterAll, beforeAll } from 'vitest'
+import { createTaskCollector, getCurrentSuite } from 'vitest/suite'
+
+declare global {
+	var container: StartedTestContainer
+	var pool: Pool
+}
+
+export const txTest = createTaskCollector((name, fn, timeout) => {
+	getCurrentSuite().task(name, {
+		...this as any, // so "todo"/"skip"/... is tracked correctly
+		meta: {
+			transaction: true
+		},
+		handler: async () => {
+			await globalThis.pool.query('BEGIN')
+			const res = await fn()
+			await globalThis.pool.query('ROLLBACK')
+			return res
+		},
+		timeout
+	})
+})
 
 beforeAll(async () => {
 	globalThis.container = await new GenericContainer('postgres')
@@ -28,14 +50,6 @@ beforeAll(async () => {
 	const child = spawn('tsx', ['src/server.ts'], {
 		stdio: 'inherit'
 	})
-})
-
-beforeEach(async () => {
-	await globalThis.pool.query('BEGIN')
-})
-
-afterEach(async () => {
-	await globalThis.pool.query('ROLLBACK')
 })
 
 afterAll(async () => {
