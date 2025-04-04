@@ -1,0 +1,1 @@
+insert into public.project (id, name) VALUES (1, 'Project 1');

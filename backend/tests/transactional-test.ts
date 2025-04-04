@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs'
 import type { Pool } from 'pg'
 import type { StartedTestContainer } from 'testcontainers'
 import { createTaskCollector, getCurrentSuite } from 'vitest/suite'
@@ -7,7 +6,6 @@ declare global {
 	var container: StartedTestContainer
 	var pool: Pool
 }
-
 
 export const txTest = createTaskCollector((name, fn, timeout) => {
 	getCurrentSuite().task(name, {
