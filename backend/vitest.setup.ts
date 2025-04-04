@@ -1,6 +1,8 @@
 // vitest.setup.ts
 
 import { spawn } from 'node:child_process'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { Pool } from 'pg'
 import { GenericContainer, type StartedTestContainer } from 'testcontainers'
 import { afterAll, beforeAll } from 'vitest'
@@ -11,9 +13,21 @@ declare global {
 	var pool: Pool
 }
 
+const runSqlFile = async (file: string) => {
+	const initProject = readFileSync(join(__dirname, file), 'utf8')
+
+	await globalThis.pool
+		.query(initProject)
+		.then(() => console.log(`Ran SQL file: ${file}`))
+		.catch(err => {
+			console.error(`Error running SQL file: ${file}`, err)
+			throw err
+		})
+}
+
 export const txTest = createTaskCollector((name, fn, timeout) => {
 	getCurrentSuite().task(name, {
-		...this as any, // so "todo"/"skip"/... is tracked correctly
+		...(this as any), // so "todo"/"skip"/... is tracked correctly
 		meta: {
 			transaction: true
 		},
@@ -30,8 +44,9 @@ export const txTest = createTaskCollector((name, fn, timeout) => {
 beforeAll(async () => {
 	globalThis.container = await new GenericContainer('postgres')
 		.withEnvironment({
-			POSTGRES_USER: 'test',
-			POSTGRES_PASSWORD: 'test'
+			POSTGRES_USER: 'groblin',
+			POSTGRES_PASSWORD: 'groblin',
+			POSTGRES_DB: 'groblin'
 		})
 		.withExposedPorts(5432)
 		.start()
@@ -42,11 +57,14 @@ beforeAll(async () => {
 	globalThis.pool = await new Pool({
 		host,
 		port,
-		user: 'test',
-		password: 'test',
-		database: 'postgres'
+		user: 'groblin',
+		password: 'groblin',
+		database: 'groblin'
 	})
 
+	// Load and execute initial SQL data
+	await runSqlFile('./database/init.sql')
+	await runSqlFile('./database/test-data.sql')
 	const child = spawn('tsx', ['src/server.ts'], {
 		stdio: 'inherit'
 	})
