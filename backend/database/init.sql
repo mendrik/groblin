@@ -26,7 +26,7 @@ CREATE FUNCTION public.delete_referenced_rows() RETURNS trigger
     AS $$
 BEGIN
     -- Delete rows where list_path contains the OLD.id (the id of the deleted row)
-    DELETE FROM "values"
+    DELETE FROM public."values"
     WHERE OLD.id = ANY(list_path);
 
     -- Return the old row (standard for delete triggers)
@@ -52,7 +52,7 @@ BEGIN
         NEW.depth := 1;
     ELSE
         -- Fetch the parent's depth and add 1
-        SELECT depth INTO parent_depth FROM node WHERE id = NEW.parent_id;
+        SELECT depth INTO parent_depth FROM public.node WHERE id = NEW.parent_id;
 
         IF parent_depth IS NULL THEN
             RAISE EXCEPTION 'Parent with id % not found or depth not set', NEW.parent_id;
