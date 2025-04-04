@@ -13,5 +13,5 @@
 			"@tp/*": ["../type-patches/*"]
 		}
 	},
-	"include": ["src", "emails", "../shared/src", "../type-patches"]
+	"include": ["src", "emails", "../shared/src", "../type-patches", "tests"]
 }

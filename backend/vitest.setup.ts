@@ -1,21 +1,18 @@
-// vitest.setup.ts
-
 import { spawn } from 'node:child_process'
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { PostgreSqlContainer } from '@testcontainers/postgresql'
 import { Pool } from 'pg'
-import { GenericContainer, type StartedTestContainer } from 'testcontainers'
+
+import { readFileSync } from 'node:fs'
+import type { StartedTestContainer } from 'testcontainers'
 import { afterAll, beforeAll } from 'vitest'
-import { createTaskCollector, getCurrentSuite } from 'vitest/suite'
 
 declare global {
 	var container: StartedTestContainer
 	var pool: Pool
 }
 
-const runSqlFile = async (file: string) => {
-	const initProject = readFileSync(join(__dirname, file), 'utf8')
-
+export const runSqlFile = async (file: string) => {
+	const initProject = readFileSync(file, 'utf8')
 	await globalThis.pool
 		.query(initProject)
 		.then(() => console.log(`Ran SQL file: ${file}`))
@@ -25,41 +22,23 @@ const runSqlFile = async (file: string) => {
 		})
 }
 
-export const txTest = createTaskCollector((name, fn, timeout) => {
-	getCurrentSuite().task(name, {
-		...(this as any), // so "todo"/"skip"/... is tracked correctly
-		meta: {
-			transaction: true
-		},
-		handler: async () => {
-			await globalThis.pool.query('BEGIN')
-			const res = await fn()
-			await globalThis.pool.query('ROLLBACK')
-			return res
-		},
-		timeout
-	})
-})
-
 beforeAll(async () => {
-	globalThis.container = await new GenericContainer('postgres')
-		.withEnvironment({
-			POSTGRES_USER: 'groblin',
-			POSTGRES_PASSWORD: 'groblin',
-			POSTGRES_DB: 'groblin'
-		})
-		.withExposedPorts(5432)
-		.start()
+	const container = new PostgreSqlContainer('postgres:latest')
+		.withDatabase('groblin')
+		.withUsername('groblin')
+		.withPassword('groblin')
+	globalThis.container = await container.start()
 
 	const host = globalThis.container.getHost()
 	const port = globalThis.container.getMappedPort(5432)
 
-	globalThis.pool = await new Pool({
+	globalThis.pool = new Pool({
 		host,
 		port,
 		user: 'groblin',
 		password: 'groblin',
-		database: 'groblin'
+		database: 'groblin',
+		max: 10
 	})
 
 	// Load and execute initial SQL data
