@@ -13,13 +13,10 @@ declare global {
 
 export const runSqlFile = async (file: string) => {
 	const initProject = readFileSync(file, 'utf8')
-	await globalThis.pool
-		.query(initProject)
-		.then(() => console.log(`Ran SQL file: ${file}`))
-		.catch(err => {
-			console.error(`Error running SQL file: ${file}`, err)
-			throw err
-		})
+	await globalThis.pool.query(initProject).catch(err => {
+		console.error(`Error running SQL file: ${file}`, err)
+		throw err
+	})
 }
 
 beforeAll(async () => {
