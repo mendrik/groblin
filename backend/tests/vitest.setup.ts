@@ -47,12 +47,10 @@ export default async function setup(project: TestProject) {
 	// Load and execute initial SQL data
 	await runSqlFile('./database/init.sql')
 	await runSqlFile('./database/test-data.sql')
-
 	await pool.end()
 
 	const shutdown = async () => {
 		await db.stop()
-		await pool.end()
 	}
 
 	return shutdown
