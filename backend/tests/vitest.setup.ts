@@ -1,15 +1,17 @@
 import { PostgreSqlContainer } from '@testcontainers/postgresql'
+import type { TestProject } from 'vitest/node'
+
+import { spawn } from 'node:child_process'
+import { readFileSync } from 'node:fs'
 import { Pool } from 'pg'
 
-import { readFileSync } from 'node:fs'
-import type { Container } from 'inversify'
-
-declare global {
-	var pool: Pool
-	var container: Container
+declare module 'vitest' {
+	export interface ProvidedContext {
+		dbPort: number
+		dbHost: string
+	}
 }
-
-export default async function setup() {
+export default async function setup(project: TestProject) {
 	const db = await new PostgreSqlContainer('postgres:latest')
 		.withDatabase('groblin')
 		.withUsername('groblin')
@@ -29,14 +31,15 @@ export default async function setup() {
 		user: 'groblin',
 		password: 'groblin',
 		database: 'groblin',
-		max: 10
+		max: 1
 	})
 
-	globalThis.pool = pool
+	project.provide('dbHost', host)
+	project.provide('dbPort', port)
 
 	const runSqlFile = async (file: string) => {
 		const initProject = readFileSync(file, 'utf8')
-		await pool.query(initProject).catch(err => {
+		await pool.query(initProject).catch((err: Error) => {
 			console.error(`Error running SQL file: ${file}`, err)
 			throw err
 		})
@@ -46,18 +49,14 @@ export default async function setup() {
 	await runSqlFile('./database/init.sql')
 	await runSqlFile('./database/test-data.sql')
 
-	globalThis.container = await import('../src/server.ts')
-		.then(({ container }) => {
-			globalThis.container = container
-			return container
-		})
-		.catch(err => {
-			console.error('Error loading container', err)
-			throw err
-		})
+	const child = spawn('npm', ['run', 'server'], {
+		stdio: 'inherit'
+	})
+	await pool.end()
 
 	return async () => {
-		await pool.end()
+		child.kill()
+
 		await db.stop()
 	}
 }

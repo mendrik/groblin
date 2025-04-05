@@ -1,9 +1,15 @@
-import type { Pool } from 'pg'
+import { Pool } from 'pg'
+import { inject } from 'vitest'
 import { createTaskCollector, getCurrentSuite } from 'vitest/suite'
 
-declare global {
-	var pool: Pool
-}
+const pool = new Pool({
+	host: inject('dbHost'),
+	port: inject('dbPort'),
+	user: 'groblin',
+	password: 'groblin',
+	database: 'groblin',
+	max: 1
+})
 
 export const txTest = createTaskCollector((name, fn, timeout) => {
 	getCurrentSuite().task(name, {
@@ -12,9 +18,9 @@ export const txTest = createTaskCollector((name, fn, timeout) => {
 			transaction: true
 		},
 		handler: async () => {
-			await globalThis.pool.query('BEGIN')
+			await pool.query('BEGIN')
 			const res = await fn()
-			await globalThis.pool.query('ROLLBACK')
+			await pool.query('ROLLBACK')
 			return res
 		},
 		timeout
