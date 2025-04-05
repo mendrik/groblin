@@ -60,11 +60,16 @@ container.bind(InternalServer).to(InternalServer).inSingletonScope()
 container.bind(PublicServer).to(PublicServer).inSingletonScope()
 container.bind(ValueResolver).toSelf()
 
-console.log(yellow(`Starting services...`))
-void container.get(ImageService).init()
-void container.get(NodeSettingsService).init()
-void container.get(InternalServer).start(container)
-void container.get(PublicServer).start()
+try {
+	console.log(yellow(`Starting services...`))
+	void container.get(ImageService).init()
+	void container.get(NodeSettingsService).init()
+	void container.get(InternalServer).start(container)
+	void container.get(PublicServer).start()
+	console.log(yellow(`Services started.`))
+} catch (e) {
+	console.error(e)
+}
 
 const shutDown = tryCatch(() => {
 	void container.get(PublicServer).stop()

@@ -1,35 +1,29 @@
-import { spawn } from 'node:child_process'
 import { PostgreSqlContainer } from '@testcontainers/postgresql'
 import { Pool } from 'pg'
 
 import { readFileSync } from 'node:fs'
-import type { StartedTestContainer } from 'testcontainers'
-import { afterAll, beforeAll } from 'vitest'
+import type { Container } from 'inversify'
 
 declare global {
-	var container: StartedTestContainer
 	var pool: Pool
+	var container: Container
 }
 
-export const runSqlFile = async (file: string) => {
-	const initProject = readFileSync(file, 'utf8')
-	await globalThis.pool.query(initProject).catch(err => {
-		console.error(`Error running SQL file: ${file}`, err)
-		throw err
-	})
-}
-
-beforeAll(async () => {
-	const container = new PostgreSqlContainer('postgres:latest')
+export default async function setup() {
+	const db = await new PostgreSqlContainer('postgres:latest')
 		.withDatabase('groblin')
 		.withUsername('groblin')
 		.withPassword('groblin')
-	globalThis.container = await container.start()
+		.start()
 
-	const host = globalThis.container.getHost()
-	const port = globalThis.container.getMappedPort(5432)
+	const host = db.getHost()
+	const port = db.getMappedPort(5432)
 
-	globalThis.pool = new Pool({
+	process.env.DATABASE_URL = `postgresql://groblin:groblin@${host}:${port}/groblin`
+	process.env.PORT = '9001'
+	process.env.PUBLIC_PORT = '9002'
+
+	const pool = new Pool({
 		host,
 		port,
 		user: 'groblin',
@@ -38,15 +32,32 @@ beforeAll(async () => {
 		max: 10
 	})
 
+	globalThis.pool = pool
+
+	const runSqlFile = async (file: string) => {
+		const initProject = readFileSync(file, 'utf8')
+		await pool.query(initProject).catch(err => {
+			console.error(`Error running SQL file: ${file}`, err)
+			throw err
+		})
+	}
+
 	// Load and execute initial SQL data
 	await runSqlFile('./database/init.sql')
 	await runSqlFile('./database/test-data.sql')
-	const child = spawn('tsx', ['src/server.ts'], {
-		stdio: 'inherit'
-	})
-})
 
-afterAll(async () => {
-	await globalThis.pool.end()
-	await globalThis.container.stop()
-})
+	globalThis.container = await import('../src/server.ts')
+		.then(({ container }) => {
+			globalThis.container = container
+			return container
+		})
+		.catch(err => {
+			console.error('Error loading container', err)
+			throw err
+		})
+
+	return async () => {
+		await pool.end()
+		await db.stop()
+	}
+}

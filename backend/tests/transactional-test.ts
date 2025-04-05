@@ -1,9 +1,7 @@
 import type { Pool } from 'pg'
-import type { StartedTestContainer } from 'testcontainers'
 import { createTaskCollector, getCurrentSuite } from 'vitest/suite'
 
 declare global {
-	var container: StartedTestContainer
 	var pool: Pool
 }
 

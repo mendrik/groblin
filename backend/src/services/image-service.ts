@@ -5,17 +5,14 @@ import { assertExists, assertThat } from '@shared/asserts.ts'
 import type { MediaType } from '@shared/json-value-types.ts'
 import { decryptInteger, encryptInteger } from '@shared/utils/number-hash.ts'
 import { url } from '@shared/utils/url.ts'
-import type { AnyFn } from '@tp/functions.ts'
 import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
-import { append, defaultTo, fromPairs, map, pipe, uniq } from 'ramda'
+import { uniq } from 'ramda'
 import { included, isString } from 'ramda-adjunct'
 import sharp from 'sharp'
 import type { DB } from 'src/database/schema.ts'
-import { NodeResolver } from 'src/resolvers/node-resolver.ts'
 import type { Value } from 'src/resolvers/value-resolver.ts'
-import { NodeType } from 'src/types.ts'
-import { Topic } from 'src/types.ts'
+import { NodeType, Topic } from 'src/types.ts'
 import { ErrorHandler } from 'src/utils/error-handler.ts'
 import { isJsonObject } from 'src/utils/json.ts'
 import type { PubSub } from 'type-graphql'
@@ -43,9 +40,6 @@ type NodeWithSettings = {
 export class ImageService {
 	@inject('PubSub')
 	private pubSub: PubSub
-
-	@inject(NodeResolver)
-	private nodeResolver: NodeResolver
 
 	@inject(S3Client)
 	private s3: S3Client
@@ -174,5 +168,4 @@ export class ImageService {
 	thumbnailFile(media: MediaType, size: string): string {
 		return `${media.file}_${size}`
 	}
-
 }
