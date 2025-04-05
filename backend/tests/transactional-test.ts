@@ -8,7 +8,7 @@ const pool = new Pool({
 	user: 'groblin',
 	password: 'groblin',
 	database: 'groblin',
-	max: 1
+	max: 10
 })
 
 export const txTest = createTaskCollector((name, fn, timeout) => {

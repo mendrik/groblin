@@ -31,7 +31,6 @@ import { useAdapter } from '@type-cacheable/node-cache-adapter'
 import NodeCache from 'node-cache'
 import { Authenticator } from './auth.ts'
 import { SesClient } from './services/ses-client.ts'
-
 const client = new NodeCache()
 useAdapter(client)
 
@@ -87,5 +86,7 @@ process.on('SIGINT', () => {
 	// Perform any cleanup tasks here
 	process.exit(0) // Exit the process gracefully
 })
+
+process.send?.('ready');
 
 export { container }

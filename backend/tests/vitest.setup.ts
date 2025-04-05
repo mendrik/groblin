@@ -1,7 +1,6 @@
 import { PostgreSqlContainer } from '@testcontainers/postgresql'
 import type { TestProject } from 'vitest/node'
 
-import { spawn } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { Pool } from 'pg'
 
@@ -49,14 +48,12 @@ export default async function setup(project: TestProject) {
 	await runSqlFile('./database/init.sql')
 	await runSqlFile('./database/test-data.sql')
 
-	const child = spawn('npm', ['run', 'server'], {
-		stdio: 'inherit'
-	})
 	await pool.end()
 
-	return async () => {
-		child.kill()
-
+	const shutdown = async () => {
 		await db.stop()
+		await pool.end()
 	}
+
+	return shutdown
 }
