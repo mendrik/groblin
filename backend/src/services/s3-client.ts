@@ -6,17 +6,17 @@ import {
 	PutObjectCommand,
 	type PutObjectRequest
 } from '@aws-sdk/client-s3'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 import { F, T } from 'ramda'
 
 @injectable()
-export class S3Client extends AwsS3 {
-	constructor() {
-		super({ region: process.env.AWS_REGION })
-	}
+export class S3Client {
+
+	@inject(AwsS3)
+	private s3: AwsS3
 
 	async getBody(key: string) {
-		const response = await this.send(
+		const response = await this.s3.send(
 			new GetObjectCommand({
 				Bucket: process.env.AWS_BUCKET,
 				Key: key
@@ -33,7 +33,7 @@ export class S3Client extends AwsS3 {
 	}
 
 	deleteFile(key: string) {
-		return this.send(
+		return this.s3.send(
 			new DeleteObjectCommand({
 				Bucket: process.env.AWS_BUCKET,
 				Key: key
@@ -42,7 +42,7 @@ export class S3Client extends AwsS3 {
 	}
 
 	exists(key: string) {
-		return this.send(
+		return this.s3.send(
 			new HeadObjectCommand({
 				Bucket: process.env.AWS_BUCKET,
 				Key: key
@@ -57,7 +57,7 @@ export class S3Client extends AwsS3 {
 	}
 
 	uploadBytes(key: string, data: Buffer, params: Partial<PutObjectRequest>) {
-		return this.send(
+		return this.s3.send(
 			new PutObjectCommand({
 				Bucket: process.env.AWS_BUCKET,
 				Key: key,

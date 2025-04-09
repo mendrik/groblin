@@ -27,17 +27,20 @@ import { PublicService } from './services/public-service.ts'
 import { S3Client } from './services/s3-client.ts'
 import { SchemaContext } from './services/schema-context.ts'
 
+import { S3Client as AwsS3 } from '@aws-sdk/client-s3'
 import { useAdapter } from '@type-cacheable/node-cache-adapter'
 import NodeCache from 'node-cache'
 import { Authenticator } from './auth.ts'
 import { SesClient } from './services/ses-client.ts'
 const client = new NodeCache()
 useAdapter(client)
+const s3 = new AwsS3({ region: process.env.AWS_REGION })
 
 const pubSub = createPubSub()
 const container = new Container()
 container.bind<PubSub>('PubSub').toConstantValue(pubSub)
 container.bind(Kysely<DB>).toConstantValue(db)
+container.bind(AwsS3).toConstantValue(s3)
 container.bind(S3Client).toSelf()
 container.bind(SesClient).toSelf()
 container.bind(Authenticator).toSelf()
@@ -86,7 +89,5 @@ process.on('SIGINT', () => {
 	// Perform any cleanup tasks here
 	process.exit(0) // Exit the process gracefully
 })
-
-process.send?.('ready');
 
 export { container }
