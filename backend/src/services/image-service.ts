@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client as AwsS3 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { assertExists, assertThat } from '@shared/asserts.ts'
 import type { MediaType } from '@shared/json-value-types.ts'
@@ -17,7 +18,6 @@ import { ErrorHandler } from 'src/utils/error-handler.ts'
 import { isJsonObject } from 'src/utils/json.ts'
 import type { PubSub } from 'type-graphql'
 import { S3Client } from './s3-client.ts'
-
 const mediaUrl = process.env.VITE_MEDIA_URL
 
 export type MediaValue = Value & { value: MediaType }
@@ -43,6 +43,9 @@ export class ImageService {
 
 	@inject(S3Client)
 	private s3: S3Client
+
+	@inject(AwsS3)
+	private awsS3: AwsS3
 
 	@inject(Kysely)
 	private db: Kysely<DB>
@@ -127,7 +130,7 @@ export class ImageService {
 			Bucket: process.env.AWS_BUCKET,
 			Key: size ? this.thumbnailFile(media.value, size) : media.value.file
 		})
-		const s3Url = await getSignedUrl(this.s3, getObj, {
+		const s3Url = await getSignedUrl(this.awsS3, getObj, {
 			expiresIn: 3600
 		})
 		response.writeHead(302, {
