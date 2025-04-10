@@ -169,7 +169,7 @@ const fieldForNode = match<
 )
 
 @injectable()
-export class PublicService {
+export class SchemaService {
 	@inject(SchemaContext)
 	context: SchemaContext
 

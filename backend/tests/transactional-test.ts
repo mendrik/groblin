@@ -5,7 +5,7 @@ import { createTaskCollector, getCurrentSuite } from 'vitest/suite'
 import { mockClient } from 'aws-sdk-client-mock'
 import { S3Client } from '../src/services/s3-client.ts'
 import 'dotenv/config'
-import { type YogaServerInstance, createPubSub, createYoga } from 'graphql-yoga'
+import { createPubSub, createYoga } from 'graphql-yoga'
 import { Container } from 'inversify'
 import { Kysely, PostgresDialect } from 'kysely'
 import 'reflect-metadata'
@@ -23,8 +23,8 @@ import { NodeSettingsResolver } from '../src/resolvers/node-settings-resolver.ts
 import { ProjectResolver } from '../src/resolvers/project-resolver.ts'
 import { UserResolver } from '../src/resolvers/user-resolver.ts'
 import { ProjectService } from '../src/services/project-service.ts'
-import { PublicService } from '../src/services/public-service.ts'
 import { SchemaContext } from '../src/services/schema-context.ts'
+import { SchemaService } from '../src/services/schema-service.ts'
 import { SesClient } from '../src/services/ses-client.ts'
 
 process.on('unhandledRejection', (reason: string, p: Promise<any>) => {
@@ -62,21 +62,34 @@ container.bind(UserResolver).toSelf()
 container.bind(ProjectService).toSelf()
 container.bind(IoResolver).toSelf()
 container.bind(SchemaContext).toSelf()
-container.bind(PublicService).toSelf()
+container.bind(SchemaService).toSelf()
 container.bind(ImageService).to(ImageService).inSingletonScope()
-
-const schema = container.get(PublicService).getSchema(1)
-const yoga = createYoga({ schema })
 
 declare module 'vitest' {
 	export interface TestContext {
 		pool: Pool
 		container: Container
-		yoga: YogaServerInstance<any, any>
+		query: (query: string) => Promise<Response>
 	}
 }
 
-export const txTest = createTaskCollector((name, fn, timeout) => {
+const schema = container.get(SchemaService).getSchema(1)
+const yoga = createYoga({ schema })
+
+const query = async (query: string) => {
+	const res = await yoga.fetch('/graphql', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ query })
+	})
+	if (!res.ok) {
+		throw new Error(
+			`Error: ${res.status} ${res.statusText} ${await res.text()}`
+		)
+	}
+}
+
+export const txTest = createTaskCollector((name, fn, timeout) =>
 	getCurrentSuite().task(name, {
 		...(this as any), // so "todo"/"skip"/... is tracked correctly
 		meta: {
@@ -84,10 +97,10 @@ export const txTest = createTaskCollector((name, fn, timeout) => {
 		},
 		handler: async () => {
 			await pool.query('BEGIN')
-			const res = await fn({ pool, container, yoga })
+			const res = await fn({ pool, container, query })
 			await pool.query('ROLLBACK')
 			return res
 		},
 		timeout
 	})
-})
+)

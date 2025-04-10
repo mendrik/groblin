@@ -23,9 +23,9 @@ import { InternalServer } from './services/interal-server.ts'
 import { NodeSettingsService } from './services/node-settings-service.ts'
 import { ProjectService } from './services/project-service.ts'
 import { PublicServer } from './services/public-server.ts'
-import { PublicService } from './services/public-service.ts'
 import { S3Client } from './services/s3-client.ts'
 import { SchemaContext } from './services/schema-context.ts'
+import { SchemaService } from './services/schema-service.ts'
 
 import { S3Client as AwsS3 } from '@aws-sdk/client-s3'
 import { useAdapter } from '@type-cacheable/node-cache-adapter'
@@ -54,7 +54,7 @@ container.bind(LogAccess).toSelf()
 container.bind(ProjectService).toSelf()
 container.bind(IoResolver).toSelf()
 container.bind(AuthChecker).toSelf()
-container.bind(PublicService).toSelf()
+container.bind(SchemaService).toSelf()
 container.bind(SchemaContext).toSelf()
 container.bind(ImageService).to(ImageService).inSingletonScope()
 container.bind(NodeSettingsService).to(NodeSettingsService).inSingletonScope()

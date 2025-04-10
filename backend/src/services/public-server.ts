@@ -21,7 +21,7 @@ import type { ProjectId } from 'src/types.ts'
 import { Topic } from 'src/types.ts'
 import type { PubSub } from 'type-graphql'
 import { ImageService } from './image-service.ts'
-import { PublicService } from './public-service.ts'
+import { SchemaService } from './schema-service.ts'
 
 const port = process.env.PUBLIC_PORT
 
@@ -35,8 +35,8 @@ export class PublicServer {
 	@inject('PubSub')
 	private pubSub: PubSub
 
-	@inject(PublicService)
-	private schemaService: PublicService
+	@inject(SchemaService)
+	private schemaService: SchemaService
 
 	@inject(ImageService)
 	private imageService: ImageService
