@@ -1,4 +1,5 @@
 import { PutObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client as AwsS3 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { inject, injectable } from 'inversify'
 import { Kysely, type Transaction, sql } from 'kysely'
@@ -66,6 +67,9 @@ export class IoResolver {
 	@inject(S3Client)
 	private readonly s3: S3Client
 
+	@inject(AwsS3)
+	private awsS3: AwsS3
+
 	@inject(NodeResolver)
 	private readonly nodeResolver: NodeResolver
 
@@ -125,7 +129,7 @@ export class IoResolver {
 			Key
 		})
 		return {
-			signedUrl: getSignedUrl(this.s3, command, { expiresIn: 3600 }),
+			signedUrl: getSignedUrl(this.awsS3, command, { expiresIn: 3600 }),
 			object: Key
 		}
 	}
