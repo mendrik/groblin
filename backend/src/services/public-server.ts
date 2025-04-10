@@ -98,7 +98,7 @@ export class PublicServer {
 		}
 	}
 
-	private async schema(apiKey: string): Promise<GraphQLSchema> {
+	async schema(apiKey: string): Promise<GraphQLSchema> {
 		const { project_id } = await this.db
 			.selectFrom('api_key')
 			.select('project_id')

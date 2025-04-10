@@ -5,7 +5,7 @@ import { createTaskCollector, getCurrentSuite } from 'vitest/suite'
 import { mockClient } from 'aws-sdk-client-mock'
 import { S3Client } from '../src/services/s3-client.ts'
 import 'dotenv/config'
-import { createPubSub } from 'graphql-yoga'
+import { type YogaServerInstance, createPubSub, createYoga } from 'graphql-yoga'
 import { Container } from 'inversify'
 import { Kysely, PostgresDialect } from 'kysely'
 import 'reflect-metadata'
@@ -65,10 +65,14 @@ container.bind(SchemaContext).toSelf()
 container.bind(PublicService).toSelf()
 container.bind(ImageService).to(ImageService).inSingletonScope()
 
+const schema = container.get(PublicService).getSchema(1)
+const yoga = createYoga({ schema })
+
 declare module 'vitest' {
 	export interface TestContext {
 		pool: Pool
 		container: Container
+		yoga: YogaServerInstance<any, any>
 	}
 }
 
@@ -80,7 +84,7 @@ export const txTest = createTaskCollector((name, fn, timeout) => {
 		},
 		handler: async () => {
 			await pool.query('BEGIN')
-			const res = await fn({ pool, container })
+			const res = await fn({ pool, container, yoga })
 			await pool.query('ROLLBACK')
 			return res
 		},
