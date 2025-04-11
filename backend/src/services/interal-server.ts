@@ -1,6 +1,5 @@
 import { cyan, lightGreen } from 'ansicolor'
 import 'dotenv/config'
-import { execute, subscribe } from 'graphql'
 import { useServer } from 'graphql-ws/use/ws'
 import { type Container, injectable } from 'inversify'
 import { prop } from 'ramda'

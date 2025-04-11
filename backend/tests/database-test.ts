@@ -13,7 +13,6 @@ import type { PubSub } from 'type-graphql'
 import type { DB } from '../src/database/schema.ts'
 
 import { S3Client as AwsS3 } from '@aws-sdk/client-s3'
-import { ImageService } from 'src/services/image-service.ts'
 import { Authenticator } from '../src/auth.ts'
 import { ApiKeyResolver } from '../src/resolvers/api-key-resolver.ts'
 import { IoResolver } from '../src/resolvers/io-resolver.ts'
@@ -22,6 +21,7 @@ import { NodeResolver } from '../src/resolvers/node-resolver.ts'
 import { NodeSettingsResolver } from '../src/resolvers/node-settings-resolver.ts'
 import { ProjectResolver } from '../src/resolvers/project-resolver.ts'
 import { UserResolver } from '../src/resolvers/user-resolver.ts'
+import { ImageService } from '../src/services/image-service.ts'
 import { ProjectService } from '../src/services/project-service.ts'
 import { SchemaContext } from '../src/services/schema-context.ts'
 import { SchemaService } from '../src/services/schema-service.ts'
@@ -73,7 +73,7 @@ declare module 'vitest' {
 	}
 }
 
-const schema = container.get(SchemaService).getSchema(1)
+const schema = await container.get(SchemaService).getSchema(1)
 const yoga = createYoga({ schema })
 
 const query = async (query: string) => {
@@ -87,9 +87,10 @@ const query = async (query: string) => {
 			`Error: ${res.status} ${res.statusText} ${await res.text()}`
 		)
 	}
+	return res.json()
 }
 
-export const txTest = createTaskCollector((name, fn, timeout) =>
+export const withDatabase = createTaskCollector((name, fn, timeout) =>
 	getCurrentSuite().task(name, {
 		...(this as any), // so "todo"/"skip"/... is tracked correctly
 		meta: {

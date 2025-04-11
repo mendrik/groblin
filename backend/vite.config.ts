@@ -1,11 +1,11 @@
 import 'dotenv/config'
 import { resolve } from 'node:path'
 import tsconfigPaths from 'vite-tsconfig-paths'
-import { type ViteUserConfig, defineConfig } from 'vitest/config'
+import { type Plugin, defineConfig } from 'vitest/config'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-	plugins: [tsconfigPaths()] as ViteUserConfig['plugins'],
+	plugins: [tsconfigPaths() as any] as Plugin[],
 	resolve: {
 		alias: {
 			'@tp': resolve(__dirname, '../type-patches/src'),

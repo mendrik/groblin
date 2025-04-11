@@ -1,6 +1,11 @@
 {
 	"name": "groblin",
 	"private": true,
+	"workspaces": [
+		"frontend",
+		"backend",
+		"shared"
+	],
 	"scripts": {
 		"schema:frontend": "pnpm --filter frontend run schema",
 		"schema:backend": "pnpm --filter backend run schema",
@@ -9,10 +14,10 @@
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
 		"@types/ramda": "0.30.2",
-		"dotenv": "16.4.7",
-		"tsd": "0.31.2",
+		"dotenv": "16.5.0",
+		"tsd": "0.32.0",
 		"tsx": "4.19.3",
-		"typescript": "5.8.2",
+		"typescript": "5.8.3",
 		"vitest": "3.1.1",
 		"vite-tsconfig-paths": "5.1.4"
 	},

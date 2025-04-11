@@ -48,36 +48,6 @@ export class PublicServer {
 
 	private server: Server
 
-	constructor() {
-		const yoga = createYoga<{
-			req: IncomingMessage
-			reply: OutgoingMessage
-		}>({
-			schema: ({ request }) => {
-				const apiKey = request.headers.get('x-api-key')
-				assertExists(apiKey, 'API key is required')
-				return this.schema(apiKey)
-			},
-			renderGraphiQL
-		})
-
-		this.server = createServer(
-			match<[any, any], any>(
-				caseOf([{ url: startsWith('/api/auth/') }, _], (i, o) =>
-					toNodeHandler(this.auth)(i, o)
-				),
-				caseOf([{ url: startsWith('/media/') }, _], (i, o) =>
-					this.imageService.handleRequest(i, o)
-				),
-				caseOf([{ url: equals('/schema') }, _], (i, o) =>
-					this.generateSchema(i, o)
-				),
-				caseOf([_, _], yoga)
-			)
-		)
-		this.abort = new AbortController()
-	}
-
 	private async listenToNodeChanges() {
 		for await (const projectId of this.pubSub.subscribe(
 			Topic.NodesUpdated
@@ -124,6 +94,33 @@ export class PublicServer {
 	}
 
 	public start() {
+		const yoga = createYoga<{
+			req: IncomingMessage
+			reply: OutgoingMessage
+		}>({
+			schema: ({ request }) => {
+				const apiKey = request.headers.get('x-api-key')
+				assertExists(apiKey, 'API key is required')
+				return this.schema(apiKey)
+			},
+			renderGraphiQL
+		})
+
+		this.server = createServer(
+			match<[any, any], any>(
+				caseOf([{ url: startsWith('/api/auth/') }, _], (i, o) =>
+					toNodeHandler(this.auth)(i, o)
+				),
+				caseOf([{ url: startsWith('/media/') }, _], (i, o) =>
+					this.imageService.handleRequest(i, o)
+				),
+				caseOf([{ url: equals('/schema') }, _], (i, o) =>
+					this.generateSchema(i, o)
+				),
+				caseOf([_, _], yoga)
+			)
+		)
+		this.abort = new AbortController()
 		this.listenToNodeChanges()
 		this.listenToNodeSettingsChanges()
 		this.server.listen({ port }, () => {
