@@ -1,11 +1,7 @@
 {
 	"name": "groblin",
 	"private": true,
-	"workspaces": [
-		"frontend",
-		"backend",
-		"shared"
-	],
+	"workspaces": ["frontend", "backend", "shared"],
 	"scripts": {
 		"schema:frontend": "pnpm --filter frontend run schema",
 		"schema:backend": "pnpm --filter backend run schema",
@@ -22,6 +18,8 @@
 		"vite-tsconfig-paths": "5.1.4"
 	},
 	"dependencies": {
+		"graphql": "16.10.0",
+		"graphql-ws": "6.0.4",
 		"ramda": "0.30.1",
 		"ramda-adjunct": "5.1.0"
 	}
