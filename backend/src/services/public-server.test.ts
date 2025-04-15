@@ -1,3 +1,4 @@
+import { path } from 'ramda'
 import { withDatabase } from 'tests/database-test.ts'
 import { describe, expect } from 'vitest'
 
@@ -14,7 +15,18 @@ describe('PublicServer', () => {
 					Birthdate
 				}
 			}`
+		).then(path(['data', 'People']))
+		expect(res).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					Name: 'Andreas Herd',
+					Birthdate: '1976-11-14',
+					Clothing: [165, 131, 11, 1],
+					Management: true,
+					Gender: 'Male',
+					Age: 48
+				})
+			])
 		)
-		expect(res.status).toBe(200)
 	})
 })

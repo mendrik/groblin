@@ -9,7 +9,8 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			'@tp': resolve(__dirname, '../type-patches/src'),
-			'@shared': resolve(__dirname, '../shared/src')
+			'@shared': resolve(__dirname, '../shared/src'),
+			'graphql': resolve(__dirname, '../node_modules/graphql/index.js'),
 		}
 	},
 	test: {
