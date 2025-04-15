@@ -64,8 +64,8 @@ importers:
         specifier: 10.0.23
         version: 10.0.23(graphql@16.10.0)
       '@graphql-yoga/render-graphiql':
-        specifier: ^5.13.3
-        version: 5.13.3(graphql-yoga@5.13.3(graphql@16.10.0))
+        specifier: ^5.13.4
+        version: 5.13.4(graphql-yoga@5.13.4(graphql@16.10.0))
       '@type-cacheable/core':
         specifier: ^14.1.0
         version: 14.1.0
@@ -76,8 +76,8 @@ importers:
         specifier: ^0.0.8
         version: 0.0.8(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(zod@3.24.2)
       better-auth:
-        specifier: ^1.2.5
-        version: 1.2.5(typescript@5.8.3)
+        specifier: ^1.2.7
+        version: 1.2.7
       chroma-js:
         specifier: 3.1.2
         version: 3.1.2
@@ -94,14 +94,14 @@ importers:
         specifier: 9.0.18
         version: 9.0.18(@types/react@19.1.0)(graphql-ws@6.0.4(graphql@16.10.0)(ws@8.18.1))(graphql@16.10.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       graphql-yoga:
-        specifier: 5.13.3
-        version: 5.13.3(graphql@16.10.0)
+        specifier: 5.13.4
+        version: 5.13.4(graphql@16.10.0)
       inversify:
         specifier: 6.2.2
         version: 6.2.2(reflect-metadata@0.2.2)
       kysely:
-        specifier: 0.27.6
-        version: 0.27.6
+        specifier: 0.28.0
+        version: 0.28.0
       ms:
         specifier: 2.1.3
         version: 2.1.3
@@ -159,7 +159,7 @@ importers:
         version: 7.0.3
       kysely-codegen:
         specifier: 0.18.3
-        version: 0.18.3(kysely@0.27.6)(pg@8.14.1)(typescript@5.8.3)
+        version: 0.18.3(kysely@0.28.0)(pg@8.14.1)(typescript@5.8.3)
       pg:
         specifier: 8.14.1
         version: 8.14.1
@@ -1281,6 +1281,9 @@ packages:
     resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
     engines: {node: '>=14'}
 
+  '@fastify/busboy@3.1.1':
+    resolution: {integrity: sha512-5DGmA8FTdB2XbDeEwc/5ZXBl6UbBAyBOOLlPuBnZ/N1SwdH9Ii+cOX3tBROlDgcTXxjOYnLMVoKk9+FXAw0CJw==}
+
   '@floating-ui/core@1.6.9':
     resolution: {integrity: sha512-uMXCuQ3BItDUbAMhIXw7UPXRfAlOAvZzdK9BWpE60MCn+Svt3aLn9jsPTi/WNGlRUu2uI0v5S7JiIUsbsvh3fw==}
 
@@ -1600,14 +1603,18 @@ packages:
     resolution: {integrity: sha512-Nv0BoDGLMg9QBKy9cIswQ3/6aKaKjlTh87x3GiBg2Z4RrjyrM48DvOOK0pJh1C1At+b0mUIM67cwZcFTDLN4sA==}
     engines: {node: '>=18.0.0'}
 
-  '@graphql-yoga/render-graphiql@5.13.3':
-    resolution: {integrity: sha512-UGJ4T6MUciXaox1Nhjr6qIUIFCSEtESsJHXPnqJDCesZxxcWCUfIzo1KoZ+9N4wuEYb+qkcc2cG97RKYuSqoiA==}
+  '@graphql-yoga/render-graphiql@5.13.4':
+    resolution: {integrity: sha512-kLmhyElpJQGIjPXfTriRlVJgn9Kl+SV1/jiI6xvLTlrr2y510dbrsagJSmwMS3XzAq9RbGI3Hg2to6bHfjm8yA==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
-      graphql-yoga: ^5.13.3
+      graphql-yoga: ^5.13.4
 
   '@graphql-yoga/subscription@5.0.4':
     resolution: {integrity: sha512-Bcj1LYVQyQmFN/vsl73TRSNistd8lBJJcPxqFVCT8diUuH/gTv2be2OYZsirpeO0l5tFjJWJv9RPgIlCYv3Khw==}
+    engines: {node: '>=18.0.0'}
+
+  '@graphql-yoga/subscription@5.0.5':
+    resolution: {integrity: sha512-oCMWOqFs6QV96/NZRt/ZhTQvzjkGB4YohBOpKM4jH/lDT4qb7Lex/aGCxpi/JD9njw3zBBtMqxbaC22+tFHVvw==}
     engines: {node: '>=18.0.0'}
 
   '@graphql-yoga/typed-event-target@3.0.2':
@@ -3345,16 +3352,28 @@ packages:
     resolution: {integrity: sha512-+yFJU3hmXPAHJULwx0VzCIsvr/H0lvbPvbOH3areOH3NAuCxCwaJsQ8w6/MwwMcvEWIynSsmAxoyaH04KeosPg==}
     engines: {node: '>=18.0.0'}
 
+  '@whatwg-node/fetch@0.10.6':
+    resolution: {integrity: sha512-6uzhO2aQ757p3bSHcemA8C4pqEXuyBqyGAM7cYpO0c6/igRMV9As9XL0W12h5EPYMclgr7FgjmbVQBoWEdJ/yA==}
+    engines: {node: '>=18.0.0'}
+
   '@whatwg-node/node-fetch@0.7.17':
     resolution: {integrity: sha512-Ni8A2H/r6brNf4u8Y7ATxmWUD0xltsQ6a4NnjWSbw4PgaT34CbY+u4QtVsFj9pTC3dBKJADKjac3AieAig+PZA==}
+    engines: {node: '>=18.0.0'}
+
+  '@whatwg-node/node-fetch@0.7.18':
+    resolution: {integrity: sha512-IxKdVWfZYasGiyxBcsROxq6FmDQu3MNNiOYJ/yqLKhe+Qq27IIWsK7ItbjS2M9L5aM5JxjWkIS7JDh7wnsn+CQ==}
     engines: {node: '>=18.0.0'}
 
   '@whatwg-node/promise-helpers@1.3.0':
     resolution: {integrity: sha512-486CouizxHXucj8Ky153DDragfkMcHtVEToF5Pn/fInhUUSiCmt9Q4JVBa6UK5q4RammFBtGQ4C9qhGlXU9YbA==}
     engines: {node: '>=16.0.0'}
 
-  '@whatwg-node/server@0.10.3':
-    resolution: {integrity: sha512-2Dnfey57vWR+hDUMjPhNzJQc9z116BBzSQwR9eD0vhnzYmN2rJXuY0QuMaHDCCqEZRmFHg2bo8iJ+/1uHOlxpg==}
+  '@whatwg-node/promise-helpers@1.3.1':
+    resolution: {integrity: sha512-D+OwTEunoQhVHVToD80dPhfz9xgPLqJyEA3F5jCRM14A2u8tBBQVdZekqfqx6ZAfZ+POT4Hb0dn601UKMsvADw==}
+    engines: {node: '>=16.0.0'}
+
+  '@whatwg-node/server@0.10.5':
+    resolution: {integrity: sha512-ydxzH1iox9AzLe+uaX9jjyVFkQO+h15j+JClropw0P4Vz+ES4+xTZVu5leUsWW8AYTVZBFkiC0iHl/PwFZ+Q1Q==}
     engines: {node: '>=18.0.0'}
 
   '@wry/caches@1.0.1':
@@ -3569,8 +3588,14 @@ packages:
   better-auth@1.2.5:
     resolution: {integrity: sha512-Tz2aKImkvaT7P9qHQ67Vhw/Slo6zpvE0jG7GoDQM+dd5tWuC3lP0OGjjWkNCZdToVlWB193i5nSHeZT90sFqEw==}
 
+  better-auth@1.2.7:
+    resolution: {integrity: sha512-2hCB263GSrgetsMUZw8vv9O1e4S4AlYJW3P4e8bX9u3Q3idv4u9BzDFCblpTLuL4YjYovghMCN0vurAsctXOAQ==}
+
   better-call@1.0.7:
     resolution: {integrity: sha512-p5kEthErx3HsW9dCCvvEx+uuEdncn0ZrlqrOG3TkR1aVYgynpwYbTVU90nY8/UwfMhROzqZWs8vryainSQxrNg==}
+
+  better-call@1.0.8:
+    resolution: {integrity: sha512-/PV8JLqDRUN7JyBPbklVsS/8E4SO3pnf8hbpa8B7xrBrr+BBYpeOAxoqtnsyk/pRs35vNB4MZx8cn9dBuNlLDA==}
 
   binary-extensions@2.3.0:
     resolution: {integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==}
@@ -4304,8 +4329,8 @@ packages:
       ws:
         optional: true
 
-  graphql-yoga@5.13.3:
-    resolution: {integrity: sha512-W8efVmPhKOreIJgiYbC2CCn60ORr7kj+5dRg7EoBg6+rbMdL4EqlXp1hYdrmbB5GGgS2g3ivyHutXKUK0S0UZw==}
+  graphql-yoga@5.13.4:
+    resolution: {integrity: sha512-q5l3HEvgXnZCKG6K38fz3XNBX41GkHkIYspJbdVl9QVsm5Ah0EFUkY303tEOx8IucyB0h2hb8OfbYXEcoNCLMw==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       graphql: ^15.2.0 || ^16.0.0
@@ -4663,6 +4688,10 @@ packages:
   kysely@0.27.6:
     resolution: {integrity: sha512-FIyV/64EkKhJmjgC0g2hygpBv5RNWVPyNCqSAD7eTCv6eFWNIi4PN1UvdSJGicN/o35bnevgis4Y0UDC0qi8jQ==}
     engines: {node: '>=14.0.0'}
+
+  kysely@0.28.0:
+    resolution: {integrity: sha512-hq8VcLy57Ww7oPTTVEOrT9ml+g8ehbbmEUkHmW4Xtubu+NHdKZi6SH6egmD4cjDhn3b/0s0h/6AjdPayOTJhNw==}
+    engines: {node: '>=18.0.0'}
 
   lazystream@1.0.1:
     resolution: {integrity: sha512-b94GiNHQNy6JNTrt5w6zNyffMrNkXZb3KTkCZJb2V1xaEGCk093vkZ2jk3tpaeP33/OiXC+WvK9AxUebnf5nbw==}
@@ -7673,6 +7702,8 @@ snapshots:
 
   '@fastify/busboy@2.1.1': {}
 
+  '@fastify/busboy@3.1.1': {}
+
   '@floating-ui/core@1.6.9':
     dependencies:
       '@floating-ui/utils': 0.2.9
@@ -8266,11 +8297,18 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@graphql-yoga/render-graphiql@5.13.3(graphql-yoga@5.13.3(graphql@16.10.0))':
+  '@graphql-yoga/render-graphiql@5.13.4(graphql-yoga@5.13.4(graphql@16.10.0))':
     dependencies:
-      graphql-yoga: 5.13.3(graphql@16.10.0)
+      graphql-yoga: 5.13.4(graphql@16.10.0)
 
   '@graphql-yoga/subscription@5.0.4':
+    dependencies:
+      '@graphql-yoga/typed-event-target': 3.0.2
+      '@repeaterjs/repeater': 3.0.6
+      '@whatwg-node/events': 0.1.2
+      tslib: 2.8.1
+
+  '@graphql-yoga/subscription@5.0.5':
     dependencies:
       '@graphql-yoga/typed-event-target': 3.0.2
       '@repeaterjs/repeater': 3.0.6
@@ -10201,6 +10239,11 @@ snapshots:
       '@whatwg-node/node-fetch': 0.7.17
       urlpattern-polyfill: 10.0.0
 
+  '@whatwg-node/fetch@0.10.6':
+    dependencies:
+      '@whatwg-node/node-fetch': 0.7.18
+      urlpattern-polyfill: 10.0.0
+
   '@whatwg-node/node-fetch@0.7.17':
     dependencies:
       '@whatwg-node/disposablestack': 0.0.6
@@ -10208,16 +10251,27 @@ snapshots:
       busboy: 1.6.0
       tslib: 2.8.1
 
+  '@whatwg-node/node-fetch@0.7.18':
+    dependencies:
+      '@fastify/busboy': 3.1.1
+      '@whatwg-node/disposablestack': 0.0.6
+      '@whatwg-node/promise-helpers': 1.3.1
+      tslib: 2.8.1
+
   '@whatwg-node/promise-helpers@1.3.0':
     dependencies:
       tslib: 2.8.1
 
-  '@whatwg-node/server@0.10.3':
+  '@whatwg-node/promise-helpers@1.3.1':
+    dependencies:
+      tslib: 2.8.1
+
+  '@whatwg-node/server@0.10.5':
     dependencies:
       '@envelop/instrumentation': 1.0.0
       '@whatwg-node/disposablestack': 0.0.6
-      '@whatwg-node/fetch': 0.10.5
-      '@whatwg-node/promise-helpers': 1.3.0
+      '@whatwg-node/fetch': 0.10.6
+      '@whatwg-node/promise-helpers': 1.3.1
       tslib: 2.8.1
 
   '@wry/caches@1.0.1':
@@ -10460,7 +10514,29 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
+  better-auth@1.2.7:
+    dependencies:
+      '@better-auth/utils': 0.2.4
+      '@better-fetch/fetch': 1.1.18
+      '@noble/ciphers': 0.6.0
+      '@noble/hashes': 1.7.1
+      '@simplewebauthn/browser': 13.1.0
+      '@simplewebauthn/server': 13.1.1
+      better-call: 1.0.8
+      defu: 6.1.4
+      jose: 5.10.0
+      kysely: 0.27.6
+      nanostores: 0.11.4
+      zod: 3.24.2
+
   better-call@1.0.7:
+    dependencies:
+      '@better-fetch/fetch': 1.1.18
+      rou3: 0.5.1
+      set-cookie-parser: 2.7.1
+      uncrypto: 0.1.3
+
+  better-call@1.0.8:
     dependencies:
       '@better-fetch/fetch': 1.1.18
       rou3: 0.5.1
@@ -11269,7 +11345,7 @@ snapshots:
     optionalDependencies:
       ws: 8.18.1
 
-  graphql-yoga@5.13.3(graphql@16.10.0):
+  graphql-yoga@5.13.4(graphql@16.10.0):
     dependencies:
       '@envelop/core': 5.2.3
       '@envelop/instrumentation': 1.0.0
@@ -11277,10 +11353,10 @@ snapshots:
       '@graphql-tools/schema': 10.0.23(graphql@16.10.0)
       '@graphql-tools/utils': 10.8.6(graphql@16.10.0)
       '@graphql-yoga/logger': 2.0.1
-      '@graphql-yoga/subscription': 5.0.4
-      '@whatwg-node/fetch': 0.10.5
+      '@graphql-yoga/subscription': 5.0.5
+      '@whatwg-node/fetch': 0.10.6
       '@whatwg-node/promise-helpers': 1.3.0
-      '@whatwg-node/server': 0.10.3
+      '@whatwg-node/server': 0.10.5
       dset: 3.1.4
       graphql: 16.10.0
       lru-cache: 10.4.3
@@ -11561,14 +11637,14 @@ snapshots:
 
   kleur@4.1.5: {}
 
-  kysely-codegen@0.18.3(kysely@0.27.6)(pg@8.14.1)(typescript@5.8.3):
+  kysely-codegen@0.18.3(kysely@0.28.0)(pg@8.14.1)(typescript@5.8.3):
     dependencies:
       chalk: 4.1.2
       cosmiconfig: 9.0.0(typescript@5.8.3)
       dotenv: 16.5.0
       dotenv-expand: 12.0.1
       git-diff: 2.0.6
-      kysely: 0.27.6
+      kysely: 0.28.0
       micromatch: 4.0.8
       minimist: 1.2.8
       pluralize: 8.0.0
@@ -11579,6 +11655,8 @@ snapshots:
       - typescript
 
   kysely@0.27.6: {}
+
+  kysely@0.28.0: {}
 
   lazystream@1.0.1:
     dependencies:
