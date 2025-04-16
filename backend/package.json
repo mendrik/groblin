@@ -6,7 +6,8 @@
 		"types:db": "kysely-codegen --out-file src/database/schema.ts --dialect postgres",
 		"schema:db": "./dump_db.sh",
 		"schema": "pnpm types:db",
-		"server": "tsx watch --include ./src --include ../shared/src  src/server.ts",
+		"server": "tsx watch --include ./src --include ../shared/src src/server.ts",
+		"test:codegen": "tsx tests/schema.setup.ts",
 		"test": "vitest"
 	},
 	"devDependencies": {
@@ -19,6 +20,7 @@
 		"ansicolor": "2.0.3",
 		"aws-sdk-client-mock": "^4.1.0",
 		"cross-env": "7.0.3",
+		"graphql-tag": "^2.12.6",
 		"kysely-codegen": "0.18.3",
 		"pg": "8.14.1",
 		"testcontainers": "^10.24.2",

@@ -10,7 +10,7 @@ export default defineConfig({
 		alias: {
 			'@tp': resolve(__dirname, '../type-patches/src'),
 			'@shared': resolve(__dirname, '../shared/src'),
-			'graphql': resolve(__dirname, '../node_modules/graphql/index.js'),
+			graphql: resolve(__dirname, '../node_modules/graphql/index.js')
 		}
 	},
 	test: {
@@ -18,6 +18,6 @@ export default defineConfig({
 		globalSetup: ['./tests/vitest.setup.ts'],
 		include: ['src/**/*.test.ts'],
 		environment: 'node',
-		testTimeout: 5000,
+		testTimeout: 5000
 	}
 })

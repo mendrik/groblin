@@ -103,10 +103,6 @@
 	},
 	"devDependencies": {
 		"@genql/cli": "6.3.3",
-		"@graphql-codegen/cli": "5.0.5",
-		"@graphql-codegen/typescript": "4.1.6",
-		"@graphql-codegen/typescript-generic-sdk": "4.0.1",
-		"@graphql-codegen/typescript-operations": "4.6.0",
 		"@preact/signals-react-transform": "0.5.1",
 		"@tailwindcss/typography": "0.5.16",
 		"@testing-library/dom": "10.4.0",
