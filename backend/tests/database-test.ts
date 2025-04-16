@@ -12,7 +12,10 @@ import 'reflect-metadata'
 import type { PubSub } from 'type-graphql'
 import type { DB } from '../src/database/schema.ts'
 
+import { writeFileSync } from 'node:fs'
 import { S3Client as AwsS3 } from '@aws-sdk/client-s3'
+import { printSchema } from 'graphql'
+import { prop } from 'ramda'
 import { IoResolver } from '../src/resolvers/io-resolver.ts'
 import { ListResolver } from '../src/resolvers/list-resolver.ts'
 import { NodeResolver } from '../src/resolvers/node-resolver.ts'
@@ -69,6 +72,7 @@ declare module 'vitest' {
 
 const schema = await container.get(SchemaService).getSchema(1)
 const yoga = createYoga({ schema })
+writeFileSync('./tests/test-schema.graphql', printSchema(schema), { encoding: 'utf-8' })
 
 const query = async (query: string) => {
 	const res = await yoga.fetch('/graphql', {
@@ -81,7 +85,7 @@ const query = async (query: string) => {
 			`Error: ${res.status} ${res.statusText} ${await res.text()}`
 		)
 	}
-	return res.json()
+	return res.json().then(prop('data'))
 }
 
 export const withDatabase = createTaskCollector((name, fn, timeout) =>

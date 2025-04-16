@@ -14,7 +14,7 @@ import { NodeSettingsResolver } from 'src/resolvers/node-settings-resolver.ts'
 import { ProjectResolver } from 'src/resolvers/project-resolver.ts'
 import { UserResolver } from 'src/resolvers/user-resolver.ts'
 import { ValueResolver } from 'src/resolvers/value-resolver.ts'
-import { buildSchema } from 'type-graphql'
+import { type ContainerType, buildSchema } from 'type-graphql'
 import { WebSocketServer } from 'ws'
 import { onConnect as connectFactory } from '../middleware/on-connect.ts'
 import { onError } from '../middleware/on-errors.ts'
@@ -46,7 +46,7 @@ export class InternalServer {
 			],
 			pubSub: container.get('PubSub'),
 			authChecker: AuthChecker,
-			container,
+			container: container as ContainerType,
 			emitSchemaFile: '../schema.graphql',
 			authMode: 'null'
 		})

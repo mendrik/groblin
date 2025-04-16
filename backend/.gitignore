@@ -3,6 +3,7 @@
 *.d.ts
 node_modules
 
+tests/*.graphql
 # CDK asset staging directory
 .cdk.staging
 cdk.out
