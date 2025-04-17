@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import 'reflect-metadata'
 
-import { readFileSync, writeFileSync } from 'node:fs'
+import { writeFileSync } from 'node:fs'
 
 import { PostgreSqlContainer } from '@testcontainers/postgresql'
 import { Pool } from 'pg'
@@ -30,19 +30,20 @@ import config from 'tests/codegen.ts'
 
 const testDb = await new PostgreSqlContainer('postgres:latest')
 	.withUsername('groblin')
+	.withCopyFilesToContainer([
+		{
+			source: './database/init.sql',
+			target: '/docker-entrypoint-initdb.d/init.sql'
+		},
+		{
+			source: './database/test-data.sql',
+			target: '/docker-entrypoint-initdb.d/test-data.sql'
+		}
+	])
 	.start()
+	.catch(rethrow`Failed to start test database: ${error}`)
 
 const pool = new Pool({ connectionString: testDb.getConnectionUri() })
-
-const runSqlFile = (file: string) =>
-	pool
-		.query(readFileSync(file, 'utf8'))
-		.catch(rethrow`Failed to run sql file ${file}: ${error}`)
-
-// Load and execute initial SQL data
-await runSqlFile('./database/init.sql')
-await runSqlFile('./database/test-data.sql')
-
 const db = new Kysely<DB>({ dialect: new PostgresDialect({ pool }) })
 
 const c = new Container()
@@ -63,6 +64,6 @@ const schema = await c.get(SchemaService).getSchema(1)
 writeFileSync('./tests/test-schema.graphql', printSchema(schema), {
 	encoding: 'utf-8'
 })
-await generate(config)
+await generate(config).then(() => console.log('generated types'))
 const yoga = createYoga({ schema })
-export { c as container, pool, yoga }
+export { c as container, pool, yoga, testDb }
