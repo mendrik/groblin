@@ -7,7 +7,7 @@
 		"schema:db": "./dump_db.sh",
 		"schema": "pnpm types:db",
 		"server": "tsx watch --include ./src --include ../shared/src src/server.ts",
-		"test:codegen": "tsx tests/schema.setup.ts",
+		"test:codegen": "tsx tests/test-context.ts",
 		"test": "vitest"
 	},
 	"devDependencies": {
