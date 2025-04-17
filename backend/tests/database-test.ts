@@ -25,6 +25,7 @@ export const withDatabase = createTaskCollector((name, fn, timeout) =>
 			transaction: true
 		},
 		handler: async () => {
+			
 			await pool.query('BEGIN')
 			const res = await fn({ pool, container, query })
 			await pool.query('ROLLBACK')

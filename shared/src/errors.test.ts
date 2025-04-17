@@ -1,13 +1,13 @@
 import { describe, expect, test } from 'vitest'
-import { error, log } from './errors.ts'
+import { error, rethrow } from './errors.ts'
 
 const fail = async () => {
 	throw new Error('TestError')
 }
 
 describe('errors', () => {
-	test('should allow message replacement', async () => {
-		const test = () => fail().catch(log`Failed with: ${error}`)
+	test('rethrow should allow message replacement', async () => {
+		const test = () => fail().catch(rethrow`Failed with: ${error}`)
 		expect(() => test()).rejects.toThrow(
 			expect.objectContaining({ message: 'Failed with: TestError' })
 		)

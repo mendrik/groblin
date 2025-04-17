@@ -9,7 +9,7 @@ export const throwAny = (errors: any): never => {
 }
 
 export const error = Symbol('error')
-export const log =
+export const rethrow =
 	(
 		strings: TemplateStringsArray,
 		...values: (number | boolean | string | undefined | typeof error)[]
