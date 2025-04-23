@@ -1,6 +1,7 @@
 import { throwAny } from '@shared/errors'
+import { firstProperty } from '@shared/helpers'
 import { type ExecutionResult, createClient } from 'graphql-ws'
-import { T, has, head, pipe, pluck, prop, toPairs, when } from 'ramda'
+import { T, has, pipe, pluck, prop, when } from 'ramda'
 import { isNotNilOrEmpty } from 'ramda-adjunct'
 import { type Sdk, getSdk } from './gql/graphql'
 import { getItem } from './lib/local-storage'
@@ -26,8 +27,6 @@ type ApiSdk = {
 		? Promise<FirstProperty<R>>
 		: never
 }
-
-const firstProperty = pipe(toPairs, head, ([, value]) => value)
 
 const throwErrors = when(
 	has('errors'),

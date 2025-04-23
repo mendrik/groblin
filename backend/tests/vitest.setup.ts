@@ -1,12 +1,13 @@
 import { error, rethrow } from '@shared/errors.ts'
 import type { Container } from 'inversify'
 import type { Pool, TestProject } from 'vitest/node'
+import type { Sdk } from './test-sdk.ts'
 
 declare module 'vitest' {
 	export interface TestContext {
 		pool: Pool
 		container: Container
-		query: (query: string) => Promise<any>
+		sdk: Sdk
 	}
 }
 
