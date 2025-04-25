@@ -9,3 +9,6 @@ declare module 'vitest' {
 		sdk: Sdk
 	}
 }
+
+export default async function globalSetup() {
+}
