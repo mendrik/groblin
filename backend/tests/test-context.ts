@@ -7,7 +7,6 @@ import { PostgreSqlContainer } from '@testcontainers/postgresql'
 import { Pool } from 'pg'
 
 import { S3Client as AwsS3 } from '@aws-sdk/client-s3'
-import { generate } from '@graphql-codegen/cli'
 import { mockClient } from 'aws-sdk-client-mock'
 import { printSchema } from 'graphql'
 import { createPubSub, createYoga } from 'graphql-yoga'
@@ -26,7 +25,15 @@ import { ImageService } from 'src/services/image-service.ts'
 import { S3Client } from 'src/services/s3-client.ts'
 import { SchemaContext } from 'src/services/schema-context.ts'
 import { SchemaService } from 'src/services/schema-service.ts'
-import config from 'tests/codegen.ts'
+import type { Sdk } from './test-sdk.ts'
+
+declare module 'vitest' {
+	export interface TestContext {
+		pool: Pool
+		container: Container
+		sdk: Sdk
+	}
+}
 
 const testDb = await new PostgreSqlContainer('postgres:latest')
 	.withUsername('groblin')
@@ -64,6 +71,5 @@ const schema = await container.get(SchemaService).getSchema(1)
 writeFileSync('./tests/test-schema.graphql', printSchema(schema), {
 	encoding: 'utf-8'
 })
-await generate(config).then(() => console.log('generated types'))
 const yoga = createYoga({ schema })
 export { container, pool, yoga, testDb }
