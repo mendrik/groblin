@@ -25,15 +25,6 @@ import { ImageService } from 'src/services/image-service.ts'
 import { S3Client } from 'src/services/s3-client.ts'
 import { SchemaContext } from 'src/services/schema-context.ts'
 import { SchemaService } from 'src/services/schema-service.ts'
-import type { Sdk } from './test-sdk.ts'
-
-declare module 'vitest' {
-	export interface TestContext {
-		pool: Pool
-		container: Container
-		sdk: Sdk
-	}
-}
 
 const testDb = await new PostgreSqlContainer('postgres:latest')
 	.withUsername('groblin')

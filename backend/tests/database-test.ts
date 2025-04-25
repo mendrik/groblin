@@ -1,7 +1,7 @@
+import { firstProperty } from '@shared/helpers.ts'
 import 'dotenv/config'
 import { prop } from 'ramda'
 import 'reflect-metadata'
-import { firstProperty } from '@shared/helpers.ts'
 import { createTaskCollector, getCurrentSuite } from 'vitest/suite'
 import { container, pool, yoga } from './test-context.ts'
 import { type Sdk, getSdk } from './test-sdk.ts'
