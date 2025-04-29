@@ -28,9 +28,10 @@ type IsUnion<T, U = T> = T extends any // distribute over each member of the (po
 type FirstProp<T> = IsUnion<keyof T> extends true ? never : T[keyof T]
 
 export type CustomSdk = {
-	[K in keyof Sdk]: Sdk[K] extends (...args: infer A)
-	 => Promise<ExecutionResult<infer P, any>>
-		? (...args: A) => DeepNonNullable<FirstProp<P>>
+	[K in keyof Sdk]: Sdk[K] extends (
+		...args: infer A
+	) => Promise<ExecutionResult<infer P, any>>
+		? (...args: A) => Promise<DeepNonNullable<FirstProp<P>>>
 		: never
 }
 
