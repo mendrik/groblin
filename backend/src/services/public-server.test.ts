@@ -1,5 +1,6 @@
 import { gql } from 'graphql-tag'
 import { withDatabase } from 'tests/database-test.ts'
+import { PeopleOrder } from 'tests/test-sdk.ts'
 import { describe, expect } from 'vitest'
 
 gql`query fetchPeople {
@@ -13,8 +14,8 @@ gql`query fetchPeople {
 	}
 }`
 
-gql`query fetchFiltered($filter: [PeopleFilter]) {
-	People(filter: $filter) { 
+gql`query fetchFiltered($filter: [PeopleFilter], $order: PeopleOrder) {
+	People(filter: $filter, order: $order) { 
 		Name
 	}
 }`
@@ -34,7 +35,8 @@ describe('PublicServer', () => {
 
 	withDatabase('Can filter number data', async ({ sdk }) => {
 		const [{ Name: n1 }, { Name: n2 }, ...r] = await sdk.fetchFiltered({
-			filter: { Age_lte: 48 }
+			filter: { Age_lte: 48 },
+			order: PeopleOrder.Name
 		})
 		expect(r).toHaveLength(0)
 		expect(n1).toBe('Andreas Herd')
@@ -43,10 +45,11 @@ describe('PublicServer', () => {
 
 	withDatabase('Can filter string data', async ({ sdk }) => {
 		const [{ Name: n1 }, { Name: n2 }, ...r] = await sdk.fetchFiltered({
-			filter: { Name_rex: '\sM' }
+			filter: { Name_rex: '\\sM' },
+			order: PeopleOrder.Name
 		})
 		expect(r).toHaveLength(0)
-		expect(n1).toBe('Andreas Herd')
-		expect(n2).toBe('Bernhard Münst')
+		expect(n1).toBe('Bernhard Münst')
+		expect(n2).toBe('Michael C. Maurer')
 	})
 })

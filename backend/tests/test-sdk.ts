@@ -188,6 +188,7 @@ export type FetchPeopleQuery = { People?: Array<{ Name?: string | null, Age?: nu
 
 export type FetchFilteredQueryVariables = Exact<{
   filter?: InputMaybe<Array<InputMaybe<PeopleFilter>> | InputMaybe<PeopleFilter>>;
+  order?: InputMaybe<PeopleOrder>;
 }>;
 
 
@@ -207,8 +208,8 @@ export const FetchPeopleDocument = `
 }
     `;
 export const FetchFilteredDocument = `
-    query fetchFiltered($filter: [PeopleFilter]) {
-  People(filter: $filter) {
+    query fetchFiltered($filter: [PeopleFilter], $order: PeopleOrder) {
+  People(filter: $filter, order: $order) {
     Name
   }
 }
