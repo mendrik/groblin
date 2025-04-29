@@ -1,6 +1,6 @@
 import { gql } from 'graphql-tag'
 import { withDatabase } from 'tests/database-test.ts'
-import { PeopleOrder } from 'tests/test-sdk.ts'
+import { Gender, PeopleOrder } from 'tests/test-sdk.ts'
 import { describe, expect } from 'vitest'
 
 gql`query fetchPeople {
@@ -50,6 +50,34 @@ describe('PublicServer', () => {
 		})
 		expect(r).toHaveLength(0)
 		expect(n1).toBe('Bernhard Münst')
+		expect(n2).toBe('Michael C. Maurer')
+	})
+
+	withDatabase('Can filter color data', async ({ sdk }) => {
+		const [{ Name: n1 }] = await sdk.fetchFiltered({
+			filter: { Clothing: 'rgb(210,5,5)' },
+			order: PeopleOrder.Name
+		})
+		expect(n1).toBe('Michael C. Maurer')
+	})
+
+	withDatabase('Can filter choice data', async ({ sdk }) => {
+		const [{ Name: n1 }, { Name: n2 }, ...r] = await sdk.fetchFiltered({
+			filter: { Gender: Gender.Male },
+			order: PeopleOrder.Name
+		})
+		expect(r).toHaveLength(0)
+		expect(n1).toBe('Andreas Herd')
+		expect(n2).toBe('Bernhard Münst')
+	})
+
+	withDatabase('Can filter date data', async ({ sdk }) => {
+		const [{ Name: n1 }, { Name: n2 }, ...r] = await sdk.fetchFiltered({
+			filter: { Birthdate: { year: 1976 } },
+			order: PeopleOrder.Name
+		})
+		expect(r).toHaveLength(0)
+		expect(n1).toBe('Andreas Herd')
 		expect(n2).toBe('Michael C. Maurer')
 	})
 })
