@@ -4,7 +4,7 @@ import { prop } from 'ramda'
 import 'reflect-metadata'
 import { createTaskCollector, getCurrentSuite } from 'vitest/suite'
 import { container, pool, yoga } from './test-context.ts'
-import { type Sdk, getSdk } from './test-sdk.ts'
+import { getSdk } from './test-sdk.ts'
 
 const validateRes = async (res: Response) => {
 	if (!res.ok) {
@@ -22,7 +22,7 @@ export const withDatabase = createTaskCollector((name, fn, timeout) =>
 			transaction: true
 		},
 		handler: async () => {
-			const sdk: Sdk = getSdk(async (query, variables, options) => {
+			const sdk = getSdk(async (query, variables, options) => {
 				const res = await yoga.fetch('/graphql', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },

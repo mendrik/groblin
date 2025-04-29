@@ -184,12 +184,31 @@ export type RootPeopleArgs = {
 export type FetchPeopleQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type FetchPeopleQuery = { People?: Array<{ Name?: string | null } | null> | null };
+export type FetchPeopleQuery = { People?: Array<{ Name?: string | null, Age?: number | null, Birthdate?: string | null, Clothing?: Array<number | null> | null, Gender?: Gender | null, Management?: boolean | null } | null> | null };
+
+export type FetchFilteredQueryVariables = Exact<{
+  filter?: InputMaybe<Array<InputMaybe<PeopleFilter>> | InputMaybe<PeopleFilter>>;
+}>;
+
+
+export type FetchFilteredQuery = { People?: Array<{ Name?: string | null } | null> | null };
 
 
 export const FetchPeopleDocument = `
     query fetchPeople {
   People {
+    Name
+    Age
+    Birthdate
+    Clothing
+    Gender
+    Management
+  }
+}
+    `;
+export const FetchFilteredDocument = `
+    query fetchFiltered($filter: [PeopleFilter]) {
+  People(filter: $filter) {
     Name
   }
 }
@@ -199,6 +218,9 @@ export function getSdk<C, E>(requester: Requester<C, E>) {
   return {
     fetchPeople(variables?: FetchPeopleQueryVariables, options?: C): Promise<ExecutionResult<FetchPeopleQuery, E>> {
       return requester<FetchPeopleQuery, FetchPeopleQueryVariables>(FetchPeopleDocument, variables, options) as Promise<ExecutionResult<FetchPeopleQuery, E>>;
+    },
+    fetchFiltered(variables?: FetchFilteredQueryVariables, options?: C): Promise<ExecutionResult<FetchFilteredQuery, E>> {
+      return requester<FetchFilteredQuery, FetchFilteredQueryVariables>(FetchFilteredDocument, variables, options) as Promise<ExecutionResult<FetchFilteredQuery, E>>;
     }
   };
 }
