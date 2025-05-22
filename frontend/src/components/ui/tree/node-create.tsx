@@ -7,8 +7,7 @@ import {
 	DialogTitle
 } from '@/components/ui/dialog'
 import { NodeType } from '@/gql/graphql'
-import { setSignal } from '@/lib/signals'
-import { notNil } from '@/lib/signals'
+import { notNil, setSignal } from '@/lib/signals'
 import {
 	$root,
 	type TreeNode,
@@ -18,9 +17,7 @@ import {
 } from '@/state/tree'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
-import { evolveAlt } from '@shared/utils/evolve-alt'
-import { caseOf, match } from '@shared/utils/match'
-import { pipeAsync } from '@shared/utils/pipe-async'
+import { caseOf, evolveAlt, match, pipeAsync } from 'matchblade'
 import { F, pipe } from 'ramda'
 import { type TypeOf, nativeEnum, strictObject } from 'zod'
 import { Button } from '../button'

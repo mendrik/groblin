@@ -1,6 +1,6 @@
 import { throwError } from '@shared/errors'
-import { caseOf, match } from '@shared/utils/match'
 import { Ban } from 'lucide-react'
+import { caseOf, match } from 'matchblade'
 import { T as _, isNotNil } from 'ramda'
 import type { ReactNode } from 'react'
 import useSWR from 'swr'

@@ -1,4 +1,4 @@
-import { caseOf, match } from '@shared/utils/match'
+import { caseOf, match } from 'matchblade'
 import { T as _, both, curry, flip, lt } from 'ramda'
 
 const second = 1000

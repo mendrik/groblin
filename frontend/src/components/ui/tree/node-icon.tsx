@@ -1,7 +1,6 @@
 import { NodeType } from '@/gql/graphql'
 import type { TreeNode } from '@/state/tree'
 import type { Icon } from '@/type-patches/icons'
-import { caseOf, match } from '@shared/utils/match'
 import {
 	ALargeSmall,
 	Box,
@@ -15,6 +14,7 @@ import {
 	Scroll,
 	ToggleLeft
 } from 'lucide-react'
+import { caseOf, match } from 'matchblade'
 import { T as _ } from 'ramda'
 
 export const nodeIcon: (node: TreeNode) => Icon = match<[TreeNode], Icon>(

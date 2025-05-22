@@ -1,6 +1,6 @@
 import { NodeType, type Value } from '@/gql/graphql'
 import { $focusedNode, $nodesMap, type TreeNode, asNode } from '@/state/tree'
-import { caseOf, match } from '@shared/utils/match'
+import { caseOf, match } from 'matchblade'
 import { T as _ } from 'ramda'
 import { type ExoticComponent, Suspense, lazy } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'

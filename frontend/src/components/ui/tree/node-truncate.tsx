@@ -14,7 +14,7 @@ import { notNil } from '@/lib/signals'
 import { type TreeNode, focusNode, updateNodeContext } from '@/state/tree'
 import { truncateList } from '@/state/value'
 import { signal } from '@preact/signals-react'
-import { pipeAsync } from '@shared/utils/pipe-async'
+import { pipeAsync } from 'matchblade'
 import { F, T, pipe } from 'ramda'
 
 export const $node = signal<TreeNode>()

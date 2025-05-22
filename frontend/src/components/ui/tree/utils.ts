@@ -1,6 +1,6 @@
 import { NodeType } from '@/gql/graphql'
 import type { TreeNode } from '@/state/tree'
-import { caseOf, match } from '@shared/utils/match'
+import { caseOf, match } from 'matchblade'
 import { F, type Pred, T, T as _ } from 'ramda'
 
 export const canHaveChildren: Pred<[TreeNode]> = match(

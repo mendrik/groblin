@@ -1,6 +1,6 @@
-import { failOn } from '@shared/utils/guards.ts'
 import { inject, injectable } from 'inversify'
 import { Kysely } from 'kysely'
+import { failOn } from 'matchblade'
 import { isNil } from 'ramda'
 import type { DB } from 'src/database/schema.ts'
 import { LogAccess } from 'src/middleware/log-access.ts'

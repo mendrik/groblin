@@ -1,5 +1,5 @@
-import type { TreeOf } from '@shared/utils/list-to-tree.ts'
 import type { User } from 'better-auth'
+import type { TreeOf } from 'matchblade'
 import type { Node } from './resolvers/node-resolver.ts'
 
 export type LoggedInUser = User

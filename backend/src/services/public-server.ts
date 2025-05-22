@@ -7,7 +7,7 @@ import type {
 import { createServer } from 'node:http'
 import { renderGraphiQL } from '@graphql-yoga/render-graphiql'
 import { assertExists } from '@shared/asserts.ts'
-import { caseOf, match } from '@shared/utils/match.ts'
+import { caseOf, match } from 'matchblade'
 import { cyan, lightGreen, yellow } from 'ansicolor'
 import { toNodeHandler } from 'better-auth/node'
 import { type GraphQLSchema, printSchema } from 'graphql'

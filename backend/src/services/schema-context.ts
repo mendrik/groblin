@@ -1,7 +1,4 @@
 import { assertExists } from '@shared/asserts.ts'
-import { listToTree } from '@shared/utils/list-to-tree.ts'
-import { mapBy } from '@shared/utils/map-by.ts'
-import { caseOf, match } from '@shared/utils/match.ts'
 import type { AnyFn } from '@tp/functions.ts'
 import { GraphQLEnumType, GraphQLObjectType, GraphQLString } from 'graphql'
 import { inject, injectable } from 'inversify'
@@ -15,6 +12,9 @@ import {
 	type TableExpression,
 	sql
 } from 'kysely'
+import { listToTree } from 'matchblade'
+import { mapBy } from 'matchblade'
+import { caseOf, match } from 'matchblade'
 import { Maybe } from 'purify-ts'
 import {
 	T as _,

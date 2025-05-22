@@ -1,4 +1,4 @@
-import { evolveAlt } from '@shared/utils/evolve-alt.ts'
+import { evolveAlt } from 'matchblade'
 import { toDate } from 'date-fns'
 import { inject, injectable } from 'inversify'
 import { Kysely, sql } from 'kysely'

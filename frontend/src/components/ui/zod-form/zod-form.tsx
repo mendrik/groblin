@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { caseOf, match } from '@shared/utils/match'
+import { caseOf, match } from 'matchblade'
 import { equals as eq } from 'ramda'
 import {
 	type ForwardedRef,

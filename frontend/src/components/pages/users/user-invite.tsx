@@ -14,7 +14,7 @@ import { setSignal } from '@/lib/signals'
 import { inviteUser } from '@/state/users'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
-import { pipeAsync } from '@shared/utils/pipe-async'
+import { pipeAsync } from 'matchblade'
 import { F, pipe } from 'ramda'
 import { type TypeOf, strictObject, string } from 'zod'
 

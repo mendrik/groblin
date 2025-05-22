@@ -14,7 +14,7 @@ import { setSignal } from '@/lib/signals'
 import { createApiKey } from '@/state/apikeys'
 import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
-import { pipeAsync } from '@shared/utils/pipe-async'
+import { pipeAsync } from 'matchblade'
 import { F, pipe } from 'ramda'
 import { type TypeOf, date, strictObject, string } from 'zod'
 

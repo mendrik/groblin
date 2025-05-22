@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dialog'
 import { setSignal } from '@/lib/signals'
 import { signal } from '@preact/signals-react'
-import { pipeAsync } from '@shared/utils/pipe-async'
+import { pipeAsync } from 'matchblade'
 import { F, T, pipe } from 'ramda'
 import type { ZodObject, ZodRawShape, ZodType } from 'zod'
 import { Button } from '../button'

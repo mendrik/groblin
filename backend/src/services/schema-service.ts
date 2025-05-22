@@ -1,4 +1,3 @@
-import { caseOf, match } from '@shared/utils/match.ts'
 import {
 	GraphQLEnumType,
 	type GraphQLFieldConfig,
@@ -12,6 +11,7 @@ import {
 	GraphQLString
 } from 'graphql'
 import { inject, injectable } from 'inversify'
+import { caseOf, match } from 'matchblade'
 import { Maybe } from 'purify-ts'
 import { T as _, assoc, isNotNil, objOf } from 'ramda'
 import {

@@ -39,9 +39,9 @@ export const capitalize: (s: string) => string = pipe(
 
 export const entriesWithIndex = <T extends object>(
 	obj: T
-): [keyof T, T, number][] =>
+): [string, T, number][] =>
 	Object.entries(obj).map(([key, value], index) => [
-		key as keyof T,
+		key,
 		value,
 		index
 	])

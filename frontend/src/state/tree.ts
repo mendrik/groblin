@@ -6,13 +6,10 @@ import {
 	NodeType
 } from '@/gql/graphql.ts'
 import { getItem, setItem } from '@/lib/local-storage'
-import { setSignal } from '@/lib/signals'
-import { notNil } from '@/lib/signals'
-import { computeSignal } from '@/lib/signals'
+import { computeSignal, notNil, setSignal } from '@/lib/signals'
 import { computed, signal } from '@preact/signals-react'
 import { assertExists } from '@shared/asserts'
-import { type TreeOf, listToTree } from '@shared/utils/list-to-tree'
-import { caseOf, match } from '@shared/utils/match'
+import { type TreeOf, caseOf, listToTree, match } from 'matchblade'
 import { Maybe, MaybeAsync } from 'purify-ts'
 import {
 	type NonEmptyArray,

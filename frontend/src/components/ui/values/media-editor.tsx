@@ -1,6 +1,6 @@
 import type { Value } from '@/gql/graphql'
 import { assertExists, assertThat } from '@shared/asserts'
-import { pipeAsync } from '@shared/utils/pipe-async'
+import { pipeAsync } from 'matchblade'
 
 import type { MediaType } from '@shared/json-value-types'
 import { Paperclip } from 'lucide-react'

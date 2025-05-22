@@ -1,8 +1,8 @@
 import { type NodeSettings, NodeType, type Value } from '@/gql/graphql'
 import { type TreeNode, pathTo } from '@/state/tree'
 import { $activeListItems, activePath, saveValue } from '@/state/value'
-import { caseOf, match } from '@shared/utils/match'
-import { pipeAsync } from '@shared/utils/pipe-async'
+import { caseOf, match } from 'matchblade'
+import { pipeAsync } from 'matchblade'
 import {
 	type Pred,
 	T as _,

@@ -1,7 +1,7 @@
 import { type NodeSettings, NodeType } from '@/gql/graphql'
 import { $nodeSettingsMap } from '@/state/node-settings'
 import type { TreeNode } from '@/state/tree'
-import { caseOf, match } from '@shared/utils/match'
+import { caseOf, match } from 'matchblade'
 
 import { Import, Trash } from 'lucide-react'
 import { T as _, isEmpty } from 'ramda'

@@ -13,7 +13,7 @@ import { stopPropagation } from '@/lib/dom-events'
 import { notNil, setSignal } from '@/lib/signals'
 import { deleteListItem, selectAnyListItem } from '@/state/value'
 import { signal } from '@preact/signals-react'
-import { pipeTap } from '@shared/utils/pipe-tap'
+import { pipeTap } from 'matchblade'
 import { T, pipe } from 'ramda'
 
 export const $deleteListItemOpen = signal(false)

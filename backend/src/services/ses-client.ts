@@ -1,9 +1,9 @@
 import { SESClient as AWSClient, SendEmailCommand } from '@aws-sdk/client-ses'
-import { caseOf, match } from '@shared/utils/match.ts'
 import { replacePlaceholders } from '@shared/utils/strings.ts'
-import { traverse } from '@shared/utils/traverse.ts'
 import { renderToStaticMarkup } from '@usewaypoint/email-builder'
 import { injectable } from 'inversify'
+import { traverse } from 'matchblade'
+import { caseOf, match } from 'matchblade'
 import { T as _, identity } from 'ramda'
 import { isString } from 'ramda-adjunct'
 

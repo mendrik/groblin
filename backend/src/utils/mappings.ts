@@ -9,7 +9,6 @@ import type {
 	NumberType,
 	StringType
 } from '@shared/json-value-types.ts'
-import { caseOf, match } from '@shared/utils/match.ts'
 import chroma from 'chroma-js'
 import { format } from 'date-fns'
 import {
@@ -23,6 +22,7 @@ import {
 	GraphQLString
 } from 'graphql'
 import { type ExpressionBuilder, type RawBuilder, sql } from 'kysely'
+import { caseOf, match } from 'matchblade'
 import { T as _, isNil } from 'ramda'
 import { isNumber } from 'ramda-adjunct'
 import type { JsonValue } from 'src/database/schema.ts'

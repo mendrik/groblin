@@ -1,5 +1,5 @@
-import { caseOf, match } from '@shared/utils/match'
 import { formatDate as format, parseJSON, toDate } from 'date-fns'
+import { caseOf, match } from 'matchblade'
 import { Maybe } from 'purify-ts'
 import { T as _, pipe, tryCatch, unless } from 'ramda'
 import { isDate, isString, isValidDate } from 'ramda-adjunct'
