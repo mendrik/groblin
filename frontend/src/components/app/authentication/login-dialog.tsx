@@ -18,7 +18,7 @@ import { pipeAsync } from 'matchblade'
 import { prop } from 'ramda'
 import { toast } from 'sonner'
 import { Link } from 'wouter'
-import { type TypeOf, strictObject } from 'zod'
+import { type TypeOf, strictObject } from 'zod/v4'
 
 const loginSchema = strictObject({
 	email: stringField('Email', EditorType.Email, 'username'),

@@ -1,15 +1,15 @@
 import { EditorType } from '@shared/enums'
-import { type TypeOf, number, object, string } from 'zod'
-import { asField } from '../../zod-form/utils'
+import { type TypeOf, number, object, string } from 'zod/v4'
 import { hideColumnHead, required } from './common'
+import { metas } from '../../zod-form/utils'
 
 export const NumberProps = object({
-	unit: asField(string().optional(), {
+	unit: string().optional().register(metas, {
 		label: 'Unit',
 		editor: EditorType.Input,
 		span: 2
 	}),
-	precision: asField(number().default(0), {
+	precision: number().default(0).register(metas, {
 		label: 'Precision',
 		editor: EditorType.Number,
 		span: 2,
@@ -19,14 +19,14 @@ export const NumberProps = object({
 			max: 5
 		}
 	}),
-	minimum: asField(number().optional(), {
+	minimum: number().optional().register(metas, {
 		label: 'Minimum',
 		editor: EditorType.Number,
 		extra: {
 			scale: 2
 		}
 	}),
-	maximum: asField(number().optional(), {
+	maximum: number().optional().register(metas, {
 		label: 'Maximum',
 		editor: EditorType.Number,
 		extra: {

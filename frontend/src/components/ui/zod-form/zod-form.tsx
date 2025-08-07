@@ -10,11 +10,12 @@ import {
 } from "react";
 import {
 	type DefaultValues,
+	FieldPath,
 	type FieldValues,
 	type UseFormReturn,
 	useForm,
 } from "react-hook-form";
-import type { ZodObject, ZodRawShape } from "zod/v4";
+import type { input, output, ZodObject, ZodRawShape } from "zod/v4";
 import {
 	Form,
 	FormDescription,
@@ -27,7 +28,7 @@ import { Editor } from "./editors";
 import { generateDefaults } from "./utils";
 
 import { assertExists } from "@shared/asserts";
-import { $ZodObject } from "zod/v4/core";
+import { $InferObjectInput, $InferObjectOutput, $ZodObject } from "zod/v4/core";
 import { FieldMeta } from "./types";
 import "./zod-form.css";
 
@@ -62,8 +63,8 @@ function* schemaIterator<T extends ZodRawShape>(schema: $ZodObject<T>) {
 	}
 }
 
-type FieldProps<T extends ZodRawShape> = {
-	form: UseFormReturn<T.output>;
+type FieldProps<T extends Record<string, any>> = {
+	form: UseFormReturn<input<any>, any, output<any>>;
 	schema: ZodObject<T>;
 };
 
@@ -75,7 +76,7 @@ export const Fields = <T extends ZodRawShape>({
 		<FormField
 			key={name}
 			control={form.control}
-			name={name}
+			name={name as FieldPath<T>}
 			render={renderer}
 		/>
 	));
@@ -85,7 +86,7 @@ export type FormApi<F extends FieldValues> = {
 };
 
 type OwnProps<T extends ZodRawShape> = {
-	schema: T;
+	schema: ZodObject<T>;
 	onSubmit: (data: any) => void;
 	onError?: (err: Error) => void;
 	columns?: number;
@@ -107,17 +108,17 @@ export const ZodForm = forwardRef(
 		ref: ForwardedRef<FormApi<T>>,
 	) => {
 		const defaultValues = useMemo(
-			() => externalDefaults ?? (generateDefaults(schema) as DefaultValues<T>),
+			() => externalDefaults ?? (generateDefaults(schema)),
 			[schema, externalDefaults],
 		);
 
-		const form = useForm<T>({
+		const form = useForm<input<typeof schema>, any, output<typeof schema>>({
 			resolver: zodResolver(schema),
 			defaultValues,
 		});
 
 		useImperativeHandle(ref, () => ({
-			formState: form.formState,
+			formState: form.formState as any,
 		}));
 
 		return (

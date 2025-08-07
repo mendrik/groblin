@@ -6,8 +6,9 @@ import {
 	nativeEnum,
 	number,
 	object,
-	string
-} from 'zod'
+	string,
+	tuple
+} from 'zod/v4'
 
 export const FieldMeta = object({
 	label: string(),
@@ -16,7 +17,8 @@ export const FieldMeta = object({
 	placeholder: string().optional(),
 	span: number().optional(),
 	autofill: string().optional(),
-	extra: any().optional()
+	extra: any().optional(),
+	options: array(tuple([string(), string()])).optional(),
 })
 
 export const FieldSelectMeta = FieldMeta.extend({

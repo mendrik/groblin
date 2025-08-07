@@ -16,7 +16,7 @@ import { pipe } from 'ramda'
 import { toast } from 'sonner'
 import { Link } from 'wouter'
 import { navigate } from 'wouter/use-browser-location'
-import { type TypeOf, strictObject } from 'zod'
+import { type TypeOf, strictObject } from 'zod/v4'
 
 const forgotPasswordSchema = strictObject({
 	email: stringField('Email', EditorType.Email, 'username')

@@ -1,7 +1,7 @@
 import { EditorType } from '@shared/enums'
 import type { Editor } from '@tiptap/react'
 import { LinkIcon } from 'lucide-react'
-import { object } from 'zod'
+import { object } from 'zod/v4'
 import { MicroIcon } from '../ui/random/micro-icon'
 import { openInputDialog } from '../ui/simple/input-dialog'
 import { stringField } from '../ui/zod-form/utils'

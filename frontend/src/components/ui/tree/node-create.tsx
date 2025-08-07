@@ -19,11 +19,12 @@ import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
 import { caseOf, evolveAlt, match, pipeAsync } from 'matchblade'
 import { F, pipe } from 'ramda'
-import { type TypeOf, nativeEnum, strictObject } from 'zod'
+import { infer as TypeOf, ZodEnum, strictObject } from 'zod/v4'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
-import { asField, enumToMap, stringField } from '../zod-form/utils'
+import {  enumToMap, metas, stringField } from '../zod-form/utils'
 import { ZodForm } from '../zod-form/zod-form'
+import { enum as zodEnum } from 'zod/v4'
 
 type NodeCreatePosition =
 	| 'root-child'
@@ -44,7 +45,7 @@ const close = pipe(F, setSignal($dialogOpen))
 const newNodeSchema = () =>
 	strictObject({
 		name: stringField('Name', EditorType.Input, 'off', 'Name of the node'),
-		type: asField(nativeEnum(NodeType).default(NodeType.Object), {
+		type: zodEnum(NodeType).default(NodeType.Object).register(metas, {
 			label: 'Type',
 			description: 'The type of node you want to create.',
 			editor: EditorType.Select,

@@ -16,7 +16,7 @@ import { pipeTap } from 'matchblade'
 import type { Fn } from '@tp/functions.ts'
 import { pipe } from 'ramda'
 import { toast } from 'sonner'
-import { type TypeOf, strictObject } from 'zod'
+import { type TypeOf, strictObject } from 'zod/v4'
 
 const resetPasswordSchema = strictObject({
 	password: stringField('Password', EditorType.Password, 'new-password'),

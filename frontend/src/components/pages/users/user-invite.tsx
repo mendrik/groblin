@@ -8,7 +8,7 @@ import {
 	DialogTitle
 } from '@/components/ui/dialog'
 import { useFormState } from '@/components/ui/zod-form/use-form-state'
-import { asField } from '@/components/ui/zod-form/utils'
+import { metas } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { setSignal } from '@/lib/signals'
 import { inviteUser } from '@/state/users'
@@ -16,7 +16,7 @@ import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
 import { pipeAsync } from 'matchblade'
 import { F, pipe } from 'ramda'
-import { type TypeOf, strictObject, string } from 'zod'
+import { infer as TypeOf, email, strictObject } from 'zod/v4'
 
 const $dialogOpen = signal(false)
 
@@ -26,7 +26,7 @@ export const openUserInvite = () => {
 const close = pipe(F, setSignal($dialogOpen))
 
 const invitationSchema = strictObject({
-	email: asField(string(), {
+	email: email().register(metas, {
 		label: 'Email',
 		editor: EditorType.Input,
 		description: 'Enter the user email'
