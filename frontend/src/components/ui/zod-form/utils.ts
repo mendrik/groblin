@@ -3,6 +3,7 @@ import { EditorType } from "@shared/enums";
 import { _, caseOf, match } from "matchblade";
 import { any, anyPass, isNotEmpty, pipe, trim } from "ramda";
 import {
+	NEVER,
 	ZodArray,
 	ZodCatch,
 	ZodDefault,
@@ -15,14 +16,13 @@ import {
 	ZodPromise,
 	ZodReadonly,
 	type ZodType,
+	instanceof as instanceOf,
 	registry,
 	string,
 } from "zod/v4";
-import { $strip } from "zod/v4/core";
 import type { FieldMeta } from "./types";
 
 export const metas = registry<FieldMeta>();
-const z = {} as any;
 
 const isZodObject = (value: ZodType): value is ZodObject<any> =>
 	value instanceof ZodObject;
@@ -48,6 +48,7 @@ const isZodPromise = (value: ZodType): value is ZodPromise<any> =>
 	value instanceof ZodPromise;
 
 const isWrappedType = anyPass([
+	isZodArray,
 	isZodDefault,
 	isZodOptional,
 	isZodPrefault,
@@ -105,16 +106,12 @@ export const fileUpload = (
 	accept: string,
 	description: string,
 ) =>
-	z
-		.instanceof(File)
+	instanceOf(File)
 		.transform(
 			async (file, ctx) =>
 				await uploadToS3(file).catch((err: Error) => {
-					ctx.addIssue({
-						code: "invalid_type",
-						message: err.message,
-					});
-					return z.NEVER;
+					ctx.addIssue("invalid_type");
+					return NEVER;
 				}),
 		)
 		.register(metas, {
