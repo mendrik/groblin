@@ -1,7 +1,7 @@
 import chroma from 'chroma-js'
 import { tryCatch } from 'ramda'
 import { isError, isString } from 'ramda-adjunct'
-import { NEVER, z } from 'zod'
+import { NEVER, z } from 'zod/v4'
 
 // Union of all color formats
 export const color = z.string().transform((value, { addIssue }) => {

@@ -11,17 +11,13 @@ import {
 import {
 	type DefaultValues,
 	type FieldValues,
-	type Path,
 	type UseFormReturn,
 	useForm
 } from 'react-hook-form'
 import type {
-	TypeOf,
-	ZodDefault,
-	ZodEffects,
 	ZodObject,
 	ZodRawShape
-} from 'zod'
+} from 'zod/v4'
 import {
 	Form,
 	FormDescription,
@@ -32,19 +28,13 @@ import {
 } from '../form'
 import { Editor } from './editors'
 import {
-	type RendererProps,
 	generateDefaults,
-	innerType,
-	isEnhanced
 } from './utils'
 
-import './zod-form.css'
 import { assertExists } from '@shared/asserts'
-
-type AllowedTypes<T extends ZodRawShape> =
-	| ZodObject<T>
-	| ZodEffects<ZodObject<T>>
-	| ZodDefault<ZodObject<T>>
+import { $ZodObject } from 'zod/v4/core'
+import { FieldMeta } from './types'
+import './zod-form.css'
 
 const cols = match<[number], string>(
 	caseOf([eq(1)], 'grid-cols-1 sm:grid-cols-1'),
@@ -58,16 +48,17 @@ const colSpan = match<[number], string>(
 	caseOf([eq(3)], 'sm:col-span-3')
 )
 
-function* schemaIterator<T extends ZodRawShape>(schema: AllowedTypes<T>) {
-	for (const [name, zodSchema] of Object.entries(innerType(schema).shape)) {
-		const fieldData = isEnhanced(zodSchema) ? zodSchema.meta : undefined
+function* schemaIterator<T extends ZodRawShape>(schema: $ZodObject<T>) {
+  const def = schema._zod.def;
+	for (const [name, type] of Object.entries(schema._zod.def.shape.fields)) {
+		const fieldData = type.meta() as FieldMeta
 		assertExists(fieldData, `Field meta data is missing in ${name}`)
 		yield {
 			name,
-			renderer: ({ field }: RendererProps<any>) => (
+			renderer: ({ field } ) => (
 				<FormItem className={colSpan(fieldData.span ?? 1)}>
 					<FormLabel>{fieldData.label}</FormLabel>
-					<Editor desc={fieldData} type={zodSchema} field={field} />
+					<Editor desc={fieldData} type={type} field={field} />
 					<FormDescription>{fieldData.description}</FormDescription>
 					<FormMessage />
 				</FormItem>
@@ -77,8 +68,8 @@ function* schemaIterator<T extends ZodRawShape>(schema: AllowedTypes<T>) {
 }
 
 type FieldProps<T extends ZodRawShape> = {
-	form: UseFormReturn<TypeOf<AllowedTypes<T>>>
-	schema: AllowedTypes<T>
+	form: UseFormReturn<T.output>
+	schema: ZodObject<T>
 }
 
 export const Fields = <T extends ZodRawShape>({
@@ -89,7 +80,7 @@ export const Fields = <T extends ZodRawShape>({
 		<FormField
 			key={name}
 			control={form.control}
-			name={name as Path<TypeOf<ZodObject<T>>>}
+			name={name}
 			render={renderer}
 		/>
 	))
@@ -98,17 +89,17 @@ export type FormApi<F extends FieldValues> = {
 	formState: UseFormReturn<F>['formState']
 }
 
-type OwnProps<T extends AllowedTypes<any>> = {
+type OwnProps<T extends ZodRawShape> = {
 	schema: T
 	onSubmit: (data: any) => void
 	onError?: (err: Error) => void
 	columns?: number
 	disabled?: boolean
-	defaultValues?: DefaultValues<TypeOf<T>>
+	defaultValues?: DefaultValues<T>
 }
 
 export const ZodForm = forwardRef(
-	<T extends AllowedTypes<any>>(
+	<T extends ZodRawShape>(
 		{
 			schema,
 			columns = 1,
@@ -118,16 +109,16 @@ export const ZodForm = forwardRef(
 			defaultValues: externalDefaults,
 			children
 		}: PropsWithChildren<OwnProps<T>>,
-		ref: ForwardedRef<FormApi<TypeOf<T>>>
+		ref: ForwardedRef<FormApi<T>>
 	) => {
 		const defaultValues = useMemo(
 			() =>
 				externalDefaults ??
-				(generateDefaults(innerType(schema)) as DefaultValues<TypeOf<T>>),
+				(generateDefaults(schema) as DefaultValues<T>),
 			[schema, externalDefaults]
 		)
 
-		const form = useForm<TypeOf<T>>({
+		const form = useForm<T>({
 			resolver: zodResolver(schema),
 			defaultValues
 		})

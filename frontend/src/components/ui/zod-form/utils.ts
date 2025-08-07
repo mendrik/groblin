@@ -1,180 +1,125 @@
-import { Api } from '@/gql-client'
-import { EditorType } from '@shared/enums'
-import { isNotEmpty, mergeAll, pipe, trim } from 'ramda'
-import type { ControllerProps, FieldPath, FieldValues } from 'react-hook-form'
-import * as z from 'zod'
+import { Api } from "@/gql-client";
+import { EditorType } from "@shared/enums";
+import { _, caseOf, match } from "matchblade";
+import { any, anyPass, isNotEmpty, pipe, trim } from "ramda";
 import {
-	type AnyZodObject,
+	ZodArray,
+	ZodCatch,
+	ZodDefault,
+	ZodLazy,
+	ZodNonOptional,
+	ZodNullable,
+	ZodObject,
+	ZodOptional,
+	ZodPrefault,
+	ZodPromise,
+	ZodReadonly,
 	type ZodType,
-	type ZodTypeDef,
-	instanceof as isA,
-	string
-} from 'zod'
-import type { FieldMeta } from './types'
+	registry,
+	string,
+} from "zod/v4";
+import { $strip } from "zod/v4/core";
+import type { FieldMeta } from "./types";
 
-type ZodTypeEnhanced<
-	O = any,
-	D extends ZodTypeDef = ZodTypeDef,
-	I = O
-> = ZodType<O, D, I> & {
-	meta: FieldMeta
-	original: ZodType<O, D, I>
-}
+export const metas = registry<FieldMeta>();
+const z = {} as any;
 
-export const isEnhanced = <O, D extends ZodTypeDef, I>(
-	type: any
-): type is ZodTypeEnhanced<O, D, I> =>
-	type._def !== undefined && type.meta !== undefined
+const isZodObject = (value: ZodType): value is ZodObject<any> =>
+	value instanceof ZodObject;
+const isZodArray = (value: ZodType): value is ZodArray<any> =>
+	value instanceof ZodArray;
+const isZodDefault = (value: ZodType): value is ZodDefault<any> =>
+	value instanceof ZodDefault;
+const isZodOptional = (value: ZodType): value is ZodOptional<any> =>
+	value instanceof ZodOptional;
+const isZodPrefault = (value: ZodType): value is ZodPrefault<any> =>
+	value instanceof ZodPrefault;
+const isZodNonOptional = (value: ZodType): value is ZodNonOptional<any> =>
+	value instanceof ZodNonOptional;
+const isZodNullable = (value: ZodType): value is ZodNullable<any> =>
+	value instanceof ZodNullable;
+const isZodCatch = (value: ZodType): value is ZodCatch<any> =>
+	value instanceof ZodCatch;
+const isZodReadonly = (value: ZodType): value is ZodReadonly<any> =>
+	value instanceof ZodReadonly;
+const isZodLazy = (value: ZodType): value is ZodLazy<any> =>
+	value instanceof ZodLazy;
+const isZodPromise = (value: ZodType): value is ZodPromise<any> =>
+	value instanceof ZodPromise;
 
-// Create a proxy to delegate method calls
-export const asField = <
-	M extends FieldMeta,
-	O = any,
-	D extends ZodTypeDef = ZodTypeDef,
-	I = O
->(
-	schema: ZodType<O, D, I>,
-	meta: M
-): ZodTypeEnhanced<O, D, I> => {
-	return new Proxy(schema, {
-		get(target: any, prop: string) {
-			if (prop === 'meta') {
-				return meta
-			}
-			if (prop === 'original') {
-				return schema
-			}
-			if (typeof target[prop] === 'function') {
-				return (...args: any[]) => target[prop](...args)
-			}
-			return target[prop]
-		}
-	})
-}
-
-export const objectHandler = (
-	zodRef: AnyZodObject
-): Record<string, z.ZodTypeAny> =>
-	Object.keys(zodRef.shape).reduce(
-		(carry, key) => {
-			const res = generateDefaults<z.ZodTypeAny>(zodRef.shape[key])
-			return {
-				...carry,
-				...(res !== undefined ? { [key]: res } : {})
-			}
-		},
-		{} as Record<string, z.ZodTypeAny>
-	)
-
-export const generateDefaults = <T extends z.ZodTypeAny>(
-	zodRef: T
-): z.infer<T> => {
-	if (zodRef instanceof z.ZodObject) {
-		return objectHandler(zodRef)
-	} else if (zodRef instanceof z.ZodDefault) {
-		return zodRef._def.defaultValue()
-	} else if (zodRef instanceof z.ZodUnion) {
-		return mergeAll(zodRef._def.options.map(generateDefaults))
-	}
-	return undefined
-}
-
-export type IsZodType<T extends ZodType<any, any>> = T extends ZodType<
-	infer U,
-	any
->
-	? U
-	: never
-
-export const isZodType =
-	<T extends ZodType<any, any>>(type: new (...args: any[]) => T) =>
-	(checkType: ZodType<any, any>): checkType is T =>
-		innerType(checkType) instanceof type
-
-// Type-level unwrapping
-type UnwrapZod<T extends z.ZodTypeAny> = T extends z.ZodNullable<infer U>
-	? UnwrapZod<U>
-	: T extends z.ZodDefault<infer U>
-		? UnwrapZod<U>
-		: T extends z.ZodOptional<infer U>
-			? UnwrapZod<U>
-			: T extends z.ZodEffects<infer U>
-				? UnwrapZod<U>
-				: T // Extend as needed
-
-// Runtime function
-export function innerType<T extends z.ZodTypeAny>(schema: T): UnwrapZod<T> {
-	if (isEnhanced(schema)) {
-		return innerType(schema.original) as UnwrapZod<T>
-	} else if (schema instanceof z.ZodDefault) {
-		return innerType(schema.removeDefault()) as UnwrapZod<T>
-	} else if (schema instanceof z.ZodNullable) {
-		return innerType(schema.unwrap()) as UnwrapZod<T>
-	} else if (schema instanceof z.ZodOptional) {
-		return innerType(schema.unwrap()) as UnwrapZod<T>
-	} else if (schema instanceof z.ZodEffects) {
-		return innerType(schema._def.schema) as UnwrapZod<T>
-	} else {
-		return schema as UnwrapZod<T>
-	}
-}
-
-export type RendererProps<
-	TFieldValues extends FieldValues = FieldValues,
-	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
-> = Parameters<ControllerProps<TFieldValues, TName>['render']>[0]
+const isWrappedType = anyPass([
+	isZodDefault,
+	isZodOptional,
+	isZodPrefault,
+	isZodNonOptional,
+	isZodNullable,
+	isZodCatch,
+	isZodReadonly,
+	isZodLazy,
+	isZodPromise,
+]);
 
 export const stringField = (
 	label: string,
 	editor: EditorType,
 	autofill?: string,
-	placeholder?: string
+	placeholder?: string,
 ) =>
-	asField(
-		string()
-			.refine(pipe(trim, isNotEmpty), { message: `${label} is required` })
-			.default(''),
-		{ label, editor, autofill, placeholder }
-	)
+	string()
+		.refine(pipe(trim, isNotEmpty), { message: `${label} is required` })
+		.default("")
+		.register(metas, { label, editor, autofill, placeholder });
+
+export const generateDefaults = match<[ZodType], any>(
+	caseOf([isZodDefault], (type) => type.def.defaultValue),
+	caseOf([isZodObject], (type) =>
+		Object.entries(type.def.shape).reduce(
+			(acc, [key, value]) => ({ ...acc, [key]: generateDefaults(value) }),
+			{},
+		),
+	),
+	caseOf([isWrappedType], (type) => generateDefaults(type.unwrap())),
+	caseOf([_], undefined),
+);
 
 export const enumToMap = <T extends Record<string, string>>(enumRef: T) =>
-	Object.entries(enumRef)
+	Object.entries(enumRef);
 
 export const uploadToS3 = async (file: File) => {
-	const { signedUrl, object } = await Api.UploadUrl({ filename: file.name })
+	const { signedUrl, object } = await Api.UploadUrl({ filename: file.name });
 	const response = await fetch(signedUrl, {
-		method: 'PUT',
+		method: "PUT",
 		headers: {
-			'Content-Type': file.type
+			"Content-Type": file.type,
 		},
-		body: file
-	})
+		body: file,
+	});
 	if (!response.ok) {
-		throw new Error(response.statusText)
+		throw new Error(response.statusText);
 	}
-	return object
-}
+	return object;
+};
 
 export const fileUpload = (
 	label: string,
 	accept: string,
-	description: string
+	description: string,
 ) =>
-	asField(
-		isA(File).transform(
+	z
+		.instanceof(File)
+		.transform(
 			async (file, ctx) =>
 				await uploadToS3(file).catch((err: Error) => {
 					ctx.addIssue({
-						code: z.ZodIssueCode.custom,
-						message: err.message
-					})
-					return z.NEVER
-				})
-		),
-		{
+						code: "invalid_type",
+						message: err.message,
+					});
+					return z.NEVER;
+				}),
+		)
+		.register(metas, {
 			label,
 			editor: EditorType.File,
 			extra: accept,
-			description
-		}
-	)
+			description,
+		});

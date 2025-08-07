@@ -7,7 +7,7 @@ import { caseOf, match } from 'matchblade'
 import { path, T as _, nth, pipe } from 'ramda'
 import type { ReactNode } from 'react'
 import type { ControllerRenderProps } from 'react-hook-form'
-import { ZodNativeEnum, ZodNumber, type ZodTypeAny } from 'zod'
+import { ZodEnum, ZodNumber, type ZodType } from 'zod/v4'
 import { openDatePicker } from '../date-picker/date-picker-dialog'
 import { FormControl } from '../form'
 import { Input } from '../input'
@@ -17,22 +17,22 @@ import { SimpleSelect } from '../simple/select'
 import { Switch } from '../switch'
 import { TagsInput } from '../tags-input'
 import type { FieldMeta, FieldSelectMeta } from './types'
-import { innerType, isZodType } from './utils'
+import { isZodType } from './utils'
 
 const hasOptions = (obj: FieldMeta): obj is FieldSelectMeta =>
 	'options' in obj && obj.options !== undefined
 
 type OwnProps = {
 	desc: FieldMeta
-	type: ZodTypeAny
+	type: ZodType
 	field: ControllerRenderProps
 }
 
-type Args = readonly [FieldMeta, ZodTypeAny, ControllerRenderProps]
+type Args = readonly [FieldMeta, ZodType, ControllerRenderProps]
 
 const matcher = match<Args, ReactNode>(
 	caseOf(
-		[hasOptions, isZodType(ZodNativeEnum), _],
+		[hasOptions, isZodType(ZodEnum), _],
 		(desc, type, { onChange, value, ref, ...field }) => {
 			return (
 				<SimpleSelect<[string, string]>
