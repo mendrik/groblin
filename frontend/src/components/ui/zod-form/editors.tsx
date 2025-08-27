@@ -17,7 +17,6 @@ import { SimpleSelect } from '../simple/select'
 import { Switch } from '../switch'
 import { TagsInput } from '../tags-input'
 import type { FieldMeta, FieldSelectMeta } from './types'
-import { isZodType } from './utils'
 
 const hasOptions = (obj: FieldMeta): obj is FieldSelectMeta =>
 	'options' in obj && obj.options !== undefined
