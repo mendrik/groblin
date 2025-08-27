@@ -1,4 +1,4 @@
-<img src="https://img.shields.io/badge/Status-Pre_Alpha_Development-red"/>
+![Static Badge](https://img.shields.io/badge/Status-Pre_Alpha_Development-red)
 
 <p align="center">
     <img src="https://mindmine-v2.s3.eu-north-1.amazonaws.com/images/gnome.png" width="200">
