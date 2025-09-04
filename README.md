@@ -3,7 +3,7 @@
 </p>
 
 <blockquote>
-<strong>Even the shiniest treasure loses its sparkle if buried too deep. Keep your content like a goblin's hoard — organized, accessible, and ready to dazzle when needed!</strong><br/><i>– Grumblewick the Goblin, Content Keeper of the Caverns</i>
+<strong>Even the shiniest treasure loses its sparkle if buried too deep. Keep your content like a goblin's hoard — organized, accessible, and ready to dazzle when needed!</strong><br/><i>– Grumblewick the Groblin, Content Keeper of the Caverns</i>
 </blockquote>
 
 ![Static Badge](https://img.shields.io/badge/Status-Pre_Alpha_Development-red?style=for-the-badge)
