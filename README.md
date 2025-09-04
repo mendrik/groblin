@@ -39,5 +39,5 @@ The structure of the tree simultaneously creates a graphql interface for clients
 - [ ] Authorizations
 
 <p align="center">
-<img width="500" height="246" alt="image" src="https://github.com/user-attachments/assets/711bc3fc-b258-4249-80b7-cb2d9ffa3e45" />
+<img width="100%" alt="image" src="https://github.com/user-attachments/assets/197d9d75-0717-4945-a7df-b92c942dddad" />
 </p>
