@@ -33,12 +33,11 @@ The structure of the tree simultaneously creates a graphql interface for clients
 - [ ] Authorization roles
 - [ ] Documentation
 
-<p align="center">
-    <img src="https://mindmine-v2.s3.eu-north-1.amazonaws.com/images/gnome.png" width="200">
-</p>
-
 #### Ideas for the future
 - [ ] External sources (REST, DB, Mailboxes)
 - [ ] Business rule manager
 - [ ] Authorizations
 
+<p align="center">
+<img width="500" height="246" alt="image" src="https://github.com/user-attachments/assets/711bc3fc-b258-4249-80b7-cb2d9ffa3e45" />
+</p>
