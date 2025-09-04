@@ -1,7 +1,7 @@
 ![Static Badge](https://img.shields.io/badge/Status-Pre_Alpha_Development-red?style=for-the-badge)
 
 <p align="center">
-    <img src="https://mindmine-v2.s3.eu-north-1.amazonaws.com/images/gnome.png" width="200">
+<img width="500" alt="image" align="center" src="https://github.com/user-attachments/assets/64ba16de-d32d-4b5f-b63d-873039a4ca3b" />
 </p>
 
 <blockquote>
@@ -34,6 +34,10 @@ The structure of the tree simultaneously creates a graphql interface for clients
 - [ ] Node settings
 - [ ] Authorization roles
 - [ ] Documentation
+
+<p align="center">
+    <img src="https://mindmine-v2.s3.eu-north-1.amazonaws.com/images/gnome.png" width="200">
+</p>
 
 #### Ideas for the future
 - [ ] External sources (REST, DB, Mailboxes)
