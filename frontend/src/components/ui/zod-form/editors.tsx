@@ -21,6 +21,11 @@ import type { FieldMeta, FieldSelectMeta } from './types'
 const hasOptions = (obj: FieldMeta): obj is FieldSelectMeta =>
 	'options' in obj && obj.options !== undefined
 
+const isZodType =
+	<T extends ZodType>(Type: new (...args: any[]) => T) =>
+	(schema: ZodType): schema is T =>
+		schema instanceof Type
+
 type OwnProps = {
 	desc: FieldMeta
 	type: ZodType
@@ -177,7 +182,7 @@ const matcher = match<Args, ReactNode>(
 		return (
 			<div>
 				Unsupported editor for "{`${a.label}`}":{' '}
-				{`${a.editor}/${innerType(b)._def.typeName}`}
+				{`${a.editor}/${b._def.typeName}`}
 			</div>
 		)
 	})

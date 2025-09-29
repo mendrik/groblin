@@ -15,7 +15,7 @@ import {
 	type UseFormReturn,
 	useForm,
 } from "react-hook-form";
-import type { input, output, ZodObject, ZodRawShape } from "zod/v4";
+import type { input, output, ZodObject, ZodRawShape, ZodType } from "zod/v4";
 import {
 	Form,
 	FormDescription,
@@ -25,12 +25,13 @@ import {
 	FormMessage,
 } from "../form";
 import { Editor } from "./editors";
-import { generateDefaults } from "./utils";
+import { generateDefaults, metas } from "./utils";
 
 import { assertExists } from "@shared/asserts";
 import { $InferObjectInput, $InferObjectOutput, $ZodObject } from "zod/v4/core";
 import { FieldMeta } from "./types";
 import "./zod-form.css";
+import { log } from "console";
 
 const cols = match<[number], string>(
 	caseOf([eq(1)], "grid-cols-1 sm:grid-cols-1"),
@@ -46,15 +47,16 @@ const colSpan = match<[number], string>(
 
 function* schemaIterator<T extends ZodRawShape>(schema: $ZodObject<T>) {
 	const def = schema._zod.def;
-	for (const [name, type] of Object.entries(schema._zod.def.shape.fields)) {
-		const fieldData = type.meta() as FieldMeta;
+	console.log(def)
+	for (const [name, type] of Object.entries(def.shape)) {
+		const fieldData = metas.get(type) as FieldMeta;
 		assertExists(fieldData, `Field meta data is missing in ${name}`);
 		yield {
 			name,
 			renderer: ({ field }) => (
 				<FormItem className={colSpan(fieldData.span ?? 1)}>
 					<FormLabel>{fieldData.label}</FormLabel>
-					<Editor desc={fieldData} type={type} field={field} />
+					<Editor desc={fieldData} type={type as ZodType} field={field} />
 					<FormDescription>{fieldData.description}</FormDescription>
 					<FormMessage />
 				</FormItem>

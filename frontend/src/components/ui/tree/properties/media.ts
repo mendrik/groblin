@@ -1,6 +1,7 @@
 import { EditorType } from '@shared/enums'
 import { infer as TypeOf, array, object, string } from 'zod/v4'
 import { hideColumnHead, required } from './common'
+import { metas } from '../../zod-form/utils'
 
 export const MediaProps = object({
 	thumbnails: 
@@ -13,7 +14,7 @@ export const MediaProps = object({
 			description: 'Either side lengths (300) or dimensions (50x50)',
 			span: 2,
 			editor: EditorType.Tags
-		}
+		} 
 	),
 	hideColumnHead,
 	required
