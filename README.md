@@ -38,3 +38,7 @@ The structure of the tree simultaneously creates a graphql interface for clients
 - [ ] Business rule manager
 - [ ] Authorizations
 
+#### Install
+- `pnpm install`
+- `docker compose up`
+
