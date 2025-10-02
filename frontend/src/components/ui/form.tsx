@@ -15,8 +15,6 @@ import { cn } from '@/lib/utils'
 import { head } from 'ramda'
 import { compact } from 'ramda-adjunct'
 
-const Form = FormProvider
-
 type FormFieldContextValue<
 	TFieldValues extends FieldValues = FieldValues,
 	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
@@ -174,7 +172,7 @@ FormMessage.displayName = 'FormMessage'
 
 export {
 	useFormField,
-	Form,
+	FormProvider as Form,
 	FormItem,
 	FormLabel,
 	FormControl,

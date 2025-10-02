@@ -7,7 +7,7 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { asField, stringField } from '@/components/ui/zod-form/utils'
+import {  metas, stringField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { signUp } from '@/lib/auth-client'
 import { setSignal } from '@/lib/signals'
@@ -20,16 +20,16 @@ import { pipeAsync } from 'matchblade'
 import { omit } from 'ramda'
 import { toast } from 'sonner'
 import { Link, useLocation } from 'wouter'
-import { type TypeOf, strictObject, string } from 'zod'
+import {  email, infer as TypeOf, strictObject, string } from 'zod/v4'
 
 const registrationSchema = strictObject({
 	name: stringField('Name', EditorType.Input, 'name', 'Full name'),
-	email: asField(string().email(), {
+	email: email().register(metas, { 
 		label: 'Email',
 		editor: EditorType.Email,
 		autofill: 'username'
 	}),
-	password: asField(string().min(8).max(32), {
+	password: string().min(8).max(32).register(metas, {
 		label: 'Password',
 		editor: EditorType.Password,
 		autofill: 'new-password'

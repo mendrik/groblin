@@ -18,10 +18,10 @@ import { pipeAsync } from 'matchblade'
 import { F, pipe } from 'ramda'
 import { isArray } from 'ramda-adjunct'
 import { toast } from 'sonner'
-import { type TypeOf, boolean, strictObject, string } from 'zod'
+import { infer as TypeOf, boolean, strictObject, string } from 'zod/v4'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
-import { asField, fileUpload } from '../zod-form/utils'
+import {  fileUpload, metas } from '../zod-form/utils'
 import { ZodForm } from '../zod-form/zod-form'
 
 const $node = signal<TreeNode>()
@@ -39,12 +39,12 @@ const importArraySchema = () =>
 			'.json,application/json',
 			'Select the json file to import'
 		),
-		external_id: asField(string().optional(), {
+		external_id: string().optional().register(metas, {
 			label: 'External ID',
 			editor: EditorType.Input,
 			description: 'External ID of each item'
 		}),
-		structure: asField(boolean().default(true), {
+		structure: boolean().default(true).register(metas, {
 			label: 'Structure',
 			editor: EditorType.Switch,
 			description: 'Create missing structure'

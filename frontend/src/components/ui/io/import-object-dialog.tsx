@@ -11,10 +11,10 @@ import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
 import { pipeAsync } from 'matchblade'
 import { F, pipe } from 'ramda'
-import { type TypeOf, instanceof as isA, strictObject } from 'zod'
+import { type TypeOf, instanceof as isA, strictObject } from 'zod/v4'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
-import { asField } from '../zod-form/utils'
+import { metas } from '../zod-form/utils'
 import { ZodForm } from '../zod-form/zod-form'
 
 const $node = signal<TreeNode>()
@@ -27,7 +27,7 @@ const close = pipe(F, setSignal($dialogOpen))
 
 const importObjectSchema = () =>
 	strictObject({
-		data: asField(isA(File), {
+		data: isA(File).register(metas, {
 			label: 'Json file',
 			editor: EditorType.File,
 			extra: {

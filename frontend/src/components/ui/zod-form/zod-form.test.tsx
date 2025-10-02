@@ -3,15 +3,15 @@ import { EditorType } from '@shared/enums'
 import { render, screen, waitFor } from '@testing-library/react'
 import { delayP } from 'ramda-adjunct'
 import { describe, expect, test, vi } from 'vitest'
-import { boolean, object, string } from 'zod'
+import { boolean, object, string } from 'zod/v4'
 import { Button } from '../button'
-import { asField } from './utils'
 import { ZodForm } from './zod-form'
+import { metas } from './utils'
 
 describe('ZodForm', () => {
 	test('string schema works', async () => {
 		const schemaString = object({
-			formTestField: asField(string().optional(), {
+			formTestField: string().optional().register(metas, {
 				label: 'Test',
 				editor: EditorType.Input
 			})
@@ -36,7 +36,7 @@ describe('ZodForm', () => {
 
 	test('string schema works with default', async () => {
 		const schemaString = object({
-			formTestField: asField(string().default('foop'), {
+			formTestField: string().default('foop').register(metas, {
 				label: 'Test',
 				editor: EditorType.Input
 			})
@@ -59,7 +59,7 @@ describe('ZodForm', () => {
 
 	test('boolean schema works with default', async () => {
 		const schemaString = object({
-			formTestField: asField(boolean().default(false), {
+			formTestField: boolean().default(false).register(metas, {
 				label: 'Test',
 				editor: EditorType.Switch
 			})

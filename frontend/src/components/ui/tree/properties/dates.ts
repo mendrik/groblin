@@ -1,10 +1,10 @@
 import { EditorType } from '@shared/enums'
-import { type TypeOf, boolean, object } from 'zod'
-import { asField } from '../../zod-form/utils'
+import { infer as  TypeOf, boolean, object } from 'zod/v4'
 import { hideColumnHead, required } from './common'
+import { metas } from '../../zod-form/utils'
 
 export const DateProps = object({
-	relative: asField(boolean().default(false), {
+	relative: boolean().default(false).register(metas, {
 		label: 'Relative',
 		editor: EditorType.Switch,
 		span: 2

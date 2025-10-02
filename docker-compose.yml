@@ -7,6 +7,7 @@ services:
       POSTGRES_PASSWORD: groblin42
     volumes:
       - ./backend/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./backend/database/test-data.sql:/docker-entrypoint-initdb.d/test-data.sql
     ports:
       - "5432:5432"
     restart: unless-stopped 

@@ -1,13 +1,13 @@
 import { EditorType } from '@shared/enums'
-import { boolean } from 'zod'
-import { asField } from '../../zod-form/utils'
+import { boolean } from 'zod/v4'
+import {  metas } from '../../zod-form/utils'
 
-export const required = asField(boolean().default(false), {
+export const required = boolean().default(false).register(metas, {
 	label: 'Required',
 	editor: EditorType.Switch
 })
 
-export const hideColumnHead = asField(boolean().default(false), {
+export const hideColumnHead = boolean().default(false).register(metas, {
 	label: 'Hide in list view',
 	editor: EditorType.Switch
 })

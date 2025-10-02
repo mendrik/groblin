@@ -1,4 +1,4 @@
-import { type TypeOf, object } from 'zod'
+import { type TypeOf, object } from 'zod/v4'
 
 export const ListProps = object({})
 

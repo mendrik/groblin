@@ -1,114 +1,103 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import { caseOf, match } from 'matchblade'
-import { equals as eq } from 'ramda'
+import { zodResolver } from "@hookform/resolvers/zod";
+import { caseOf, match } from "matchblade";
+import { equals as eq } from "ramda";
 import {
 	type ForwardedRef,
 	type PropsWithChildren,
 	forwardRef,
 	useImperativeHandle,
-	useMemo
-} from 'react'
+	useMemo,
+} from "react";
 import {
 	type DefaultValues,
+	FieldPath,
 	type FieldValues,
-	type Path,
 	type UseFormReturn,
-	useForm
-} from 'react-hook-form'
-import type {
-	TypeOf,
-	ZodDefault,
-	ZodEffects,
-	ZodObject,
-	ZodRawShape
-} from 'zod'
+	useForm,
+} from "react-hook-form";
+import type { input, output, ZodObject, ZodRawShape, ZodType } from "zod/v4";
 import {
 	Form,
 	FormDescription,
 	FormField,
 	FormItem,
 	FormLabel,
-	FormMessage
-} from '../form'
-import { Editor } from './editors'
-import {
-	type RendererProps,
-	generateDefaults,
-	innerType,
-	isEnhanced
-} from './utils'
+	FormMessage,
+} from "../form";
+import { Editor } from "./editors";
+import { generateDefaults, metas } from "./utils";
 
-import './zod-form.css'
-import { assertExists } from '@shared/asserts'
-
-type AllowedTypes<T extends ZodRawShape> =
-	| ZodObject<T>
-	| ZodEffects<ZodObject<T>>
-	| ZodDefault<ZodObject<T>>
+import { assertExists } from "@shared/asserts";
+import { $InferObjectInput, $InferObjectOutput, $ZodObject } from "zod/v4/core";
+import { FieldMeta } from "./types";
+import "./zod-form.css";
+import { log } from "console";
 
 const cols = match<[number], string>(
-	caseOf([eq(1)], 'grid-cols-1 sm:grid-cols-1'),
-	caseOf([eq(2)], 'grid-cols-1 sm:grid-cols-2'),
-	caseOf([eq(3)], 'grid-cols-1 sm:grid-cols-3')
-)
+	caseOf([eq(1)], "grid-cols-1 sm:grid-cols-1"),
+	caseOf([eq(2)], "grid-cols-1 sm:grid-cols-2"),
+	caseOf([eq(3)], "grid-cols-1 sm:grid-cols-3"),
+);
 
 const colSpan = match<[number], string>(
-	caseOf([eq(1)], 'sm:col-span-1'),
-	caseOf([eq(2)], 'sm:col-span-2'),
-	caseOf([eq(3)], 'sm:col-span-3')
-)
+	caseOf([eq(1)], "sm:col-span-1"),
+	caseOf([eq(2)], "sm:col-span-2"),
+	caseOf([eq(3)], "sm:col-span-3"),
+);
 
-function* schemaIterator<T extends ZodRawShape>(schema: AllowedTypes<T>) {
-	for (const [name, zodSchema] of Object.entries(innerType(schema).shape)) {
-		const fieldData = isEnhanced(zodSchema) ? zodSchema.meta : undefined
-		assertExists(fieldData, `Field meta data is missing in ${name}`)
+function* schemaIterator<T extends ZodRawShape>(schema: $ZodObject<T>) {
+	const def = schema._zod.def;
+	console.log(def)
+	for (const [name, type] of Object.entries(def.shape)) {
+		const fieldData = metas.get(type) as FieldMeta;
+		assertExists(fieldData, `Field meta data is missing in ${name}`);
 		yield {
 			name,
-			renderer: ({ field }: RendererProps<any>) => (
+			renderer: ({ field }) => (
 				<FormItem className={colSpan(fieldData.span ?? 1)}>
 					<FormLabel>{fieldData.label}</FormLabel>
-					<Editor desc={fieldData} type={zodSchema} field={field} />
+					<Editor desc={fieldData} type={type as ZodType} field={field} />
 					<FormDescription>{fieldData.description}</FormDescription>
 					<FormMessage />
 				</FormItem>
-			)
-		}
+			),
+		};
 	}
 }
 
-type FieldProps<T extends ZodRawShape> = {
-	form: UseFormReturn<TypeOf<AllowedTypes<T>>>
-	schema: AllowedTypes<T>
-}
+type FieldProps<T extends Record<string, any>> = {
+	form: UseFormReturn<input<any>, any, output<any>>;
+	schema: ZodObject<T>;
+};
 
 export const Fields = <T extends ZodRawShape>({
 	form,
-	schema
+	schema,
 }: FieldProps<T>) =>
 	[...schemaIterator(schema)].map(({ name, renderer }) => (
 		<FormField
 			key={name}
 			control={form.control}
-			name={name as Path<TypeOf<ZodObject<T>>>}
+			name={name as FieldPath<T>}
 			render={renderer}
 		/>
-	))
+	));
 
 export type FormApi<F extends FieldValues> = {
-	formState: UseFormReturn<F>['formState']
-}
+	formState: UseFormReturn<F>["formState"];
+};
 
-type OwnProps<T extends AllowedTypes<any>> = {
-	schema: T
-	onSubmit: (data: any) => void
-	onError?: (err: Error) => void
-	columns?: number
-	disabled?: boolean
-	defaultValues?: DefaultValues<TypeOf<T>>
-}
+type OwnProps<T extends ZodRawShape> = {
+	schema: ZodObject<T>;
+	onSubmit: (data: any) => void;
+	onError?: (err: Error) => void;
+	columns?: number;
+	disabled?: boolean;
+	defaultValues?: DefaultValues<T>;
+};
 
 export const ZodForm = forwardRef(
-	<T extends AllowedTypes<any>>(
+	<T extends ZodRawShape>(
 		{
 			schema,
 			columns = 1,
@@ -116,38 +105,36 @@ export const ZodForm = forwardRef(
 			disabled = false,
 			onError = console.error,
 			defaultValues: externalDefaults,
-			children
+			children,
 		}: PropsWithChildren<OwnProps<T>>,
-		ref: ForwardedRef<FormApi<TypeOf<T>>>
+		ref: ForwardedRef<FormApi<T>>,
 	) => {
 		const defaultValues = useMemo(
-			() =>
-				externalDefaults ??
-				(generateDefaults(innerType(schema)) as DefaultValues<TypeOf<T>>),
-			[schema, externalDefaults]
-		)
+			() => externalDefaults ?? (generateDefaults(schema)),
+			[schema, externalDefaults],
+		);
 
-		const form = useForm<TypeOf<T>>({
+		const form = useForm<input<typeof schema>, any, output<typeof schema>>({
 			resolver: zodResolver(schema),
-			defaultValues
-		})
+			defaultValues,
+		});
 
 		useImperativeHandle(ref, () => ({
-			formState: form.formState
-		}))
+			formState: form.formState as any,
+		}));
 
 		return (
 			<Form {...form}>
 				<form
-					onSubmit={e =>
+					onSubmit={(e) =>
 						form
 							.handleSubmit(
 								onSubmit,
-								console.error
+								console.error,
 							)(e)
-							.catch(e => {
-								console.error(e)
-								onError(e)
+							.catch((e) => {
+								console.error(e);
+								onError(e);
 							})
 					}
 					className="flex flex-col gap-6 relative"
@@ -159,6 +146,6 @@ export const ZodForm = forwardRef(
 					{children}
 				</form>
 			</Form>
-		)
-	}
-)
+		);
+	},
+);

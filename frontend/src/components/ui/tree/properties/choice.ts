@@ -1,10 +1,10 @@
 import { EditorType } from '@shared/enums'
-import { type TypeOf, array, object, string } from 'zod'
-import { asField } from '../../zod-form/utils'
+import { infer as TypeOf, array, object, string } from 'zod/v4'
 import { hideColumnHead, required } from './common'
+import { metas } from '../../zod-form/utils'
 
 export const ChoiceProps = object({
-	choices: asField(array(string().nonempty()).default([]), {
+	choices: array(string().nonempty()).default([]).register(metas, {
 		label: 'Choices',
 		description: 'Enter a list of choices',
 		span: 2,

@@ -8,7 +8,7 @@ import {
 	DialogTitle
 } from '@/components/ui/dialog'
 import { useFormState } from '@/components/ui/zod-form/use-form-state'
-import { asField } from '@/components/ui/zod-form/utils'
+import {  metas } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { setSignal } from '@/lib/signals'
 import { createApiKey } from '@/state/apikeys'
@@ -16,7 +16,7 @@ import { signal } from '@preact/signals-react'
 import { EditorType } from '@shared/enums'
 import { pipeAsync } from 'matchblade'
 import { F, pipe } from 'ramda'
-import { type TypeOf, date, strictObject, string } from 'zod'
+import { infer as TypeOf, date, strictObject, string } from 'zod/v4'
 
 const $dialogOpen = signal(false)
 
@@ -26,12 +26,12 @@ export const openApiKeyCreate = () => {
 const close = pipe(F, setSignal($dialogOpen))
 
 const newApiKeySchema = strictObject({
-	name: asField(string(), {
+	name: string().register(metas, {
 		label: 'Name',
 		editor: EditorType.Input,
 		description: 'Name the key'
 	}),
-	expires: asField(date().optional(), {
+	expires: date().optional().register(metas, {
 		label: 'Expires',
 		description:
 			'You can limit the validity of the key by setting an expiration date.',

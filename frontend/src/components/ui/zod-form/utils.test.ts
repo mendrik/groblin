@@ -1,57 +1,23 @@
 import { EditorType } from '@shared/enums'
 import { describe, expect, it } from 'vitest'
-import * as z from 'zod'
+import * as z from 'zod/v4'
 import {
 	generateDefaults,
-	isEnhanced,
-	isZodType,
-	objectHandler,
+	metas,
 	stringField
 } from './utils'
+import { L } from 'vitest/dist/chunks/reporters.d.BFLkQcL6.js'
+import { assert } from 'console'
+import { assertExists } from '@shared/asserts'
+import { FieldMeta } from './types'
 
 describe('utils', () => {
 	describe('zod form', () => {
 		it('should detect enhanced fields', () => {
 			const schema = stringField('Name', EditorType.Input)
-			expect(isEnhanced(schema)).toBe(true)
-		})
-	})
-
-	describe('objectHandler', () => {
-		it('should generate defaults for a ZodObject', () => {
-			const schema = z.object({
-				name: z.string().default('John Doe'),
-				age: z.number().default(30)
-			})
-
-			const result = objectHandler(schema)
-			expect(result).toEqual({
-				name: 'John Doe',
-				age: 30
-			})
-		})
-
-		it('should return an empty object for an empty ZodObject', () => {
-			const schema = z.object({})
-
-			const result = objectHandler(schema)
-			expect(result).toEqual({})
-		})
-
-		it('should handle nested ZodObjects', () => {
-			const schema = z.object({
-				user: z.object({
-					name: z.string().default('John Doe'),
-					age: z.number().default(30)
-				})
-			})
-
-			const result = objectHandler(schema)
-			expect(result).toEqual({
-				user: {
-					name: 'John Doe',
-					age: 30
-				}
+			expect(metas.get(schema)).toMatchObject({
+				label: 'Name',
+				editor: EditorType.Input,
 			})
 		})
 	})
@@ -82,35 +48,6 @@ describe('utils', () => {
 
 			const result = generateDefaults(schema)
 			expect(result).toBeUndefined()
-		})
-	})
-
-	describe('isZodType', () => {
-		it('should return true for matching ZodType', () => {
-			const zodString = z.string()
-
-			const result = isZodType(z.ZodString)(zodString)
-			expect(result).toBe(true)
-		})
-
-		it('should return false for non-matching ZodType', () => {
-			const zodNumber = z.number()
-
-			const result = isZodType(z.ZodString)(zodNumber)
-			expect(result).toBe(false)
-		})
-
-		it('should handle instances of ZodDefault correctly', () => {
-			const zodDefaultString = z.string().default('Default')
-
-			const result = isZodType(z.ZodString)(zodDefaultString)
-			expect(result).toBe(true)
-		})
-
-		it('should return false for non-ZodType instances', () => {
-			const notZodType = {}
-			const result = isZodType(z.ZodString)(notZodType as any)
-			expect(result).toBe(false)
 		})
 	})
 })
