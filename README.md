@@ -14,7 +14,13 @@ Each node has different types and based on the type and settings different edito
 
 The structure of the tree simultaneously creates a graphql interface for clients to consume.
 
+Data editor:
+
 <img width="100%" height="auto" alt="image" src="https://github.com/user-attachments/assets/83850e77-4fd4-44bc-87a3-6c278cb89544" />
+
+Graphql sandbox:
+
+<img width="100%" height="auto" alt="image" src="https://github.com/user-attachments/assets/4e380bc2-d684-4e39-9525-982bb9aa7499" />
 
 #### Todo
 - [ ] Thumbnails for Media
