@@ -14,8 +14,7 @@ Each node has different types and based on the type and settings different edito
 
 The structure of the tree simultaneously creates a graphql interface for clients to consume.
 
-<img width="2741" height="1464" alt="image" src="https://github.com/user-attachments/assets/9305c85e-4aa5-4520-9e5c-5c409ca7d863" />
-
+<img width="100%" height="auto" alt="image" src="https://github.com/user-attachments/assets/83850e77-4fd4-44bc-87a3-6c278cb89544" />
 
 #### Todo
 - [ ] Thumbnails for Media
