@@ -1,136 +1,227 @@
-import { PutObjectCommand } from '@aws-sdk/client-s3'
-import { S3Client as AwsS3 } from '@aws-sdk/client-s3'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { createHash } from 'node:crypto'
+import { jsonImportInputSchema } from '@shared/imports.ts'
+import type { UploadInput } from '@shared/media-upload.ts'
+import { GraphQLError } from 'graphql'
 import { inject, injectable } from 'inversify'
-import { Kysely, type Transaction, sql } from 'kysely'
-import type { DB, JsonArray } from 'src/database/schema.ts'
-import { LogAccess } from 'src/middleware/log-access.ts'
-import { importJson } from 'src/services/importer.ts'
-import { S3Client } from 'src/services/s3-client.ts'
-import { Topic } from 'src/types.ts'
-import type { Context } from 'src/types.ts'
-import { Role } from 'src/types.ts'
+import { Kysely } from 'kysely'
+import { z } from 'zod'
+import type { DB } from '../database/schema.ts'
 import {
-	Arg,
-	Authorized,
-	Ctx,
-	Field,
-	InputType,
-	Int,
-	Mutation,
-	ObjectType,
-	type PubSub,
-	Resolver,
-	UseMiddleware
-} from 'type-graphql'
-import { v4 as uuid } from 'uuid'
-import { NodeResolver } from './node-resolver.ts'
+	ImportKind,
+	type ImportPreview,
+	type JsonArrayImportInput
+} from '../gql/schema.ts'
+import {
+	requireListPath,
+	requireNode,
+	requireProjectFile
+} from '../security/project-access.ts'
+import { requireProjectRole } from '../security/require-role.ts'
+import {
+	ensureContentBaseline,
+	readContentSnapshot,
+	recordContentRevision,
+	requireRevision
+} from '../services/content-revisions.ts'
+import { importJson } from '../services/importer.ts'
+import { MediaAssets } from '../services/media-assets.ts'
+import { lockProject } from '../services/model-validation.ts'
+import { S3Client } from '../services/s3-client.ts'
+import { type Context, NodeType, type PubSub, Role, Topic } from '../types.ts'
+import { isJsonObject } from '../utils/json.ts'
 
-@InputType()
-export class JsonArrayImportInput {
-	@Field(type => Int)
-	node_id: number
+export type { JsonArrayImportInput, Upload } from '../gql/schema.ts'
 
-	@Field(type => String)
-	data: string
-
-	@Field(type => String, { nullable: true })
-	external_id: string | undefined
-
-	@Field(type => Boolean)
-	structure: boolean
-
-	@Field(type => [Int], { nullable: true })
-	list_path: number[] | null
-}
-
-@ObjectType()
-export class Upload {
-	@Field(type => String)
-	signedUrl: string
-
-	@Field(type => String)
-	object: string
+const inputSchema =
+	jsonImportInputSchema satisfies z.ZodType<JsonArrayImportInput>
+class PreviewComplete extends Error {
+	constructor(readonly preview: ImportPreview) {
+		super('Import preview complete')
+	}
 }
 
 @injectable()
-@UseMiddleware(LogAccess)
-@Authorized(Role.Admin)
-@Resolver()
 export class IoResolver {
 	@inject(Kysely)
 	private db: Kysely<DB>
-
 	@inject('PubSub')
 	private pubSub: PubSub
-
 	@inject(S3Client)
 	private readonly s3: S3Client
+	@inject(MediaAssets)
+	private assets: MediaAssets
 
-	@inject(AwsS3)
-	private awsS3: AwsS3
-
-	@inject(NodeResolver)
-	private readonly nodeResolver: NodeResolver
-
-	async applyOrder(trx: Transaction<DB>, parentIds: number[]) {
-		sql`
-			WITH ordered_nodes AS (
-				SELECT
-					id,
-					parent_id,
-					ROW_NUMBER() OVER (PARTITION BY parent_id ORDER BY "order", id) - 1 AS new_order
-				FROM node WHERE parent_id IN (${parentIds.join(',')})
-			)
-			UPDATE node SET "order" = ordered_nodes.new_order FROM ordered_nodes 
-			WHERE node.id = ordered_nodes.id;
-		`.execute(trx)
-	}
-
-	@Mutation(returns => Boolean)
-	async importArray(
-		@Arg('data', () => JsonArrayImportInput) payload: JsonArrayImportInput,
-		@Ctx() ctx: Context
-	) {
+	private async applyImport(
+		input: JsonArrayImportInput,
+		ctx: Context,
+		kind: ImportKind,
+		confirmation?: { version: number; source: string }
+	): Promise<ImportPreview | true> {
+		const payload = inputSchema.parse(input)
 		const { project_id } = ctx
-		const { node_id, data } = payload
-		const json: JsonArray = await this.s3.getContent(data).then(JSON.parse)
-		const node = await this.nodeResolver.getTreeNode(project_id, node_id)
-		const importer = importJson(project_id, json, node, payload)
-
-		await this.db
-			.transaction()
-			.setIsolationLevel('serializable')
-			.execute(importer)
-			.catch(cause => {
-				throw new Error(`Failed to import data: ${cause.message}`, { cause })
+		requireProjectFile(project_id, payload.data)
+		await requireProjectRole(
+			this.db,
+			ctx,
+			payload.structure ? [Role.Admin] : [Role.Admin, Role.Editor]
+		)
+		await this.assets.requireSource(
+			project_id,
+			payload.data,
+			'JSON_IMPORT',
+			ctx.user.id
+		)
+		const raw = await this.s3.getContent(payload.data, 10 * 1024 * 1024)
+		let json: z.infer<ReturnType<typeof z.json>>
+		try {
+			json = z.json().parse(JSON.parse(raw))
+		} catch {
+			throw new GraphQLError('Invalid JSON import', {
+				extensions: { code: 'BAD_USER_INPUT' }
 			})
-
-		this.pubSub.publish(Topic.NodesUpdated, true)
-		this.pubSub.publish(Topic.SomeNodeSettingsUpdated, project_id)
-		this.pubSub.publish(Topic.ValuesUpdated, true)
-		await this.s3.deleteFile(data).catch(console.warn)
-		return true
+		}
+		if (
+			kind === ImportKind.Array
+				? !Array.isArray(json) || json.length > 10000
+				: !isJsonObject(json)
+		)
+			throw new GraphQLError(
+				'Choose a JSON array with at most 10000 objects, or an object for object import',
+				{ extensions: { code: 'BAD_USER_INPUT' } }
+			)
+		const source = createHash('sha256')
+			.update(JSON.stringify([project_id, kind, payload, raw]))
+			.digest('hex')
+		const result = await this.db
+			.transaction()
+			.execute(async trx => {
+				await lockProject(trx, project_id)
+				await requireProjectRole(
+					trx,
+					ctx,
+					payload.structure ? [Role.Admin] : [Role.Admin, Role.Editor]
+				)
+				const project = await trx
+					.selectFrom('project')
+					.select('version')
+					.where('id', '=', project_id)
+					.executeTakeFirstOrThrow()
+				if (confirmation) {
+					requireRevision(confirmation.version, project.version, 'Project')
+					if (confirmation.source !== source)
+						throw new GraphQLError(
+							'The uploaded file changed. Review the import again.',
+							{ extensions: { code: 'CONFLICT' } }
+						)
+				}
+				const node = await requireNode(trx, project_id, payload.node_id)
+				if (
+					kind === ImportKind.Array
+						? node.type !== NodeType.list
+						: ![NodeType.object, NodeType.root].includes(node.type)
+				)
+					throw new GraphQLError(
+						'Choose a list for array import or a container for object import',
+						{ extensions: { code: 'BAD_USER_INPUT' } }
+					)
+				await requireListPath(
+					trx,
+					project_id,
+					payload.node_id,
+					payload.list_path
+				)
+				const before = !confirmation
+					? await readContentSnapshot(trx, project_id)
+					: undefined
+				if (confirmation) await ensureContentBaseline(trx, ctx)
+				await importJson(trx, project_id, json, payload)
+				if (before) {
+					const after = await readContentSnapshot(trx, project_id)
+					const oldValues = new Map(
+						before.values.map(value => [value.id, value])
+					)
+					const newIds = new Set(after.values.map(value => value.id))
+					throw new PreviewComplete({
+						version: project.version,
+						source,
+						name: node.name,
+						fieldsAdded: after.nodes.length - before.nodes.length,
+						valuesAdded: after.values.filter(value => !oldValues.has(value.id))
+							.length,
+						valuesChanged: after.values.filter(
+							value =>
+								oldValues.has(value.id) &&
+								oldValues.get(value.id)?.revision !== value.revision
+						).length,
+						valuesRemoved: before.values.filter(value => !newIds.has(value.id))
+							.length
+					})
+				}
+				await recordContentRevision(trx, ctx, `Imported into ${node.name}`)
+				return true as const
+			})
+			.catch(error => {
+				if (error instanceof PreviewComplete) return error.preview
+				throw error
+			})
+		if (result === true) {
+			this.pubSub.publish(Topic.NodesUpdated, project_id)
+			this.pubSub.publish(Topic.SomeNodeSettingsUpdated, project_id)
+			this.pubSub.publish(Topic.ValuesUpdated, project_id)
+			await this.s3
+				.deleteFile(payload.data)
+				.catch(() =>
+					console.warn('Import accepted; source upload cleanup will need retry')
+				)
+		}
+		return result
 	}
 
-	@Mutation(returns => Upload)
-	async uploadUrl(
-		@Arg('filename', () => String) filename: string,
-		@Ctx() ctx: Context
+	async previewImport(
+		data: JsonArrayImportInput,
+		kind: ImportKind,
+		ctx: Context
 	) {
-		const { user, project_id } = ctx
-		const Key = `project_${project_id}/${uuid()}`
-		const command = new PutObjectCommand({
-			Metadata: {
-				uploadedBy: user.email,
-				filename
-			},
-			Bucket: process.env.AWS_BUCKET,
-			Key
-		})
+		const result = await this.applyImport(data, ctx, kind)
+		if (result === true)
+			throw new Error('Import preview unexpectedly committed')
+		return result
+	}
+	async importArray(
+		data: JsonArrayImportInput,
+		ctx: Context,
+		expectedVersion: number,
+		expectedSource: string
+	) {
+		return (
+			(await this.applyImport(data, ctx, ImportKind.Array, {
+				version: expectedVersion,
+				source: expectedSource
+			})) === true
+		)
+	}
+	async importObject(
+		data: JsonArrayImportInput,
+		ctx: Context,
+		expectedVersion: number,
+		expectedSource: string
+	) {
+		return (
+			(await this.applyImport(data, ctx, ImportKind.Object, {
+				version: expectedVersion,
+				source: expectedSource
+			})) === true
+		)
+	}
+	async uploadUrl(data: UploadInput, ctx: Context) {
+		return this.assets.prepare(data, ctx)
+	}
+	async finalizeUpload(key: string, ctx: Context) {
+		const media = await this.assets.finalize(key, ctx)
 		return {
-			signedUrl: getSignedUrl(this.awsS3, command, { expiresIn: 3600 }),
-			object: Key
+			...media,
+			width: media.width ?? null,
+			height: media.height ?? null
 		}
 	}
 }

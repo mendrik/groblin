@@ -1,35 +1,24 @@
+import type { createPubSub } from 'graphql-yoga'
+export type PubSub = ReturnType<typeof createPubSub>
+
 import type { User } from 'better-auth'
 import type { TreeOf } from 'matchblade'
 import type { Node } from './resolvers/node-resolver.ts'
 
 export type LoggedInUser = User
 
-export enum NodeType {
-	root = 'Root',
-	object = 'Object',
-	string = 'String',
-	article = 'Article',
-	number = 'Number',
-	boolean = 'Boolean',
-	list = 'List',
-	choice = 'Choice',
-	date = 'Date',
-	color = 'Color',
-	media = 'Media'
+export { NodeType } from '@shared/node-types.ts'
 
-	// reference = 'Reference'
-	// tags = "Tags"
-}
-
-export enum Role {
-	Admin = 'Admin',
-	Viewer = 'Viewer'
-}
+export { Role } from '@shared/project-roles.ts'
 
 export interface Context {
-	requestId: number
+	requestId: string
 	user: LoggedInUser
 	project_id: ProjectId
+	session_id: string
+	roles: string[]
+	authorize: (roles: readonly string[]) => Promise<boolean>
+	authenticate: () => Promise<boolean>
 }
 
 export enum Topic {

@@ -1,6 +1,4 @@
 import type { ExecutionResult } from 'graphql'
-import type { Container } from 'inversify'
-import type { Pool } from 'pg'
 import type { Sdk } from './test-sdk.ts'
 
 type DeepNonNullable<T> = T extends null | undefined
@@ -33,14 +31,6 @@ export type CustomSdk = {
 	) => Promise<ExecutionResult<infer P, any>>
 		? (...args: A) => Promise<DeepNonNullable<FirstProp<P>>>
 		: never
-}
-
-declare module 'vitest' {
-	export interface TestContext {
-		pool: Pool
-		container: Container
-		sdk: CustomSdk
-	}
 }
 
 export default async function globalSetup() {}

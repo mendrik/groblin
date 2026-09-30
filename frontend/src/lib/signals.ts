@@ -1,7 +1,7 @@
 import {
+	computed,
 	type ReadonlySignal,
-	type Signal,
-	computed
+	type Signal
 } from '@preact/signals-react'
 import { assertExists } from '@shared/asserts'
 import type { Fn } from '@tp/functions'

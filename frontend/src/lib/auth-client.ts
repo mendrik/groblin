@@ -1,5 +1,15 @@
 import { createAuthClient } from 'better-auth/react'
-export const { signIn, signOut, signUp, getSession } = createAuthClient({})
+export const {
+	signIn,
+	signOut,
+	signUp,
+	getSession,
+	requestPasswordReset,
+	resetPassword,
+	updateUser,
+	changePassword,
+	sendVerificationEmail
+} = createAuthClient({})
 
 type Data<Res> =
 	| {
@@ -17,7 +27,9 @@ type Data<Res> =
 
 export const dataOrError = <T>(data: Data<T>): NonNullable<T> => {
 	if (data.error) {
-		throw data.error
+		throw new Error(data.error.message ?? data.error.statusText)
 	}
-	return data.data as NonNullable<T>
+	const result = data.data
+	if (result == null) throw new Error('The server returned no account data')
+	return result
 }

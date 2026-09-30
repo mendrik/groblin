@@ -1,4 +1,5 @@
 import { ErrorBoundary } from 'react-error-boundary'
+import { DeletionDialog } from './components/ui/deletion-dialog'
 import './app.css'
 import { useRef } from 'react'
 import { DocumentTree } from './components/app/document-tree'
@@ -25,11 +26,12 @@ export function App() {
 			<ScrollArea>
 				<div className="w-full max-h-svh">
 					<ResizablePanelGroup
-						direction="horizontal"
+						orientation="horizontal"
 						className="w-full min-h-svh"
-						onLayout={setPanelSizes}
+						defaultLayout={$panelSizes.value}
+						onLayoutChanged={setPanelSizes}
 					>
-						<ResizablePanel defaultSize={$panelSizes.value[0]}>
+						<ResizablePanel id="tree" defaultSize="25%">
 							<div className="w-full h-8 shrink-0">
 								<h1 className="px-2 py-1 text-xl font-normal text-muted-foreground tracking-tight transition-colors truncate  w-full overflow-hidden">
 									{notNil($project).name}
@@ -38,7 +40,7 @@ export function App() {
 							<DocumentTree />
 						</ResizablePanel>
 						<ResizableHandle />
-						<ResizablePanel defaultSize={$panelSizes.value[1]}>
+						<ResizablePanel id="values" defaultSize="35%">
 							<div className="w-full shrink-0 h-8 p-1" />
 							<div className="flex-1 py-2">
 								<NodeValues />
@@ -46,7 +48,8 @@ export function App() {
 						</ResizablePanel>
 						<ResizableHandle />
 						<ResizablePanel
-							defaultSize={$panelSizes.value[2]}
+							id="preview"
+							defaultSize="40%"
 							className="container-size"
 						>
 							<div className="w-full h-0" ref={ref} />
@@ -58,6 +61,7 @@ export function App() {
 				</div>
 			</ScrollArea>
 			<InputDialog />
+			<DeletionDialog />
 		</Layout>
 	)
 }

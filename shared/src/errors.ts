@@ -1,5 +1,3 @@
-import { zipWith } from 'ramda'
-
 export const throwError = (message: string): never => {
 	throw new Error(message)
 }
@@ -15,10 +13,16 @@ export const rethrow =
 		...values: (number | boolean | string | undefined | typeof error)[]
 	) =>
 	(err: Error): never => {
-		const log = zipWith(
-			(s: string, v: string) => s + v,
-			strings,
-			values.map(v => (v === error ? err.message : String(v)))
+		const message = strings.reduce(
+			(result, text, index) =>
+				result +
+				text +
+				(index < values.length
+					? values[index] === error
+						? err.message
+						: String(values[index])
+					: ''),
+			''
 		)
-		throw new Error(log.join(''), { cause: err })
+		throw new Error(message, { cause: err })
 	}

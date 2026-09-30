@@ -1,33 +1,58 @@
-import TiptapEditor from '@/components/editor/tiptap-editor'
-import type { Value } from '@/gql/graphql'
-import { $valueMap, activePath, saveValue } from '@/state/value'
 import type { ArticleType } from '@shared/json-value-types'
-import { pipeAsync } from 'matchblade'
-import { equals, objOf, unless } from 'ramda'
-import { useState } from 'react'
+import DOMPurify from 'dompurify'
+import { useEffect, useRef, useState } from 'react'
 import { useDebounce } from 'react-use'
+import TiptapEditor from '@/components/editor/tiptap-editor'
+import { $canEdit } from '@/state/access'
+import {
+	$valueMap,
+	activePath,
+	saveValue,
+	stageValue,
+	valueDraft
+} from '@/state/value'
 import type { PreviewProps } from './preview-panel'
 
 export default function ArticlePreview({ node }: PreviewProps) {
-	const value: Value | undefined = $valueMap.value[node.id]?.[0]
-	const [article, setArticle] = useState<string>(value?.value?.content ?? '')
+	const value = $valueMap.value[node.id]?.[0]
 	const listPath = activePath(node)
-
-	const save: (value: string) => Promise<number> | string = unless(
-		equals(value?.value?.content),
-		pipeAsync(
-			objOf('content'),
-			(typeValue: ArticleType) => ({
-				value: typeValue,
-				node_id: node.id,
-				id: value?.id,
-				list_path: listPath
-			}),
-			saveValue
-		)
+	const draft = valueDraft(node.id, listPath, value?.id)
+	const initial = draft?.value?.content ?? value?.value?.content
+	const [article, setArticle] = useState<string>(
+		typeof initial === 'string' ? initial : ''
 	)
-
-	useDebounce(() => save(article), 500, [article])
-
-	return <TiptapEditor defaultValue={article} onChange={setArticle} />
+	const dirty = useRef(false)
+	useEffect(() => {
+		if (!draft && typeof value?.value?.content === 'string')
+			setArticle(value.value.content)
+	}, [draft, value?.value?.content])
+	const data = (content: ArticleType) => ({
+		value: content,
+		node_id: node.id,
+		id: draft?.id ?? value?.id,
+		expectedRevision: draft?.expectedRevision ?? value?.revision ?? 0,
+		list_path: listPath
+	})
+	const change = (content: string) => {
+		if (!$canEdit.peek()) return
+		dirty.current = true
+		setArticle(content)
+		stageValue(data({ content }))
+	}
+	useDebounce(
+		() => {
+			if ($canEdit.peek() && dirty.current && draft)
+				void saveValue(data({ content: article })).catch(() => {})
+		},
+		500,
+		[article]
+	)
+	return $canEdit.value ? (
+		<TiptapEditor defaultValue={article} onChange={change} />
+	) : (
+		<article
+			className="prose dark:prose-invert"
+			dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article) }}
+		/>
+	)
 }

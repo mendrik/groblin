@@ -1,5 +1,6 @@
-import { type TypeOf, object } from 'zod/v4'
+import { listSettingsSchema } from '@shared/node-settings'
+import type { infer as TypeOf } from 'zod/v4'
 
-export const ListProps = object({})
+export const ListProps = listSettingsSchema.safeExtend({})
 
 export type ListProps = TypeOf<typeof ListProps>

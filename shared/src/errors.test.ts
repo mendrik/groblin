@@ -8,8 +8,14 @@ const fail = async () => {
 describe('errors', () => {
 	test('rethrow should allow message replacement', async () => {
 		const test = () => fail().catch(rethrow`Failed with: ${error}`)
-		expect(() => test()).rejects.toThrow(
+		await expect(test()).rejects.toThrow(
 			expect.objectContaining({ message: 'Failed with: TestError' })
 		)
 	})
+})
+
+test('preserves the suffix after the final interpolation', () => {
+	expect(() =>
+		rethrow`Failed: ${error}; retry later`(new Error('broken'))
+	).toThrow('Failed: broken; retry later')
 })

@@ -1,5 +1,5 @@
-import { Icon } from '@/components/ui/simple/icon'
 import { Settings } from 'lucide-react'
+import { Icon } from '@/components/ui/simple/icon'
 
 export const PreviewLoader = () => (
 	<div className="flex w-full justify-center items-center mt-10">

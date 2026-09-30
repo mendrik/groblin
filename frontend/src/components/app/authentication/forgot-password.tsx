@@ -1,3 +1,8 @@
+import { EditorType } from '@shared/enums'
+import { toast } from 'sonner'
+import { Link } from 'wouter'
+import { navigate } from 'wouter/use-browser-location'
+import { strictObject, type TypeOf } from 'zod/v4'
 import { Button } from '@/components/ui/button'
 import {
 	Dialog,
@@ -9,14 +14,7 @@ import {
 } from '@/components/ui/dialog'
 import { stringField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
-import { EditorType } from '@shared/enums'
-import type { Fn } from '@tp/functions.ts'
-import { pipeTap } from 'matchblade'
-import { pipe } from 'ramda'
-import { toast } from 'sonner'
-import { Link } from 'wouter'
-import { navigate } from 'wouter/use-browser-location'
-import { type TypeOf, strictObject } from 'zod/v4'
+import { dataOrError, requestPasswordReset } from '@/lib/auth-client'
 
 const forgotPasswordSchema = strictObject({
 	email: stringField('Email', EditorType.Email, 'username')
@@ -25,14 +23,22 @@ const forgotPasswordSchema = strictObject({
 type ForgotPassword = TypeOf<typeof forgotPasswordSchema>
 
 const success = () =>
-	toast.success('Reset password email was sent', {
-		description: 'Check your mail box for a link to reset your password',
+	toast.success('Check your email', {
+		description:
+			'If an account exists for this email, you will receive a password reset link.',
 		closeButton: true
 	})
 
-const forgotPasswordCommand: Fn<ForgotPassword, void> = pipeTap(success, () =>
+const forgotPasswordCommand = async ({ email }: ForgotPassword) => {
+	dataOrError(
+		await requestPasswordReset({
+			email: email.trim(),
+			redirectTo: `${window.location.origin}/reset-password`
+		})
+	)
+	success()
 	navigate('/')
-)
+}
 
 export const ForgotPasswordDialog = () => {
 	return (
@@ -47,7 +53,8 @@ export const ForgotPasswordDialog = () => {
 				</DialogHeader>
 				<ZodForm
 					schema={forgotPasswordSchema}
-					onSubmit={pipe(forgotPasswordCommand)}
+					onSubmit={forgotPasswordCommand}
+					onError={error => toast.error(error.message)}
 				>
 					<DialogFooter className="gap-2 flex flex-row items-center">
 						<div className="mr-auto">

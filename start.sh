@@ -1,8 +1,11 @@
-#!/bin/bash
-source ~/.bashrc
-fuser -k 5173/tcp
-fuser -k 6173/tcp
-fuser -k 4001/tcp 
-(cd ./frontend && pnpm run dev) &
-(cd ./backend && pnpm run server)
-wait
+#!/usr/bin/env bash
+set -euo pipefail
+root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+cd -- "$root"
+pnpm --filter frontend dev &
+frontend_pid=$!
+pnpm --filter backend server &
+backend_pid=$!
+cleanup() { kill "$frontend_pid" "$backend_pid" 2>/dev/null || true; wait "$frontend_pid" "$backend_pid" 2>/dev/null || true; }
+trap cleanup EXIT INT TERM
+wait -n "$frontend_pid" "$backend_pid"

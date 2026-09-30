@@ -61,12 +61,6 @@ declare module 'ramda' {
 		fn: (a: T) => boolean
 	): <T2 extends T>(list: readonly T2[]) => boolean
 
-	export function map<A, B>(
-		fn: (x: A) => B
-	): <U extends object>(dict: U) => Record<keyof U, B>
-
-	export function map<A>(fn: (x: any) => A): (x: any) => A
-
 	export function ifElse<A, F extends (x: A | undefined) => x is undefined>(
 		pred: F,
 		onTrue: (v: undefined) => any,

@@ -1,5 +1,12 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.9.2/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": "on"
+			}
+		}
+	},
 	"vcs": {
 		"enabled": false,
 		"clientKind": "git",
@@ -7,19 +14,18 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"ignore": [
-			"node_modules", 
-			"**/gen/**/*", 
-			"**/schema.ts",
-			"backend/tests/test-sdk.ts"
+		"includes": [
+			"**/*.ts",
+			"**/*.tsx",
+			"**/*.js",
+			"**/*.jsx",
+			"!**/gen/**/*",
+			"!**/schema.ts"
 		]
 	},
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab"
-	},
-	"organizeImports": {
-		"enabled": true
 	},
 	"linter": {
 		"enabled": true,
@@ -30,7 +36,7 @@
 			"a11y": {
 				"noLabelWithoutControl": "off"
 			},
-			"recommended": true,
+			"preset": "recommended",
 			"complexity": {
 				"noForEach": "off",
 				"useArrowFunction": "error",
@@ -44,7 +50,7 @@
 			"correctness": {
 				"noUnusedImports": "error",
 				"noChildrenProp": "off",
-				"noUnsafeOptionalChaining":"off"	
+				"noUnsafeOptionalChaining": "off"
 			},
 			"performance": {
 				"noAccumulatingSpread": "off"

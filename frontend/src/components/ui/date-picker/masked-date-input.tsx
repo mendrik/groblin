@@ -1,10 +1,10 @@
-import { setSignal } from '@/lib/signals'
-import { cn } from '@/lib/utils'
 import { parse } from 'date-fns'
 import { format } from 'date-fns/fp'
 import { isNil, unless } from 'ramda'
 import type { HTMLAttributes } from 'react'
 import { IMask, IMaskMixin } from 'react-imask'
+import { setSignal } from '@/lib/signals'
+import { cn } from '@/lib/utils'
 import { $viewDate } from './date-picker-dialog'
 
 const dateFormat = 'dd.MM.yyyy'
@@ -13,7 +13,7 @@ const MaskedStyledInput = IMaskMixin(({ inputRef, className, ...props }) => (
 	<input
 		ref={inputRef as any}
 		className={cn(
-			'w-[120px] bg-transparent border border-border appearance-none rounded-sm px-2 py-1',
+			'w-[120px] bg-transparent border border-border appearance-none rounded-xs px-2 py-1',
 			className
 		)}
 		{...props}

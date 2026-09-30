@@ -1,38 +1,24 @@
 import { assertExists } from '@shared/asserts.ts'
-import type { AnyFn } from '@tp/functions.ts'
-import { GraphQLEnumType, GraphQLObjectType, GraphQLString } from 'graphql'
+import {
+	type ContentSnapshot,
+	contentSnapshotSchema
+} from '@shared/content-snapshot.ts'
 import { inject, injectable } from 'inversify'
 import {
 	type Expression,
 	type ExpressionBuilder,
 	type ExpressionWrapper,
 	Kysely,
+	type Selectable,
 	type SelectQueryBuilder,
 	type SqlBool,
-	type TableExpression,
-	sql
+	sql,
+	type TableExpression
 } from 'kysely'
-import { listToTree } from 'matchblade'
-import { mapBy } from 'matchblade'
-import { caseOf, match } from 'matchblade'
+import { caseOf, listToTree, mapBy, match } from 'matchblade'
 import { Maybe } from 'purify-ts'
-import {
-	T as _,
-	assoc,
-	chain,
-	head,
-	isNil,
-	isNotEmpty,
-	isNotNil,
-	keys,
-	map,
-	pipe,
-	prop,
-	propOr,
-	split,
-	uniq
-} from 'ramda'
-import { compact, isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
+import { T as _, assoc, isNil, isNotEmpty, isNotNil, prop, propOr } from 'ramda'
+import { isNilOrEmpty, isNotNilOrEmpty } from 'ramda-adjunct'
 import type { DB, JsonValue } from 'src/database/schema.ts'
 import { NodeResolver } from 'src/resolvers/node-resolver.ts'
 import {
@@ -40,25 +26,22 @@ import {
 	NodeSettingsResolver
 } from 'src/resolvers/node-settings-resolver.ts'
 import type { Value } from 'src/resolvers/value-resolver.ts'
+import type { ListPath, ProjectId, TreeNode } from 'src/types.ts'
 import {
-	type ListPath,
-	NodeType,
-	type ProjectId,
-	type TreeNode
-} from 'src/types.ts'
-import { isJsonObject } from 'src/utils/json.ts'
-import {
-	type Operand,
 	arrow,
 	dbValue,
 	jsonField,
+	type Operand,
 	onlyMonth,
 	onlyYear,
+	operators,
 	opMap,
 	yearAndMonth
 } from 'src/utils/mappings.ts'
 import { allNodes } from 'src/utils/nodes.ts'
+import { parseNode } from '../utils/parse-node.ts'
 import { ImageService, type MediaValue } from './image-service.ts'
+import { SchemaTypes } from './schema-types.ts'
 
 export type Filter = {
 	[key: string]: any
@@ -75,17 +58,10 @@ export type ListArgs = {
 	}
 	direction?: 'asc' | 'desc'
 }
-type Key = string
-
-const extractKeys = chain<Filter, string>(
-	pipe(keys, map(pipe(split('_'), head))) as AnyFn
-)
-
 const customSort =
 	(path: ListPath, { order }: ListArgs) =>
 	(qb: SelectQueryBuilder<any, any, any>) => {
 		const o = sql`order_v.value->${sql.lit(order!.json_field)}`
-		console.log(order!.json_field)
 
 		return qb
 			.leftJoin('values as order_v', j =>
@@ -112,47 +88,75 @@ type Condition = {
 
 @injectable()
 export class SchemaContext {
-	@inject(Kysely<DB>)
-	private db: Kysely<DB>
+	constructor(
+		@inject(Kysely) private db: Kysely<DB>,
+		@inject(NodeSettingsResolver)
+		private nodeSettingsResolver: NodeSettingsResolver,
+		@inject(NodeResolver) private nodeResolver: NodeResolver,
+		@inject(ImageService) private imageService: ImageService
+	) {}
 
-	@inject(NodeSettingsResolver)
-	private nodeSettingsResolver: NodeSettingsResolver
-
-	@inject(NodeResolver)
-	private nodeResolver: NodeResolver
-
-	@inject(ImageService)
-	private imageService: ImageService
+	async forProject(projectId: ProjectId) {
+		const context = new SchemaContext(
+			this.db,
+			this.nodeSettingsResolver,
+			this.nodeResolver,
+			this.imageService
+		)
+		await context.init(projectId)
+		return context
+	}
 
 	projectId: ProjectId
+	private snapshot: ContentSnapshot | undefined
+	private revisionId: number | undefined
 	_settings: Map<number, NodeSettings>
-	_enums: Map<number, GraphQLEnumType>
-	_thumbnails: Map<number, string[]>
+	types: SchemaTypes
+
+	forSnapshot(input: ContentSnapshot, revisionId: number) {
+		const snapshot = contentSnapshotSchema.parse(input)
+		const context = new SchemaContext(
+			this.db,
+			this.nodeSettingsResolver,
+			this.nodeResolver,
+			this.imageService
+		)
+		context.projectId = snapshot.project.id
+		context.snapshot = snapshot
+		context.revisionId = revisionId
+		context._settings = new Map(
+			snapshot.settings.map(row => [
+				row.node_id,
+				{ ...row, settings: row.settings ?? {} }
+			])
+		)
+		context.types = new SchemaTypes(snapshot.nodes, [
+			...context._settings.values()
+		])
+		return context
+	}
+
+	/** PostgreSQL applies identical nested filters and ordering to live and immutable data. */
+	private valuesDatabase() {
+		const source = this.snapshot
+			? sql<
+					Selectable<DB['values']>
+				>`jsonb_populate_recordset(null::public."values", ${JSON.stringify(this.snapshot.values)}::jsonb)`
+			: sql<Selectable<DB['values']>>`public."values"`
+		return this.db.with('values', query =>
+			query.selectFrom(source.as('saved_value')).selectAll()
+		)
+	}
 
 	async init(projectId: ProjectId) {
 		this.projectId = projectId
 		this._settings = await this.nodeSettingsResolver
 			.settings(projectId)
 			.then(mapBy(prop('node_id')))
-		this._enums = await this.initEnums()
-		this._thumbnails = await this.initThumbnails()
-	}
-
-	async initThumbnails(): Promise<Map<number, string[]>> {
-		const thumbnails = await this.db
-			.selectFrom('node_settings')
-			.leftJoin('node', 'node.id', 'node_settings.node_id')
-			.where('node_settings.project_id', '=', this.projectId)
-			.where('type', '=', NodeType.media)
-			.select(['node_id', 'settings'])
-			.execute()
-
-		return thumbnails.reduce((acc, { node_id, settings }) => {
-			if (isJsonObject(settings) && Array.isArray(settings.thumbnails)) {
-				acc.set(node_id, settings.thumbnails as string[])
-			}
-			return acc
-		}, new Map<number, string[]>())
+		this.types = new SchemaTypes(
+			await this.nodeResolver.getDbNodes(projectId),
+			[...this._settings.values()]
+		)
 	}
 
 	async listItems(
@@ -161,22 +165,48 @@ export class SchemaContext {
 		listArgs: ListArgs
 	): Promise<Value[]> {
 		const { direction, limit, offset, order, name, filter = [] } = listArgs
-		const node = await this.nodeResolver.getTreeNode(this.projectId, nodeId)
+		const node = this.snapshot
+			? [...allNodes(await this.getRoot())].find(node => node.id === nodeId)
+			: await this.nodeResolver.getTreeNode(this.projectId, nodeId)
+		assertExists(node, 'List field not found')
 		const children = [...allNodes(node)]
-		const orderNodeKey = children.find(n => n.id === order?.node_id)?.name
-		const allKeys = pipe(compact, uniq)([...extractKeys(filter), orderNodeKey])
-		const filterNodes = children.filter(node => allKeys.includes(node.name))
-		const res = this.db
+		const filterFields = new Map(
+			children.flatMap(node =>
+				operators(node).map(
+					op =>
+						[
+							op === 'eq' ? node.name : `${node.name}_${op}`,
+							{ node, op }
+						] as const
+				)
+			)
+		)
+		const database = this.valuesDatabase()
+		const res = database
 			.selectFrom('values')
 			.select([
 				'values.id',
+				'values.revision',
 				'values.node_id',
 				'values.value',
 				'values.list_path',
-				'values.order'
+				'values.order',
+				'values.updated_at'
 			])
 			.distinctOn(['values.id', 'values.order'])
 			.where('values.node_id', '=', nodeId)
+			.where('values.project_id', '=', this.projectId)
+			.$if(path.length === 0, q =>
+				q.where(eb =>
+					eb.or([
+						eb('values.list_path', 'is', null),
+						eb('values.list_path', '=', sql.val([]))
+					])
+				)
+			)
+			.$if(path.length > 0, q =>
+				q.where('values.list_path', '=', sql.val(path))
+			)
 			.$if(isNotNil(name), q =>
 				q.where(eb => eb(sql`"values"."value"->>'name'`, '=', sql.val(name)))
 			)
@@ -184,10 +214,11 @@ export class SchemaContext {
 				const processFilterEntry =
 					(index: number) =>
 					([key, val]: [string, any]): Condition => {
-						const [prop, op = 'eq'] = key.split('_') as [Key, Operand]
-						const join = `${prop}_${index}`
-						const node = filterNodes.find(n => n.name === prop)
-						assertExists(node, `Node not found for property: ${prop}`)
+						const definition = filterFields.get(key)
+						assertExists(definition, `Unknown filter: ${key}`)
+						const { node, op } = definition
+						const join = `filter_${node.id}_${op}_${index}`
+
 						const field = sql`${sql.ref(`${join}.value`)}${sql.raw(arrow(node, val))}${sql.lit(jsonField(node))}`
 
 						const condition = (eb: ExpressionBuilder<any, any>) =>
@@ -237,26 +268,28 @@ export class SchemaContext {
 			})
 			.$if(isNotNil(order), customSort(path, listArgs))
 			.orderBy('values.id')
-			.orderBy('values.order', direction ?? 'asc')
-			.$if(isNotNil(offset), q => q.offset(offset ?? 0))
-			.$if(isNotNil(limit), q => q.limit(limit ?? Number.MAX_SAFE_INTEGER))
+			.orderBy('values.order')
 
-		const query = isNil(order)
-			? res
-			: this.db
-					.selectFrom(res.as('sub'))
-					.selectAll()
-					.orderBy('sub.field_order', direction ?? 'asc')
+		const query = database
+			.selectFrom(res.as('sub'))
+			.selectAll()
+			.$if(isNotNil(order), q =>
+				q.orderBy('sub.field_order', direction ?? 'asc')
+			)
+			.orderBy('sub.order', direction ?? 'asc')
+			.orderBy('sub.id')
+			.offset(Math.max(0, offset ?? 0))
+			.limit(Math.max(0, Math.min(limit ?? 100, 1000)))
 
 		const data = await query.execute()
-		// console.log(data)
 		return data as Value[]
 	}
 
 	getValue(node: TreeNode, path: ListPath): Promise<Value | undefined> {
-		return this.db
+		return this.valuesDatabase()
 			.selectFrom('values')
 			.where('node_id', '=', node.id)
+			.where('project_id', '=', this.projectId)
 			.selectAll()
 			.$if(isNilOrEmpty(path), qb =>
 				qb.where(eb =>
@@ -287,87 +320,46 @@ export class SchemaContext {
 	 * Returns a list of nodes that are either objects or lists
 	 */
 	async getRoot(): Promise<TreeNode> {
+		if (this.snapshot)
+			return listToTree(
+				'id',
+				'parent_id',
+				'nodes'
+			)(
+				[...this.snapshot.nodes].sort(
+					(a, b) => a.order - b.order || a.id - b.id
+				)
+			)
 		const nodes = await this.db
 			.selectFrom('node')
 			.where('project_id', '=', this.projectId)
 			.selectAll()
 			.orderBy('order', 'desc')
 			.execute()
-		return listToTree('id', 'parent_id', 'nodes')(nodes) as TreeNode
+		return listToTree('id', 'parent_id', 'nodes')(nodes.map(parseNode))
 	}
 
-	getEnumType(nodeId: number): GraphQLEnumType | typeof GraphQLString {
-		return this._enums.get(nodeId) ?? GraphQLString
-	}
-
-	getMediaType(node: TreeNode): GraphQLObjectType {
-		const thumbnails = this._thumbnails.get(node.id) ?? []
-		const fields = {
-			url: { type: GraphQLString },
-			contentType: { type: GraphQLString },
-			...thumbnails.reduce(
-				(acc, size) => ({
-					...acc,
-					[`url_${size}`]: { type: GraphQLString }
-				}),
-				{}
-			)
-		}
-		return new GraphQLObjectType({
-			name: `Media_${node.name}`,
-			fields
-		})
-	}
-
-	getEnums(): GraphQLEnumType[] {
-		return Array.from(this._enums.values())
-	}
-
-	async initEnums() {
-		const enums = await this.db
-			.selectFrom('node_settings')
-			.innerJoin('node', 'node.id', 'node_settings.node_id')
-			.where('node_settings.project_id', '=', this.projectId)
-			.where('node.type', '=', NodeType.choice)
-			.select([
-				'name',
-				'node_id',
-				sql<string[]>`ARRAY(
-					SELECT jsonb_array_elements_text("node_settings"."settings"->'choices')
-				)`.as('choices')
-			])
-			.execute()
-
-		return enums
-			.filter(({ choices }) => choices.length > 0)
-			.reduce((acc, { node_id, choices, name }) => {
-				acc.set(
-					node_id,
-					new GraphQLEnumType({
-						name,
-						values: choices.reduce(
-							(acc, choice) => assoc(choice, { value: choice }, acc),
-							{}
-						)
-					})
-				)
-				return acc
-			}, new Map<number, GraphQLEnumType>())
+	articleHtml(content: string) {
+		return this.imageService.articleHtml(content, this.revisionId)
 	}
 
 	mediaUrl(value: MediaValue, size?: string): string {
-		return this.imageService.mediaUrl(value, size)
+		return this.imageService.mediaUrl(value, size, this.revisionId)
 	}
 
 	getMedia(media: MediaValue) {
-		const sizes = this._thumbnails.get(media.node_id) ?? []
+		const sizes = this.types.thumbnails.get(media.node_id) ?? []
 		const thumbnails = sizes.reduce(
 			(acc, size) =>
-				assoc(`url_${size}`, this.imageService.mediaUrl(media, size), acc),
+				assoc(
+					`url_${size}`,
+					this.imageService.mediaUrl(media, size, this.revisionId),
+					acc
+				),
 			{}
 		)
 		return {
-			url: this.imageService.mediaUrl(media),
+			url: this.imageService.mediaUrl(media, undefined, this.revisionId),
 			contentType: media.value.contentType,
 			...thumbnails
 		}

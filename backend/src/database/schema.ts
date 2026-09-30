@@ -47,12 +47,68 @@ export interface ApiKey {
   key: string;
   last_used: Generated<Timestamp | null>;
   name: string;
+  preview: Generated<boolean>;
   project_id: number;
+}
+
+export interface ContentPublication {
+  author_id: string | null;
+  author_name: string;
+  created_at: Generated<Timestamp>;
+  id: Generated<number>;
+  project_id: number;
+  revision_id: number;
+}
+
+export interface ContentRevision {
+  author_id: string | null;
+  author_name: string;
+  created_at: Generated<Timestamp>;
+  id: Generated<number>;
+  project_id: number;
+  snapshot: Json;
+  summary: string;
+  version: number;
 }
 
 export interface History {
   current_project_id: number | null;
   user_id: string;
+}
+
+export interface MediaAsset {
+  cleanup_attempts: Generated<number>;
+  content_type: string;
+  created_at: Generated<Timestamp>;
+  expires_at: Generated<Timestamp>;
+  filename: string;
+  height: number | null;
+  key: string;
+  last_error: string | null;
+  project_id: number;
+  purpose: string;
+  sealed_key: string | null;
+  sha256: string | null;
+  size: number;
+  uploaded_by: string | null;
+  verified_at: Timestamp | null;
+  width: number | null;
+}
+
+export interface MediaCleanupJob {
+  attempts: Generated<number>;
+  created_at: Generated<Timestamp>;
+  id: Generated<number>;
+  last_error: string | null;
+  not_before: Generated<Timestamp>;
+  prefix: string;
+}
+
+export interface MediaFileCleanupJob {
+  attempts: Generated<number>;
+  key: string;
+  last_error: string | null;
+  not_before: Generated<Timestamp>;
 }
 
 export interface Node {
@@ -62,6 +118,7 @@ export interface Node {
   order: number;
   parent_id: number | null;
   project_id: number;
+  revision: Generated<number>;
   type: string;
 }
 
@@ -71,12 +128,38 @@ export interface NodeSettings {
   priority: Generated<boolean | null>;
   project_id: number;
   required: Generated<boolean | null>;
+  revision: Generated<number>;
   settings: Json | null;
 }
 
 export interface Project {
   id: Generated<number>;
   name: string;
+  published_revision_id: number | null;
+  version: Generated<number>;
+}
+
+export interface ProjectImportReceipt {
+  created_at: Generated<Timestamp>;
+  project_id: number | null;
+  source_hash: string;
+  upload_key: string;
+  user_id: string;
+}
+
+export interface ProjectInvitation {
+  accepted_at: Timestamp | null;
+  accepted_by: string | null;
+  created_at: Generated<Timestamp>;
+  email: string;
+  expires_at: Timestamp;
+  id: Generated<number>;
+  invited_by: string | null;
+  invited_name: string;
+  project_id: number;
+  revoked_at: Timestamp | null;
+  role: string;
+  token_hash: string;
 }
 
 export interface ProjectUser {
@@ -84,7 +167,14 @@ export interface ProjectUser {
   owner: Generated<boolean>;
   project_id: number;
   roles: string[];
-  user_id: string | null;
+  user_id: string;
+}
+
+export interface SchemaMigration {
+  applied_at: Generated<Timestamp>;
+  checksum: string;
+  name: string;
+  version: number;
 }
 
 export interface Session {
@@ -115,6 +205,7 @@ export interface Values {
   node_id: number;
   order: Generated<number>;
   project_id: number;
+  revision: Generated<number>;
   updated_at: Generated<Timestamp>;
   value: Json | null;
 }
@@ -131,11 +222,19 @@ export interface Verification {
 export interface DB {
   account: Account;
   api_key: ApiKey;
+  content_publication: ContentPublication;
+  content_revision: ContentRevision;
   history: History;
+  media_asset: MediaAsset;
+  media_cleanup_job: MediaCleanupJob;
+  media_file_cleanup_job: MediaFileCleanupJob;
   node: Node;
   node_settings: NodeSettings;
   project: Project;
+  project_import_receipt: ProjectImportReceipt;
+  project_invitation: ProjectInvitation;
   project_user: ProjectUser;
+  schema_migration: SchemaMigration;
   session: Session;
   user: User;
   values: Values;

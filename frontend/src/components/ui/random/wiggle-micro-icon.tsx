@@ -1,7 +1,7 @@
-import { cn } from '@/lib/utils'
-import type {} from '@/type-patches/icons'
 import { useRef, useState } from 'react'
 import { useClickAway } from 'react-use'
+import { cn } from '@/lib/utils'
+import type {} from '@/type-patches/icons'
 import { MicroIcon, type MicroIconProps } from './micro-icon'
 
 export const WiggleMicroIcon = ({

@@ -1,6 +1,6 @@
+import type { PropsWithChildren } from 'react'
 import { cn } from '@/lib/utils'
 import type { Icon } from '@/type-patches/icons'
-import type { PropsWithChildren } from 'react'
 import { Button, type ButtonProps } from '../ui/button'
 
 type OwnProps = {

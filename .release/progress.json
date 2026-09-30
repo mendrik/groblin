@@ -1,0 +1,305 @@
+{
+  "objective": "Upgrade all npm libraries, then complete stages 1, 2 and 3 of the self-hosted v1 gap analysis",
+  "releaseGate": "A new operator installs, invites an editor, models and publishes to a real website, recovers a mistake, upgrades and restores a backup without manual database edits",
+  "phases": {
+    "dependencies": [
+      {
+        "requirement": "Upgrade every workspace direct dependency to registry latest and refresh transitive dependencies",
+        "status": "complete",
+        "evidence": [
+          "All workspace direct packages upgraded with pnpm -r update --latest; pnpm-lock.yaml refreshed",
+          "pnpm outdated -r --format json reports no outdated direct dependencies",
+          "MIT license metadata in all workspace manifests"
+        ]
+      },
+      {
+        "requirement": "Migrate breaking APIs and configuration",
+        "status": "complete",
+        "evidence": [
+          "GraphQL 17 / Yoga 5 internal SDL with generated resolver and client types replaces incompatible type-graphql decorators",
+          "TypeScript 7, Tailwind 4 Vite integration, Vite React plugin and Babel transform migration",
+          "React resizable panels v4 API and persisted layout migration; matchblade evolve API migration"
+        ]
+      },
+      {
+        "requirement": "Verify typecheck, lint, coverage, build, audit, generated clients, and registry freshness",
+        "status": "complete",
+        "evidence": [
+          "pnpm typecheck: backend, frontend, shared and strict browser-test compilation pass",
+          "pnpm lint: 340 files pass without errors or warnings",
+          "pnpm test:coverage: backend 188, frontend 97 and shared 56 tests pass with unchanged coverage gates",
+          "Both production Docker images build; complete disposable deployment verification passes",
+          "pnpm --filter backend schema:test passes; API and database code generation reproduces identical artifacts",
+          "pnpm audit --json: zero vulnerabilities; pnpm outdated -r --format json: no outdated direct dependencies"
+        ]
+      }
+    ],
+    "dataSafety": [
+      {
+        "requirement": "Shared server-side content and settings validation including list ancestry",
+        "status": "complete",
+        "evidence": [
+          "shared/src/content.ts and shared/src/node-settings.ts: strict shared validators and inferred domain types",
+          "Frontend property forms derive from shared validators",
+          "Value and settings mutations validate in serialized transactions; invalidating settings edits preserve existing values",
+          "backend/src/security/project-access.ts validates exact ordered ancestor list instances",
+          "Imports validate typed content before commit",
+          "backend/src/resolvers/content-validation.test.ts and backend/src/services/node-settings-validation.test.ts"
+        ]
+      },
+      {
+        "requirement": "Validate complete generated schemas before committing model changes and preview destructive changes",
+        "status": "complete",
+        "evidence": [
+          "backend/src/services/public-schema.ts and schema-types.ts share exact schema construction between validation and serving",
+          "Model inserts, updates, deletes, settings changes and imports validate the full GraphQL schema and content before transaction commit",
+          "Generated filter/type collisions, invalid names, duplicate siblings, invalid hierarchy and incompatible content/list ancestry changes roll back without update events",
+          "Empty projects and lists expose valid schemas; subtree moves refresh descendant depths",
+          "backend/src/services/model-validation.test.ts: 14 regression cases, including media, fractional alpha, settings collisions and import rollback",
+          "Project-scoped deletion previews count fields, cascading values, list items and media; confirmation uses a fingerprint rechecked under the project lock",
+          "The shared deletion dialog waits for acknowledgement, displays errors, refreshes stale previews and requires explicit reconfirmation",
+          "backend/src/services/deletion-impact.test.ts and frontend/src/components/ui/deletion-dialog.test.tsx"
+        ]
+      },
+      {
+        "requirement": "Fix nested list scoping, empty items, underscore filters, ordering and pagination",
+        "status": "complete",
+        "evidence": [
+          "backend/src/services/content-lists.test.ts reproduced the defects before fixing them",
+          "Nested list queries constrain the exact parent path; filters support underscores; sorting precedes pagination; empty admin list items retain empty child arrays"
+        ]
+      },
+      {
+        "requirement": "Durable save feedback and pending edit protection",
+        "status": "complete",
+        "evidence": [
+          "frontend/src/state/save-queue.ts serializes saves, retains unconfirmed edits in account/project-scoped local storage, and preserves the exact base version until acknowledgement",
+          "Values, article text, field names and field properties share save status, retry, conflict review and explicit resolution; pending edits trigger unload protection and block history restore",
+          "Unreadable recovery data is preserved; storage failures are visible; creation and rename dialogs wait for their mutation before closing; form errors retain entered values",
+          "frontend/src/state/save-queue.test.ts, save-status.test.tsx and content-history.test.tsx exercise acknowledgement, newer queued drafts, failure/reload recovery and explicit conflict choices"
+        ]
+      },
+      {
+        "requirement": "Concurrent edit detection, revision history and restore",
+        "status": "complete",
+        "evidence": [
+          "database/migrations/003-content-revisions.sql adds row edit versions, a monotonic project version and immutable API-visible content revision records",
+          "Required expectedRevision tokens protect values, fields and properties; scalar creation checks prevent concurrent duplicates",
+          "All accepted content/model/settings/list/import writes capture snapshots in the same transaction, including a migrated-project baseline",
+          "Content history supports paging, inspection and confirmed atomic restore; restore checks expectedVersion, validates the model and issues fresh row versions",
+          "Media referenced by history is retained after replacement or deletion",
+          "backend/src/services/content-revisions.test.ts and project-lock.test.ts exercise stale edits, separate-connection locks, restoration, isolation and history media retention"
+        ]
+      }
+    ],
+    "workflows": [
+      {
+        "requirement": "Invitations, acceptance, project switching and project lifecycle",
+        "status": "complete",
+        "evidence": [
+          "Migrations 004/005 enforce canonical membership roles and store hashed expiring invitations; new and existing accounts accept after verified-email checks",
+          "Generated workspace and lifecycle API supports create, switch, versioned rename, confirmed deletion and atomic ownership transfer",
+          "Per-operation project selection prevents requests from another tab changing the target; stale subscription responses are discarded",
+          "Frontend project and member pages preserve errors and wait for acknowledgements; pending edits block project changes; deleted projects queue storage cleanup with retries",
+          "backend/src/services/project-workflows.test.ts, middleware/on-connect.test.ts and frontend/src/state/project.test.ts"
+        ]
+      },
+      {
+        "requirement": "Owner, administrator, editor and viewer permissions with role-aware UI",
+        "status": "complete",
+        "evidence": [
+          "Owner/Admin/Editor/Viewer are shared domain roles, enforced at GraphQL roots and under lifecycle locks",
+          "Editor can change content and lists; Viewer reads; model, users, invitations and API keys require Admin/Owner; ownership operations require Owner",
+          "Required subscription roles are rechecked before every event; workspace notifications refresh revoked roles",
+          "Role-aware controls, keyboard actions, article editing, member actions and history restore are gated"
+        ]
+      },
+      {
+        "requirement": "Account profile and settings",
+        "status": "complete",
+        "evidence": [
+          "Profile UI supports name changes, verification email resend and password changes that revoke other sessions",
+          "Real BetterAuth account integration test and three UI submission/error/acknowledgement tests pass"
+        ]
+      },
+      {
+        "requirement": "Draft content, preview, publication snapshots and rollback",
+        "status": "complete",
+        "evidence": [
+          "Migration 006 adds project-scoped immutable publication pointers and publication history; default API keys serve only publications and preview keys follow saved draft revisions",
+          "Snapshot query runtime preserves SQL filter/order/list semantics; per-revision caches are checked against the database on every request",
+          "Publication and rollback check both draft and publication versions, validate required fields in list scopes, and keep the draft unchanged on publication rollback",
+          "Publication review, confirmation and rollback UI; immutable signed snapshot media survives draft replacement/deletion. Backend publication/filter/media integration and UI tests pass."
+        ]
+      },
+      {
+        "requirement": "Versioned project export and import including media and round-trip tests",
+        "status": "complete",
+        "evidence": [
+          "Versioned bounded gzip archives preserve model/settings/list content and checksummed verified media",
+          "New unpublished owned copies remap field/value/list/media IDs and article image references",
+          "Idempotent receipts, project/purpose validation, durable cleanup and source expiry protect failures and retries",
+          "Six backend archive and three UI tests pass, including actual media/article round trips, corruption, authorization and retry"
+        ]
+      },
+      {
+        "requirement": "List search, filtering and pagination",
+        "status": "complete",
+        "evidence": [
+          "Shared validated list requests bound page size, offsets, filters and search; exact parent list paths and field ownership are enforced",
+          "Typed number/date sorting occurs before pagination; totals, literal search, equality/contains/range/existence filters share a consistent database snapshot",
+          "List UI includes search, filter, sort, page size, pagination, empty/error/retry feedback and scoped caches that discard stale project/path responses",
+          "Backend list scope/sort/filter/limits tests and three UI control/retry/project isolation tests pass"
+        ]
+      },
+      {
+        "requirement": "Article images and media progress, metadata and cleanup",
+        "status": "complete",
+        "evidence": [
+          "Verified immutable media registry; bounded byte/mime/image dimension checks and project/purpose scoping",
+          "Upload progress/cancellation and metadata acknowledge only finalized uploads; optional GraphQL null fields are omitted from durable JSON drafts",
+          "Tiptap verified image insertion and shared canonical article sanitizer retain stable image asset references in exports, publications and history",
+          "Durable per-file and deleted-project cleanup jobs preserve live/history/publication references and retry failures",
+          "Seven media integration tests, media/article/upload UI tests, and actual browser upload/public download pass"
+        ]
+      }
+    ],
+    "operations": [
+      {
+        "requirement": "Versioned production deployment package and reverse proxy",
+        "status": "complete",
+        "evidence": [
+          "deploy/compose.yml, backend/frontend Dockerfiles and Caddyfile build and run from a fresh checkout configuration",
+          "Pinned PostgreSQL, SeaweedFS, Caddy and Node service images; versioned local application images and private backend/database ports",
+          "Actual Chromium registration, uploads, website consumer and recovery pass through the reverse proxy"
+        ]
+      },
+      {
+        "requirement": "Validated configuration, registration policy and resource limits",
+        "status": "complete",
+        "evidence": [
+          "Startup Zod validation checks origins, separate secrets, storage/email, registration, limits and retention without revealing values",
+          "setup-selfhost.mjs generates unique mode-0600 credentials; SMTP or SES delivery is configured",
+          "Invite-mode browser checks admit the bootstrap owner and invited editor and reject an uninvited account; query/body/field/upload/resource limits are enforced"
+        ]
+      },
+      {
+        "requirement": "Tracked migrations and verified upgrade path",
+        "status": "complete",
+        "evidence": [
+          "Ten ordered checksummed migrations run transactionally under an advisory lock; checksum mismatch and downgrade fail explicitly",
+          "Real PostgreSQL tests verify empty installation, idempotence and legacy project/model/settings/content preservation with plaintext key revocation",
+          "Restored deployment reruns the migration CLI and restarts the backend while preserving login, keys, publications, history and media"
+        ]
+      },
+      {
+        "requirement": "Database and media backup and demonstrated restore",
+        "status": "complete",
+        "evidence": [
+          "backup.sh freezes application/storage writes and backs up PostgreSQL, complete bundled media volume and configuration with checksums",
+          "restore.sh refuses populated database/media targets; verification rejects corrupted files, unsafe paths and links",
+          "verify-selfhost.sh demonstrates complete fresh-project restore and existing-key, account, role, draft/publication, media and history checks; refusal cases preserve the restored deployment"
+        ]
+      },
+      {
+        "requirement": "Health, readiness, useful logs and draining shutdown",
+        "status": "complete",
+        "evidence": [
+          "/health/live and /health/ready with migration/database/storage checks, request IDs and bounded HTTP/WebSocket operations",
+          "Structured route/status/duration logging omits secrets and request bodies",
+          "SIGTERM draining emits shutdown_started and shutdown_complete, awaits server/background cleanup and closes database/SDK clients; actual backup/restart check passes"
+        ]
+      },
+      {
+        "requirement": "First-project guide, example consumer website, API and media documentation",
+        "status": "complete",
+        "evidence": [
+          "Built-in /guide and complete operator/content/API documentation",
+          "Working server-rendered examples/consumer website uses a server-side key and stays on the publication while a draft changes",
+          "Browser installation checks follow the real guide link and complete the first-project workflow"
+        ]
+      },
+      {
+        "requirement": "License decision, release notes, support and security reporting",
+        "status": "complete",
+        "evidence": [
+          "MIT LICENSE and workspace license metadata",
+          "CHANGELOG.md, bug-report template and SECURITY.md document supported scope, upgrades and reporting",
+          "A named private maintainer contact, GitHub release publication and production rollout remain maintainer/operator actions"
+        ]
+      },
+      {
+        "requirement": "End-to-end browser, concurrency, disconnection, permissions and staging verification",
+        "status": "complete",
+        "evidence": [
+          "341 unit/integration tests plus 7 deployed browser executions pass in the final checkpoint",
+          "Browser checks cover verified signup, invited editor, permission controls/revocation, modeling, media, publication/consumer, mistake restore, concurrent tabs, interrupted save/reload and project isolation",
+          "Clean installation, complete backup restore, migration restart, corrupt-backup rejection and populated-target refusal are automated in CI release-smoke"
+        ]
+      },
+      {
+        "requirement": "Document and verify historical exposure cleanup for affected deployments",
+        "status": "complete",
+        "evidence": [
+          "Tracked environment files and private test-data dump removed; check-secrets.mjs passes and is enforced in CI",
+          "Migration 002 revokes legacy plaintext API keys; new keys are displayed once and stored as SHA-256 fingerprints",
+          "Read-only history inspection confirms historical private files remain; SECURITY.md documents credential/session/key rotation and incident procedures",
+          "No external credentials were rotated and no Git history was rewritten; affected operators must complete that remediation before public use"
+        ]
+      }
+    ]
+  },
+  "verification": {
+    "date": "2026-09-30",
+    "tests": 341,
+    "testCounts": {
+      "backend": 188,
+      "frontend": 97,
+      "shared": 56
+    },
+    "browserExecutions": 7,
+    "browserScenarios": 5,
+    "backendCoverage": {
+      "lines": 85.69,
+      "statements": 84.83,
+      "functions": 84.82,
+      "branches": 76.52
+    },
+    "frontendCoverage": {
+      "lines": 52.74,
+      "statements": 51.63,
+      "functions": 37.81,
+      "branches": 49.04
+    },
+    "sharedCoverage": {
+      "lines": 76.21,
+      "statements": 75.72,
+      "functions": 73.21,
+      "branches": 68.0
+    },
+    "coverageGates": "unchanged and passed",
+    "auditVulnerabilities": 0,
+    "outdatedDirectDependencies": 0,
+    "generatedArtifacts": "identical after API and isolated database regeneration",
+    "deploymentVerification": "scripts/verify-selfhost.sh passes on the final dependency set",
+    "limitations": [
+      "No production deployment, public release, external credential rotation or history rewrite was performed",
+      "Upstream generic SDK code generator declares an older GraphQL peer range; GraphQL 17 generation, compilation and API tests pass",
+      "Two deprecated transitive dependencies remain upstream; dependency audit reports no vulnerabilities",
+      "Browser verification covers desktop Chromium and local SMTP/storage, not a full accessibility, mobile, cross-browser or load audit",
+      "Real DNS/HTTPS issuance, external SMTP, encrypted off-host backup schedules and operator alerts remain rollout actions",
+      "Entry bundle approximately 1.15 MB minified / 346 KB gzip; performance benchmarks and further splitting remain improvements",
+      "Supported single-host deployment runs one backend process; high availability and shared editor notifications are outside v1"
+    ],
+    "evidence": [
+      "docs/product-gap-analysis.md",
+      "e2e/selfhost.spec.ts",
+      "e2e/resilience.spec.ts",
+      "e2e/restored.spec.ts",
+      ".github/workflows/check.yml",
+      "scripts/verify-selfhost.sh"
+    ]
+  },
+  "implementationStatus": "complete",
+  "releaseStatus": "verified self-hosted v1 candidate; not published or deployed to production"
+}

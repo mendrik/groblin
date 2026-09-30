@@ -1,17 +1,22 @@
-export type StringType = { content: string }
-export type NumberType = { figure: number }
-type Bytes = number
+import type { infer as Infer } from 'zod'
+import type {
+	articleValueSchema,
+	booleanValueSchema,
+	choiceValueSchema,
+	colorValueSchema,
+	dateValueSchema,
+	listValueSchema,
+	mediaValueSchema,
+	numberValueSchema,
+	stringValueSchema
+} from './content.ts'
 
-export type MediaType = {
-	name: string
-	file: string
-	contentType: string
-	size: Bytes
-}
-
-export type DateType = { date: string }
-export type ColorType = { rgba: [number, number, number, number?] }
-export type ChoiceType = { selected: string }
-export type BooleanType = { state: boolean }
-export type ArticleType = { content: string }
-export type ListType = { name: string }
+export type StringType = Infer<typeof stringValueSchema>
+export type NumberType = Infer<typeof numberValueSchema>
+export type MediaType = Infer<typeof mediaValueSchema>
+export type DateType = Infer<typeof dateValueSchema>
+export type ColorType = Infer<typeof colorValueSchema>
+export type ChoiceType = Infer<typeof choiceValueSchema>
+export type BooleanType = Infer<typeof booleanValueSchema>
+export type ArticleType = Infer<typeof articleValueSchema>
+export type ListType = Infer<typeof listValueSchema>

@@ -23,3 +23,15 @@ dist-ssr
 *.sln
 *.sw?
 *.tsbuildinfo
+.env
+.env.*
+!.env.example
+!.env.template
+backend/database/test-data.sql
+backend/tests/test-schema.graphql
+
+**/coverage/
+
+.release/browser-report/
+.release/browser-results/
+.playwright/

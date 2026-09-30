@@ -1,5 +1,3 @@
-import { signOut } from '@/lib/auth-client'
-import type { Icon as IconImg } from '@/type-patches/icons'
 import {
 	Tooltip,
 	TooltipContent,
@@ -7,19 +5,25 @@ import {
 	TooltipTrigger
 } from '@radix-ui/react-tooltip'
 import {
-	FileJson,
+	BookOpen,
+	History,
 	House,
 	Key,
 	LogIn,
 	Settings,
+	Upload,
 	UserCircleIcon,
 	Users
 } from 'lucide-react'
 import type { ButtonHTMLAttributes, PropsWithChildren } from 'react'
 import { useLocation } from 'wouter'
-import { Icon } from '../ui/simple/icon'
-import { setSignal } from '@/lib/signals'
+import { disconnect } from '@/gql-client'
+import { signOut } from '@/lib/auth-client'
+import { $canManage } from '@/state/access'
 import { $user } from '@/state/user'
+import type { Icon as IconImg } from '@/type-patches/icons'
+import { openContentHistory } from '../ui/content-history'
+import { Icon } from '../ui/simple/icon'
 
 type OwnProps = {
 	icon: IconImg
@@ -32,7 +36,10 @@ const IconLink = ({
 }: PropsWithChildren<OwnProps>) => (
 	<li>
 		<Tooltip delayDuration={0}>
-			<TooltipTrigger {...button}>
+			<TooltipTrigger
+				aria-label={typeof children === 'string' ? children : undefined}
+				{...button}
+			>
 				<Icon
 					icon={icon}
 					size={20}
@@ -43,7 +50,7 @@ const IconLink = ({
 			<TooltipContent
 				sideOffset={5}
 				side="right"
-				className="bg-muted border border-border rounded-sm px-4 py-2 z-10 text-foreground drop-shadow-tooltip"
+				className="bg-muted border border-border rounded-xs px-4 py-2 z-10 text-foreground drop-shadow-tooltip"
 			>
 				{children}
 			</TooltipContent>
@@ -57,23 +64,49 @@ export const AppSidebar = () => {
 		<div className="p-2 border-r">
 			<TooltipProvider>
 				<ul className="flex flex-col gap-y-2 text-muted-foreground">
+					<IconLink icon={BookOpen} onClick={() => navigate('/guide')}>
+						Guide
+					</IconLink>
 					<IconLink icon={House} onClick={() => navigate('/')}>
 						Home
 					</IconLink>
-					<IconLink icon={Settings}>Settings</IconLink>
-					<IconLink icon={Key} onClick={() => navigate('/api-keys')}>
-						Api keys
+					<IconLink icon={History} onClick={openContentHistory}>
+						Content history
 					</IconLink>
-					<IconLink icon={Users} onClick={() => navigate('/users')}>
-						Users
+					<IconLink icon={Settings} onClick={() => navigate('/projects')}>
+						Projects
 					</IconLink>
-					<IconLink icon={FileJson}>Import</IconLink>
-					<IconLink icon={UserCircleIcon}>Profile</IconLink>
-					<IconLink icon={LogIn} onClick={() => signOut({
-						fetchOptions: {
-							onSuccess: () => setSignal($user, null)
+					<IconLink icon={Upload} onClick={() => navigate('/publication')}>
+						Publication
+					</IconLink>
+					{$canManage.value && (
+						<>
+							<IconLink icon={Key} onClick={() => navigate('/api-keys')}>
+								Api keys
+							</IconLink>
+							<IconLink icon={Users} onClick={() => navigate('/users')}>
+								Users
+							</IconLink>
+						</>
+					)}
+					<IconLink icon={UserCircleIcon} onClick={() => navigate('/profile')}>
+						Profile
+					</IconLink>
+					<IconLink
+						icon={LogIn}
+						onClick={() =>
+							signOut({
+								fetchOptions: {
+									onSuccess: async () => {
+										await disconnect()
+										$user.value = undefined
+										localStorage.removeItem('tree-state')
+										window.location.replace('/')
+									}
+								}
+							})
 						}
-					})}>
+					>
 						Logout
 					</IconLink>
 				</ul>

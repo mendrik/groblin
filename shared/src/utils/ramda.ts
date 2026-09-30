@@ -40,18 +40,14 @@ export const capitalize: (s: string) => string = pipe(
 export const entriesWithIndex = <T extends object>(
 	obj: T
 ): [string, T, number][] =>
-	Object.entries(obj).map(([key, value], index) => [
-		key,
-		value,
-		index
-	])
+	Object.entries(obj).map(([key, value], index) => [key, value, index])
 
 type Guard<T, ST extends T> = (e: T) => e is ST
 type Pred<T> = (e: T) => boolean
 type GP<T, ST extends T> = Guard<T, ST> | Pred<T>
 
 type INF<G> = {
-	[K in keyof G]: G[K] extends Guard<infer T, infer ST>
+	[K in keyof G]: G[K] extends Guard<infer _T, infer ST>
 		? ST[]
 		: G[K] extends (a: infer A) => boolean
 			? A[]
@@ -62,8 +58,8 @@ type INF<G> = {
  * Takes a list of predicates and returns a function that takes a list of values and returns a list of lists of values
  * where each list of values is the result of filtering the input list by the corresponding predicate.
  * This function does not partition the input list: elements can be in multiple output lists.
- * @param preds 
- * @returns 
+ * @param preds
+ * @returns
  */
 export const fork =
 	<T, G extends Array<GP<any, any>>>(...preds: G) =>
@@ -72,4 +68,3 @@ export const fork =
 
 export const removeAt = (idx: number): (<T>(list: T[]) => T[]) =>
 	pipe(splitAt(idx) as AnyFn, apply(useWith(concat, [identity, tail]) as AnyFn))
-

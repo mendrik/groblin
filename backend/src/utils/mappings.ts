@@ -26,7 +26,7 @@ import { caseOf, match } from 'matchblade'
 import { T as _, isNil } from 'ramda'
 import { isNumber } from 'ramda-adjunct'
 import type { JsonValue } from 'src/database/schema.ts'
-import type { SchemaContext } from 'src/services/schema-context.ts'
+import type { SchemaTypes } from 'src/services/schema-types.ts'
 import { NodeType, type TreeNode } from 'src/types.ts'
 
 const hasValue = <T>(value: T | null): value is T => value != null
@@ -50,19 +50,19 @@ export const GraphQLDateInput = new GraphQLInputObjectType({
 })
 
 export const outputScalarForNode = match<
-	[TreeNode, SchemaContext],
+	[TreeNode, SchemaTypes],
 	GraphQLOutputType
 >(
 	caseOf([{ type: NodeType.boolean }, _], GraphQLBoolean),
 	caseOf([{ type: NodeType.number }, _], GraphQLFloat),
-	caseOf([{ type: NodeType.color }, _], new GraphQLList(GraphQLInt)),
+	caseOf([{ type: NodeType.color }, _], new GraphQLList(GraphQLFloat)),
 	caseOf([{ type: NodeType.choice }, _], (n, c) => c.getEnumType(n.id)),
 	caseOf([{ type: NodeType.media }, _], (n, c) => c.getMediaType(n)),
 	caseOf([_, _], GraphQLString)
 )
 
 export const inputScalarForNode = match<
-	[TreeNode, string, SchemaContext],
+	[TreeNode, string, SchemaTypes],
 	GraphQLInputType
 >(
 	caseOf([{ type: NodeType.boolean }, _, _], GraphQLBoolean),
@@ -79,7 +79,7 @@ export const jsonForNode = match<[TreeNode, any], JsonValue>(
 	caseOf([{ type: NodeType.number }, isNumberType], (_, v) => v.figure),
 	caseOf([{ type: NodeType.date }, isDateType], (_, v) => v.date),
 	caseOf([{ type: NodeType.choice }, isChoiceType], (_, v) => v.selected),
-	caseOf([{ type: NodeType.boolean }, isNil], (_, v) => false),
+	caseOf([{ type: NodeType.boolean }, isNil], (_, _v) => false),
 	caseOf([{ type: NodeType.boolean }, isBooleanType], (_, v) => v.state),
 	caseOf([{ type: NodeType.article }, isArticleType], (_, v) => v.content),
 	caseOf([{ type: NodeType.media }, isMediaype], () =>
@@ -132,7 +132,7 @@ export const dbValue = match<[string, TreeNode, any], RawBuilder<any>>(
 		const rgba = chroma(v).rgba()
 		return sql.raw(`'[${rgba.join(',')}]'::jsonb`)
 	}),
-	caseOf([isOperator, { type: NodeType.date }, _], (o, __, v) => {
+	caseOf([isOperator, { type: NodeType.date }, _], (_o, __, v) => {
 		const { year = 0, month = 0, day = 1 } = v
 		const date = format(new Date(year, month - 1, day), 'yyyy-MM-dd')
 		return sql.val(date)
@@ -151,7 +151,7 @@ export const arrow = match<[TreeNode, any], string>(
 export const onlyYear = (
 	eb: ExpressionBuilder<any, any>,
 	field: RawBuilder<unknown>,
-	op: Operator
+	_op: Operator
 ) =>
 	caseOf(
 		[{ type: NodeType.date }, _, { year: isNumber, month: isNil, day: isNil }],

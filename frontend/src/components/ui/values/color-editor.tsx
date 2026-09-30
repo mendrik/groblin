@@ -1,13 +1,13 @@
+import type { ColorType } from '@shared/json-value-types'
+import chroma from 'chroma-js'
+import { objOf, pipe } from 'ramda'
 import KeyListener from '@/components/utils/key-listener'
 import type { Value } from '@/gql/graphql'
 import { stopPropagation } from '@/lib/dom-events'
 import { cn } from '@/lib/utils'
-import type { ColorType } from '@shared/json-value-types'
-import chroma from 'chroma-js'
-import { objOf, pipe } from 'ramda'
 import { Button } from '../button'
 import { openColorPicker } from '../color-picker'
-import { type ValueEditor, editorKey } from './value-editor'
+import { editorKey, type ValueEditor } from './value-editor'
 
 export type ColorValue = Omit<Value, 'value'> & { value: ColorType }
 
@@ -23,7 +23,7 @@ export const ColorEditor: ValueEditor<ColorValue> = ({ node, value, save }) => {
 					variant="ghost"
 					type="button"
 					className={cn(
-						'h-4 w-4 p-0 rounded-sm',
+						'h-4 w-4 p-0 rounded-xs',
 						!value && 'border border-border'
 					)}
 					style={{ backgroundColor }}

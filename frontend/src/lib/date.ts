@@ -17,5 +17,5 @@ export const safeFormat = tryCatch(format, () => undefined)
 export const formatDate = (date?: Date) =>
 	Maybe.fromNullable(date).map(d => format(d, 'd.M.yyyy'))
 
-export const formatIsoDate = (date?: string) =>
+export const formatIsoDate = (date?: string | null) =>
 	Maybe.fromNullable(date).map(toDate).chain(formatDate).orDefault('')

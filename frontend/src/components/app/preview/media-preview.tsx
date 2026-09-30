@@ -1,19 +1,23 @@
+import { mediaValueSchema } from '@shared/content'
+import { encryptInteger } from '@shared/utils/number-hash'
+import { url } from '@shared/utils/url'
+import { Paperclip, Trash } from 'lucide-react'
+import { Maybe } from 'purify-ts'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ImageLoader } from '@/components/ui/random/image-loader'
 import { WiggleMicroIcon } from '@/components/ui/random/wiggle-micro-icon'
 import { Icon } from '@/components/ui/simple/icon'
 import { $valueMap, deleteValue } from '@/state/value'
-import { encryptInteger } from '@shared/utils/number-hash'
-import { url } from '@shared/utils/url'
-import { Paperclip, Trash } from 'lucide-react'
-import { Maybe } from 'purify-ts'
 import type { PreviewProps } from './preview-panel'
 
-const mediaUrl = import.meta.env.VITE_MEDIA_URL
+const mediaUrl = import.meta.env.VITE_MEDIA_URL ?? '/media'
 
 export default function MediaPreview({ node }: PreviewProps) {
-	const value = Maybe.fromNullable($valueMap.value[node.id]?.[0])
+	const value = Maybe.fromNullable($valueMap.value[node.id]?.[0]).map(item => ({
+		...item,
+		value: mediaValueSchema.parse(item.value)
+	}))
 
 	return (
 		<div className="w-full h-screen justify-center items-center flex relative">

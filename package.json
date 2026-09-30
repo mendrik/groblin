@@ -1,31 +1,56 @@
 {
 	"name": "groblin",
 	"private": true,
-	"workspaces": ["frontend", "backend", "shared"],
+	"workspaces": [
+		"frontend",
+		"backend",
+		"shared"
+	],
 	"scripts": {
 		"schema:frontend": "pnpm --filter frontend run schema",
 		"schema:backend": "pnpm --filter backend run schema",
 		"schema": "pnpm schema:backend && pnpm schema:frontend",
-		"test": "CI=true pnpm -r --color test"
+		"test": "pnpm -r test --run",
+		"test:coverage": "pnpm -r test --run --coverage",
+		"typecheck": "pnpm --filter backend exec tsc --noEmit && pnpm --filter frontend exec tsc -b && pnpm --filter shared exec tsc --noEmit && tsc --project e2e/tsconfig.json --noEmit",
+		"lint": "biome check backend/src backend/tests backend/scripts frontend/src frontend/tests shared/src type-patches e2e playwright.config.ts",
+		"schema:api": "pnpm --filter backend schema:api && pnpm --filter frontend schema"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.1.3",
-		"@graphql-codegen/cli": "5.0.7",
-		"@graphql-codegen/typescript-generic-sdk": "4.0.2",
-		"@graphql-codegen/typescript-operations": "4.6.1",
-		"@graphql-codegen/typescript": "4.1.6",
-		"@types/ramda": "0.31.0",
-		"dotenv": "17.2.1",
-		"tsd": "0.32.0",
-		"tsx": "4.20.3",
-		"typescript": "5.9.2",
-		"vite-tsconfig-paths": "5.1.4",
-		"vitest": "3.2.4"
+		"@biomejs/biome": "2.5.15",
+		"@graphql-codegen/add": "7.1.1",
+		"@graphql-codegen/cli": "7.4.3",
+		"@graphql-codegen/typescript": "6.1.0",
+		"@graphql-codegen/typescript-generic-sdk": "5.0.1",
+		"@graphql-codegen/typescript-operations": "6.1.9",
+		"@graphql-codegen/typescript-resolvers": "6.1.0",
+		"@playwright/test": "^1.63.0",
+		"@types/node": "26.6.3",
+		"@types/ramda": "0.32.0",
+		"@vitest/coverage-v8": "5.0.3",
+		"dotenv": "18.0.5",
+		"tsd": "0.33.0",
+		"tsx": "4.23.15",
+		"typescript": "7.0.2",
+		"vitest": "5.0.3",
+		"zod": "4.6.5"
 	},
 	"dependencies": {
-		"graphql": "16.11.0",
-		"graphql-ws": "6.0.6",
-		"ramda": "0.31.3",
-		"ramda-adjunct": "5.1.0"
-	}
+		"graphql": "17.0.2",
+		"graphql-ws": "6.3.0",
+		"ramda": "0.32.0",
+		"ramda-adjunct": "6.1.0"
+	},
+	"pnpm": {
+		"overrides": {
+			"js-cookie": "3.0.7",
+			"lodash": "4.18.1",
+			"immutable@3": "3.8.4"
+		}
+	},
+	"engines": {
+		"node": ">=24.0.0"
+	},
+	"packageManager": "pnpm@10.19.0",
+	"license": "MIT"
 }

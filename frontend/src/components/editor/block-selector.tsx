@@ -1,3 +1,5 @@
+import type { Editor } from '@tiptap/react'
+import { caseOf, match } from 'matchblade'
 import {
 	Select,
 	SelectContent,
@@ -7,8 +9,6 @@ import {
 	SelectTrigger,
 	SelectValue
 } from '@/components/ui/select'
-import type { Editor } from '@tiptap/react'
-import { caseOf, match } from 'matchblade'
 
 type OwnProps = {
 	editor: Editor

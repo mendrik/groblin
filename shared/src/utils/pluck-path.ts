@@ -1,5 +1,5 @@
 import type { AnyFn } from '@tp/functions.ts'
-import { path, map } from 'ramda'
+import { map, path } from 'ramda'
 
 type Prev = [never, 0, 1, 2, 3, 4, ...0[]]
 

@@ -1,6 +1,7 @@
 query GetProject {
 	getProject {
 		project {
+ version
 			id
 			name
 		}
@@ -17,6 +18,7 @@ query GetProject {
 }
 
 fragment Value on Value {
+ revision
 	id
 	node_id
 	order
@@ -26,6 +28,7 @@ fragment Value on Value {
 }
 
 fragment Node on Node {
+ revision
 	id
 	name
 	order
@@ -35,6 +38,7 @@ fragment Node on Node {
 }
 
 fragment NodeSettings on NodeSettings {
+ revision
 	id
 	node_id
 	settings
@@ -57,15 +61,16 @@ mutation InsertNode($data: InsertNode!, $settings: JSONObject) {
 }
 
 mutation UpdateNode($data: ChangeNodeInput!) {
-	updateNode(data: $data)
+	updateNode(data: $data) { ...Node }
 }
 
-mutation DeleteNodeById($order: Int!, $parent_id: Int!, $id: Int!) {
-	deleteNodeById(order: $order, parent_id: $parent_id, id: $id)
+mutation DeleteNodeById($order: Int!, $parent_id: Int!, $id: Int!, $expectedImpact: String!) {
+	deleteNodeById(order: $order, parent_id: $parent_id, id: $id, expectedImpact: $expectedImpact)
 }
 
 query GetNodeSttings {
 	getNodeSettings {
+ revision
 		id
 		settings
 		node_id
@@ -73,7 +78,7 @@ query GetNodeSttings {
 }
 
 mutation UpsertNodeSettings($data: UpsertNodeSettings!) {
-	upsertNodeSettings(data: $data)
+	upsertNodeSettings(data: $data) { ...NodeSettings }
 }
 
 subscription NodeSettingsUpdated {
@@ -96,28 +101,30 @@ mutation InsertListItem($listItem: InsertListItem!) {
 	insertListItem(listItem: $listItem)
 }
 
-mutation DeleteListItem($id: Int!) {
-	deleteListItem(id: $id)
+mutation DeleteListItem($id: Int!, $expectedImpact: String!) {
+	deleteListItem(id: $id, expectedImpact: $expectedImpact)
 }
 
 mutation UpsertValue($data: UpsertValue!) {
-	upsertValue(data: $data)
+	upsertValue(data: $data) { ...Value }
 }
 
-mutation DeleteValue($id: Int!) {
-	deleteValue(id: $id)
+mutation DeleteValue($id: Int!, $expectedImpact: String!) {
+	deleteValue(id: $id, expectedImpact: $expectedImpact)
 }
 
-mutation ImportArray($data: JsonArrayImportInput!) {
-	importArray(data: $data)
+mutation ImportArray($data: JsonArrayImportInput!, $expectedVersion: Int!, $expectedSource: String!) {
+	importArray(data: $data, expectedVersion: $expectedVersion, expectedSource: $expectedSource)
 }
+mutation ImportObject($data: JsonArrayImportInput!, $expectedVersion: Int!, $expectedSource: String!) { importObject(data: $data, expectedVersion: $expectedVersion, expectedSource: $expectedSource) }
+query PreviewImport($data: JsonArrayImportInput!, $kind: ImportKind!) { previewImport(data: $data, kind: $kind) { version source name fieldsAdded valuesAdded valuesChanged valuesRemoved } }
 
 mutation TruncateList($data: TruncateValue!) {
 	truncate(data: $data)
 }
 
-mutation UploadUrl($filename: String!) {
-	uploadUrl(filename: $filename) {
+mutation UploadUrl($data: UploadInput!) {
+	uploadUrl(data: $data) {
 		signedUrl
 		object
 	}
@@ -125,6 +132,7 @@ mutation UploadUrl($filename: String!) {
 
 query GetListItems($request: ListRequest!) {
 	getListItems(request: $request) {
+ revision
 		id
 		node_id
 		value
@@ -144,6 +152,7 @@ query GetListColumns($node_id: Int!) {
 }
 
 fragment ApiKey on ApiKey {
+ preview
 	name
 	key
 	is_active
@@ -177,6 +186,7 @@ subscription ApiKeysUpdated {
 }
 
 fragment ProjectUser on ProjectUser {
+ role
 	id
 	email
 	name
@@ -192,7 +202,7 @@ query GetUsers {
 }
 
 mutation InviteUser($invite: Invite!) {
-	inviteUser(data: $invite)
+	inviteUser(data: $invite) { invitation { ...ProjectInvitation } url emailSent emailError }
 }
 
 mutation DeleteUser($id: String!) {
@@ -202,3 +212,42 @@ mutation DeleteUser($id: String!) {
 subscription UsersUpdated {
 	usersUpdated
 }
+
+query GetDeletionImpact($target: DeletionTarget!) {
+ getDeletionImpact(target: $target) { fingerprint name fields values listItems mediaFiles fieldNames }
+}
+
+query GetContentRevisions($before: Int, $limit: Int) {
+ getContentRevisions(before: $before, limit: $limit) { id version created_at author_name summary }
+}
+query GetContentRevision($id: Int!) {
+ getContentRevision(id: $id) { revision { id version created_at author_name summary } snapshot }
+}
+mutation RestoreContentRevision($id: Int!, $expectedVersion: Int!) {
+ restoreContentRevision(id: $id, expectedVersion: $expectedVersion)
+}
+
+fragment ProjectInvitation on ProjectInvitation { id email role created_at expires_at accepted_at revoked_at }
+query GetWorkspace { getWorkspace { projects { id name version role } currentProject { id name version role } } }
+fragment Publication on Publication { id revision_id version author_name created_at summary }
+query GetPublication { getPublication { draftVersion current { ...Publication } history { ...Publication } } }
+mutation PublishContent($expectedVersion: Int!, $expectedPublication: Int!, $revisionId: Int) { publishContent(expectedVersion: $expectedVersion, expectedPublication: $expectedPublication, revisionId: $revisionId) { ...Publication } }
+subscription WorkspaceUpdated { workspaceUpdated }
+query GetInvitations { getInvitations { ...ProjectInvitation } }
+query GetInvitation($token: String!) { getInvitation(token: $token) { project_name email role expires_at accepted } }
+mutation CreateProject($name: String!) { createProject(name: $name) }
+mutation SwitchProject($id: Int!) { switchProject(id: $id) }
+mutation RenameProject($name: String!, $expectedVersion: Int!) { renameProject(name: $name, expectedVersion: $expectedVersion) }
+mutation DeleteProject($expectedVersion: Int!, $confirmation: String!) { deleteProject(expectedVersion: $expectedVersion, confirmation: $confirmation) }
+mutation TransferProjectOwnership($userId: String!) { transferProjectOwnership(userId: $userId) }
+mutation UpdateUserRole($id: String!, $role: Role!, $expectedRole: Role!) { updateUserRole(id: $id, role: $role, expectedRole: $expectedRole) }
+mutation RevokeInvitation($id: Int!) { revokeInvitation(id: $id) }
+mutation AcceptInvitation($token: String!) { acceptInvitation(token: $token) }
+
+mutation ExportProject { exportProject { filename bytes url } }
+query PreviewProjectImport($key: String!) { previewProjectImport(key: $key) { source name fields values mediaFiles mediaBytes } }
+mutation ImportProjectArchive($key: String!, $expectedSource: String!, $name: String!) { importProjectArchive(key: $key, expectedSource: $expectedSource, name: $name) }
+
+query GetListPage($request: ListRequest!) { getListPage(request: $request) { total limit offset items { revision id node_id order value list_path updated_at children { ...Value } } } }
+
+mutation FinalizeUpload($key: String!) { finalizeUpload(key: $key) { file name contentType size width height } }

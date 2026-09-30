@@ -1,3 +1,7 @@
+import { signal } from '@preact/signals-react'
+import { EditorType } from '@shared/enums'
+import { evolve, pipeAsync } from 'matchblade'
+import { strictObject, type TypeOf } from 'zod/v4'
 import {
 	Dialog,
 	DialogContent,
@@ -6,16 +10,9 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { setSignal } from '@/lib/signals'
-import { notNil } from '@/lib/signals'
+import { notNil, setSignal } from '@/lib/signals'
 import type { TreeNode } from '@/state/tree'
 import { activePath, focusListItem, insertListItem } from '@/state/value'
-import { signal } from '@preact/signals-react'
-import { EditorType } from '@shared/enums'
-import { evolveAlt } from 'matchblade'
-import { pipeAsync } from 'matchblade'
-import { pipe } from 'ramda'
-import { type TypeOf, strictObject } from 'zod/v4'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
 import { stringField } from '../zod-form/utils'
@@ -37,7 +34,7 @@ export type NewListItemSchema = TypeOf<typeof newListItemSchema>
 
 const createListItemCommand: (data: NewListItemSchema) => Promise<void> =
 	pipeAsync(
-		evolveAlt({
+		evolve({
 			node_id: () => notNil($node, 'id'),
 			list_path: () => activePath(notNil($node))
 		}),
@@ -46,7 +43,7 @@ const createListItemCommand: (data: NewListItemSchema) => Promise<void> =
 	)
 
 export const ListItemCreate = () => {
-	const [formApi, ref] = useFormState<NewListItemSchema>()
+	const [formApi, ref] = useFormState()
 	return (
 		<Dialog open={$createListItemOpen.value}>
 			<DialogContent close={close}>
@@ -59,11 +56,11 @@ export const ListItemCreate = () => {
 				<ZodForm
 					schema={newListItemSchema}
 					columns={1}
-					onSubmit={pipe(createListItemCommand, close)}
+					onSubmit={pipeAsync(createListItemCommand, close)}
 					ref={ref}
 				>
 					<DialogFooter className="gap-y-2">
-						<Button onClick={close} variant="secondary">
+						<Button type="button" onClick={close} variant="secondary">
 							Cancel
 						</Button>
 						<Button type="submit" disabled={formApi.isSubmitting}>

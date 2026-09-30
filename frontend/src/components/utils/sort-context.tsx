@@ -1,9 +1,9 @@
 import {
+	closestCenter,
 	DndContext,
 	type DragEndEvent,
 	PointerSensor,
 	type UniqueIdentifier,
-	closestCenter,
 	useSensor,
 	useSensors
 } from '@dnd-kit/core'

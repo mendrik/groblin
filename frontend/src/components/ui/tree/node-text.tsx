@@ -1,13 +1,18 @@
-import KeyListener from '@/components/utils/key-listener'
-import { stopPropagation } from '@/lib/dom-events'
-import { cn } from '@/lib/utils'
-import { type TreeNode, notEditing, startEditing } from '@/state/tree'
 import { pipeTap } from 'matchblade'
 import { isNotEmpty, pipe, when } from 'ramda'
 import { forwardRef } from 'react'
+import KeyListener from '@/components/utils/key-listener'
+import { stopPropagation } from '@/lib/dom-events'
+import { cn } from '@/lib/utils'
+import { $canManage } from '@/state/access'
+import {
+	deleteNode,
+	notEditing,
+	startEditing,
+	type TreeNode
+} from '@/state/tree'
 import { Button } from '../button'
 import { Icon } from '../simple/icon'
-import { openNodeDelete } from './node-delete'
 import { nodeIcon } from './node-icon'
 
 type OwnProps = {
@@ -16,14 +21,22 @@ type OwnProps = {
 
 export const NodeText = forwardRef<HTMLButtonElement, OwnProps>(
 	({ node }, ref) => {
-		const hasChildren = isNotEmpty(node.nodes)
+		const _hasChildren = isNotEmpty(node.nodes)
 		return (
 			<KeyListener
-				onEnter={pipeTap(
-					stopPropagation,
-					when(notEditing, () => startEditing(node.id))
-				)}
-				onDelete={pipe(stopPropagation, () => openNodeDelete(node))}
+				onEnter={
+					$canManage.value
+						? pipeTap(
+								stopPropagation,
+								when(notEditing, () => startEditing(node.id))
+							)
+						: undefined
+				}
+				onDelete={
+					$canManage.value
+						? pipe(stopPropagation, () => deleteNode(node.id))
+						: undefined
+				}
 			>
 				<Button
 					type="button"

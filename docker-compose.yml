@@ -1,13 +1,14 @@
 services:
   db:
-    image: postgres:latest
+    image: postgres:17-alpine
     environment:
       POSTGRES_DB: groblin
       POSTGRES_USER: groblin
-      POSTGRES_PASSWORD: groblin42
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     volumes:
-      - ./backend/database/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./backend/database/test-data.sql:/docker-entrypoint-initdb.d/test-data.sql
+      - groblin-db:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
-    restart: unless-stopped 
+      - "127.0.0.1:5432:5432"
+    restart: unless-stopped
+volumes:
+  groblin-db:

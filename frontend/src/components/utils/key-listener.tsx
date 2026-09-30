@@ -1,13 +1,12 @@
-import type { Key } from 'ts-key-enum'
-
 import type React from 'react'
 import {
+	forwardRef,
 	type ReactNode,
 	type RefObject,
-	forwardRef,
 	useEffect,
 	useRef
 } from 'react'
+import type { Key } from 'ts-key-enum'
 
 export type KeyEvent = KeyboardEvent | React.KeyboardEvent
 

@@ -1,32 +1,33 @@
 import { EditorType } from '@shared/enums'
-import { type TypeOf, number, object, string } from 'zod/v4'
-import { hideColumnHead, required } from './common'
+import { numberSettingsSchema } from '@shared/node-settings'
+import type { infer as TypeOf } from 'zod/v4'
 import { metas } from '../../zod-form/utils'
+import { hideColumnHead, required } from './common'
 
-export const NumberProps = object({
-	unit: string().optional().register(metas, {
+export const NumberProps = numberSettingsSchema.safeExtend({
+	unit: numberSettingsSchema.shape.unit.register(metas, {
 		label: 'Unit',
 		editor: EditorType.Input,
 		span: 2
 	}),
-	precision: number().default(0).register(metas, {
+	precision: numberSettingsSchema.shape.precision.register(metas, {
 		label: 'Precision',
 		editor: EditorType.Number,
 		span: 2,
 		extra: {
 			scale: 0,
 			min: 0,
-			max: 5
+			max: 12
 		}
 	}),
-	minimum: number().optional().register(metas, {
+	minimum: numberSettingsSchema.shape.minimum.register(metas, {
 		label: 'Minimum',
 		editor: EditorType.Number,
 		extra: {
 			scale: 2
 		}
 	}),
-	maximum: number().optional().register(metas, {
+	maximum: numberSettingsSchema.shape.maximum.register(metas, {
 		label: 'Maximum',
 		editor: EditorType.Number,
 		extra: {

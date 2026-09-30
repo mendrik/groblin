@@ -1,3 +1,9 @@
+import { EditorType } from '@shared/enums'
+import { pipeAsync } from 'matchblade'
+import { prop } from 'ramda'
+import { toast } from 'sonner'
+import { Link, useLocation } from 'wouter'
+import { strictObject, type TypeOf } from 'zod/v4'
 import { Button } from '@/components/ui/button'
 import {
 	Card,
@@ -6,19 +12,13 @@ import {
 	CardHeader,
 	CardTitle
 } from '@/components/ui/card'
-import {} from '@/components/ui/dialog'
 import { stringField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
 import { dataOrError, signIn } from '@/lib/auth-client'
 import { setSignal } from '@/lib/signals'
+import { invitationReturn } from '@/routing/return-to'
 import { loadProject } from '@/state/project'
 import { $user } from '@/state/user'
-import { EditorType } from '@shared/enums'
-import { pipeAsync } from 'matchblade'
-import { prop } from 'ramda'
-import { toast } from 'sonner'
-import { Link } from 'wouter'
-import { type TypeOf, strictObject } from 'zod/v4'
 
 const loginSchema = strictObject({
 	email: stringField('Email', EditorType.Email, 'username'),
@@ -34,22 +34,34 @@ const failed = (e: Error) =>
 type LoginForm = TypeOf<typeof loginSchema>
 
 const loginCommand: (credentials: LoginForm) => Promise<any> = pipeAsync(
+	credentials => ({
+		...credentials,
+		email: credentials.email.trim()
+	}),
 	signIn.email,
 	dataOrError,
 	prop('user'),
-	user => loadProject().then(() => user),
+	user => loadProject(user.id).then(() => user),
 	setSignal($user),
 	_ => toast.success('Successfully logged in')
 )
 
 export const LoginDialog = () => {
+	const [, navigate] = useLocation()
 	return (
 		<Card className="w-auto max-w-sm p-4 h-fit shadow-lg">
 			<CardHeader className="p-0 pb-4">
 				<CardTitle>Login</CardTitle>
 				<CardDescription>Please enter your email and password</CardDescription>
 			</CardHeader>
-			<ZodForm schema={loginSchema} onSubmit={loginCommand} onError={failed}>
+			<ZodForm
+				schema={loginSchema}
+				onSubmit={async credentials => {
+					await loginCommand(credentials)
+					navigate(invitationReturn())
+				}}
+				onError={failed}
+			>
 				<CardFooter className="gap-2 flex flex-row items-center p-0">
 					<div className="mr-auto">
 						Did you forget your{' '}

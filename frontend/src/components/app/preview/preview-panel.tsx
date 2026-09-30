@@ -1,10 +1,11 @@
-import { NodeType, type Value } from '@/gql/graphql'
-import { $focusedNode, $nodesMap, type TreeNode, asNode } from '@/state/tree'
 import { caseOf, match } from 'matchblade'
 import { T as _ } from 'ramda'
-import { type ExoticComponent, Suspense, lazy } from 'react'
+import { type ExoticComponent, lazy, Suspense } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { SWRConfig } from 'swr'
+import { NodeType, type Value } from '@/gql/graphql'
+import { $focusedNode, $nodesMap, asNode, type TreeNode } from '@/state/tree'
+import { activePath } from '@/state/value'
 import { PreviewLoader } from './preview-loader'
 import { SelectInfo } from './select-info'
 
@@ -48,7 +49,14 @@ export const PreviewPanel = ({ width }: OwnProps) => {
 					}}
 				>
 					<Suspense fallback={<PreviewLoader />}>
-						{width !== 0 && <Panel node={node} width={width} values={[]} />}
+						{width !== 0 && (
+							<Panel
+								key={`${node.id}:${activePath(node)?.join(':') ?? ''}`}
+								node={node}
+								width={width}
+								values={[]}
+							/>
+						)}
 					</Suspense>
 				</SWRConfig>
 			</ErrorBoundary>

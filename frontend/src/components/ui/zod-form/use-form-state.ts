@@ -1,22 +1,18 @@
-import { type RefObject, useMemo, useRef } from 'react'
-import type { FieldValues, FormState } from 'react-hook-form'
+import { type RefCallback, useCallback, useState } from 'react'
 import type { FormApi } from './zod-form'
 
-export const useFormState = <T extends FieldValues>(): [
-	FormState<T>,
-	RefObject<FormApi<T> | null>
+export const useFormState = (): [
+	FormApi['formState'],
+	RefCallback<FormApi>
 ] => {
-	const ref = useRef<FormApi<T>>(null)
-
-	const state = useMemo(
-		() =>
-			new Proxy(ref, {
-				get(target, prop: keyof FormState<T>) {
-					return target.current?.formState?.[prop]
-				}
-			}) as unknown as FormState<T>,
-		[]
-	)
-
-	return [state, ref] as const
+	const [state, setState] = useState({ isSubmitting: false })
+	const ref = useCallback((api: FormApi | null) => {
+		if (api)
+			setState(previous =>
+				previous.isSubmitting === api.formState.isSubmitting
+					? previous
+					: api.formState
+			)
+	}, [])
+	return [state, ref]
 }

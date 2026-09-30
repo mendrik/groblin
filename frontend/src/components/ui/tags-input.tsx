@@ -1,6 +1,3 @@
-import { inputValue, preventDefault, stopPropagation } from '@/lib/dom-events'
-import { setSignal, updateSignal } from '@/lib/signals'
-import { cn } from '@/lib/utils'
 import { useSignal, useSignalEffect } from '@preact/signals-react'
 import { assertExists } from '@shared/asserts'
 import { removeAt } from '@shared/utils/ramda'
@@ -11,11 +8,14 @@ import {
 	useLayoutEffect,
 	useRef
 } from 'react'
+import { inputValue, preventDefault, stopPropagation } from '@/lib/dom-events'
+import { setSignal, updateSignal } from '@/lib/signals'
+import { cn } from '@/lib/utils'
 import KeyListener from '../utils/key-listener'
 import { SortContext } from '../utils/sort-context'
 import { SortableItem } from '../utils/sortable-item'
 
-interface TagsInputProps extends HTMLAttributes<HTMLDivElement> {
+interface TagsInputProps extends HTMLAttributes<HTMLFieldSetElement> {
 	value: string[]
 	onValueChange: (value: string[]) => void
 	placeholder?: string
@@ -69,7 +69,9 @@ export const TagsInput = ({
 	})
 
 	const deleteLast = () => updateSignal(list, dropLast(1))
-	const push = (el: string) => updateSignal(list, append(el))
+	const push = (el: string) => {
+		if (!list.value.includes(el)) updateSignal(list, append(el))
+	}
 	const focusLast = () => {
 		setSignal(toFocus, list.value.length - 1)
 	}
@@ -83,14 +85,10 @@ export const TagsInput = ({
 	}
 
 	return (
-		<div
+		<fieldset
 			{...props}
-			// biome-ignore lint/a11y/useSemanticElements: <explanation>
-			role="textbox"
-			tabIndex={0}
-			onFocus={pipe(stopPropagation, e => ref(inputRef).focus())}
 			className={cn(
-				'bg-background border border-input rounded-sm flex flex-wrap flex-row gap-1 p-1 cursor-text',
+				'bg-background border border-input rounded-xs flex flex-wrap flex-row gap-1 p-1 cursor-text',
 				className
 			)}
 		>
@@ -105,18 +103,18 @@ export const TagsInput = ({
 					values={list.value.map(objOf('id'))}
 					onDragEnd={() => console.log('drag end')}
 				>
-					{list.value.map((item, index) => (
+					{list.value.map(item => (
 						<SortableItem
 							className={cn(
-								'badge rounded flex grow-0 select-none items-center gap-1',
+								'badge rounded-sm flex grow-0 select-none items-center gap-1',
 								'relative font-normal px-2 border border-border truncate transition-colors',
-								'focus-visible:outline-none focus-visible:ring-1 focus:ring-offset-0 focus:ring-1 focus-visible:ring-ring focus:ring-ring'
+								'focus-visible:outline-hidden focus-visible:ring-1 focus:ring-offset-0 focus:ring-1 focus-visible:ring-ring focus:ring-ring'
 							)}
 							id={item}
 							onFocus={pipe(stopPropagation, () => setSignal(active, item))}
 							tabIndex={0}
 							renderer={() => <span className="text-sm">{item}</span>}
-							key={`${index}-${item}`}
+							key={item}
 						/>
 					))}
 				</SortContext>
@@ -133,10 +131,10 @@ export const TagsInput = ({
 					className={cn(
 						'[&[style]]:placeholder-transparent field-sizing disabled:cursor-not-allowed disabled:opacity-50',
 						'border-none appearance-none bg-transparent text-sm p-1 min-w-0 flex-grow basis-5',
-						'placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0'
+						'placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-0'
 					)}
 				/>
 			</KeyListener>
-		</div>
+		</fieldset>
 	)
 }

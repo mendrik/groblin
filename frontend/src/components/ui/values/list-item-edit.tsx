@@ -1,3 +1,7 @@
+import { signal } from '@preact/signals-react'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
+import { EditorType } from '@shared/enums'
+import { strictObject, type TypeOf } from 'zod/v4'
 import {
 	Dialog,
 	DialogContent,
@@ -6,15 +10,8 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { setSignal } from '@/lib/signals'
-import { notNil } from '@/lib/signals'
+import { notNil, setSignal } from '@/lib/signals'
 import { saveValue } from '@/state/value'
-import { signal } from '@preact/signals-react'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { EditorType } from '@shared/enums'
-import { pipeAsync } from 'matchblade'
-import { mergeLeft, objOf, omit, pipe } from 'ramda'
-import { type TypeOf, strictObject } from 'zod/v4'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
 import { stringField } from '../zod-form/utils'
@@ -36,16 +33,19 @@ const editListItemSchema = strictObject({
 
 export type NewListItemSchema = TypeOf<typeof editListItemSchema>
 
-const createListItemCommand: (data: NewListItemSchema) => Promise<number> =
-	pipeAsync(
-		objOf('value'),
-		n => mergeLeft(n, notNil($item)),
-		omit(['order', 'updated_at']),
-		saveValue
-	)
+const createListItemCommand = (value: NewListItemSchema) => {
+	const item = notNil($item)
+	return saveValue({
+		expectedRevision: item.revision,
+		id: item.id,
+		node_id: item.node_id,
+		list_path: item.list_path,
+		value
+	})
+}
 
 export const ListItemEdit = () => {
-	const [formApi, ref] = useFormState<NewListItemSchema>()
+	const [formApi, ref] = useFormState()
 	return (
 		<Dialog open={$editListItemOpen.value}>
 			<DialogContent close={close}>
@@ -58,14 +58,17 @@ export const ListItemEdit = () => {
 				<ZodForm
 					schema={editListItemSchema}
 					columns={1}
-					onSubmit={pipe(createListItemCommand, close)}
+					onSubmit={async value => {
+						await createListItemCommand(value)
+						close()
+					}}
 					defaultValues={{
 						name: $item.value?.value.name
 					}}
 					ref={ref}
 				>
 					<DialogFooter className="gap-y-2">
-						<Button onClick={close} variant="secondary">
+						<Button type="button" onClick={close} variant="secondary">
 							Cancel
 						</Button>
 						<Button type="submit" disabled={formApi.isSubmitting}>

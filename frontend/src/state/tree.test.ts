@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { type TreeNode, parentInTree } from './tree'
+import { parentInTree, type TreeNode } from './tree'
 
 describe('parentForRoot', () => {
 	const mockTree = {

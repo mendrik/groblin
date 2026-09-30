@@ -1,35 +1,34 @@
-import { Api, Subscribe } from '@/gql-client'
-import {
-	type InsertNode,
-	type JsonArrayImportInput,
-	type Node,
-	NodeType
-} from '@/gql/graphql.ts'
-import { getItem, setItem } from '@/lib/local-storage'
-import { computeSignal, notNil, setSignal } from '@/lib/signals'
 import { computed, signal } from '@preact/signals-react'
 import { assertExists } from '@shared/asserts'
-import { type TreeOf, caseOf, listToTree, match } from 'matchblade'
-import { Maybe, MaybeAsync } from 'purify-ts'
+import { caseOf, listToTree, match, type TreeOf } from 'matchblade'
+import { Maybe } from 'purify-ts'
 import {
-	type NonEmptyArray,
-	type Tuple,
 	T as _,
 	aperture,
 	toString as asStr,
 	find,
 	head,
 	isNil,
-	isNotEmpty,
 	last,
 	lensProp,
-	mergeDeepLeft,
+	type NonEmptyArray,
 	over,
 	pipe,
 	prop,
 	reverse,
+	type Tuple,
 	unless
 } from 'ramda'
+import { z } from 'zod'
+import type { ChangeNodeInput } from '@/gql/graphql'
+import { DeletionKind } from '@/gql/graphql'
+import { type InsertNode, type Node, NodeType } from '@/gql/graphql.ts'
+import { Api, Subscribe } from '@/gql-client'
+import { getItem, setItem } from '@/lib/local-storage'
+import { computeSignal, notNil } from '@/lib/signals'
+import { requireManage } from './access'
+import { requestDeletion } from './deletion'
+import { createSaveQueue } from './save-queue'
 
 /** ---- types ---- **/
 export type TreeNode = TreeOf<Node, 'nodes'>
@@ -45,7 +44,7 @@ type NodeId = number
 export const $nodes = signal<Node[]>([])
 export const $nodesMap = computed<Record<NodeId, TreeNode>>(() => {
 	const res = {} as Record<NodeId, TreeNode>
-	for (const node of Array.from(iterateNodes($root.value))) {
+	for (const node of $root.value ? iterateNodes($root.value) : []) {
 		res[node.id] = node
 	}
 	return res
@@ -63,13 +62,20 @@ export const $nextNode = signal<number>()
 export const $parentNode = signal<number>()
 export const $editingNode = signal<number | undefined>()
 const $abort = signal<AbortController>()
+let nodesGeneration = 0
+export const stopNodesSubscription = () => {
+	nodesGeneration++
+	$abort.peek()?.abort()
+}
 
 /** ---- subscriptions ---- **/
 export const subscribeToNodes = () => {
-	$abort.value?.abort()
-	$abort.value = Subscribe.NodesUpdated({}, () =>
-		Api.GetNodes().then(setSignal($nodes))
-	)
+	stopNodesSubscription()
+	const generation = nodesGeneration
+	$abort.value = Subscribe.NodesUpdated({}, async () => {
+		const nodes = await Api.GetNodes()
+		if (generation === nodesGeneration) $nodes.value = nodes
+	})
 }
 
 $root.subscribe(
@@ -80,7 +86,12 @@ $root.subscribe(
 $nodeStates.subscribe(setItem('tree-state'))
 
 /** ---- interfaces ---- **/
-export const startEditing: (nodeId: number) => void = setSignal($editingNode)
+export const $editingBase = signal<Node>()
+export const startEditing = (nodeId: number) => {
+	requireManage()
+	$editingBase.value = asNode(nodeId)
+	$editingNode.value = nodeId
+}
 export const notEditing = () => $editingNode.value === undefined
 export const isOpen = (nodeId: number): boolean =>
 	$nodeStates.value[`${nodeId}`]?.open
@@ -164,7 +175,7 @@ export const updateNodeState =
 	(state: Partial<NodeState>) => (nodeId: number) => {
 		$nodeStates.value = over(
 			lensProp(asStr(nodeId)),
-			mergeDeepLeft(state),
+			(previous: NodeState) => ({ ...previous, ...state }),
 			$nodeStates.value
 		)
 		updateNodeContext(nodeId)
@@ -184,18 +195,49 @@ export const openParent = <T extends Pick<TreeNode, 'parent_id'>>(
 	return obj
 }
 
+const nodeInput = z.strictObject({
+	id: z.int().positive(),
+	name: z.string(),
+	expectedRevision: z.int().nonnegative(),
+	order: z.int().nullish(),
+	parent_id: z.int().positive().nullish(),
+	type: z.enum(NodeType).nullish()
+}) satisfies z.ZodType<ChangeNodeInput>
+export const nodeSaves = createSaveQueue<ChangeNodeInput, Node>({
+	input: nodeInput,
+	canRecreate: false,
+	storage: window.localStorage,
+	key: data => String(data.id),
+	send: data => Api.UpdateNode({ data }),
+	read: async data => (await Api.GetNodes()).find(node => node.id === data.id),
+	onSaved: saved => {
+		$nodes.value = $nodes
+			.peek()
+			.map(node => (node.id === saved.id ? saved : node))
+	}
+})
+const renameInput = (value: string): ChangeNodeInput => {
+	requireManage()
+	const base = $editingBase.peek()
+	assertExists(base, 'No field is being renamed')
+	return { id: base.id, name: value, expectedRevision: base.revision }
+}
+export const stageNodeName = (value: string) =>
+	nodeSaves.stage(renameInput(value), 'Field name')
 export const confirmNodeName = (value: string) =>
-	MaybeAsync.liftMaybe(Maybe.fromNullable($editingNode.value))
-		.filter(isNotEmpty)
-		.map(id => Api.UpdateNode({ data: { id, name: value } }))
-		.run()
+	nodeSaves.save(renameInput(value), 'Field name')
 
-export const deleteNode = (id: number) =>
-	Api.DeleteNodeById({
-		id,
-		parent_id: parentOf(id),
-		order: asNode(id).order
-	})
+export const deleteNode = (id: number) => {
+	requireManage()
+	return requestDeletion({ kind: DeletionKind.Node, id }, expectedImpact =>
+		Api.DeleteNodeById({
+			expectedImpact,
+			id,
+			parent_id: parentOf(id),
+			order: asNode(id).order
+		})
+	)
+}
 
 const defaultSettings = match<[InsertNode], any>(
 	caseOf([{ type: NodeType.List }], { scoped: true }),
@@ -203,6 +245,7 @@ const defaultSettings = match<[InsertNode], any>(
 )
 
 export const insertNode = (data: InsertNode): Promise<number> => {
+	requireManage()
 	assertExists(data.parent_id, 'insertNode needs a valid node_id')
 	assertExists(data.order, 'insertNode needs a valid order')
 	return Api.InsertNode({
@@ -261,6 +304,3 @@ export const parentOf = (node_id: number | undefined): number => {
 	assertExists($root.value, 'Root node is missing')
 	return parentInTree($root.value, node_id)
 }
-
-export const importArray = (data: JsonArrayImportInput) =>
-	Api.ImportArray({ data })

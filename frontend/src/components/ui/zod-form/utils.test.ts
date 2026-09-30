@@ -1,15 +1,7 @@
 import { EditorType } from '@shared/enums'
 import { describe, expect, it } from 'vitest'
 import * as z from 'zod/v4'
-import {
-	generateDefaults,
-	metas,
-	stringField
-} from './utils'
-import { L } from 'vitest/dist/chunks/reporters.d.BFLkQcL6.js'
-import { assert } from 'console'
-import { assertExists } from '@shared/asserts'
-import { FieldMeta } from './types'
+import { generateDefaults, metas, stringField } from './utils'
 
 describe('utils', () => {
 	describe('zod form', () => {
@@ -17,7 +9,7 @@ describe('utils', () => {
 			const schema = stringField('Name', EditorType.Input)
 			expect(metas.get(schema)).toMatchObject({
 				label: 'Name',
-				editor: EditorType.Input,
+				editor: EditorType.Input
 			})
 		})
 	})

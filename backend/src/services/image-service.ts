@@ -1,24 +1,28 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { GetObjectCommand } from '@aws-sdk/client-s3'
-import { S3Client as AwsS3 } from '@aws-sdk/client-s3'
+import { S3Client as AwsS3, GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { normalizeArticle } from '@shared/article-assets.ts'
 import { assertExists, assertThat } from '@shared/asserts.ts'
+import { contentSnapshotSchema } from '@shared/content-snapshot.ts'
 import type { MediaType } from '@shared/json-value-types.ts'
 import { decryptInteger, encryptInteger } from '@shared/utils/number-hash.ts'
 import { url } from '@shared/utils/url.ts'
-import { inject, injectable } from 'inversify'
+import { inject, injectable, optional } from 'inversify'
 import { Kysely } from 'kysely'
 import { uniq } from 'ramda'
-import { included, isString } from 'ramda-adjunct'
+import { included } from 'ramda-adjunct'
 import sharp from 'sharp'
 import type { DB } from 'src/database/schema.ts'
 import type { Value } from 'src/resolvers/value-resolver.ts'
-import { NodeType, Topic } from 'src/types.ts'
 import { ErrorHandler } from 'src/utils/error-handler.ts'
 import { isJsonObject } from 'src/utils/json.ts'
-import type { PubSub } from 'type-graphql'
+import { Authenticator } from '../auth.ts'
+import { signMedia, verifyMedia } from '../security/media-token.ts'
+import { requireProjectFile } from '../security/project-access.ts'
+import { MediaAssets } from './media-assets.ts'
 import { S3Client } from './s3-client.ts'
-const mediaUrl = process.env.VITE_MEDIA_URL
+
+const mediaUrl = process.env.VITE_MEDIA_URL ?? '/media'
 
 export type MediaValue = Value & { value: MediaType }
 type MediaSettings = {
@@ -31,62 +35,36 @@ type ValueWithSettings = {
 	settings?: MediaSettings
 }
 
-type NodeWithSettings = {
-	type: NodeType
-	settings?: MediaSettings
-}
-
 @injectable()
 export class ImageService {
-	@inject('PubSub')
-	private pubSub: PubSub
-
 	@inject(S3Client)
 	private s3: S3Client
 
+	@inject('S3SigningClient') @optional() private signing: AwsS3 | undefined
 	@inject(AwsS3)
 	private awsS3: AwsS3
 
+	@inject(MediaAssets) private assets: MediaAssets
 	@inject(Kysely)
 	private db: Kysely<DB>
 
-	init() {
-		void this.waitForImageReplacement()
+	@inject(Authenticator)
+	private auth: Authenticator
+
+	articleHtml(content: string, revision?: number) {
+		return normalizeArticle(content, key => this.assets.mediaUrl(key, revision))
+			.content
 	}
 
-	async waitForImageReplacement() {
-		console.log('Waiting for image replacement')
-		for await (const value of this.pubSub.subscribe(
-			Topic.ValueDeleted
-		) as AsyncIterable<Value>) {
-			const res = await this.db
-				.selectFrom('node')
-				.leftJoin('node_settings', 'node.id', 'node_settings.node_id')
-				.select([
-					'node.type',
-					eb => eb.ref('node_settings.settings').as('settings')
-				])
-				.where('node.id', '=', value.node_id)
-				.executeTakeFirstOrThrow()
-			const node = res as NodeWithSettings
-			if (
-				node.type === NodeType.media &&
-				isJsonObject(value.value) &&
-				isString(value.value.file)
-			) {
-				this.s3.deleteFile(value.value.file)
-				const thumbails: string[] = uniq(
-					['640'].concat(node.settings?.thumbnails ?? [])
-				)
-				for await (const size of thumbails) {
-					await this.s3.deleteFile(`${value.value.file}_${size}`)
-				}
-			}
-		}
-	}
-
-	mediaUrl(value: Value & { value: MediaType }, size?: string): string {
-		return url`${mediaUrl}/${encryptInteger(value.id)}?size=${size}&updated_at=${value.updated_at.getTime()}`
+	mediaUrl(
+		value: Value & { value: MediaType },
+		size?: string,
+		revision?: number
+	): string {
+		const version = `${revision ? `${revision}:` : ''}${value.updated_at.getTime()}`
+		const expires = String(Date.now() + 3600000)
+		const token = signMedia(value.id, version, size ?? '', expires)
+		return url`${mediaUrl}/${encryptInteger(value.id)}?size=${size}&revision=${revision}&updated_at=${version}&expires=${expires}&token=${token}`
 	}
 
 	@ErrorHandler()
@@ -95,24 +73,83 @@ export class ImageService {
 		response: O
 	) {
 		assertExists(req.url, 'Request URL is missing')
-		const url = new URL(req.url, mediaUrl)
+		const url = new URL(
+			req.url,
+			process.env.BETTER_AUTH_URL ?? 'http://localhost:4001'
+		)
 		const size = url.searchParams.get('size') ?? undefined
 		const idHash = url.pathname.split('/').pop()
 
 		assertExists(idHash, 'Image ID is missing')
 		const id = decryptInteger(idHash)
 
-		const res = await this.db
-			.selectFrom('values')
-			.leftJoin('node_settings', 'values.node_id', 'node_settings.node_id')
-			.select([
-				'values.value',
-				eb => eb.ref('node_settings.settings').as('settings')
-			])
-			.where('values.id', '=', id)
-			.executeTakeFirstOrThrow()
+		const revisionInput = url.searchParams.get('revision')
+		const revision = revisionInput === null ? undefined : Number(revisionInput)
+		if (
+			revision !== undefined &&
+			(!Number.isSafeInteger(revision) || revision <= 0)
+		)
+			throw new Error('Invalid media revision')
+		const res = revision
+			? await this.archivedMedia(revision, id)
+			: await this.db
+					.selectFrom('values')
+					.leftJoin('node_settings', 'values.node_id', 'node_settings.node_id')
+					.select([
+						'values.value',
+						'values.project_id',
+						'values.updated_at',
+						eb => eb.ref('node_settings.settings').as('settings')
+					])
+					.where('values.id', '=', id)
+					.executeTakeFirstOrThrow()
 
-		const media = res as ValueWithSettings
+		const signed = verifyMedia(
+			id,
+			`${revision ? `${revision}:` : ''}${res.updated_at.getTime()}`,
+			size ?? '',
+			url.searchParams.get('expires') ?? '',
+			url.searchParams.get('token') ?? ''
+		)
+		if (!signed) {
+			const session = await this.auth.api.getSession({
+				headers: new Headers({ cookie: req.headers.cookie ?? '' }),
+				query: { disableCookieCache: true }
+			})
+			const membership =
+				session &&
+				(await this.db
+					.selectFrom('project_user')
+					.select('project_id')
+					.where('project_id', '=', res.project_id)
+					.where('user_id', '=', session.user.id)
+					.where('confirmed', '=', true)
+					.executeTakeFirst())
+			if (!membership) {
+				response.writeHead(403)
+				response.end('Forbidden')
+				return
+			}
+		}
+
+		if (
+			!isJsonObject(res.value) ||
+			typeof res.value.file !== 'string' ||
+			typeof res.value.name !== 'string' ||
+			typeof res.value.contentType !== 'string' ||
+			typeof res.value.size !== 'number'
+		)
+			throw new Error('Invalid media')
+		const media: ValueWithSettings = {
+			value: {
+				file: res.value.file,
+				name: res.value.name,
+				contentType: res.value.contentType,
+				size: res.value.size
+			},
+			settings: res.settings as MediaSettings | undefined
+		}
+		requireProjectFile(res.project_id, media.value.file)
 		const thumbails: string[] = uniq(
 			['640'].concat(media.settings?.thumbnails ?? [])
 		)
@@ -130,20 +167,42 @@ export class ImageService {
 			Bucket: process.env.AWS_BUCKET,
 			Key: size ? this.thumbnailFile(media.value, size) : media.value.file
 		})
-		const s3Url = await getSignedUrl(this.awsS3, getObj, {
+		const s3Url = await getSignedUrl(this.signing ?? this.awsS3, getObj, {
 			expiresIn: 3600
 		})
 		response.writeHead(302, {
-			'Access-Control-Allow-Origin': '*',
+			'Cache-Control': 'private, no-store',
 			Location: s3Url
 		})
 		response.end()
+	}
+
+	private async archivedMedia(revisionId: number, valueId: number) {
+		const revision = await this.db
+			.selectFrom('content_revision')
+			.select(['snapshot', 'project_id'])
+			.where('id', '=', revisionId)
+			.executeTakeFirstOrThrow()
+		const snapshot = contentSnapshotSchema.parse(revision.snapshot)
+		const value = snapshot.values.find(value => value.id === valueId)
+		if (!value || value.project_id !== revision.project_id)
+			throw new Error('Archived media not found')
+		return {
+			value: value.value,
+			project_id: revision.project_id,
+			updated_at: new Date(value.updated_at),
+			settings:
+				snapshot.settings.find(settings => settings.node_id === value.node_id)
+					?.settings ?? null
+		}
 	}
 
 	async createThumbnail(media: MediaType, size: string) {
 		const [width, height] = size.includes('x')
 			? size.split('x').map(Number)
 			: [Number(size), Number(size)]
+		if (![width, height].every(n => Number.isInteger(n) && n > 0 && n <= 4096))
+			throw new Error('Invalid thumbnail dimensions')
 		const image = await this.s3.getBytes(media.file)
 		const resizedImage = await sharp(image)
 			.resize({

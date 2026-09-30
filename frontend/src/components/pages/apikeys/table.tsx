@@ -1,3 +1,4 @@
+import { Check, Trash, X } from 'lucide-react'
 import { MicroIcon } from '@/components/ui/random/micro-icon'
 import { WiggleMicroIcon } from '@/components/ui/random/wiggle-micro-icon'
 import {
@@ -9,10 +10,8 @@ import {
 	TableHeader,
 	TableRow
 } from '@/components/ui/table'
-import { copyToClipboard } from '@/lib/clipboard'
 import { formatIsoDate } from '@/lib/date'
 import { $apiKeys, deleteApiKey, toggleApiKey } from '@/state/apikeys'
-import { Check, Copy, Trash, X } from 'lucide-react'
 
 export const ApiKeyTable = () => {
 	return (
@@ -22,7 +21,7 @@ export const ApiKeyTable = () => {
 				<TableRow>
 					<TableHead className="w-[16px]" />
 					<TableHead className="w-[100px]">Name</TableHead>
-					<TableHead>Key</TableHead>
+					<TableHead>Fingerprint</TableHead>
 					<TableHead className="w-[100px]">Expires</TableHead>
 					<TableHead className="w-[100px]">Last used</TableHead>
 					<TableHead className="w-[16px]" />
@@ -38,10 +37,11 @@ export const ApiKeyTable = () => {
 								<MicroIcon icon={X} onClick={() => toggleApiKey(key.key)} />
 							)}
 						</TableCell>
-						<TableCell>{key.name}</TableCell>
+						<TableCell>
+							{key.name} · {key.preview ? 'Preview' : 'Published'}
+						</TableCell>
 						<TableCell className="flex h-10 gap-1 items-center">
 							{key.key.slice(0, 8)}...{key.key.slice(-8)}
-							<MicroIcon icon={Copy} onClick={() => copyToClipboard(key.key)} />
 						</TableCell>
 						<TableCell>{formatIsoDate(key.expires_at)}</TableCell>
 						<TableCell>{formatIsoDate(key.last_used)}</TableCell>

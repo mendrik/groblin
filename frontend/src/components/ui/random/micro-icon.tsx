@@ -1,6 +1,6 @@
+import type { RefObject } from 'react'
 import { cn } from '@/lib/utils'
 import type { Icon, IconProps } from '@/type-patches/icons'
-import type { RefObject } from 'react'
 import { Button, type ButtonProps } from '../button'
 
 export type MicroIconProps = {

@@ -1,10 +1,11 @@
 import { EditorType } from '@shared/enums'
-import { infer as TypeOf, array, object, string } from 'zod/v4'
-import { hideColumnHead, required } from './common'
+import { choiceSettingsSchema } from '@shared/node-settings'
+import type { infer as TypeOf } from 'zod/v4'
 import { metas } from '../../zod-form/utils'
+import { hideColumnHead, required } from './common'
 
-export const ChoiceProps = object({
-	choices: array(string().nonempty()).default([]).register(metas, {
+export const ChoiceProps = choiceSettingsSchema.safeExtend({
+	choices: choiceSettingsSchema.shape.choices.register(metas, {
 		label: 'Choices',
 		description: 'Enter a list of choices',
 		span: 2,

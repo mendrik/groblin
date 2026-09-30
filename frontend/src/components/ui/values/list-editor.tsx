@@ -1,9 +1,3 @@
-import type { Value } from '@/gql/graphql'
-import { preventDefault, stopPropagation } from '@/lib/dom-events'
-import { notNil } from '@/lib/signals'
-import { cn } from '@/lib/utils'
-import type { TreeNode } from '@/state/tree'
-import { $activeListItems, activateListItem } from '@/state/value'
 import type { ListType } from '@shared/json-value-types'
 import {
 	ChevronFirst,
@@ -20,6 +14,17 @@ import {
 import { clamp, findIndex, isNotNil } from 'ramda'
 import { useEffect } from 'react'
 import { useEffectOnce } from 'react-use'
+import type { Value } from '@/gql/graphql'
+import { preventDefault, stopPropagation } from '@/lib/dom-events'
+import { notNil } from '@/lib/signals'
+import { cn } from '@/lib/utils'
+import { $canEdit } from '@/state/access'
+import type { TreeNode } from '@/state/tree'
+import {
+	$activeListItems,
+	activateListItem,
+	deleteListItem as openListItemDelete
+} from '@/state/value'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -29,7 +34,6 @@ import {
 import { MicroIcon } from '../random/micro-icon'
 import { Icon } from '../simple/icon'
 import { openListItemCreate } from './list-item-create'
-import { openListItemDelete } from './list-item-delete'
 import { openListItemEdit } from './list-item-edit'
 import type { ValueEditor } from './value-editor'
 
@@ -40,7 +44,7 @@ type ListItemActionsProps = {
 	item: ListItemValue
 }
 
-const ListItemActions = ({ node, item }: ListItemActionsProps) => (
+const ListItemActions = ({ item }: ListItemActionsProps) => (
 	<DropdownMenu>
 		<DropdownMenuTrigger className="h-7" onKeyDown={stopPropagation}>
 			<Icon icon={EllipsisVertical} />
@@ -113,14 +117,16 @@ export const TabEditor: ValueEditor<ListItemValue[]> = ({
 						>
 							{item.value.name ?? 'Unnamed'}
 						</button>
-						{$activeItem?.id === item.id && (
+						{$canEdit.value && $activeItem?.id === item.id && (
 							<ListItemActions node={node} item={item} />
 						)}
 					</li>
 				))}
 			</ol>
 			<div className="flex content-center">
-				<MicroIcon icon={Plus} onClick={() => openListItemCreate(node)} />
+				{$canEdit.value && (
+					<MicroIcon icon={Plus} onClick={() => openListItemCreate(node)} />
+				)}
 			</div>
 		</div>
 	)

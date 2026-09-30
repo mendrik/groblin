@@ -1,3 +1,9 @@
+import { signal } from '@preact/signals-react'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
+import { colorValueSchema } from '@shared/content'
+import type { ColorType } from '@shared/json-value-types'
+import { assoc, F, pipe, T } from 'ramda'
+import PickerLib, { useColorPicker } from 'react-best-gradient-color-picker'
 import {
 	Dialog,
 	DialogContent,
@@ -5,17 +11,11 @@ import {
 	DialogFooter,
 	DialogTitle
 } from '@/components/ui/dialog'
-import { setSignal } from '@/lib/signals'
-import { updateSignalFn } from '@/lib/signals'
-import { notNil } from '@/lib/signals'
-import { signal } from '@preact/signals-react'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { F, T, assoc, pipe } from 'ramda'
-import PickerLib, { useColorPicker } from 'react-best-gradient-color-picker'
+import { notNil, setSignal, updateSignalFn } from '@/lib/signals'
 import { Button } from './button'
 
 type OpenProps = {
-	callback: (color: [number, number, number, number?]) => any
+	callback: (color: ColorType['rgba']) => unknown
 	color: string
 }
 
@@ -69,7 +69,7 @@ export const ColorPicker = () => {
 						type="button"
 						onClick={() => {
 							notNil($props).callback(
-								rgbaArr as [number, number, number, number?]
+								colorValueSchema.parse({ rgba: rgbaArr }).rgba
 							)
 							close()
 						}}

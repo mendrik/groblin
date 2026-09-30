@@ -27,7 +27,7 @@ CREATE FUNCTION public.delete_referenced_rows() RETURNS trigger
 BEGIN
     -- Delete rows where list_path contains the OLD.id (the id of the deleted row)
     DELETE FROM public."values"
-    WHERE OLD.id = ANY(list_path);
+    WHERE project_id = OLD.project_id AND OLD.id = ANY(list_path);
 
     -- Return the old row (standard for delete triggers)
     RETURN OLD;
@@ -35,7 +35,6 @@ END;
 $$;
 
 
-ALTER FUNCTION public.delete_referenced_rows() OWNER TO groblin;
 
 --
 -- Name: set_node_depth(); Type: FUNCTION; Schema: public; Owner: groblin
@@ -66,7 +65,6 @@ END;
 $$;
 
 
-ALTER FUNCTION public.set_node_depth() OWNER TO groblin;
 
 --
 -- Name: update_timestamp(); Type: FUNCTION; Schema: public; Owner: groblin
@@ -82,7 +80,6 @@ END;
 $$;
 
 
-ALTER FUNCTION public.update_timestamp() OWNER TO groblin;
 
 SET default_tablespace = '';
 
@@ -109,7 +106,6 @@ CREATE TABLE public.account (
 );
 
 
-ALTER TABLE public.account OWNER TO groblin;
 
 --
 -- Name: api_key; Type: TABLE; Schema: public; Owner: groblin
@@ -127,7 +123,6 @@ CREATE TABLE public.api_key (
 );
 
 
-ALTER TABLE public.api_key OWNER TO groblin;
 
 --
 -- Name: api_key_id_seq; Type: SEQUENCE; Schema: public; Owner: groblin
@@ -142,7 +137,6 @@ CREATE SEQUENCE public.api_key_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.api_key_id_seq OWNER TO groblin;
 
 --
 -- Name: api_key_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: groblin
@@ -161,7 +155,6 @@ CREATE TABLE public.history (
 );
 
 
-ALTER TABLE public.history OWNER TO groblin;
 
 --
 -- Name: node; Type: TABLE; Schema: public; Owner: groblin
@@ -178,7 +171,6 @@ CREATE TABLE public.node (
 );
 
 
-ALTER TABLE public.node OWNER TO groblin;
 
 --
 -- Name: node_id_seq; Type: SEQUENCE; Schema: public; Owner: groblin
@@ -193,7 +185,6 @@ CREATE SEQUENCE public.node_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.node_id_seq OWNER TO groblin;
 
 --
 -- Name: node_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: groblin
@@ -216,7 +207,6 @@ CREATE TABLE public.node_settings (
 );
 
 
-ALTER TABLE public.node_settings OWNER TO groblin;
 
 --
 -- Name: node_settings_id_seq; Type: SEQUENCE; Schema: public; Owner: groblin
@@ -231,7 +221,6 @@ CREATE SEQUENCE public.node_settings_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.node_settings_id_seq OWNER TO groblin;
 
 --
 -- Name: node_settings_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: groblin
@@ -250,7 +239,6 @@ CREATE TABLE public.project (
 );
 
 
-ALTER TABLE public.project OWNER TO groblin;
 
 --
 -- Name: project_id_seq; Type: SEQUENCE; Schema: public; Owner: groblin
@@ -265,7 +253,6 @@ CREATE SEQUENCE public.project_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.project_id_seq OWNER TO groblin;
 
 --
 -- Name: project_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: groblin
@@ -287,7 +274,6 @@ CREATE TABLE public.project_user (
 );
 
 
-ALTER TABLE public.project_user OWNER TO groblin;
 
 --
 -- Name: session; Type: TABLE; Schema: public; Owner: groblin
@@ -305,7 +291,6 @@ CREATE TABLE public.session (
 );
 
 
-ALTER TABLE public.session OWNER TO groblin;
 
 --
 -- Name: user; Type: TABLE; Schema: public; Owner: groblin
@@ -322,7 +307,6 @@ CREATE TABLE public."user" (
 );
 
 
-ALTER TABLE public."user" OWNER TO groblin;
 
 --
 -- Name: values; Type: TABLE; Schema: public; Owner: groblin
@@ -340,7 +324,6 @@ CREATE TABLE public."values" (
 );
 
 
-ALTER TABLE public."values" OWNER TO groblin;
 
 --
 -- Name: values_id_seq; Type: SEQUENCE; Schema: public; Owner: groblin
@@ -355,7 +338,6 @@ CREATE SEQUENCE public.values_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.values_id_seq OWNER TO groblin;
 
 --
 -- Name: values_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: groblin
@@ -378,7 +360,6 @@ CREATE TABLE public.verification (
 );
 
 
-ALTER TABLE public.verification OWNER TO groblin;
 
 --
 -- Name: api_key id; Type: DEFAULT; Schema: public; Owner: groblin
@@ -469,6 +450,7 @@ ALTER TABLE ONLY public.history
 
 ALTER TABLE ONLY public.node
     ADD CONSTRAINT node_pkey PRIMARY KEY (id);
+ALTER TABLE public.node ADD CONSTRAINT node_project_identity UNIQUE (id, project_id);
 
 
 --
@@ -623,7 +605,7 @@ CREATE INDEX project_user_project_id ON public.project_user USING btree (project
 -- Name: sqlite_autoindex_project_user_1; Type: INDEX; Schema: public; Owner: groblin
 --
 
-CREATE UNIQUE INDEX sqlite_autoindex_project_user_1 ON public.project_user USING btree (project_id);
+CREATE UNIQUE INDEX project_user_membership ON public.project_user USING btree (project_id, user_id);
 
 
 --
@@ -675,7 +657,7 @@ ALTER TABLE ONLY public.api_key
 --
 
 ALTER TABLE ONLY public.node
-    ADD CONSTRAINT node_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES public.node(id) ON DELETE CASCADE;
+    ADD CONSTRAINT node_parent_id_fkey FOREIGN KEY (parent_id, project_id) REFERENCES public.node(id, project_id) ON DELETE CASCADE;
 
 
 --
@@ -691,7 +673,7 @@ ALTER TABLE ONLY public.node
 --
 
 ALTER TABLE ONLY public.node_settings
-    ADD CONSTRAINT node_settings_node_id_fkey FOREIGN KEY (node_id) REFERENCES public.node(id) ON DELETE CASCADE;
+    ADD CONSTRAINT node_settings_node_id_fkey FOREIGN KEY (node_id, project_id) REFERENCES public.node(id, project_id) ON DELETE CASCADE;
 
 
 --
@@ -731,7 +713,7 @@ ALTER TABLE ONLY public.session
 --
 
 ALTER TABLE ONLY public."values"
-    ADD CONSTRAINT values_node_id_fkey FOREIGN KEY (node_id) REFERENCES public.node(id) ON DELETE CASCADE;
+    ADD CONSTRAINT values_node_id_fkey FOREIGN KEY (node_id, project_id) REFERENCES public.node(id, project_id) ON DELETE CASCADE;
 
 
 --
@@ -746,3 +728,178 @@ ALTER TABLE ONLY public."values"
 -- PostgreSQL database dump complete
 --
 
+
+
+BEGIN;
+-- Plaintext keys may have appeared in SQL logs and the committed dump.
+UPDATE public.api_key SET is_active = false, key = 'revoked:' || id::text WHERE key NOT LIKE 'sha256:%';
+COMMIT;
+
+BEGIN;
+ALTER TABLE public.project ADD COLUMN version integer NOT NULL DEFAULT 0 CHECK (version >= 0);
+ALTER TABLE public.node ADD COLUMN revision integer NOT NULL DEFAULT 1 CHECK (revision > 0);
+ALTER TABLE public.node_settings ADD COLUMN revision integer NOT NULL DEFAULT 1 CHECK (revision > 0);
+ALTER TABLE public."values" ADD COLUMN revision integer NOT NULL DEFAULT 1 CHECK (revision > 0);
+CREATE FUNCTION public.bump_content_revision() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+ NEW.revision := OLD.revision + 1;
+ RETURN NEW;
+END;
+$$;
+CREATE TRIGGER node_revision BEFORE UPDATE ON public.node FOR EACH ROW EXECUTE FUNCTION public.bump_content_revision();
+CREATE TRIGGER settings_revision BEFORE UPDATE ON public.node_settings FOR EACH ROW EXECUTE FUNCTION public.bump_content_revision();
+CREATE TRIGGER value_revision BEFORE UPDATE ON public."values" FOR EACH ROW EXECUTE FUNCTION public.bump_content_revision();
+CREATE TABLE public.content_revision (
+ id integer GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+ project_id integer NOT NULL REFERENCES public.project(id) ON DELETE CASCADE,
+ version integer NOT NULL CHECK (version >= 0),
+ created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ author_id text REFERENCES public."user"(id) ON DELETE SET NULL,
+ author_name text NOT NULL,
+ summary varchar(200) NOT NULL,
+ snapshot jsonb NOT NULL,
+ UNIQUE (project_id, version)
+);
+COMMIT;
+
+BEGIN;
+UPDATE public.project_user SET roles = ARRAY[CASE
+ WHEN owner THEN 'Owner'
+ WHEN 'Admin' = ANY(roles) THEN 'Admin'
+ WHEN 'Editor' = ANY(roles) THEN 'Editor'
+ ELSE 'Viewer' END];
+ALTER TABLE public.project_user ALTER COLUMN user_id SET NOT NULL;
+ALTER TABLE public.project_user ADD CONSTRAINT canonical_project_role CHECK (
+ (owner AND confirmed AND roles = ARRAY['Owner']) OR
+ (NOT owner AND roles IN (ARRAY['Admin'], ARRAY['Editor'], ARRAY['Viewer']))
+);
+CREATE UNIQUE INDEX one_owner_per_project ON public.project_user(project_id) WHERE owner;
+CREATE TABLE public.project_invitation (
+ id integer GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+ project_id integer NOT NULL REFERENCES public.project(id) ON DELETE CASCADE,
+ email text NOT NULL CHECK (email = lower(trim(email))),
+ role text NOT NULL CHECK (role IN ('Admin', 'Editor', 'Viewer')),
+ token_hash text NOT NULL UNIQUE,
+ invited_by text REFERENCES public."user"(id) ON DELETE SET NULL,
+ invited_name text NOT NULL,
+ created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ expires_at timestamptz NOT NULL,
+ accepted_at timestamptz,
+ accepted_by text REFERENCES public."user"(id) ON DELETE SET NULL,
+ revoked_at timestamptz
+);
+CREATE UNIQUE INDEX pending_project_invitation ON public.project_invitation(project_id, email)
+ WHERE accepted_at IS NULL AND revoked_at IS NULL;
+COMMIT;
+
+BEGIN;
+-- Deliberately survives project deletion, so a failed storage request can be retried.
+CREATE TABLE public.media_cleanup_job (
+ id integer GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+ prefix text NOT NULL CHECK (prefix ~ '^project_[0-9]+/$'),
+ created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ attempts integer NOT NULL DEFAULT 0,
+ not_before timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ last_error text
+);
+COMMIT;
+
+BEGIN;
+ALTER TABLE public.content_revision ADD CONSTRAINT content_revision_project_identity UNIQUE(id, project_id);
+ALTER TABLE public.project ADD COLUMN published_revision_id integer;
+ALTER TABLE public.project ADD CONSTRAINT project_publication_revision
+ FOREIGN KEY (published_revision_id, id) REFERENCES public.content_revision(id, project_id)
+ ON DELETE SET NULL (published_revision_id);
+ALTER TABLE public.api_key ADD COLUMN preview boolean NOT NULL DEFAULT false;
+CREATE TABLE public.content_publication (
+ id integer GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+ project_id integer NOT NULL REFERENCES public.project(id) ON DELETE CASCADE,
+ revision_id integer NOT NULL,
+ author_id text REFERENCES public."user"(id) ON DELETE SET NULL,
+ author_name text NOT NULL,
+ created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ FOREIGN KEY (revision_id, project_id) REFERENCES public.content_revision(id, project_id) ON DELETE CASCADE
+);
+CREATE INDEX publication_history ON public.content_publication(project_id, id DESC);
+COMMIT;
+
+BEGIN;
+ALTER TABLE public."values" DROP CONSTRAINT constraint_name;
+DROP INDEX public.constraint_ext_node;
+CREATE UNIQUE INDEX external_content_identity ON public."values"
+ (project_id, node_id, coalesce(list_path, '{}'::integer[]), external_id)
+ WHERE external_id IS NOT NULL;
+COMMIT;
+
+BEGIN;
+CREATE TABLE public.project_import_receipt (
+ user_id text NOT NULL REFERENCES public."user"(id) ON DELETE CASCADE,
+ upload_key text NOT NULL,
+ source_hash text NOT NULL,
+ project_id integer REFERENCES public.project(id) ON DELETE SET NULL,
+ created_at timestamptz NOT NULL DEFAULT now(),
+ PRIMARY KEY (user_id, upload_key, source_hash)
+);
+COMMIT;
+
+BEGIN;
+CREATE INDEX list_scope_order ON public."values" (project_id, node_id, coalesce(list_path, '{}'::integer[]), "order", id);
+CREATE INDEX list_scope_children ON public."values" (project_id, coalesce(list_path, '{}'::integer[]), node_id);
+COMMIT;
+
+BEGIN;
+CREATE TABLE public.media_asset (
+ key text PRIMARY KEY,
+ project_id integer NOT NULL REFERENCES public.project(id) ON DELETE CASCADE,
+ uploaded_by text REFERENCES public."user"(id) ON DELETE SET NULL,
+ filename text NOT NULL,
+ content_type text NOT NULL,
+ size integer NOT NULL CHECK (size BETWEEN 0 AND 67108864),
+ purpose text NOT NULL CHECK (purpose IN ('MEDIA', 'JSON_IMPORT', 'PROJECT_IMPORT', 'EXPORT')),
+ created_at timestamptz NOT NULL DEFAULT now(),
+ verified_at timestamptz,
+ sha256 text,
+ width integer,
+ height integer,
+ sealed_key text,
+ expires_at timestamptz NOT NULL DEFAULT now() + interval '24 hours',
+ cleanup_attempts integer NOT NULL DEFAULT 0,
+ last_error text,
+ CHECK (key ~ ('^project_' || project_id || '/[0-9a-f-]{36}$'))
+);
+CREATE INDEX expiring_media_assets ON public.media_asset(expires_at);
+COMMIT;
+BEGIN;
+CREATE TABLE public.media_file_cleanup_job (
+ key text PRIMARY KEY CHECK (key ~ '^project_[1-9][0-9]*/[0-9a-f-]{36}$'),
+ not_before timestamptz NOT NULL DEFAULT now() + interval '24 hours',
+ attempts integer NOT NULL DEFAULT 0,
+ last_error text
+);
+COMMIT;
+BEGIN;
+-- Register files already referenced by pre-registry content and retained history.
+WITH content AS (
+ SELECT project_id, value FROM public."values"
+ UNION ALL
+ SELECT r.project_id, item -> 'value' FROM public.content_revision r,
+ LATERAL jsonb_array_elements(r.snapshot -> 'values') item
+), files AS (
+ SELECT DISTINCT ON (project_id, value ->> 'file') project_id, value
+ FROM content WHERE value ->> 'file' ~ '^project_[1-9][0-9]*/[0-9a-f-]{36}$'
+ AND value ->> 'file' LIKE 'project_' || project_id || '/%'
+)
+INSERT INTO public.media_asset (key, project_id, filename, content_type, size, purpose, verified_at)
+SELECT value ->> 'file', project_id, coalesce(value ->> 'name', 'Imported legacy file'),
+ coalesce(value ->> 'contentType', 'application/octet-stream'),
+ CASE WHEN value ->> 'size' ~ '^[0-9]{1,8}$' THEN least((value ->> 'size')::int, 67108864) ELSE 0 END,
+ 'MEDIA', now() FROM files
+ON CONFLICT (key) DO NOTHING;
+COMMIT;
+
+CREATE TABLE IF NOT EXISTS public.schema_migration (
+ version integer PRIMARY KEY,
+ name text NOT NULL,
+ checksum text NOT NULL,
+ applied_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

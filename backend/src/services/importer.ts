@@ -1,249 +1,277 @@
-import { throwError } from '@shared/errors.ts'
-import { toArray } from '@shared/utils/async-generator.ts'
-import { capitalize, entriesWithIndex, fork } from '@shared/utils/ramda.ts'
-import { type InsertObject, type Transaction, sql } from 'kysely'
-import { type TreeOf, caseOf, failOn, match } from 'matchblade'
-import { path, T as _, eqBy, isNil, isNotEmpty, prop, uniqBy } from 'ramda'
-import {
-	isArray,
-	isBoolean,
-	isNumber,
-	isPlainObj,
-	isString
-} from 'ramda-adjunct'
-import type { DB, JsonArray, JsonObject } from 'src/database/schema.ts'
-import type { JsonArrayImportInput } from 'src/resolvers/io-resolver.ts'
-import type { Node } from 'src/resolvers/node-resolver.ts'
-import { NodeType } from 'src/types.ts'
-import { color } from 'src/utils/color-codec.ts'
-import { date } from 'src/utils/date-codec.ts'
+import { parseContentValue } from '@shared/content.ts'
+import { GraphQLError } from 'graphql'
+import { sql, type Transaction } from 'kysely'
+import { listToTree } from 'matchblade'
+import { z } from 'zod'
+import type { DB, JsonValue } from '../database/schema.ts'
+import type { JsonArrayImportInput } from '../gql/schema.ts'
+import { NodeType, type TreeNode } from '../types.ts'
+import { color } from '../utils/color-codec.ts'
+import { isJsonObject } from '../utils/json.ts'
+import { parseNode } from '../utils/parse-node.ts'
+import { validateProjectModel } from './model-validation.ts'
 
-type DbValue = InsertObject<DB, 'values'>
-type DbNode = InsertObject<DB, 'node'>
-type DbNodeSetting = InsertObject<DB, 'node_settings'>
-
-type Inserts = DbValue | DbNode | DbNodeSetting
-
-type TreeNode = TreeOf<Node, 'nodes'>
-type JsonStart = JsonArray | JsonObject
-type JsonNode = [string, any]
-type Options = JsonArrayImportInput
-type PathToRoot = number[]
-
-const normalize = (key: string) =>
-	key
+const invalid = (message: string): never => {
+	throw new GraphQLError(message, { extensions: { code: 'BAD_USER_INPUT' } })
+}
+const normalize = (name: string) =>
+	name
 		.normalize('NFKD')
-		// biome-ignore lint/suspicious/noMisleadingCharacterClass: <explanation>
 		.replace(/[\u0300-\u036F]/g, '')
 		.toLowerCase()
-
-const byNormalizedName =
-	(key: string) =>
-	(node: TreeNode): boolean =>
-		normalize(node.name) === normalize(key)
-
-const isColorString = (json: unknown): json is string =>
-	color.safeParse(json).success
-
-const isDate = (json: unknown): json is string => date.safeParse(json).success
-
-const typeForValue = match<[any], NodeType>(
-	caseOf([isPlainObj], NodeType.object),
-	caseOf([isArray], NodeType.list),
-	caseOf([isNumber], NodeType.number),
-	caseOf([isBoolean], NodeType.boolean),
-	caseOf([isDate], NodeType.date),
-	caseOf([isColorString], NodeType.color),
-	caseOf([isString], NodeType.string),
-	caseOf([_], () => throwError('Unknown type'))
-)
-
-const valueForType = match<[any, NodeType], JsonObject>(
-	caseOf([isString, NodeType.color], v => ({ rgba: color.parse(v) })),
-	caseOf([isString, NodeType.date], v => ({ date: date.parse(v) })),
-	caseOf([isString, _], v => ({ content: v })),
-	caseOf([isNumber], v => ({ figure: v })),
-	caseOf([isBoolean], v => ({ state: v })),
-	caseOf([_], () => throwError('Unknown type'))
-)
-
-type Created = boolean
-
-const nodeForName = async (
-	name: string,
-	value: any,
-	parent: TreeNode,
-	nodeId: AsyncGenerator<number>
-): Promise<[TreeNode, Created]> => {
-	const node = parent.nodes.find(byNormalizedName(name))
-	if (node) return [node, false]
-	const { value: id } = await nodeId.next()
-	const res: TreeNode = {
-		id,
-		name: capitalize(name),
-		order: 0,
-		depth: 0,
-		parent_id: parent.id,
-		type: typeForValue(value),
-		nodes: []
+const typeFor = (value: JsonValue): NodeType => {
+	if (Array.isArray(value)) return NodeType.list
+	if (isJsonObject(value)) return NodeType.object
+	if (typeof value === 'number') return NodeType.number
+	if (typeof value === 'boolean') return NodeType.boolean
+	if (typeof value === 'string') {
+		if (
+			z.union([z.iso.date(), z.iso.datetime({ offset: true })]).safeParse(value)
+				.success
+		)
+			return NodeType.date
+		if (color.safeParse(value).success) return NodeType.color
+		return NodeType.string
 	}
-	parent.nodes.push(res)
-	return [res, true]
+	return invalid('Null values cannot define a new field')
+}
+const scalarValue = (value: JsonValue, type: NodeType) => {
+	if (type === NodeType.color && typeof value === 'string')
+		return { rgba: color.parse(value) }
+	if (type === NodeType.date && typeof value === 'string')
+		return { date: value }
+	if (type === NodeType.choice && typeof value === 'string')
+		return { selected: value }
+	if (type === NodeType.number && typeof value === 'number')
+		return { figure: value }
+	if (type === NodeType.boolean && typeof value === 'boolean')
+		return { state: value }
+	if (
+		[NodeType.string, NodeType.article].includes(type) &&
+		typeof value === 'string'
+	)
+		return { content: value }
+	return invalid('Imported value does not match the field type')
 }
 
-const processJson = (
-	project_id: number,
-	options: Options,
-	nodeId: AsyncGenerator<number>,
-	valueId: AsyncGenerator<number>
-) => {
-	return async function* processNode(
-		json: JsonNode,
-		node: TreeNode,
-		list_path: PathToRoot
-	): AsyncGenerator<Inserts> {
-		const baseValue = {
-			node_id: node.id,
-			project_id,
-			order: 0
-		}
-		const matchCase = match<[JsonNode, TreeNode], AsyncGenerator<Inserts>>(
-			/* - - - - Arrays - - - - */
-			caseOf(
-				[[_, isArray], { type: NodeType.list }],
-				async function* ([k, v], n): AsyncGenerator<Inserts> {
-					yield {
-						node_id: n.id,
-						project_id,
-						settings: {
-							scoped: true
-						}
-					}
-					for (const item of v) {
-						// create list items
-						const external_id = options.external_id
-							? item[options.external_id]
-							: null
-						const { value: value_id } = await valueId.next()
-						const listItem = {
-							...baseValue,
-							id: value_id,
-							value: { name: null },
-							list_path,
-							external_id
-						}
-						yield listItem
-						yield* processNode([k, item], n, [...list_path, value_id])
-					}
-				}
-			),
-			/* - - - - Objects items - - - - */
-			caseOf(
-				[[_, isPlainObj], _],
-				async function* ([_, v], n): AsyncGenerator<Inserts> {
-					for await (const [key, value, index] of entriesWithIndex(v)) {
-						if (eqBy(normalize, key, options.external_id ?? '')) continue
-						const [subNode, created] = await nodeForName(key, value, n, nodeId)
-						if (created) {
-							yield {
-								id: subNode.id,
-								project_id: project_id,
-								type: subNode.type,
-								name: subNode.name,
-								order: created ? index : subNode.order,
-								parent_id: subNode.parent_id
-							}
-						}
-						yield* processNode([key, value], subNode, list_path)
-					}
-				}
-			),
-			/* - - - - Object properties - - - - */
-			caseOf(
-				[[_, _], _],
-				async function* ([_, value]): AsyncGenerator<Inserts> {
-					const { value: value_id } = await valueId.next()
-					yield {
-						...baseValue,
-						id: value_id,
-						list_path,
-						value: valueForType(value, node.type)
-					}
-				}
+/** Execute under the caller's project lock and transaction, using the current model. */
+export async function importJson(
+	trx: Transaction<DB>,
+	projectId: number,
+	json: JsonValue,
+	options: JsonArrayImportInput
+) {
+	const rows = await trx
+		.selectFrom('node')
+		.selectAll()
+		.where('project_id', '=', projectId)
+		.orderBy('order')
+		.orderBy('id')
+		.execute()
+	const root = listToTree('id', 'parent_id', 'nodes')(rows.map(parseNode))
+	const byId = new Map<number, TreeNode>()
+	const index = (node: TreeNode) => {
+		byId.set(node.id, node)
+		node.nodes.forEach(index)
+	}
+	index(root)
+	const target = byId.get(options.node_id)
+	if (!target) return invalid('Import target not found')
+	const settings = await trx
+		.selectFrom('node_settings')
+		.selectAll()
+		.where('project_id', '=', projectId)
+		.execute()
+	const bySettings = new Map(settings.map(row => [row.node_id, row.settings]))
+	let visited = 0
+	const existing = (nodeId: number, path: number[]) =>
+		trx
+			.selectFrom('values')
+			.selectAll()
+			.where('project_id', '=', projectId)
+			.where('node_id', '=', nodeId)
+			.where(
+				sql<boolean>`coalesce(list_path, '{}'::integer[]) = ${path}::integer[]`
 			)
+	const findField = async (
+		parent: TreeNode,
+		name: string,
+		value: JsonValue
+	) => {
+		const found = parent.nodes.find(
+			node => normalize(node.name) === normalize(name)
 		)
-		yield* matchCase(json, node)
-	}
-}
-
-async function* nodeId(trx: Transaction<DB>): AsyncGenerator<number> {
-	while (true) {
-		yield await sql`SELECT nextval('node_id_seq')`
-			.execute(trx)
-			.then<number | undefined>(path(['rows', 0, 'nextval']))
-			.then(failOn(isNil, 'node_id_seq failed'))
-	}
-}
-
-async function* valueId(trx: Transaction<DB>): AsyncGenerator<number> {
-	while (true) {
-		yield await sql`SELECT nextval('values_id_seq')`
-			.execute(trx)
-			.then<number | undefined>(path(['rows', 0, 'nextval']))
-			.then(failOn(isNil, 'node_id_seq failed'))
-	}
-}
-
-const isNode = (value: any): value is DbNode => 'type' in value
-const isValue = (value: any): value is DbValue => 'list_path' in value
-const isSetting = (value: any): value is DbNodeSetting => 'settings' in value
-
-export const importJson =
-	(project_id: number, json: JsonStart, node: TreeNode, options: Options) =>
-	async (trx: Transaction<DB>): Promise<void> => {
-		/**
-		 * The generator climbs down a json structure and generates
-		 * either values, nodes or node settings that need to be inserted
-		 * into the database. if a node already exists it is used instead.
-		 * The whole process runs inside a locking transaction, because we
-		 * need to fetch referencing ids ahead of the execution.
-		 */
-		const generator = processJson(
-			project_id,
-			options,
-			nodeId(trx),
-			valueId(trx)
-		)(['root', json], node, options.list_path ?? [])
-
-		const [nodes, values, settings] = await toArray(generator).then(
-			fork(isNode, isValue, isSetting)
-		)
-		if (isNotEmpty(nodes)) {
-			await trx.insertInto('node').values(nodes).execute()
-		}
-		if (isNotEmpty(settings)) {
+		if (found) return found
+		if (!options.structure)
+			return invalid(
+				`Unknown field ${name}. Enable structure creation or model it first.`
+			)
+		const created = await trx
+			.insertInto('node')
+			.values({
+				project_id: projectId,
+				parent_id: parent.id,
+				name: name.charAt(0).toUpperCase() + name.slice(1),
+				type: typeFor(value),
+				order: parent.nodes.length
+			})
+			.returningAll()
+			.executeTakeFirstOrThrow()
+		const node = { ...parseNode(created), nodes: [] }
+		parent.nodes.push(node)
+		byId.set(node.id, node)
+		if (node.type === NodeType.list) {
+			const setting = { scoped: true }
 			await trx
 				.insertInto('node_settings')
-				.values(uniqBy(prop('node_id'), settings))
-				.onConflict(c =>
-					c.columns(['node_id']).doUpdateSet(e => ({
-						settings: e.ref('excluded.settings')
-					}))
-				)
+				.values({ project_id: projectId, node_id: node.id, settings: setting })
 				.execute()
+			bySettings.set(node.id, setting)
 		}
-		if (isNotEmpty(values)) {
+		return node
+	}
+	const visit = async (
+		value: JsonValue,
+		node: TreeNode,
+		path: number[],
+		depth: number,
+		replaceNested: boolean
+	): Promise<void> => {
+		if (++visited > 100000 || depth > 64)
+			return invalid('Import is too large or deeper than 64 levels')
+		if (node.type === NodeType.list) {
+			if (!Array.isArray(value))
+				return invalid(`Field ${node.name} expects an array`)
+			if (value.length > 10000)
+				return invalid('Import must contain at most 10000 rows per list')
+			if (replaceNested && node.id !== target.id)
+				await existing(node.id, path)
+					.clearSelect()
+					.select('id')
+					.execute()
+					.then(async rows => {
+						if (rows.length)
+							await trx
+								.deleteFrom('values')
+								.where('project_id', '=', projectId)
+								.where(
+									'id',
+									'in',
+									rows.map(row => row.id)
+								)
+								.execute()
+					})
+			const identities = new Set<string>()
+			const highest = await existing(node.id, path)
+				.clearSelect()
+				.select(({ fn }) => fn.max<number>('order').as('highest'))
+				.executeTakeFirst()
+			let order = (highest?.highest ?? -1) + 1
+			for (const item of value) {
+				if (!isJsonObject(item))
+					return invalid('List imports require objects as items')
+				const externalKey =
+					options.external_id &&
+					Object.keys(item).find(
+						key => normalize(key) === normalize(options.external_id ?? '')
+					)
+				const identity = externalKey ? item[externalKey] : undefined
+				if (
+					identity !== undefined &&
+					typeof identity !== 'string' &&
+					typeof identity !== 'number'
+				)
+					return invalid('External IDs must be strings or numbers')
+				const externalId = identity == null ? null : String(identity)
+				if (node.id === target.id && options.external_id && !externalId)
+					return invalid('Every item must have a non-empty external ID')
+				if (externalId && identities.has(externalId))
+					return invalid('Duplicate external ID in import')
+				if (externalId) identities.add(externalId)
+				const saved = externalId
+					? await existing(node.id, path)
+							.where('external_id', '=', externalId)
+							.executeTakeFirst()
+					: undefined
+				const row =
+					saved ??
+					(await trx
+						.insertInto('values')
+						.values({
+							node_id: node.id,
+							project_id: projectId,
+							value: { name: '' },
+							list_path: path,
+							external_id: externalId,
+							order: order++
+						})
+						.returningAll()
+						.executeTakeFirstOrThrow())
+				await object(
+					item,
+					node,
+					[...path, row.id],
+					depth + 1,
+					!!saved || replaceNested
+				)
+			}
+			return
+		}
+		if (node.type === NodeType.object || node.type === NodeType.root) {
+			if (!isJsonObject(value))
+				return invalid(`Field ${node.name} expects an object`)
+			return object(value, node, path, depth + 1, replaceNested)
+		}
+		const content = parseContentValue(
+			node.type,
+			scalarValue(value, node.type),
+			bySettings.get(node.id)
+		)
+		const previous = await existing(node.id, path).executeTakeFirst()
+		if (previous) {
+			if (JSON.stringify(previous.value) !== JSON.stringify(content))
+				await trx
+					.updateTable('values')
+					.set({ value: content })
+					.where('id', '=', previous.id)
+					.where('project_id', '=', projectId)
+					.execute()
+		} else
 			await trx
 				.insertInto('values')
-				.values(values)
-				.onConflict(c =>
-					c
-						.columns(['external_id', 'node_id'])
-						.where('external_id', 'is not', null)
-						.doUpdateSet(e => ({
-							value: e.ref('excluded.value')
-						}))
-				)
+				.values({
+					node_id: node.id,
+					project_id: projectId,
+					value: content,
+					list_path: path,
+					order: 0
+				})
 				.execute()
+	}
+	const object = async (
+		value: DB['values']['value'],
+		node: TreeNode,
+		path: number[],
+		depth: number,
+		replaceNested: boolean
+	): Promise<void> => {
+		if (!isJsonObject(value)) return invalid('Expected an object')
+		for (const [name, item] of Object.entries(value)) {
+			if (
+				options.external_id &&
+				normalize(name) === normalize(options.external_id)
+			)
+				continue
+			if (item === undefined) return invalid('Invalid imported value')
+			await visit(
+				item,
+				await findField(node, name, item),
+				path,
+				depth,
+				replaceNested
+			)
 		}
 	}
+	await visit(json, target, options.list_path ?? [], 1, false)
+	await validateProjectModel(trx, projectId)
+}

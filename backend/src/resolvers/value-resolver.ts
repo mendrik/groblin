@@ -1,243 +1,282 @@
-import { GraphQLDateTime, GraphQLJSONObject } from 'graphql-scalars'
-import { inject, injectable } from 'inversify'
-import { Kysely } from 'kysely'
-import type { DB, JsonValue } from 'src/database/schema.ts'
-import { LogAccess } from 'src/middleware/log-access.ts'
-import type { Context } from 'src/types.ts'
-import { Role, Topic } from 'src/types.ts'
+import { parseContentValue } from '@shared/content.ts'
+import { GraphQLError } from 'graphql'
+import type {
+	GetValues,
+	InsertListItem,
+	TruncateValue,
+	UpsertValue,
+	Value
+} from '../gql/schema.ts'
+import { DeletionKind } from '../gql/schema.ts'
+import { requireProjectRole } from '../security/require-role.ts'
 import {
-	Arg,
-	Authorized,
-	Ctx,
-	Field,
-	InputType,
-	Int,
-	Mutation,
-	ObjectType,
-	type PubSub,
-	Query,
-	Resolver,
-	Root,
-	Subscription,
-	UseMiddleware
-} from 'type-graphql'
+	ensureContentBaseline,
+	recordContentRevision,
+	requireRevision
+} from '../services/content-revisions.ts'
+import { requireDeletionImpact } from '../services/deletion-impact.ts'
+import { MediaAssets } from '../services/media-assets.ts'
+import { lockProject } from '../services/model-validation.ts'
+import type { PubSub } from '../types.ts'
+import { NodeType, Role } from '../types.ts'
 
-@ObjectType()
-export class Value {
-	@Field(type => Int)
-	id: number
+export type {
+	GetValues,
+	InsertListItem,
+	TruncateValue,
+	UpsertValue,
+	Value
+} from '../gql/schema.ts'
 
-	@Field(type => Int)
-	node_id: number
-
-	@Field(type => Int)
-	order: number
-
-	@Field(type => [Int], { nullable: true })
-	list_path: number[] | null
-
-	@Field(type => GraphQLJSONObject, { nullable: true })
-	value: JsonValue
-
-	@Field(type => GraphQLDateTime)
-	updated_at: Date
-}
-
-@InputType()
-export class UpsertValue {
-	@Field(type => Int, { nullable: true })
-	id?: number
-
-	@Field(type => Int)
-	node_id: number
-
-	@Field(type => [Int], { nullable: true })
-	list_path: number[] | null
-
-	@Field(type => GraphQLJSONObject)
-	value: JsonValue
-}
-
-@InputType()
-export class TruncateValue {
-	@Field(type => Int)
-	node_id: number
-}
-
-@InputType()
-export class GetValues {
-	@Field(type => [Int], { nullable: false })
-	ids: number[]
-}
-
-@InputType()
-export class InsertListItem {
-	@Field(type => String)
-	name: string
-
-	@Field(type => Int)
-	node_id: number
-
-	@Field(type => [Int], { nullable: true })
-	list_path: number[] | null
-}
+import { inject, injectable } from 'inversify'
+import { Kysely, sql } from 'kysely'
+import type { DB } from 'src/database/schema.ts'
+import type { Context } from 'src/types.ts'
+import { Topic } from 'src/types.ts'
+import {
+	requireListPath,
+	requireNode,
+	requireProjectFile
+} from '../security/project-access.ts'
+import { isJsonObject } from '../utils/json.ts'
 
 @injectable()
-@UseMiddleware(LogAccess)
-@Authorized(Role.Admin, Role.Viewer)
-@Resolver()
 export class ValueResolver {
+	@inject(MediaAssets) private assets: MediaAssets
 	@inject(Kysely)
 	private db: Kysely<DB>
 
 	@inject('PubSub')
 	private pubSub: PubSub
 
-	@Subscription(returns => Value, {
-		topics: Topic.ValuesUpdated
-	})
-	valuesUpdated(@Root() valuePayload: Value) {
-		return valuePayload
-	}
-
-	@Query(returns => [Value])
-	async getValues(
-		@Arg('data', () => GetValues) { ids }: GetValues,
-		@Ctx() ctx: Context
-	): Promise<Value[]> {
+	async getValues({ ids }: GetValues, ctx: Context): Promise<Value[]> {
 		const { project_id } = ctx
 		return this.db
 			.selectFrom('values')
 			.where('project_id', '=', project_id)
 			.where(({ or, eb }) =>
-				or([eb('list_path', '<@', [ids]), eb('list_path', 'is', null)])
+				or([eb('list_path', '<@', sql.val(ids)), eb('list_path', 'is', null)])
 			)
-			.orderBy(['order', 'id'])
+			.orderBy('order')
+			.orderBy('id')
 			.selectAll()
 			.execute()
 	}
 
-	async value(id: number): Promise<Value | undefined> {
+	async value(id: number, projectId: number): Promise<Value | undefined> {
 		return this.db
 			.selectFrom('values')
 			.where('id', '=', id)
+			.where('project_id', '=', projectId)
 			.selectAll()
 			.executeTakeFirst()
 	}
 
-	@Mutation(returns => Int)
-	async insertListItem(
-		@Arg('listItem', () => InsertListItem) data: InsertListItem,
-		@Ctx() ctx: Context
-	) {
+	async insertListItem(data: InsertListItem, ctx: Context) {
 		const { project_id } = ctx
-		const { max_order } = await this.db
-			.selectFrom('values')
-			.where('node_id', '=', data.node_id)
-			.select(this.db.fn.max('order').as('max_order'))
-			.executeTakeFirstOrThrow()
+		const res = await this.db.transaction().execute(async trx => {
+			await trx
+				.selectFrom('project')
+				.select('id')
+				.where('id', '=', project_id)
+				.forUpdate()
+				.executeTakeFirstOrThrow()
+			await requireProjectRole(trx, ctx, [Role.Admin, Role.Editor])
+			const node = await requireNode(trx, project_id, data.node_id)
+			await requireListPath(trx, project_id, data.node_id, data.list_path)
+			if (node.type !== NodeType.list)
+				throw new GraphQLError('Select a list node', {
+					extensions: { code: 'BAD_USER_INPUT' }
+				})
+			const value = parseContentValue(node.type, { name: data.name })
+			await ensureContentBaseline(trx, ctx)
+			const { max_order } = await trx
+				.selectFrom('values')
+				.where('node_id', '=', data.node_id)
+				.where('project_id', '=', project_id)
+				.select(trx.fn.max('order').as('max_order'))
+				.executeTakeFirstOrThrow()
 
-		const res = await this.db
-			.insertInto('values')
-			.values({
-				node_id: data.node_id,
-				project_id,
-				value: { name: data.name },
-				list_path: data.list_path,
-				order: max_order + 1
-			})
-			.returning(['id', 'node_id', 'order', 'list_path', 'value', 'updated_at'])
-			.executeTakeFirstOrThrow()
+			const res = await trx
+				.insertInto('values')
+				.values({
+					node_id: data.node_id,
+					project_id,
+					value,
+					list_path: data.list_path,
+					order: (max_order ?? -1) + 1
+				})
+				.returningAll()
+				.executeTakeFirstOrThrow()
+			await recordContentRevision(trx, ctx, `Added item to ${node.name}`)
+			return res
+		})
 
 		this.pubSub.publish(Topic.ValuesUpdated, res)
 		return res.id
 	}
 
-	@Mutation(returns => Boolean)
-	async deleteListItem(@Arg('id', () => Int) id: number, @Ctx() ctx: Context) {
-		const { numDeletedRows } = await this.db
-			.transaction()
-			.execute(async trx => {
-				const deleted = await trx
-					.deleteFrom('values')
-					.where('list_path', '&&', [[id]])
-					.returning(['id', 'value', 'node_id', 'list_path'])
-					.execute()
-
-				for (const value of deleted) {
-					this.pubSub.publish(Topic.ValueDeleted, value)
-				}
-
-				return await trx
-					.deleteFrom('values')
-					.where('id', '=', id)
-					.executeTakeFirstOrThrow()
-			})
-
-		this.pubSub.publish(Topic.ValuesUpdated, true)
-		return numDeletedRows > 0
+	async deleteListItem(id: number, ctx: Context, expectedImpact: string) {
+		const deleted = await this.db.transaction().execute(async trx => {
+			await lockProject(trx, ctx.project_id)
+			await requireProjectRole(trx, ctx, [Role.Admin, Role.Editor])
+			const snapshot = await requireDeletionImpact(
+				trx,
+				ctx.project_id,
+				{ kind: DeletionKind.Value, id },
+				expectedImpact
+			)
+			await ensureContentBaseline(trx, ctx)
+			await trx
+				.deleteFrom('values')
+				.where('project_id', '=', ctx.project_id)
+				.where(
+					'id',
+					'in',
+					snapshot.values.map(row => row.id)
+				)
+				.execute()
+			await recordContentRevision(
+				trx,
+				ctx,
+				`Deleted ${snapshot.values.length} values`
+			)
+			return snapshot.values
+		})
+		for (const value of deleted) this.pubSub.publish(Topic.ValueDeleted, value)
+		this.pubSub.publish(Topic.ValuesUpdated, ctx.project_id)
+		return deleted.length > 0
 	}
 
-	@Mutation(returns => Int)
-	async upsertValue(
-		@Arg('data', () => UpsertValue) data: UpsertValue,
-		@Ctx() ctx: Context
-	) {
+	async upsertValue(data: UpsertValue, ctx: Context) {
 		const { project_id } = ctx
-		const prev = data.id ? await this.value(data.id) : undefined
-		const res = await this.db
-			.insertInto('values')
-			.values({
-				id: data.id,
-				node_id: data.node_id,
-				project_id,
-				value: data.value,
-				list_path: data.list_path
-			})
-			.onConflict(c =>
-				c.column('id').doUpdateSet(e => ({
-					value: e.ref('excluded.value')
-				}))
+		const { res, prev } = await this.db.transaction().execute(async trx => {
+			await trx
+				.selectFrom('project')
+				.select('id')
+				.where('id', '=', project_id)
+				.forUpdate()
+				.executeTakeFirstOrThrow()
+			await requireProjectRole(trx, ctx, [Role.Admin, Role.Editor])
+			const node = await requireNode(trx, project_id, data.node_id)
+			await requireListPath(trx, project_id, data.node_id, data.list_path)
+			if (isJsonObject(data.value) && typeof data.value.file === 'string')
+				requireProjectFile(project_id, data.value.file)
+			const prev = data.id
+				? await trx
+						.selectFrom('values')
+						.selectAll()
+						.where('id', '=', data.id)
+						.where('project_id', '=', project_id)
+						.executeTakeFirst()
+				: node.type === NodeType.list
+					? undefined
+					: await trx
+							.selectFrom('values')
+							.selectAll()
+							.where('node_id', '=', data.node_id)
+							.where('project_id', '=', project_id)
+							.where(
+								sql<boolean>`coalesce(list_path, '{}'::integer[]) = ${data.list_path ?? []}::integer[]`
+							)
+							.executeTakeFirst()
+			if (data.id && (!prev || prev.node_id !== data.node_id))
+				throw new GraphQLError('Value no longer available', {
+					extensions: { code: 'CONFLICT' }
+				})
+			requireRevision(data.expectedRevision, prev?.revision ?? 0, 'Value')
+			if (!data.id && prev)
+				throw new GraphQLError(
+					'A value was already created. Review the latest version.',
+					{ extensions: { code: 'CONFLICT' } }
+				)
+			if (
+				prev &&
+				JSON.stringify(prev.list_path ?? []) !==
+					JSON.stringify(data.list_path ?? [])
 			)
-			.returning(['id', 'node_id', 'order', 'list_path', 'value', 'updated_at'])
-			.executeTakeFirstOrThrow()
-		if (prev != null) {
+				throw new GraphQLError('A value cannot be moved to another list item', {
+					extensions: { code: 'BAD_USER_INPUT' }
+				})
+			const settings = await trx
+				.selectFrom('node_settings')
+				.select('settings')
+				.where('node_id', '=', data.node_id)
+				.where('project_id', '=', project_id)
+				.executeTakeFirst()
+			const value = parseContentValue(node.type, data.value, settings?.settings)
+			await this.assets.requireFiles(trx, project_id, value)
+			await ensureContentBaseline(trx, ctx)
+
+			const res = await trx
+				.insertInto('values')
+				.values({
+					id: data.id ?? undefined,
+					node_id: data.node_id,
+					project_id,
+					value,
+					list_path: data.list_path
+				})
+				.onConflict(c =>
+					c
+						.column('id')
+						.doUpdateSet(e => ({
+							value: e.ref('excluded.value')
+						}))
+						.where('values.project_id', '=', project_id)
+						.where('values.node_id', '=', data.node_id)
+				)
+				.returningAll()
+				.executeTakeFirstOrThrow()
+			await recordContentRevision(trx, ctx, `Changed ${node.name}`)
+			return { res, prev }
+		})
+		if (
+			prev != null &&
+			(!isJsonObject(prev.value) ||
+				!isJsonObject(data.value) ||
+				prev.value.file !== data.value.file)
+		) {
 			this.pubSub.publish(Topic.ValueDeleted, prev)
 		}
 		this.pubSub.publish(Topic.ValuesUpdated, res)
-		return res.id
+		return res
 	}
 
-	@Mutation(returns => Boolean)
-	async truncate(
-		@Arg('data', () => TruncateValue) data: TruncateValue,
-		@Ctx() ctx: Context
-	) {
-		const { project_id } = ctx
-		const { numDeletedRows } = await this.db.transaction().execute(trx => {
-			return trx
+	async truncate(data: TruncateValue, ctx: Context) {
+		const deleted = await this.db.transaction().execute(async trx => {
+			await lockProject(trx, ctx.project_id)
+			await requireProjectRole(trx, ctx, [Role.Admin, Role.Editor])
+			const snapshot = await requireDeletionImpact(
+				trx,
+				ctx.project_id,
+				{ kind: DeletionKind.NodeValues, id: data.node_id },
+				data.expectedImpact
+			)
+			if (!snapshot.values.length) return []
+			await ensureContentBaseline(trx, ctx)
+			await trx
 				.deleteFrom('values')
-				.where('node_id', '=', data.node_id)
-				.where('project_id', '=', project_id)
-				.executeTakeFirstOrThrow()
+				.where('project_id', '=', ctx.project_id)
+				.where(
+					'id',
+					'in',
+					snapshot.values.map(row => row.id)
+				)
+				.execute()
+			await recordContentRevision(
+				trx,
+				ctx,
+				`Deleted ${snapshot.values.length} values`
+			)
+			return snapshot.values
 		})
-		this.pubSub.publish(Topic.ValuesUpdated, true)
-		return numDeletedRows > 0
+		for (const value of deleted) this.pubSub.publish(Topic.ValueDeleted, value)
+		this.pubSub.publish(Topic.ValuesUpdated, ctx.project_id)
+		return deleted.length > 0
 	}
 
-	@Mutation(returns => Boolean)
-	async deleteValue(@Arg('id', () => Int) id: number, @Ctx() ctx: Context) {
-		const { project_id } = ctx
-		const value = await this.value(id)
-		const { numDeletedRows } = await this.db
-			.deleteFrom('values')
-			.where('id', '=', id)
-			.where('project_id', '=', project_id)
-			.executeTakeFirstOrThrow()
-		if (value != null) {
-			this.pubSub.publish(Topic.ValueDeleted, value)
-		}
-		this.pubSub.publish(Topic.ValuesUpdated, true)
-		return numDeletedRows > 0
+	async deleteValue(id: number, ctx: Context, expectedImpact: string) {
+		return this.deleteListItem(id, ctx, expectedImpact)
 	}
 }

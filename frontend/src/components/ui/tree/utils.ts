@@ -1,7 +1,7 @@
+import { caseOf, match } from 'matchblade'
+import { T as _, F, type Pred, T } from 'ramda'
 import { NodeType } from '@/gql/graphql'
 import type { TreeNode } from '@/state/tree'
-import { caseOf, match } from 'matchblade'
-import { F, type Pred, T, T as _ } from 'ramda'
 
 export const canHaveChildren: Pred<[TreeNode]> = match(
 	caseOf([{ type: NodeType.Object }], T),

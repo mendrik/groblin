@@ -1,8 +1,8 @@
-import type { Value } from '@/gql/graphql'
 import type { BooleanType } from '@shared/json-value-types'
 import { objOf, pipe } from 'ramda'
+import type { Value } from '@/gql/graphql'
 import { Switch } from '../switch'
-import { type ValueEditor, editorKey } from './value-editor'
+import { editorKey, type ValueEditor } from './value-editor'
 
 type BooleanValue = Omit<Value, 'value'> & { value: BooleanType }
 

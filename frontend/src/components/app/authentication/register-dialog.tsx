@@ -1,3 +1,8 @@
+import { signal } from '@preact/signals-react'
+import { EditorType } from '@shared/enums'
+import { toast } from 'sonner'
+import { Link, useLocation } from 'wouter'
+import { email, strictObject, string, type infer as TypeOf } from 'zod/v4'
 import { Button } from '@/components/ui/button'
 import {
 	Dialog,
@@ -7,29 +12,21 @@ import {
 	DialogHeader,
 	DialogTitle
 } from '@/components/ui/dialog'
-import {  metas, stringField } from '@/components/ui/zod-form/utils'
+import { metas, stringField } from '@/components/ui/zod-form/utils'
 import { ZodForm } from '@/components/ui/zod-form/zod-form'
-import { signUp } from '@/lib/auth-client'
+import { dataOrError, signUp } from '@/lib/auth-client'
 import { setSignal } from '@/lib/signals'
+import { invitationReturn } from '@/routing/return-to'
 import type { NavigateFn } from '@/routing/types'
-import { signal } from '@preact/signals-react'
-import { EditorType } from '@shared/enums'
-import type { Fn } from '@tp/functions.ts'
-import { evolveAlt } from 'matchblade'
-import { pipeAsync } from 'matchblade'
-import { omit } from 'ramda'
-import { toast } from 'sonner'
-import { Link, useLocation } from 'wouter'
-import {  email, infer as TypeOf, strictObject, string } from 'zod/v4'
 
 const registrationSchema = strictObject({
 	name: stringField('Name', EditorType.Input, 'name', 'Full name'),
-	email: email().register(metas, { 
+	email: email().register(metas, {
 		label: 'Email',
 		editor: EditorType.Email,
 		autofill: 'username'
 	}),
-	password: string().min(8).max(32).register(metas, {
+	password: string().min(12).max(128).register(metas, {
 		label: 'Password',
 		editor: EditorType.Password,
 		autofill: 'new-password'
@@ -47,7 +44,7 @@ const registrationSchema = strictObject({
 export type RegistrationForm = TypeOf<typeof registrationSchema>
 
 const $locked = signal(false)
-const lockForm = () => setSignal($locked, true)
+const _lockForm = () => setSignal($locked, true)
 
 const success = () =>
 	toast.success('Successfully registered', {
@@ -61,19 +58,24 @@ const failed = (e: Error) =>
 		closeButton: true
 	})
 
-const registerCommand = (navigate: NavigateFn): Fn<RegistrationForm, unknown> =>
-	pipeAsync(
-		omit(['repeatPassword']),
-		evolveAlt({
-			callbackURL: '/dashboard'
-		}),
-		s =>
-			signUp.email(s, {
-				onRequest: () => void lockForm(),
-				onSuccess: () => navigate('/'),
-				onError: ({ error }) => void failed(error)
-			})
-	)
+const registerCommand =
+	(navigate: NavigateFn) =>
+	async ({ repeatPassword: _repeat, ...data }: RegistrationForm) => {
+		$locked.value = true
+		try {
+			dataOrError(
+				await signUp.email({
+					...data,
+					email: data.email.trim(),
+					callbackURL: invitationReturn()
+				})
+			)
+			success()
+			navigate(invitationReturn())
+		} finally {
+			$locked.value = false
+		}
+	}
 
 export const RegistrationDialog = () => {
 	const [_, navigate] = useLocation()

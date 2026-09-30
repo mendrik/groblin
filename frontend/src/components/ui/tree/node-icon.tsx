@@ -1,6 +1,3 @@
-import { NodeType } from '@/gql/graphql'
-import type { TreeNode } from '@/state/tree'
-import type { Icon } from '@/type-patches/icons'
 import {
 	ALargeSmall,
 	Box,
@@ -16,6 +13,9 @@ import {
 } from 'lucide-react'
 import { caseOf, match } from 'matchblade'
 import { T as _ } from 'ramda'
+import { NodeType } from '@/gql/graphql'
+import type { TreeNode } from '@/state/tree'
+import type { Icon } from '@/type-patches/icons'
 
 export const nodeIcon: (node: TreeNode) => Icon = match<[TreeNode], Icon>(
 	caseOf([{ type: NodeType.Object }], () => Box),

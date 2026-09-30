@@ -1,25 +1,24 @@
+import { isNotNil, pipe, when } from 'ramda'
+import { useRef } from 'react'
 import { Node } from '@/components/ui/tree/node'
 import { EmptyList } from '@/components/utils/empty-list'
 import { dataInt, safeDataInt } from '@/lib/dom-events'
 import { cn } from '@/lib/utils'
+import { $canManage } from '@/state/access'
 import {
-	type TreeNode,
 	closeNode,
 	focusNode,
 	nextNode,
 	openNode,
 	previousNode,
+	type TreeNode,
 	updateNodeContext
 } from '@/state/tree'
-import { isNotNil, pipe, when } from 'ramda'
-import { useRef } from 'react'
 import KeyListener from '../../utils/key-listener'
 import { Button } from '../button'
 import { ImportArrayDialog } from '../io/import-array-dialog'
 import { NodeCreate, openNodeCreate } from './node-create'
-import { NodeDelete } from './node-delete'
 import { NodeProperties } from './node-properties'
-import { NodeTruncate } from './node-truncate'
 
 type OwnProps = {
 	root: TreeNode
@@ -37,6 +36,8 @@ export const Tree = ({ root }: OwnProps) => {
 			>
 				<div
 					ref={tree}
+					role="tree"
+					aria-label="Project nodes"
 					className={cn('w-full px-2 tree', root.nodes.length && 'grid-lines')}
 					onFocus={pipe(
 						safeDataInt('node_id'),
@@ -49,6 +50,7 @@ export const Tree = ({ root }: OwnProps) => {
 					<EmptyList list={root.nodes}>
 						<div className="flex justify-center p-4">
 							<Button
+								disabled={!$canManage.value}
 								onClick={() => openNodeCreate(root, 'root-child')}
 								variant="outline"
 							>
@@ -58,8 +60,6 @@ export const Tree = ({ root }: OwnProps) => {
 					</EmptyList>
 				</div>
 			</KeyListener>
-			<NodeDelete />
-			<NodeTruncate />
 			<NodeCreate />
 			<NodeProperties />
 			<ImportArrayDialog />

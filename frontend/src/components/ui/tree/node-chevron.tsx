@@ -1,8 +1,7 @@
-import { cn } from '@/lib/utils'
-import { type TreeNode, isOpen, updateNodeState } from '@/state/tree'
-
 import { ChevronRight } from 'lucide-react'
 import { isNotEmpty } from 'ramda'
+import { cn } from '@/lib/utils'
+import { isOpen, type TreeNode, updateNodeState } from '@/state/tree'
 import { MicroIcon } from '../random/micro-icon'
 
 type OwnProps = {

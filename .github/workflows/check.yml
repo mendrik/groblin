@@ -1,0 +1,59 @@
+name: Checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.19.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: node scripts/check-secrets.mjs
+      - run: pnpm schema:api && pnpm --filter backend schema:db:build && pnpm --filter backend types:db:isolated
+      - run: git diff --exit-code -- schema.graphql backend/src/gql frontend/src/gql backend/database/init.sql backend/src/database/schema.ts
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test:coverage
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: |
+            backend/coverage/
+            frontend/coverage/
+            shared/coverage/
+          retention-days: 14
+      - run: pnpm --filter frontend build
+      - run: pnpm audit
+  release-smoke:
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.19.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: node scripts/setup-selfhost.mjs owner@example.invalid
+      - run: scripts/verify-selfhost.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release-browser-checks
+          path: |
+            .release/browser-report/
+            .release/browser-results/
+          retention-days: 14

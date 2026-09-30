@@ -1,0 +1,39 @@
+{$SITE_ADDRESS} {
+	encode zstd gzip
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy same-origin
+		X-Frame-Options DENY
+	}
+	request_body {
+		max_size 64KB
+	}
+	handle /graphql {
+		reverse_proxy backend:6173
+	}
+	handle /content/graphql {
+		rewrite * /graphql
+		reverse_proxy backend:4001
+	}
+	handle /content/schema {
+		rewrite * /schema
+		reverse_proxy backend:4001
+	}
+	handle /api/* {
+		reverse_proxy backend:4001
+	}
+	handle /media/* {
+		reverse_proxy backend:4001
+	}
+	handle /health/* {
+		reverse_proxy backend:4001
+	}
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}
+{$STORAGE_ADDRESS} {
+	reverse_proxy storage:8333
+}

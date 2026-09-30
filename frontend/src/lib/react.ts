@@ -1,13 +1,5 @@
 import type { ForwardedRef, RefCallback, RefObject } from 'react'
 
-import 'react'
-
-declare module 'react' {
-	interface CSSProperties {
-		[key: `--${string}`]: string | number
-	}
-}
-
 export const isActiveRef = <EL>(ref: ForwardedRef<EL>): ref is RefObject<EL> =>
 	ref != null && 'current' in ref && ref.current != null
 

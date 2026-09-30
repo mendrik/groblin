@@ -1,5 +1,5 @@
-import { cn } from '@/lib/utils'
 import type { PropsWithChildren } from 'react'
+import { cn } from '@/lib/utils'
 import { AppSidebar } from './app/app-sidebar'
 
 export const Layout = ({ children }: PropsWithChildren) => {

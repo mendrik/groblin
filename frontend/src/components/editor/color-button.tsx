@@ -16,8 +16,8 @@ export const ColorButton = ({ editor }: OwnProps) => (
 		onClick={() =>
 			openColorPicker({
 				color: 'rgba(0,0,0,1)',
-				callback: color => {
-					const hex = chroma.rgb(...color).hex()
+				callback: ([red, green, blue, alpha = 1]) => {
+					const hex = chroma.rgb(red, green, blue, alpha).hex()
 					editor.chain().focus().setColor(hex).run()
 				}
 			})

@@ -1,7 +1,6 @@
 {
 	"extends": "../tsconfig.base.json",
 	"compilerOptions": {
-		"baseUrl": ".",
 		"target": "ESNext",
 		"module": "NodeNext",
 		"types": ["reflect-metadata"],
@@ -9,9 +8,11 @@
 		"resolveJsonModule": true,
 		"lib": ["ESNext"],
 		"paths": {
+			"src/*": ["./src/*"],
+			"tests/*": ["./tests/*"],
 			"@shared/*": ["../shared/src/*"],
 			"@tp/*": ["../type-patches/*"]
 		}
 	},
-	"include": ["src", "emails", "../shared/src", "../type-patches", "tests"]
+	"include": ["src", "../shared/src", "../type-patches", "tests", "scripts"]
 }

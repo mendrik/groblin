@@ -40,7 +40,7 @@ describe('url', () => {
 		const sub = '&ww.' // This will be filtered out.
 		expect(
 			url`http://${sub}example.com${path}?foo=${fooVal}&baz=${emptyVal}`
-		).toBe('http://&ww.example.com/xh/z?foo=bar&baz=x%3D%263')
+		).toBe('http://&ww.example.com/xh/z?foo=bar%26baz&baz=x%3D%263')
 	})
 
 	test('should return only the base URL if query string is empty or malformed', () => {
@@ -49,4 +49,10 @@ describe('url', () => {
 		// Only invalid parameters
 		expect(url`http://example.com?&=`).toBe('http://example.com')
 	})
+})
+
+test('encodes the first query value and keeps zero and false', () => {
+	expect(url`/search?q=${'a&b=c'}&page=${0}&active=${false}`).toBe(
+		'/search?q=a%26b%3Dc&page=0&active=false'
+	)
 })

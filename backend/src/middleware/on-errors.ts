@@ -1,13 +1,13 @@
 import type { ServerOptions } from 'graphql-ws'
-import type { User } from 'src/database/schema.ts'
-
+import { log } from '../utils/log.ts'
 export const onError: ServerOptions['onError'] = (
-	ctx,
-	message,
+	_ctx,
+	id,
 	_payload,
 	errors
 ) => {
-	const { extra } = ctx
-	const user = extra as User
-	console.error(`${user?.email}: ${message}`, ...errors)
+	log('graphql_operation_failed', {
+		operationId: id,
+		errorCount: errors.length
+	})
 }

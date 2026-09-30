@@ -1,0 +1,17 @@
+name: Bug report
+description: Report a reproducible product or deployment problem
+body:
+  - type: markdown
+    attributes:
+      value: Do not include secrets, cookies, private content, media tokens or database dumps. For vulnerabilities, follow SECURITY.md.
+  - type: input
+    id: version
+    attributes: {label: Application version}
+    validations: {required: true}
+  - type: textarea
+    id: steps
+    attributes: {label: Reproduction steps, description: Include the failing workflow and expected behavior.}
+    validations: {required: true}
+  - type: textarea
+    id: evidence
+    attributes: {label: Redacted evidence, description: Browser and deployment details; request ID and safe log events.}

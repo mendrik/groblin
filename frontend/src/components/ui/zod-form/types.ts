@@ -1,12 +1,12 @@
 import { EditorType } from '@shared/enums'
 import {
-	type TypeOf,
 	any,
 	array,
 	nativeEnum,
 	number,
 	object,
 	string,
+	type TypeOf,
 	tuple
 } from 'zod/v4'
 
@@ -18,7 +18,7 @@ export const FieldMeta = object({
 	span: number().optional(),
 	autofill: string().optional(),
 	extra: any().optional(),
-	options: array(tuple([string(), string()])).optional(),
+	options: array(tuple([string(), string()])).optional()
 })
 
 export const FieldSelectMeta = FieldMeta.extend({

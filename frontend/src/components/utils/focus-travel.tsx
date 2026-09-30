@@ -1,4 +1,3 @@
-import { hasMethod } from '@/lib/utils'
 import {
 	converge,
 	equals,
@@ -11,6 +10,7 @@ import {
 	sort
 } from 'ramda'
 import { type PropsWithChildren, useEffect, useRef } from 'react'
+import { hasMethod } from '@/lib/utils'
 import KeyListener, { type KeyEvent } from './key-listener'
 
 type OwnProps = PropsWithChildren<{

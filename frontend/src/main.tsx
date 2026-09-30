@@ -3,9 +3,11 @@ import { enGB } from 'date-fns/locale'
 import { Maybe } from 'purify-ts'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { Router } from 'wouter'
+import { Route, Router, Switch } from 'wouter'
+import { PasswordResetDialog } from './components/app/authentication/password-reset'
 import { ThemeProvider } from './components/theme-provider'
 import { Toaster } from './components/ui/sonner'
+import { getSession } from './lib/auth-client'
 import { LoggedIn } from './routing/logged-in'
 import { LoggedOut } from './routing/logged-out'
 import { loadProject } from './state/project'
@@ -31,7 +33,12 @@ const Main = () => (
 					}
 				}}
 			/>
-			<Router base="/">{$user.value ? <LoggedIn /> : <LoggedOut />}</Router>
+			<Router>
+				<Switch>
+					<Route path="/reset-password" component={PasswordResetDialog} />
+					<Route>{$user.value ? <LoggedIn /> : <LoggedOut />}</Route>
+				</Switch>
+			</Router>
 		</ThemeProvider>
 	</StrictMode>
 )
@@ -41,9 +48,19 @@ setDefaultOptions({
 	weekStartsOn: 1
 })
 
-loadProject().finally(() =>
-	Maybe.fromNullable(document.getElementById('app'))
-		.map(createRoot)
-		.map(r => r.render(<Main />))
-		.ifNothing(() => console.error('No element with id "app" found'))
-)
+getSession()
+	.then(async ({ data }) => {
+		if (data?.user) {
+			await loadProject(data.user.id)
+			$user.value = data.user
+		}
+	})
+	.catch(() => {
+		$user.value = undefined
+	})
+	.finally(() =>
+		Maybe.fromNullable(document.getElementById('app'))
+			.map(createRoot)
+			.map(r => r.render(<Main />))
+			.ifNothing(() => console.error('No element with id "app" found'))
+	)

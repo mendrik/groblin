@@ -1,6 +1,6 @@
+import { AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Icon } from '@/components/ui/simple/icon'
-import { AlertCircle } from 'lucide-react'
 
 export const SelectInfo = () => (
 	<Alert variant="default" className="max-w-sm m-auto mt-10">

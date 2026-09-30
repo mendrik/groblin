@@ -1,9 +1,9 @@
 import type { ServerResponse } from 'node:http'
 
 export function ErrorHandler(
-	handler = (res: ServerResponse, error: any) => {
-		res.writeHead(500, error.message)
-		res.end(error.message)
+	handler = (res: ServerResponse, _error: any) => {
+		res.writeHead(500, { 'Content-Type': 'text/plain' })
+		res.end('Request failed')
 	}
 ) {
 	return (

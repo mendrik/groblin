@@ -1,0 +1,39 @@
+type Prev = [never, 0, 1, 2, 3, 4, ...0[]]
+type StringKeys<T> = Extract<keyof T, string>
+type Paths<T, D extends number = 5> = [D] extends [never]
+	? never
+	: T extends object
+		? {
+				[K in StringKeys<T>]-?:
+					| readonly [K]
+					| (Paths<T[K], Prev[D]> extends infer P
+							? P extends readonly any[]
+								? readonly [K, ...P]
+								: never
+							: never)
+			}[StringKeys<T>]
+		: []
+/**
+ * Given an object type T, make sure the string[] array contains valid nested keys.
+ */
+export type TypesafePath<T> = Paths<T>
+type TypeAtPath<T, P extends readonly string[]> = P extends readonly [
+	infer First,
+	...infer Rest
+]
+	? First extends keyof T
+		? Rest extends readonly string[]
+			? TypeAtPath<T[First], Rest>
+			: T[First]
+		: never
+	: T
+/**
+ * Given a path and a list of objects, return a list of the values at the path in each object.
+ * @param path
+ * @param list
+ * @returns a list of values at the path in each object
+ */
+export declare const pluckPath: <T, P extends TypesafePath<T>>(
+	path: P,
+	list: T[]
+) => TypeAtPath<T, P>[]

@@ -1,12 +1,13 @@
+@reference "../../index.css";
 .scroll-fade {
     --top-opacity: 0;
     --bottom-opacity: 1;
     @apply relative;
-    @apply after:opacity-[--top-opacity];
+    @apply after:opacity-(--top-opacity);
     @apply after:left-0 after:top-0 after:right-2;
     @apply after:pointer-events-none after:absolute after:content-[''];
     
-    @apply before:opacity-[--bottom-opacity];
+    @apply before:opacity-(--bottom-opacity);
     @apply before:left-0 before:bottom-0 before:right-2;
     @apply before:pointer-events-none before:absolute before:content-[''];
 

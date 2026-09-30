@@ -1,113 +1,38 @@
+import { parseNodeSettings } from '@shared/node-settings.ts'
+import type { ChangeNodeInput, InsertNode, Node } from '../gql/schema.ts'
+import { DeletionKind, type DeletionTarget } from '../gql/schema.ts'
+import { requireProjectRole } from '../security/require-role.ts'
+import {
+	ensureContentBaseline,
+	recordContentRevision,
+	requireRevision
+} from '../services/content-revisions.ts'
+import {
+	deletionSnapshot,
+	requireDeletionImpact
+} from '../services/deletion-impact.ts'
+import {
+	lockProject,
+	validateProjectModel
+} from '../services/model-validation.ts'
+import type { PubSub } from '../types.ts'
+import { Role } from '../types.ts'
+import { parseNode } from '../utils/parse-node.ts'
+
+export type { ChangeNodeInput, InsertNode, Node } from '../gql/schema.ts'
+
 import { assertExists } from '@shared/asserts.ts'
-import { GraphQLJSONObject } from 'graphql-scalars'
 import { inject, injectable } from 'inversify'
-import { Kysely, type Transaction, sql } from 'kysely'
+import { Kysely, sql, type Transaction } from 'kysely'
 import { failOn, listToTree } from 'matchblade'
 import { isNil } from 'ramda'
 import type { DB, JsonValue } from 'src/database/schema.ts'
-import { LogAccess } from 'src/middleware/log-access.ts'
-import { Topic } from 'src/types.ts'
 import type { Context, TreeNode } from 'src/types.ts'
-import { NodeType, Role } from 'src/types.ts'
+import { NodeType, Topic } from 'src/types.ts'
 import { allNodes } from 'src/utils/nodes.ts'
-import {
-	Arg,
-	Authorized,
-	Ctx,
-	Field,
-	InputType,
-	Int,
-	Mutation,
-	ObjectType,
-	type PubSub,
-	Query,
-	Resolver,
-	Root,
-	Subscription,
-	UseMiddleware,
-	registerEnumType
-} from 'type-graphql'
-
-registerEnumType(NodeType, {
-	name: 'NodeType'
-})
-
-@ObjectType()
-export class Node {
-	@Field(type => Int)
-	id: number
-
-	@Field(type => String)
-	name: string
-
-	@Field(type => Int)
-	order: number
-
-	@Field(type => NodeType)
-	type: NodeType
-
-	@Field(type => Int, { nullable: true })
-	parent_id?: number
-
-	@Field(type => Int)
-	depth: number
-}
-
-@InputType()
-export class InsertNode {
-	@Field(type => String)
-	name: string
-
-	@Field(type => Int)
-	order: number
-
-	@Field(type => NodeType)
-	type: NodeType
-
-	@Field(type => Int, { nullable: true })
-	parent_id?: number
-}
-
-@InputType()
-export class ChangeNodeInput {
-	@Field(type => Int)
-	id: number
-
-	@Field(type => String)
-	name: string
-
-	@Field(type => Int, { nullable: true })
-	order: number
-
-	@Field(type => NodeType, { nullable: true })
-	type: NodeType
-
-	@Field(type => Int, { nullable: true })
-	parent_id?: number
-}
-
-@InputType()
-export class InsertNodeSettings {
-	@Field(type => Int)
-	id: number
-
-	@Field(type => String)
-	name: string
-
-	@Field(type => Int, { nullable: true })
-	order: number
-
-	@Field(type => NodeType, { nullable: true })
-	type: NodeType
-
-	@Field(type => Int, { nullable: true })
-	parent_id?: number
-}
+import { requireNode } from '../security/project-access.ts'
 
 @injectable()
-@UseMiddleware(LogAccess)
-@Authorized(Role.Admin, Role.Viewer)
-@Resolver()
 export class NodeResolver {
 	@inject(Kysely)
 	private db: Kysely<DB>
@@ -115,29 +40,30 @@ export class NodeResolver {
 	@inject('PubSub')
 	private pubSub: PubSub
 
-	@Subscription(returns => Boolean, {
-		topics: Topic.NodesUpdated
-	})
-	nodesUpdated(@Root() _projectId: number) {
-		return true
-	}
 	async getDbNodes(projectId: number): Promise<Node[]> {
 		return this.db
 			.selectFrom('node')
 			.where('project_id', '=', projectId)
 			.selectAll()
 			.orderBy('order', 'asc')
-			.execute() as Promise<Node[]>
+			.execute()
+			.then(rows => rows.map(parseNode))
 	}
 
-	@Query(returns => [Node])
-	async getNodes(@Ctx() ctx: Context): Promise<Node[]> {
+	async getDeletionImpact(target: DeletionTarget, ctx: Context) {
+		return (await deletionSnapshot(this.db, ctx.project_id, target)).impact
+	}
+
+	async getNodes(ctx: Context): Promise<Node[]> {
 		return this.getDbNodes(ctx.project_id)
 	}
 
-	insertNodeTrx(trx: Transaction<DB>, data: InsertNode, ctx: Context) {
-		trx
+	async insertNodeTrx(trx: Transaction<DB>, data: InsertNode, ctx: Context) {
+		assertExists(data.parent_id, 'Parent ID must be provided')
+		await requireNode(trx, ctx.project_id, data.parent_id)
+		await trx
 			.updateTable('node')
+			.where('project_id', '=', ctx.project_id)
 			.where('order', '>=', data.order)
 			.where('parent_id', '=', data.parent_id ?? null)
 			.set({ order: sql`"order" + 1` })
@@ -155,15 +81,17 @@ export class NodeResolver {
 			.executeTakeFirstOrThrow()
 	}
 
-	@Mutation(returns => Node)
 	async insertNode(
-		@Arg('data', () => InsertNode) data: InsertNode,
-		@Arg('settings', () => GraphQLJSONObject, { nullable: true })
+		data: InsertNode,
+
 		settings: JsonValue | undefined,
-		@Ctx() ctx: Context
+		ctx: Context
 	): Promise<Node> {
 		const { project_id } = ctx
 		const id = await this.db.transaction().execute(async trx => {
+			await lockProject(trx, project_id)
+			await requireProjectRole(trx, ctx, [Role.Admin])
+			await ensureContentBaseline(trx, ctx)
 			const { id } = await this.insertNodeTrx(trx, data, ctx)
 			if (settings) {
 				await trx
@@ -171,26 +99,30 @@ export class NodeResolver {
 					.values({
 						node_id: id,
 						project_id,
-						settings
+						settings: parseNodeSettings(data.type, settings)
 					})
 					.execute()
 			}
+			await validateProjectModel(trx, project_id)
+			await recordContentRevision(trx, ctx, `Added field ${data.name}`)
 			return id
 		})
 		this.pubSub.publish(Topic.NodesUpdated, project_id)
 		if (settings) {
 			this.pubSub.publish(Topic.SomeNodeSettingsUpdated, project_id)
 		}
-		return await this.getNode(id)
+		return await this.getNode(id, project_id)
 	}
 
-	async getNode(id: number): Promise<Node> {
+	async getNode(id: number, projectId: number): Promise<Node> {
 		return this.db
 			.selectFrom('node')
 			.selectAll()
 			.where('id', '=', id)
+			.where('project_id', '=', projectId)
 			.executeTakeFirst()
-			.then(failOn(isNil, 'Node not found')) as Promise<Node>
+			.then(failOn(isNil, 'Node not found'))
+			.then(parseNode)
 	}
 
 	async getTreeNode(projectId: number, id?: number): Promise<TreeNode> {
@@ -202,46 +134,82 @@ export class NodeResolver {
 		return node
 	}
 
-	@Mutation(returns => Boolean)
-	async updateNode(
-		@Arg('data', () => ChangeNodeInput) data: ChangeNodeInput,
-		@Ctx() ctx: Context
-	): Promise<boolean> {
+	async updateNode(data: ChangeNodeInput, ctx: Context): Promise<Node> {
 		const { project_id } = ctx
-		const { numUpdatedRows = 0 } = await this.db
-			.updateTable('node')
-			.set(data)
-			.where('id', '=', data.id)
-			.where('project_id', '=', project_id)
-			.executeTakeFirst()
-
+		const updated = await this.db.transaction().execute(async trx => {
+			await lockProject(trx, project_id)
+			await requireProjectRole(trx, ctx, [Role.Admin])
+			const current = await requireNode(trx, project_id, data.id)
+			requireRevision(data.expectedRevision, current.revision, 'Field')
+			await ensureContentBaseline(trx, ctx)
+			await trx
+				.updateTable('node')
+				.set({
+					name: data.name,
+					order: data.order ?? current.order,
+					type: data.type ?? current.type,
+					parent_id:
+						data.parent_id === undefined ? current.parent_id : data.parent_id
+				})
+				.where('id', '=', data.id)
+				.where('project_id', '=', project_id)
+				.executeTakeFirstOrThrow()
+			await validateProjectModel(trx, project_id)
+			await recordContentRevision(trx, ctx, `Changed field ${current.name}`)
+			return parseNode(
+				await trx
+					.selectFrom('node')
+					.selectAll()
+					.where('id', '=', data.id)
+					.where('project_id', '=', project_id)
+					.executeTakeFirstOrThrow()
+			)
+		})
 		this.pubSub.publish(Topic.NodesUpdated, project_id)
-		return numUpdatedRows > 0 // Returns true if at least one row was updated
+		return updated
 	}
 
-	@Mutation(returns => Boolean)
 	async deleteNodeById(
-		@Arg('id', () => Int) id: number,
-		@Arg('parent_id', () => Int) parent_id: number | undefined,
-		@Arg('order', () => Int) order: number,
-		@Ctx() ctx: Context
+		id: number,
+		_parent_id: number | undefined,
+		_order: number,
+		ctx: Context,
+		expectedImpact: string
 	): Promise<boolean> {
 		const { project_id } = ctx
-		const { numDeletedRows } = await this.db
+		const { result, values } = await this.db
 			.transaction()
 			.execute(async trx => {
-				trx
+				await lockProject(trx, project_id)
+				await requireProjectRole(trx, ctx, [Role.Admin])
+				const { values } = await requireDeletionImpact(
+					trx,
+					project_id,
+					{ kind: DeletionKind.Node, id },
+					expectedImpact
+				)
+				const node = await requireNode(trx, project_id, id)
+				await ensureContentBaseline(trx, ctx)
+				await trx
 					.updateTable('node')
-					.where('order', '>', order)
-					.where('parent_id', '=', parent_id ?? null)
+					.where('order', '>', node.order)
+					.where('parent_id', '=', node.parent_id)
 					.where('project_id', '=', project_id)
 					.where('type', '!=', NodeType.root)
 					.set({ order: sql`"order" - 1` })
 					.execute()
 
-				return trx.deleteFrom('node').where('id', '=', id).executeTakeFirst()
+				const result = await trx
+					.deleteFrom('node')
+					.where('id', '=', id)
+					.where('project_id', '=', project_id)
+					.executeTakeFirst()
+				await validateProjectModel(trx, project_id)
+				await recordContentRevision(trx, ctx, `Deleted field ${node.name}`)
+				return { result, values }
 			})
 		this.pubSub.publish(Topic.NodesUpdated, project_id)
-		return numDeletedRows > 0
+		for (const value of values) this.pubSub.publish(Topic.ValueDeleted, value)
+		return result.numDeletedRows > 0
 	}
 }

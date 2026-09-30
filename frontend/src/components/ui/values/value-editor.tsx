@@ -1,20 +1,25 @@
-import { type NodeSettings, NodeType, type Value } from '@/gql/graphql'
-import { type TreeNode, pathTo } from '@/state/tree'
-import { $activeListItems, activePath, saveValue } from '@/state/value'
 import { caseOf, match } from 'matchblade'
-import { pipeAsync } from 'matchblade'
 import {
-	type Pred,
 	T as _,
 	any,
 	dropLast,
 	equals,
 	filter,
 	ifElse,
-	pipe,
-	unless
+	type Pred,
+	pipe
 } from 'ramda'
-import type { ReactNode } from 'react'
+import { type ReactNode, useState } from 'react'
+import { record, string, unknown } from 'zod'
+import { type NodeSettings, NodeType, type Value } from '@/gql/graphql'
+import { pathTo, type TreeNode } from '@/state/tree'
+import {
+	$activeListItems,
+	activePath,
+	saveValue,
+	stageValue,
+	valueDraft
+} from '@/state/value'
 import { BooleanEditor } from './boolean-editor'
 import { ColorEditor } from './color-editor'
 import { DateEditor } from './date-editor'
@@ -23,6 +28,7 @@ import { NumberEditor } from './number-editor'
 import { StringEditor } from './string-editor'
 
 import './value-editor.css'
+import { $canEdit } from '@/state/access'
 import { $nodeSettingsMap } from '@/state/node-settings'
 import { ArticleEditor } from './article-editor'
 import { ChoiceEditor } from './choice-editor'
@@ -40,6 +46,7 @@ type ValueEditorProps<T, S = NodeSettings['settings']> = {
 	settings?: S
 	value?: T
 	save: (value: InnerValue<T>) => Promise<number>
+	stage?: (value: InnerValue<T>) => void
 }
 
 export type ValueEditor<T, S = NodeSettings['settings']> = (
@@ -84,8 +91,8 @@ const matcher = match<Args, ValueEditor<any> | null>(
 )
 
 export const editorKey = (node: TreeNode, value?: Value) =>
-	value
-		? `${value.id}-${value.updated_at}`
+	value && value.id > 0
+		? `${value.id}-${value.revision}`
 		: `${node.id}-${activePath(node)?.join('-')}`
 
 type OwnProps = {
@@ -101,30 +108,77 @@ export const ValueEditor = ({
 	view = ViewContext.Tree,
 	listPath = []
 }: OwnProps) => {
+	const [saveError, setSaveError] = useState<string>()
 	const settings = $nodeSettingsMap.value[node.id]?.settings
-
-	const save: ValueEditorProps<any>['save'] = unless(
-		equals(value?.[0]?.value),
-		pipeAsync(
-			<C,>(typeValue?: C) => ({
-				value: typeValue,
+	const draft = valueDraft(node.id, listPath, value?.[0]?.id)
+	const currentValue = value?.[0]
+	const displayedValue = draft
+		? {
+				...currentValue,
+				id: draft.id ?? 0,
 				node_id: node.id,
-				id: value?.[0]?.id,
-				list_path: listPath
-			}),
-			saveValue
-		)
-	)
+				order: currentValue?.order ?? 0,
+				list_path: listPath,
+				updated_at: currentValue?.updated_at ?? '',
+				revision: draft.expectedRevision,
+				value: draft.value
+			}
+		: currentValue
+	const toInput = (content: Record<string, unknown>) => ({
+		value: content,
+		node_id: node.id,
+		id: draft?.id ?? currentValue?.id,
+		expectedRevision: draft?.expectedRevision ?? currentValue?.revision ?? 0,
+		list_path: listPath
+	})
+	const stage = (input: unknown) => {
+		stageValue(toInput(record(string(), unknown()).parse(input)))
+	}
+
+	const save = async (input: unknown): Promise<number> => {
+		setSaveError(undefined)
+		try {
+			const content = record(string(), unknown()).parse(input)
+			if (!draft && currentValue && equals(currentValue.value, content))
+				return currentValue.id
+			return await saveValue(toInput(content))
+		} catch (error) {
+			setSaveError(
+				error instanceof Error
+					? error.message
+					: 'Save failed. Check save status.'
+			)
+			if (node.type === NodeType.Media) throw error
+			return currentValue?.id ?? 0
+		}
+	}
 
 	const EditorCmp = matcher(node, view)
+	if (!$canEdit.value && !isList(node) && node.type !== NodeType.Article)
+		return (
+			<output className="text-muted-foreground whitespace-pre-wrap break-words">
+				{displayedValue?.value?.name ??
+					displayedValue?.value?.content ??
+					JSON.stringify(displayedValue?.value ?? null)}
+			</output>
+		)
 	return (
 		EditorCmp && (
-			<EditorCmp
-				node={node}
-				value={isList(node) ? value : value?.[0]}
-				save={save}
-				settings={settings}
-			/>
+			<>
+				<EditorCmp
+					key={`${node.id}:${value?.[0]?.id ?? listPath.join('-')}`}
+					node={node}
+					value={isList(node) ? value : displayedValue}
+					save={save}
+					stage={stage}
+					settings={settings}
+				/>
+				{saveError && (
+					<span role="alert" className="text-destructive text-xs">
+						{saveError}
+					</span>
+				)}
+			</>
 		)
 	)
 }

@@ -1,6 +1,7 @@
-import { cn } from '@/lib/utils'
-import { BubbleMenu, type Editor } from '@tiptap/react'
+import type { Editor } from '@tiptap/react'
+import { BubbleMenu } from '@tiptap/react/menus'
 import { BetweenHorizonalStart, ListX, Table, Trash } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { MicroIcon } from '../ui/random/micro-icon'
 
 type OwnProps = {
@@ -11,7 +12,7 @@ export const TableButton = ({ editor }: OwnProps) => (
 	<>
 		<BubbleMenu
 			editor={editor}
-			tippyOptions={{ duration: 100 }}
+			options={{ placement: 'top' }}
 			shouldShow={({ editor }) =>
 				editor.isActive('table') ||
 				editor.isActive('tableCell') ||
@@ -20,7 +21,7 @@ export const TableButton = ({ editor }: OwnProps) => (
 			}
 			className={cn(
 				'z-50 rounded-md border border-muted-foreground bg-popover p-1 text-popover-foreground shadow-md',
-				'outline-none data-[state=open]:animate-in data-[state=closed]:animate-out',
+				'outline-hidden data-[state=open]:animate-in data-[state=closed]:animate-out',
 				'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95',
 				'data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2',
 				'data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',

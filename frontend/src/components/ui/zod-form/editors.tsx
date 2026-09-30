@@ -1,13 +1,12 @@
-import { safeFormat } from '@/lib/date'
-import { inputValue } from '@/lib/dom-events'
 import { EditorType } from '@shared/enums'
-import type { AnyFn } from '@tp/functions'
 import { Calendar } from 'lucide-react'
 import { caseOf, match } from 'matchblade'
-import { path, T as _, nth, pipe } from 'ramda'
+import { T as _, nth, path, pipe } from 'ramda'
 import type { ReactNode } from 'react'
 import type { ControllerRenderProps } from 'react-hook-form'
 import { ZodEnum, ZodNumber, type ZodType } from 'zod/v4'
+import { safeFormat } from '@/lib/date'
+import { inputValue } from '@/lib/dom-events'
 import { openDatePicker } from '../date-picker/date-picker-dialog'
 import { FormControl } from '../form'
 import { Input } from '../input'
@@ -17,14 +16,15 @@ import { SimpleSelect } from '../simple/select'
 import { Switch } from '../switch'
 import { TagsInput } from '../tags-input'
 import type { FieldMeta, FieldSelectMeta } from './types'
+import { unwrapField } from './utils'
 
 const hasOptions = (obj: FieldMeta): obj is FieldSelectMeta =>
 	'options' in obj && obj.options !== undefined
 
 const isZodType =
 	<T extends ZodType>(Type: new (...args: any[]) => T) =>
-	(schema: ZodType): schema is T =>
-		schema instanceof Type
+	(schema: ZodType) =>
+		unwrapField(schema) instanceof Type
 
 type OwnProps = {
 	desc: FieldMeta
@@ -40,11 +40,13 @@ const matcher = match<Args, ReactNode>(
 		(desc, type, { onChange, value, ref, ...field }) => {
 			return (
 				<SimpleSelect<[string, string]>
+					formControl
+					getKey={item => item[0]}
 					options={desc.options}
 					render={nth(0)}
 					value={desc.options.find(([_, v]) => v === value)}
 					optional={type.isNullable()}
-					onChange={pipe(nth(1) as AnyFn, onChange)}
+					onChange={item => onChange(item?.[1] ?? null)}
 					placeholder={desc.placeholder}
 					{...field}
 				/>
@@ -56,6 +58,8 @@ const matcher = match<Args, ReactNode>(
 		(desc, type, { onChange, value, ref, ...field }) => {
 			return (
 				<SimpleSelect<{ id: number; name: string }>
+					formControl
+					getKey={item => item.id}
 					options={desc.options}
 					render={t => t.name}
 					value={desc.options.find(t => t.id === value)}
@@ -88,7 +92,7 @@ const matcher = match<Args, ReactNode>(
 					{...field}
 					onChange={pipe(inputValue, Number, onChange)}
 					mask={Number}
-					className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-0 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+					className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-0 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
 					defaultValue={value}
 					placeholder={desc.placeholder}
 					autoComplete={desc.autofill}
@@ -126,7 +130,7 @@ const matcher = match<Args, ReactNode>(
 	),
 	caseOf(
 		[{ editor: EditorType.Switch }, _, _],
-		(desc, _, { value, onChange, ...field }) => (
+		(_desc, _, { value, onChange, ...field }) => (
 			<FormControl className="block">
 				<Switch {...field} onCheckedChange={onChange} defaultChecked={value} />
 			</FormControl>

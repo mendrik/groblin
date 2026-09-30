@@ -1,3 +1,4 @@
+@reference "../../../index.css";
 .month {
     @apply grid grid-cols-7 items-center snap-mandatory snap-center;
 

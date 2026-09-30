@@ -1,0 +1,11 @@
+.git
+**/node_modules
+**/coverage
+**/dist
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.template
+.release
+.rust-repo-intelligence
+*.iml

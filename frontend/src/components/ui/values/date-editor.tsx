@@ -1,14 +1,14 @@
+import { format, parse } from 'date-fns'
+import { CalendarDays } from 'lucide-react'
+import { isNil, objOf, pipe, unless } from 'ramda'
 import KeyListener from '@/components/utils/key-listener'
 import type { Value } from '@/gql/graphql'
 import { safeFormat } from '@/lib/date'
 import { stopPropagation } from '@/lib/dom-events'
 import { relativeTime } from '@/lib/relative-time'
-import { format, parse } from 'date-fns'
-import { CalendarDays } from 'lucide-react'
-import { isNil, objOf, pipe, unless } from 'ramda'
 import { openDatePicker } from '../date-picker/date-picker-dialog'
 import { MicroIcon } from '../random/micro-icon'
-import type { DateProps } from '../tree/properties/dates'
+import { DateProps } from '../tree/properties/dates'
 import type { ValueEditor } from './value-editor'
 
 type DateValue = Omit<Value, 'value'> & {
@@ -28,11 +28,12 @@ const AbsoluteDate = ({ date }: DateRenderProps) => (
 	<span className="mt-1">{safeFormat(date, 'dd.MM.yyyy')}</span>
 )
 
-export const DateEditor: ValueEditor<DateValue, DateProps> = ({
-	settings,
+export const DateEditor: ValueEditor<DateValue> = ({
+	settings: rawSettings,
 	value,
 	save
 }) => {
+	const settings = DateProps.parse(rawSettings ?? {})
 	const date = value
 		? parse(value.value.date, 'yyyy-MM-dd', new Date())
 		: undefined

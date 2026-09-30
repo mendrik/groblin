@@ -1,10 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-flex 
-.test {
-  color: hsl(202, 77%, 34%);
-}
+@import "tailwindcss";
+@config "../tailwind.config.js";
 
 @layer base {
 
@@ -98,4 +93,3 @@ flex
     @apply bg-background text-foreground;
   }
 }
-

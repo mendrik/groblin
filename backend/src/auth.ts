@@ -1,16 +1,9 @@
 import { type Account, type BetterAuthOptions, betterAuth } from 'better-auth'
 import { inject, injectable } from 'inversify'
-import { PostgresDialect } from 'kysely'
-import pg from 'pg'
+import { Kysely } from 'kysely'
+import type { DB } from './database/schema.ts'
 import { ProjectService } from './services/project-service.ts'
 import { SesClient } from './services/ses-client.ts'
-
-const dialect = new PostgresDialect({
-	pool: new pg.Pool({
-		connectionString: process.env.DATABASE_URL,
-		max: 10
-	})
-})
 
 type Auth = ReturnType<typeof betterAuth>
 
@@ -23,35 +16,76 @@ export class Authenticator {
 		private sesClient: SesClient,
 
 		@inject(ProjectService)
-		private projectService: ProjectService
+		private projectService: ProjectService,
+
+		@inject(Kysely) db: Kysely<DB>
 	) {
 		const email = this.sesClient
 		const auth = betterAuth({
-			trustedOrigins: ['http://localhost:5173', 'https://groblin.org'],
+			trustedOrigins: (
+				process.env.TRUSTED_ORIGINS ?? 'http://localhost:5173'
+			).split(','),
 			databaseHooks: {
+				user: {
+					create: {
+						before: async user => {
+							const mode = process.env.REGISTRATION_MODE ?? 'open'
+							if (mode === 'open') return
+							if (
+								user.email.toLowerCase() ===
+								process.env.BOOTSTRAP_EMAIL?.toLowerCase()
+							)
+								return
+							const invitation =
+								mode === 'invite'
+									? await db
+											.selectFrom('project_invitation')
+											.select('id')
+											.where('email', '=', user.email.toLowerCase())
+											.where('expires_at', '>', new Date())
+											.where('accepted_at', 'is', null)
+											.where('revoked_at', 'is', null)
+											.executeTakeFirst()
+									: undefined
+							return !!invitation
+						}
+					}
+				},
 				account: {
 					create: {
 						after: async (account: Account) => {
-							await projectService.initializeProject(account.userId)
+							await this.projectService.initializeProject(account.userId)
 						}
 					}
 				}
 			},
 			database: {
-				dialect,
+				db,
 				type: 'postgres'
 			},
 			emailAndPassword: {
-				enabled: true
+				enabled: true,
+				minPasswordLength: 12,
+				revokeSessionsOnPasswordReset: true,
+				sendResetPassword: ({ user, url }) =>
+					email.sendEmail({
+						template: { kind: 'reset', url },
+						to: user.email,
+						subject: 'Reset your password'
+					})
 			},
+			rateLimit: { enabled: true, window: 60, max: 60 },
 			emailVerification: {
 				sendOnSignUp: true,
 				sendVerificationEmail: options =>
 					email.sendEmail({
-						file: 'confirmAccount.json',
+						template: {
+							kind: 'verify',
+							name: options.user.name,
+							url: options.url
+						},
 						to: options.user.email,
-						subject: 'Verify your email',
-						options
+						subject: 'Verify your email'
 					})
 			}
 		} satisfies BetterAuthOptions)

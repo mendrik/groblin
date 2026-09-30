@@ -1,7 +1,7 @@
-import type { Value } from '@/gql/graphql'
 import type { ArticleType } from '@shared/json-value-types'
 import DOMPurify from 'dompurify'
 import { Eye } from 'lucide-react'
+import type { Value } from '@/gql/graphql'
 import { Popover, PopoverContent, PopoverTrigger } from '../popover'
 import { ScrollArea } from '../scroll-area'
 import type { ValueEditor } from './value-editor'

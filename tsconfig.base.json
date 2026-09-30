@@ -9,7 +9,7 @@
 		"inlineSourceMap": true,
 		"inlineSources": true,
 		"noEmit": true,
-		"noImplicitAny": false,
+		"noImplicitAny": true,
 		"noImplicitReturns": true,
 		"noImplicitThis": true,
 		"noUnusedLocals": false,

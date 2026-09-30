@@ -1,10 +1,11 @@
 import { EditorType } from '@shared/enums'
-import { infer as  TypeOf, boolean, object } from 'zod/v4'
-import { hideColumnHead, required } from './common'
+import { dateSettingsSchema } from '@shared/node-settings'
+import type { infer as TypeOf } from 'zod/v4'
 import { metas } from '../../zod-form/utils'
+import { hideColumnHead, required } from './common'
 
-export const DateProps = object({
-	relative: boolean().default(false).register(metas, {
+export const DateProps = dateSettingsSchema.safeExtend({
+	relative: dateSettingsSchema.shape.relative.register(metas, {
 		label: 'Relative',
 		editor: EditorType.Switch,
 		span: 2

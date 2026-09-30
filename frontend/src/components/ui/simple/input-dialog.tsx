@@ -1,3 +1,7 @@
+import { signal } from '@preact/signals-react'
+import { pipeAsync } from 'matchblade'
+import { F, pipe, T } from 'ramda'
+import type { ZodObject, ZodRawShape, ZodType } from 'zod/v4'
 import {
 	Dialog,
 	DialogContent,
@@ -7,10 +11,6 @@ import {
 	DialogTitle
 } from '@/components/ui/dialog'
 import { setSignal } from '@/lib/signals'
-import { signal } from '@preact/signals-react'
-import { pipeAsync } from 'matchblade'
-import { F, T, pipe } from 'ramda'
-import type { ZodObject, ZodRawShape, ZodType } from 'zod/v4'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
 import { ZodForm } from '../zod-form/zod-form'
@@ -33,7 +33,7 @@ export const openInputDialog: <T>(props: DialogProps<T>) => void = pipe(
 const close = pipe(F, setSignal($dialogOpen))
 
 export const InputDialog = <T extends ZodRawShape>() => {
-	const [formApi, ref] = useFormState<T>()
+	const [formApi, ref] = useFormState()
 	if (!$dialogProps.value) {
 		return null
 	}

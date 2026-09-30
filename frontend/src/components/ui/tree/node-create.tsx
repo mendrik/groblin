@@ -1,3 +1,8 @@
+import { signal } from '@preact/signals-react'
+import { EditorType } from '@shared/enums'
+import { caseOf, evolve, match, pipeAsync } from 'matchblade'
+import { F, pipe } from 'ramda'
+import { strictObject, type infer as TypeOf, enum as zodEnum } from 'zod/v4'
 import {
 	Dialog,
 	DialogContent,
@@ -8,23 +13,18 @@ import {
 } from '@/components/ui/dialog'
 import { NodeType } from '@/gql/graphql'
 import { notNil, setSignal } from '@/lib/signals'
+import { requireManage } from '@/state/access'
 import {
 	$root,
-	type TreeNode,
 	insertNode,
 	openParent,
-	parentOf
+	parentOf,
+	type TreeNode
 } from '@/state/tree'
-import { signal } from '@preact/signals-react'
-import { EditorType } from '@shared/enums'
-import { caseOf, evolveAlt, match, pipeAsync } from 'matchblade'
-import { F, pipe } from 'ramda'
-import { infer as TypeOf, ZodEnum, strictObject } from 'zod/v4'
 import { Button } from '../button'
 import { useFormState } from '../zod-form/use-form-state'
-import {  enumToMap, metas, stringField } from '../zod-form/utils'
+import { enumToMap, metas, stringField } from '../zod-form/utils'
 import { ZodForm } from '../zod-form/zod-form'
-import { enum as zodEnum } from 'zod/v4'
 
 type NodeCreatePosition =
 	| 'root-child'
@@ -36,6 +36,7 @@ const $node = signal<TreeNode>()
 const $dialogOpen = signal(false)
 const $position = signal<NodeCreatePosition>('child')
 export const openNodeCreate = (node: TreeNode, pos: NodeCreatePosition) => {
+	requireManage()
 	setSignal($node, node)
 	setSignal($position, pos)
 	setSignal($dialogOpen, true)
@@ -45,14 +46,16 @@ const close = pipe(F, setSignal($dialogOpen))
 const newNodeSchema = () =>
 	strictObject({
 		name: stringField('Name', EditorType.Input, 'off', 'Name of the node'),
-		type: zodEnum(NodeType).default(NodeType.Object).register(metas, {
-			label: 'Type',
-			description: 'The type of node you want to create.',
-			editor: EditorType.Select,
-			options: enumToMap(NodeType)
-				.filter(([_, v]) => v !== NodeType.Root)
-				.sort()
-		})
+		type: zodEnum(NodeType)
+			.default(NodeType.Object)
+			.register(metas, {
+				label: 'Type',
+				description: 'The type of node you want to create.',
+				editor: EditorType.Select,
+				options: enumToMap(NodeType)
+					.filter(([_, v]) => v !== NodeType.Root)
+					.sort()
+			})
 	})
 
 export type NewNodeSchema = TypeOf<ReturnType<typeof newNodeSchema>>
@@ -79,7 +82,7 @@ const order = match<[NodeCreatePosition], number>(
 )
 
 const createNodeCommand: (data: NewNodeSchema) => Promise<number> = pipeAsync(
-	evolveAlt({
+	evolve({
 		parent_id: () => parent($position.value),
 		order: () => order($position.value)
 	}),
@@ -88,7 +91,7 @@ const createNodeCommand: (data: NewNodeSchema) => Promise<number> = pipeAsync(
 )
 
 export const NodeCreate = () => {
-	const [formApi, ref] = useFormState<NewNodeSchema>()
+	const [formApi, ref] = useFormState()
 
 	return (
 		<Dialog open={$dialogOpen.value}>
@@ -103,11 +106,11 @@ export const NodeCreate = () => {
 				<ZodForm
 					schema={newNodeSchema()}
 					columns={2}
-					onSubmit={pipe(createNodeCommand, close)}
+					onSubmit={pipeAsync(createNodeCommand, close)}
 					ref={ref}
 				>
 					<DialogFooter className="gap-y-2">
-						<Button onClick={close} variant="secondary">
+						<Button type="button" onClick={close} variant="secondary">
 							Cancel
 						</Button>
 						<Button type="submit" disabled={formApi.isSubmitting}>

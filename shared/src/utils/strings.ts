@@ -1,4 +1,4 @@
-import { path, hasPath } from 'ramda'
+import { hasPath, path } from 'ramda'
 
 export const replacePlaceholders =
 	(values: Record<string, any>) =>
