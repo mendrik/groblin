@@ -2,6 +2,10 @@
 
 Groblin is a self-hosted headless CMS. Define a tree of fields, edit content with your team, and publish a read-only GraphQL API for a website. Saved drafts and published snapshots are separate. This repository targets a dependable self-hosted v1; the deployment package is versioned as 0.1.0 and verified locally as a release candidate.
 
+<blockquote>
+<strong>Even the shiniest treasure loses its sparkle if buried too deep. Keep your content like a groblin's hoard — organized, accessible, and ready to dazzle when needed!</strong><br/><i>– Grumblewick the Groblin, Content Keeper of the Caverns</i>
+</blockquote>
+
 The product includes Owner, Admin, Editor and Viewer roles, verified invitations, project switching, profile settings, conflict detection, local draft recovery, content history, publication rollback, nested lists with search and filtering, article images, verified private media uploads, and portable project archives.
 
 ## Start locally
@@ -42,3 +46,15 @@ See [the v1 gap analysis](docs/product-gap-analysis.md), [backup, restore and up
 The supported v1 deployment runs one backend process on one host. Replication, hosted billing, organization management, scheduled publication, webhooks and high availability are outside this release scope.
 
 Licensed under [MIT](LICENSE). Dependencies and deployment services retain their own licenses.
+
+## Development screenshots
+
+These screenshots show earlier development versions.
+
+Data editor:
+
+<img width="100%" height="auto" alt="Groblin data editor" src="https://github.com/user-attachments/assets/83850e77-4fd4-44bc-87a3-6c278cb89544" />
+
+GraphQL sandbox:
+
+<img width="100%" height="auto" alt="Groblin GraphQL sandbox" src="https://github.com/user-attachments/assets/4e380bc2-d684-4e39-9525-982bb9aa7499" />
